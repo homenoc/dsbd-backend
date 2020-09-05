@@ -16,12 +16,12 @@ func CreateUserToDB(user auth.User) error {
 	}
 	defer db.Close()
 
-	writeTable, err := db.Prepare(`INSERT INTO "user" ("gid","name","level","email","pass") VALUES (?,?,?,?,?)`)
+	writeTable, err := db.Prepare(`INSERT INTO "user" ("created_at","gid","name","email","pass","level","status","is_verify") VALUES (?,?,?,?,?,?,?,?)`)
 	if err != nil {
 		log.Println("write error |error: ", err)
 		return fmt.Errorf("(%s)error: write error\n %s", time.Now(), err)
 	}
-	if _, err := writeTable.Exec(user.GID, user.Name, user.Level, user.Mail, user.Pass); err != nil {
+	if _, err := writeTable.Exec(time.Now().Unix(), user.GID, user.Name, user.Mail, user.Pass, user.Level, user.Status, user.IsVerify); err != nil {
 		log.Println("apply error |error: ", err)
 		return fmt.Errorf("(%s)error: apply error\n %s", time.Now(), err)
 	}
@@ -53,8 +53,8 @@ func UpdateUserToDB(user auth.User) error {
 	}
 	defer db.Close()
 
-	if _, err := db.Exec("UPDATE user SET name = ?,level = ?,email = ?,pass = ? WHERE id = ?",
-		user.Name, user.Level, user.Mail, user.Pass, user.ID); err != nil {
+	if _, err := db.Exec("UPDATE user SET updated_at = ?,name = ?,email = ?,pass = ?,level = ?,status = ?,is_verify = ? WHERE id = ?",
+		time.Now().Unix(), user.Name, user.Mail, user.Pass, user.Level, user.Status, user.IsVerify, user.ID); err != nil {
 		log.Println("database update table error |", err)
 		return fmt.Errorf("(%s)error: update table\n", time.Now())
 	}
@@ -72,7 +72,7 @@ func GetUserMailFromDB(mail string) *userResult {
 
 	rows := db.QueryRow("SELECT * FROM user WHERE email = ?", mail)
 	var user auth.User
-	err := rows.Scan(&user.ID, &user.GID, &user.Name, &user.Level, &user.Mail, &user.Pass)
+	err := rows.Scan(&user.ID, &user.CreatedAt, &user.UpdatedAt, &user.GID, &user.Name, &user.Mail, &user.Pass, &user.Level, &user.Status, &user.IsVerify)
 	if err != nil {
 		log.Println("database scan error")
 		return &userResult{err: fmt.Errorf("(%s)error: query\n", time.Now())}
@@ -91,7 +91,7 @@ func GetUserIDFromDB(id int) *userResult {
 
 	rows := db.QueryRow("SELECT * FROM user WHERE id = ?", id)
 	var user auth.User
-	err := rows.Scan(&user.ID, &user.GID, &user.Name, &user.Level, &user.Mail, &user.Pass)
+	err := rows.Scan(&user.ID, &user.CreatedAt, &user.UpdatedAt, &user.GID, &user.Name, &user.Mail, &user.Pass, &user.Level, &user.Status, &user.IsVerify)
 	if err != nil {
 		log.Println("database scan error")
 		return &userResult{err: fmt.Errorf("(%s)error: query\n", time.Now())}
@@ -118,7 +118,7 @@ func GetAllUserFromDB() *allUserResult {
 	var allUser *[]auth.User
 	for rows.Next() {
 		var user auth.User
-		err := rows.Scan(&user.ID, &user.GID, &user.Name, &user.Level, &user.Mail, &user.Pass)
+		err := rows.Scan(&user.ID, &user.CreatedAt, &user.UpdatedAt, &user.GID, &user.Name, &user.Mail, &user.Pass, &user.Level, &user.Status, &user.IsVerify)
 		if err != nil {
 			log.Println("database scan error")
 			return &allUserResult{err: fmt.Errorf("(%s)error: query\n", time.Now())}
