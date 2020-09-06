@@ -39,7 +39,7 @@ func createDB(database string) error {
 func InitDB() error {
 	// User data
 	err := createDB(`CREATE TABLE IF NOT EXISTS "user" ("id" INTEGER PRIMARY KEY, "created_at" INT, "updated_at" INT,
-"gid" INT,　"name" VARCHAR(255), "email" VARCHAR(2000), "pass" VARCHAR(2000), "level" INT, "is_verify" INT)`)
+"gid" INT,　"name" VARCHAR(255), "email" VARCHAR(2000), "pass" VARCHAR(2000), "level" INT, "is_verify" INT, "mail_token" VARCHAR(2000)`)
 	if err != nil {
 		log.Println("create error: User database ", err)
 		return err

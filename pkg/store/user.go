@@ -16,12 +16,12 @@ func CreateUserToDB(user auth.User) error {
 	}
 	defer db.Close()
 
-	writeTable, err := db.Prepare(`INSERT INTO "user" ("created_at","gid","name","email","pass","level","status","is_verify") VALUES (?,?,?,?,?,?,?,?)`)
+	writeTable, err := db.Prepare(`INSERT INTO "user" ("created_at","gid","name","email","pass","level","status","is_verify","mail_token") VALUES (?,?,?,?,?,?,?,?,?)`)
 	if err != nil {
 		log.Println("write error |error: ", err)
 		return fmt.Errorf("(%s)error: write error\n %s", time.Now(), err)
 	}
-	if _, err := writeTable.Exec(time.Now().Unix(), user.GID, user.Name, user.Mail, user.Pass, user.Level, user.Status, user.IsVerify); err != nil {
+	if _, err := writeTable.Exec(time.Now().Unix(), user.GID, user.Name, user.Mail, user.Pass, user.Level, user.Status, user.IsVerify, user.MailToken); err != nil {
 		log.Println("apply error |error: ", err)
 		return fmt.Errorf("(%s)error: apply error\n %s", time.Now(), err)
 	}
@@ -61,6 +61,25 @@ func UpdateUserToDB(user auth.User) error {
 	return nil
 }
 
+func GetUserTokenMailFromDB(mailToken string) *userResult {
+	db := connectDB()
+	//error check
+	if db == nil {
+		log.Println("database connection error")
+		return &userResult{err: fmt.Errorf("(%s)error: database connection\n", time.Now())}
+	}
+	defer db.Close()
+
+	rows := db.QueryRow("SELECT * FROM user WHERE mail_token = ?", mailToken)
+	var user auth.User
+	err := rows.Scan(&user.ID, &user.CreatedAt, &user.UpdatedAt, &user.GID, &user.Name, &user.Mail, &user.Pass, &user.Level, &user.Status, &user.IsVerify, &user.MailToken)
+	if err != nil {
+		log.Println("database scan error")
+		return &userResult{err: fmt.Errorf("(%s)error: query\n", time.Now())}
+	}
+	return &userResult{user: user, err: nil}
+}
+
 func GetUserMailFromDB(mail string) *userResult {
 	db := connectDB()
 	//error check
@@ -72,7 +91,7 @@ func GetUserMailFromDB(mail string) *userResult {
 
 	rows := db.QueryRow("SELECT * FROM user WHERE email = ?", mail)
 	var user auth.User
-	err := rows.Scan(&user.ID, &user.CreatedAt, &user.UpdatedAt, &user.GID, &user.Name, &user.Mail, &user.Pass, &user.Level, &user.Status, &user.IsVerify)
+	err := rows.Scan(&user.ID, &user.CreatedAt, &user.UpdatedAt, &user.GID, &user.Name, &user.Mail, &user.Pass, &user.Level, &user.Status, &user.IsVerify, &user.MailToken)
 	if err != nil {
 		log.Println("database scan error")
 		return &userResult{err: fmt.Errorf("(%s)error: query\n", time.Now())}
@@ -91,7 +110,7 @@ func GetUserIDFromDB(id int) *userResult {
 
 	rows := db.QueryRow("SELECT * FROM user WHERE id = ?", id)
 	var user auth.User
-	err := rows.Scan(&user.ID, &user.CreatedAt, &user.UpdatedAt, &user.GID, &user.Name, &user.Mail, &user.Pass, &user.Level, &user.Status, &user.IsVerify)
+	err := rows.Scan(&user.ID, &user.CreatedAt, &user.UpdatedAt, &user.GID, &user.Name, &user.Mail, &user.Pass, &user.Level, &user.Status, &user.IsVerify, &user.MailToken)
 	if err != nil {
 		log.Println("database scan error")
 		return &userResult{err: fmt.Errorf("(%s)error: query\n", time.Now())}
@@ -118,7 +137,7 @@ func GetAllUserFromDB() *allUserResult {
 	var allUser *[]auth.User
 	for rows.Next() {
 		var user auth.User
-		err := rows.Scan(&user.ID, &user.CreatedAt, &user.UpdatedAt, &user.GID, &user.Name, &user.Mail, &user.Pass, &user.Level, &user.Status, &user.IsVerify)
+		err := rows.Scan(&user.ID, &user.CreatedAt, &user.UpdatedAt, &user.GID, &user.Name, &user.Mail, &user.Pass, &user.Level, &user.Status, &user.IsVerify, &user.MailToken)
 		if err != nil {
 			log.Println("database scan error")
 			return &allUserResult{err: fmt.Errorf("(%s)error: query\n", time.Now())}
