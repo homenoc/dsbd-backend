@@ -83,7 +83,7 @@ func Update(u *user.User) user.Result {
 	}
 }
 
-// 0:ID ,1:GID, 2:Mail, 3:Token, 4:MailVerify
+// value of base can reference from api/core/user/interface.go
 func Get(base int, data *user.User) user.Result {
 	db := store.ConnectDB()
 	//error check
@@ -97,21 +97,18 @@ func Get(base int, data *user.User) user.Result {
 
 	var database, baseData string
 
-	if base == 0 { //ID
+	if base == user.ID { //ID
 		database = "SELECT * FROM data WHERE id = ?"
 		baseData = strconv.Itoa(data.ID)
-	} else if base == 1 { //GID
+	} else if base == user.GID { //GID
 		database = "SELECT * FROM data WHERE gid = ?"
 		baseData = strconv.Itoa(data.GID)
-	} else if base == 2 { //Mail
+	} else if base == user.Email { //Mail
 		database = "SELECT * FROM data WHERE email = ?"
 		baseData = data.Email
-	} else if base == 3 { //Token
+	} else if base == user.MailToken { //Token
 		database = "SELECT * FROM data WHERE mail_token = ?"
 		baseData = data.MailToken
-		//} else if base == 4 { //MailVerify
-		//	database = "SELECT * FROM data WHERE is_verify = ?"
-		//	baseData =
 	} else {
 		log.Println("base select error")
 		return user.Result{
