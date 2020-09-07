@@ -8,13 +8,9 @@ import (
 	"strconv"
 )
 
-func connectDB() *sql.DB {
-	conf, err := config.GetConfig()
-	if err != nil {
-		return nil
-	}
+func ConnectDB() *sql.DB {
 	db, err := sql.Open("mysql",
-		fmt.Sprintf("%s:%s@tcp(%s)/%s", conf.DB.User, conf.DB.Pass, conf.DB.IP+strconv.Itoa(conf.DB.Port), conf.DB.DBName))
+		fmt.Sprintf("%s:%s@tcp(%s)/%s", config.Conf.DB.User, config.Conf.DB.Pass, config.Conf.DB.IP+strconv.Itoa(config.Conf.DB.Port), config.Conf.DB.DBName))
 	if err != nil {
 		log.Println("database ping error: ", err)
 		return nil
@@ -27,7 +23,7 @@ func connectDB() *sql.DB {
 }
 
 func createDB(database string) error {
-	db := *connectDB()
+	db := *ConnectDB()
 	_, err := db.Exec(database)
 	if err != nil {
 		log.Println("database create error: ", err)
