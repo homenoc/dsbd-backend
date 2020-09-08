@@ -1,7 +1,7 @@
 package main
 
 import (
-	"git.bgp.ne.jp/dsbd/backend/pkg/backend/cmd"
+	"github.com/homenoc/dsbd-backend/pkg/backend/cmd"
 )
 
 func main() {

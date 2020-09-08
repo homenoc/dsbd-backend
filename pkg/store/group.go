@@ -2,7 +2,7 @@ package store
 
 import (
 	"fmt"
-	"git.bgp.ne.jp/dsbd/backend/pkg/auth"
+	"github.com/homenoc/dsbd-backend/pkg/auth"
 	"log"
 	"time"
 )

@@ -4,13 +4,14 @@ type User struct {
 	ID        int
 	CreatedAt int
 	UpdatedAt int
-	Name      string
 	GID       int
+	Name      string
 	Pass      string
 	Mail      string
 	Level     int
 	Status    int
 	IsVerify  int
+	MailToken string
 }
 
 type Group struct {

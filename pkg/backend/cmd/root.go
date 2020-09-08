@@ -14,7 +14,7 @@ var cfgFile string
 var rootCmd = &cobra.Command{
 	Use:   "backend",
 	Short: "web system backend",
-	Long:  "Source Code: https://git.bgp.ne.jp/dsbd/backend",
+	Long:  "Source Code: https://github.com/homenoc/dsbd-backend",
 }
 
 func Execute() {

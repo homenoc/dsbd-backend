@@ -3,7 +3,7 @@ package store
 import (
 	"database/sql"
 	"fmt"
-	"git.bgp.ne.jp/dsbd/backend/pkg/config"
+	"github.com/homenoc/dsbd-backend/pkg/config"
 	"log"
 	"strconv"
 )

@@ -2,8 +2,8 @@ package v0
 
 import (
 	"fmt"
-	"git.bgp.ne.jp/dsbd/backend/pkg/api/core/user"
-	"git.bgp.ne.jp/dsbd/backend/pkg/store"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
+	"github.com/homenoc/dsbd-backend/pkg/store"
 	"log"
 	"strconv"
 	"time"
