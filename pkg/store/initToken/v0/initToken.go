@@ -15,7 +15,7 @@ func Create(t *user.InitToken) user.InitTokenResult {
 		log.Println("database connection error")
 		return user.InitTokenResult{
 			Status: false,
-			Data:   fmt.Sprintf("(%s)error: database connection", time.Now()),
+			Error:  fmt.Sprintf("(%s)error: database connection", time.Now()),
 		}
 	}
 	defer db.Close()
@@ -25,14 +25,14 @@ func Create(t *user.InitToken) user.InitTokenResult {
 		log.Println("write error |error: ", err)
 		return user.InitTokenResult{
 			Status: false,
-			Data:   fmt.Sprintf("(%s)error: write error\n %s", time.Now(), err),
+			Error:  fmt.Sprintf("(%s)error: write error\n %s", time.Now(), err),
 		}
 	}
 	if _, err := writeTable.Exec(time.Now().Unix(), time.Now().Unix()+10000, time.Now().Unix()+20000, t.IP, t.Token1, t.Token2); err != nil {
 		log.Println("apply error |error: ", err)
 		return user.InitTokenResult{
 			Status: false,
-			Data:   fmt.Sprintf("(%s)error: apply error\n %s", time.Now(), err),
+			Error:  fmt.Sprintf("(%s)error: apply error\n %s", time.Now(), err),
 		}
 	}
 	return user.InitTokenResult{
@@ -47,7 +47,7 @@ func Delete(t *user.InitToken) user.InitTokenResult {
 		log.Println("database connection error")
 		return user.InitTokenResult{
 			Status: false,
-			Data:   fmt.Sprintf("(%s)error: database connection\n", time.Now()),
+			Error:  fmt.Sprintf("(%s)error: database connection\n", time.Now()),
 		}
 	}
 	defer db.Close()
@@ -56,7 +56,7 @@ func Delete(t *user.InitToken) user.InitTokenResult {
 		log.Println("database delete table error |", err)
 		return user.InitTokenResult{
 			Status: false,
-			Data:   fmt.Sprintf("(%s)error: delete error\n %s", time.Now(), err),
+			Error:  fmt.Sprintf("(%s)error: delete error\n %s", time.Now(), err),
 		}
 	}
 	return user.InitTokenResult{
@@ -72,7 +72,7 @@ func Get(token string) user.InitTokenResult {
 		log.Println("database connection error")
 		return user.InitTokenResult{
 			Status: false,
-			Data:   fmt.Sprintf("(%s)error: database connection\n", time.Now()),
+			Error:  fmt.Sprintf("(%s)error: database connection\n", time.Now()),
 		}
 	}
 	defer db.Close()
@@ -84,7 +84,7 @@ func Get(token string) user.InitTokenResult {
 		log.Println("database scan error")
 		return user.InitTokenResult{
 			Status: false,
-			Data:   fmt.Sprintf("(%s)error: database scan\n", time.Now()),
+			Error:  fmt.Sprintf("(%s)error: database scan\n", time.Now()),
 		}
 	}
 	return user.InitTokenResult{
@@ -100,7 +100,7 @@ func GetAll() user.InitTokenResult {
 		log.Println("database connection error")
 		return user.InitTokenResult{
 			Status: false,
-			Data:   fmt.Sprintf("(%s)error: database connection\n", time.Now()),
+			Error:  fmt.Sprintf("(%s)error: database connection\n", time.Now()),
 		}
 	}
 	defer db.Close()
@@ -110,7 +110,7 @@ func GetAll() user.InitTokenResult {
 		log.Println("database query error")
 		return user.InitTokenResult{
 			Status: false,
-			Data:   fmt.Sprintf("(%s)error: database query\n", time.Now()),
+			Error:  fmt.Sprintf("(%s)error: database query\n", time.Now()),
 		}
 	}
 	defer rows.Close()
@@ -123,7 +123,7 @@ func GetAll() user.InitTokenResult {
 			log.Println("database scan error")
 			return user.InitTokenResult{
 				Status: false,
-				Data:   fmt.Sprintf("(%s)error: query\n", time.Now()),
+				Error:  fmt.Sprintf("(%s)error: query\n", time.Now()),
 			}
 		}
 		allInitToken = append(allInitToken, t)
