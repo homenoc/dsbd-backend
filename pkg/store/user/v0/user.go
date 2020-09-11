@@ -15,7 +15,8 @@ func Create(u *user.User) user.Result {
 	if db == nil {
 		log.Println("database connection error")
 		return user.Result{
-			Status: fmt.Sprintf("(%s)error: database connection", time.Now()),
+			Status: false,
+			Error:  fmt.Sprintf("(%s)error: database connection", time.Now()),
 		}
 	}
 	defer db.Close()
@@ -24,17 +25,19 @@ func Create(u *user.User) user.Result {
 	if err != nil {
 		log.Println("write error |error: ", err)
 		return user.Result{
-			Status: fmt.Sprintf("(%s)error: write error\n %s", time.Now(), err),
+			Status: false,
+			Error:  fmt.Sprintf("(%s)error: write error\n %s", time.Now(), err),
 		}
 	}
 	if _, err := writeTable.Exec(time.Now().Unix(), u.GID, u.Name, u.Email, u.Pass, 1, u.Status, u.MailVerify, u.MailToken); err != nil {
 		log.Println("apply error |error: ", err)
 		return user.Result{
-			Status: fmt.Sprintf("(%s)error: apply error\n %s", time.Now(), err),
+			Status: false,
+			Error:  fmt.Sprintf("(%s)error: apply error\n %s", time.Now(), err),
 		}
 	}
 	return user.Result{
-		Status: "OK",
+		Status: true,
 	}
 }
 
@@ -44,7 +47,8 @@ func Delete(u *user.User) user.Result {
 	if db == nil {
 		log.Println("database connection error")
 		return user.Result{
-			Status: fmt.Sprintf("(%s)error: database connection\n", time.Now()),
+			Status: false,
+			Error:  fmt.Sprintf("(%s)error: database connection\n", time.Now()),
 		}
 	}
 	defer db.Close()
@@ -52,11 +56,12 @@ func Delete(u *user.User) user.Result {
 	if _, err := db.Exec("DELETE FROM user WHERE name = ?", u.ID); err != nil {
 		log.Println("database delete table error |", err)
 		return user.Result{
-			Status: fmt.Sprintf("(%s)error: delete error\n %s", time.Now(), err),
+			Status: false,
+			Error:  fmt.Sprintf("(%s)error: delete error\n %s", time.Now(), err),
 		}
 	}
 	return user.Result{
-		Status: "OK",
+		Status: true,
 	}
 }
 
@@ -66,7 +71,8 @@ func Update(u *user.User) user.Result {
 	if db == nil {
 		log.Println("database connection error")
 		return user.Result{
-			Status: fmt.Sprintf("(%s)error: database connection\n", time.Now()),
+			Status: false,
+			Error:  fmt.Sprintf("(%s)error: database connection\n", time.Now()),
 		}
 	}
 	defer db.Close()
@@ -75,11 +81,12 @@ func Update(u *user.User) user.Result {
 		time.Now().Unix(), u.Name, u.Email, u.Pass, u.Level, u.Status, u.MailVerify, u.ID); err != nil {
 		log.Println("database update table error |", err)
 		return user.Result{
-			Status: fmt.Sprintf("(%s)error: database connection\n", time.Now()),
+			Status: false,
+			Error:  fmt.Sprintf("(%s)error: delete error\n %s", time.Now(), err),
 		}
 	}
 	return user.Result{
-		Status: "OK",
+		Status: true,
 	}
 }
 
@@ -90,7 +97,8 @@ func Get(base int, data *user.User) user.Result {
 	if db == nil {
 		log.Println("database connection error")
 		return user.Result{
-			Status: fmt.Sprintf("(%s)error: database connection\n", time.Now()),
+			Status: false,
+			Error:  fmt.Sprintf("(%s)error: database connection\n", time.Now()),
 		}
 	}
 	defer db.Close()
@@ -112,7 +120,8 @@ func Get(base int, data *user.User) user.Result {
 	} else {
 		log.Println("base select error")
 		return user.Result{
-			Status: fmt.Sprintf("(%s)error: base select\n", time.Now()),
+			Status: false,
+			Error:  fmt.Sprintf("(%s)error: base select\n", time.Now()),
 		}
 	}
 
@@ -122,11 +131,12 @@ func Get(base int, data *user.User) user.Result {
 	if err != nil {
 		log.Println("database scan error")
 		return user.Result{
-			Status: fmt.Sprintf("(%s)error: database scan\n", time.Now()),
+			Status: false,
+			Error:  fmt.Sprintf("(%s)error: database scan\n", time.Now()),
 		}
 	}
 	return user.Result{
-		Status:   "OK",
+		Status:   true,
 		UserData: []user.User{u},
 	}
 }
@@ -137,7 +147,8 @@ func GetAll() user.Result {
 	if db == nil {
 		log.Println("database connection error")
 		return user.Result{
-			Status: fmt.Sprintf("(%s)error: database connection\n", time.Now()),
+			Status: false,
+			Error:  fmt.Sprintf("(%s)error: database connection\n", time.Now()),
 		}
 	}
 	defer db.Close()
@@ -146,7 +157,8 @@ func GetAll() user.Result {
 	if err != nil {
 		log.Println("database query error")
 		return user.Result{
-			Status: fmt.Sprintf("(%s)error: database query\n", time.Now()),
+			Status: false,
+			Error:  fmt.Sprintf("(%s)error: database query\n", time.Now()),
 		}
 	}
 	defer rows.Close()
@@ -158,13 +170,14 @@ func GetAll() user.Result {
 		if err != nil {
 			log.Println("database scan error")
 			return user.Result{
-				Status: fmt.Sprintf("(%s)error: query\n", time.Now()),
+				Status: false,
+				Error:  fmt.Sprintf("(%s)error: query\n", time.Now()),
 			}
 		}
 		allUser = append(allUser, u)
 	}
 	return user.Result{
-		Status:   "OK",
+		Status:   true,
 		UserData: allUser,
 	}
 }
