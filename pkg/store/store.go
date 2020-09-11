@@ -60,6 +60,12 @@ func InitDB() error {
 		log.Println("create error: IPAssign database ", err)
 		return err
 	}
+	// Init Token data
+	err = createDB(`CREATE TABLE IF NOT EXISTS "initToken" ("id" INTEGER PRIMARY KEY, "created_at" INT, "expired_at" INT, "delete_at" INT, "ip" VARCHAR(255), "token1" VARCHAR(1000), "token2" VARCHAR(1000)`)
+	if err != nil {
+		log.Println("create error: Token database ", err)
+		return err
+	}
 	// Token data
 	err = createDB(`CREATE TABLE IF NOT EXISTS "token" ("id" INTEGER PRIMARY KEY, "uid" INT, "token" VARCHAR(255),"begintime" INT,"endtime" INT)`)
 	if err != nil {
