@@ -2,103 +2,107 @@ package v0
 
 import (
 	"fmt"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	"github.com/homenoc/dsbd-backend/pkg/store"
 	"log"
 	"time"
 )
 
-func Create(t *user.InitToken) user.InitTokenResult {
+func Create(t *token.Token) token.Result {
 	db := store.ConnectDB()
 	//error check
 	if db == nil {
 		log.Println("database connection error")
-		return user.InitTokenResult{
+		return token.Result{
 			Status: false,
 			Error:  fmt.Sprintf("(%s)error: database connection", time.Now()),
 		}
 	}
 	defer db.Close()
 
-	writeTable, err := db.Prepare(`INSERT INTO "init_token" ("created_at","expired_at","delete_at","ip","token1","token2") VALUES (?,?,?,?,?,?)`)
+	writeTable, err := db.Prepare(`INSERT INTO "token" ("created_at","update_at","expired_at","delete_at","uid",
+"status","user_token","tmp_token","access_token","debug") VALUES (?,?,?,?,?,?,?,?,?,?)`)
 	if err != nil {
 		log.Println("write error |error: ", err)
-		return user.InitTokenResult{
+		return token.Result{
 			Status: false,
 			Error:  fmt.Sprintf("(%s)error: write error\n %s", time.Now(), err),
 		}
 	}
-	if _, err := writeTable.Exec(time.Now().Unix(), time.Now().Unix()+10000, time.Now().Unix()+20000, t.IP, t.Token1, t.Token2); err != nil {
+	if _, err := writeTable.Exec(time.Now().Unix(), time.Now().Unix(), time.Now().Unix()+int64(t.ExpiredAt),
+		time.Now().Unix()+int64(t.ExpiredAt)+int64(t.DeletedAt), t.UID, t.Status, t.UserToken, t.TmpToken,
+		t.AccessToken, t.Debug); err != nil {
 		log.Println("apply error |error: ", err)
-		return user.InitTokenResult{
+		return token.Result{
 			Status: false,
 			Error:  fmt.Sprintf("(%s)error: apply error\n %s", time.Now(), err),
 		}
 	}
-	return user.InitTokenResult{
+	return token.Result{
 		Status: true,
 	}
 }
 
-func Delete(t *user.InitToken) user.InitTokenResult {
+func Delete(t *token.Token) token.Result {
 	db := store.ConnectDB()
 	//error check
 	if db == nil {
 		log.Println("database connection error")
-		return user.InitTokenResult{
+		return token.Result{
 			Status: false,
 			Error:  fmt.Sprintf("(%s)error: database connection\n", time.Now()),
 		}
 	}
 	defer db.Close()
 
-	if _, err := db.Exec("DELETE FROM user WHERE name = ?", t.ID); err != nil {
+	if _, err := db.Exec("DELETE FROM token WHERE id = ?", t.ID); err != nil {
 		log.Println("database delete table error |", err)
-		return user.InitTokenResult{
+		return token.Result{
 			Status: false,
 			Error:  fmt.Sprintf("(%s)error: delete error\n %s", time.Now(), err),
 		}
 	}
-	return user.InitTokenResult{
+	return token.Result{
 		Status: true,
 	}
 }
 
 // value of base can reference from api/core/user/interface.go
-func Get(token string) user.InitTokenResult {
+func Get(userToken, accessToken string) token.Result {
 	db := store.ConnectDB()
 	//error check
 	if db == nil {
 		log.Println("database connection error")
-		return user.InitTokenResult{
+		return token.Result{
 			Status: false,
 			Error:  fmt.Sprintf("(%s)error: database connection\n", time.Now()),
 		}
 	}
 	defer db.Close()
 
-	rows := db.QueryRow("SELECT * FROM init_token WHERE token1 = ?", token)
-	var t user.InitToken
-	err := rows.Scan(&t.ID, &t.CreatedAt, &t.ExpiredAt, &t.DeletedAt, &t.IP, &t.Token1, &t.Token2)
+	rows := db.QueryRow("SELECT * FROM token WHERE user_token = ? AND access_token = ?", userToken, accessToken)
+	var t token.Token
+	err := rows.Scan(&t.ID, &t.CreatedAt, &t.UpdatedAt, &t.ExpiredAt, &t.DeletedAt, &t.UID, &t.Status, &t.UserToken,
+		&t.TmpToken, &t.AccessToken, &t.Debug)
 	if err != nil {
 		log.Println("database scan error")
-		return user.InitTokenResult{
+		return token.Result{
 			Status: false,
 			Error:  fmt.Sprintf("(%s)error: database scan\n", time.Now()),
 		}
 	}
-	return user.InitTokenResult{
-		Status:    true,
-		TokenData: []user.InitToken{t},
+	return token.Result{
+		Status: true,
+		Token:  []token.Token{t},
 	}
 }
 
-func GetAll() user.InitTokenResult {
+func GetAll() token.Result {
 	db := store.ConnectDB()
 	//error check
 	if db == nil {
 		log.Println("database connection error")
-		return user.InitTokenResult{
+		return token.Result{
 			Status: false,
 			Error:  fmt.Sprintf("(%s)error: database connection\n", time.Now()),
 		}
@@ -108,28 +112,29 @@ func GetAll() user.InitTokenResult {
 	rows, err := db.Query("SELECT * FROM user")
 	if err != nil {
 		log.Println("database query error")
-		return user.InitTokenResult{
+		return token.Result{
 			Status: false,
 			Error:  fmt.Sprintf("(%s)error: database query\n", time.Now()),
 		}
 	}
 	defer rows.Close()
 
-	var allInitToken []user.InitToken
+	var allToken []token.Token
 	for rows.Next() {
-		var t user.InitToken
-		err := rows.Scan(&t.ID, &t.CreatedAt, &t.ExpiredAt, &t.DeletedAt, &t.IP, &t.Token1, &t.Token2)
+		var t token.Token
+		err := rows.Scan(&t.ID, &t.CreatedAt, &t.UpdatedAt, &t.ExpiredAt, &t.DeletedAt, &t.UID, &t.Status, &t.UserToken,
+			&t.TmpToken, &t.AccessToken, &t.Debug)
 		if err != nil {
 			log.Println("database scan error")
-			return user.InitTokenResult{
+			return token.Result{
 				Status: false,
 				Error:  fmt.Sprintf("(%s)error: query\n", time.Now()),
 			}
 		}
-		allInitToken = append(allInitToken, t)
+		allToken = append(allToken, t)
 	}
-	return user.InitTokenResult{
-		Status:    true,
-		TokenData: allInitToken,
+	return token.Result{
+		Status: true,
+		Token:  allToken,
 	}
 }
