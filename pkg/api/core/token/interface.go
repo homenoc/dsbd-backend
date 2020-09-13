@@ -2,8 +2,10 @@ package token
 
 const (
 	ID                      = 0
-	UserTokenAndTmpToken    = 10
+	UserToken               = 10
 	UserTokenAndAccessToken = 11
+	AddToken                = 100
+	UpdateToken             = 101
 )
 
 type Token struct {
