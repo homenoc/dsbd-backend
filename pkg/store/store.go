@@ -55,19 +55,15 @@ func InitDB() error {
 		return err
 	}
 	// IPAssign data
-	err = createDB(`CREATE TABLE IF NOT EXISTS "ip_assign" ("id" INTEGER PRIMARY KEY, "name" VARCHAR(255),"admin" VARCHAR(500),"user" VARCHAR(2000),"uuid" VARCHAR(20000),"maxvm" INT,"maxcpu" INT,"maxmem" INT,"maxstorage" INT,"net" VARCHAR(255))`)
+	err = createDB(`CREATE TABLE IF NOT EXISTS "ip_assign" ("id" INTEGER PRIMARY KEY, "name" VARCHAR(255), "admin" VARCHAR(500),"user" VARCHAR(2000),"uuid" VARCHAR(20000),"maxvm" INT,"maxcpu" INT,"maxmem" INT,"maxstorage" INT,"net" VARCHAR(255))`)
 	if err != nil {
 		log.Println("create error: IPAssign database ", err)
 		return err
 	}
-	// Init Token data
-	err = createDB(`CREATE TABLE IF NOT EXISTS "initToken" ("id" INTEGER PRIMARY KEY, "created_at" INT, "expired_at" INT, "delete_at" INT, "ip" VARCHAR(255), "token1" VARCHAR(1000), "token2" VARCHAR(1000)`)
-	if err != nil {
-		log.Println("create error: Token database ", err)
-		return err
-	}
 	// Token data
-	err = createDB(`CREATE TABLE IF NOT EXISTS "token" ("id" INTEGER PRIMARY KEY, "uid" INT, "token" VARCHAR(255),"begintime" INT,"endtime" INT)`)
+	err = createDB(`CREATE TABLE IF NOT EXISTS "token" ("id" INTEGER PRIMARY KEY, "created_at" INT,
+"updated_at" INT, "expired_at" INT, "deleted_at" INT, "uid" INT, "status" INT, "user_token" VARCHAR(1000),
+"tmp_token" VARCHAR(1000), "access_token" VARCHAR(1000), "debug" VARCHAR(500))`)
 	if err != nil {
 		log.Println("create error: Token database ", err)
 		return err
