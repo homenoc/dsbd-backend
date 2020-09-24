@@ -3,6 +3,7 @@ package store
 import (
 	"database/sql"
 	"fmt"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/homenoc/dsbd-backend/pkg/config"
 	"log"
 	"strconv"
@@ -12,7 +13,7 @@ func ConnectDB() *sql.DB {
 	db, err := sql.Open("mysql",
 		fmt.Sprintf("%s:%s@tcp(%s)/%s", config.Conf.DB.User, config.Conf.DB.Pass, config.Conf.DB.IP+strconv.Itoa(config.Conf.DB.Port), config.Conf.DB.DBName))
 	if err != nil {
-		log.Println("database ping error: ", err)
+		log.Println("database open error: ", err)
 		return nil
 	}
 	if err := db.Ping(); err != nil {
@@ -48,8 +49,8 @@ func InitDB() error {
 		log.Println("create error: Group database ", err)
 		return err
 	}
-	// Inquiry data
-	err = createDB(`CREATE TABLE IF NOT EXISTS "inquiry" ("id" INTEGER PRIMARY KEY, "name" VARCHAR(255), "pass" VARCHAR(255))`)
+	// private data
+	err = createDB(`CREATE TABLE IF NOT EXISTS "private" ("id" INTEGER PRIMARY KEY, "name" VARCHAR(255), "pass" VARCHAR(255))`)
 	if err != nil {
 		log.Println("create error: Inquiry database ", err)
 		return err
@@ -69,7 +70,7 @@ func InitDB() error {
 		return err
 	}
 	// Administrator data
-	err = createDB(`CREATE TABLE IF NOT EXISTS "administrator" ("id" INTEGER PRIMARY KEY, "uid" VARCHAR(255), "name" VARCHAR(255), "email" INT, "pass" INT)`)
+	err = createDB(`CREATE TABLE IF NOT EXISTS "admin" ("id" INTEGER PRIMARY KEY, "name" VARCHAR(255), "email" INT, "pass" INT)`)
 	if err != nil {
 		log.Println("create error: Administrator database ", err)
 		return err
