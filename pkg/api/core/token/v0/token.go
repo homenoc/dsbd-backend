@@ -15,10 +15,10 @@ func GenerateInit(c *gin.Context) {
 	ip := c.ClientIP()
 	userToken := c.Param("token1")
 	tmpToken, _ := toolToken.Generate(2)
-	result := dbToken.Create(&token.Token{ExpiredAt: 1800, DeletedAt: 1800, UID: 0, Status: 0,
+	err := dbToken.Create(&token.Token{ExpiredAt: 1800, DeletedAt: 1800, UID: 0, Status: 0,
 		UserToken: userToken, TmpToken: tmpToken, Debug: ip})
-	if !result.Status {
-		c.JSON(http.StatusInternalServerError, result)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, user.Result{})
 	}
 
 	t := []token.Token{{TmpToken: tmpToken}}
@@ -30,12 +30,12 @@ func Generate(c *gin.Context) {
 	userToken := c.Param("USER_TOKEN")
 	hashPass := c.Param("HASH_PASS")
 	mail := c.Param("Email")
-	tokenResult := dbToken.Get(token.UserToken, &token.Token{UserToken: userToken})
-	if !tokenResult.Status {
-		c.JSON(http.StatusInternalServerError, tokenResult)
+	tokenResult, err := dbToken.Get(token.UserToken, &token.Token{UserToken: userToken})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: err.Error()})
 	}
-	userResult := dbUser.Get(user.Email, &user.User{Email: mail})
-	h, err := hash.Generate(userResult.UserData[0].Pass + tokenResult.Token[0].TmpToken)
+	userResult, err := dbUser.Get(user.Email, &user.User{Email: mail})
+	h, err := hash.Generate(userResult.Pass + tokenResult.TmpToken)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, &token.Result{Status: false, Error: "error: hash process"})
 	}
@@ -43,13 +43,12 @@ func Generate(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, &token.Result{Status: false, Error: "failed pass"})
 	}
 	accessToken, _ := toolToken.Generate(2)
-	result := dbToken.Update(token.AddToken, &token.Token{ID: tokenResult.Token[0].ID, ExpiredAt: 1800, DeletedAt: 1800,
-		UID: userResult.UserData[0].ID, Status: 1, AccessToken: accessToken})
-	if !result.Status {
-		c.JSON(http.StatusInternalServerError, tokenResult)
+	err = dbToken.Update(token.AddToken, &token.Token{ID: tokenResult.ID, ExpiredAt: 1800, DeletedAt: 1800,
+		UID: userResult.ID, Status: 1, AccessToken: accessToken})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
+	} else {
+		tmp := []token.Token{{AccessToken: accessToken}}
+		c.JSON(http.StatusOK, &token.Result{Status: true, Token: tmp})
 	}
-
-	tmp := []token.Token{{AccessToken: accessToken}}
-
-	c.JSON(http.StatusOK, &token.Result{Status: true, Token: tmp})
 }

@@ -35,30 +35,30 @@ func Add(c *gin.Context) {
 		data = user.User{GID: input.GID, Name: input.Name, Email: input.Email, Pass: input.Pass, Status: 0, Level: input.Level}
 	}
 	//check exist for database
-	if result := dbUser.Create(&data); !result.Status {
-		c.JSON(http.StatusInternalServerError, result)
+	if err := dbUser.Create(&data); err != nil {
+		c.JSON(http.StatusInternalServerError, user.Result{Status: false})
 	} else {
-		c.JSON(http.StatusOK, result)
+		c.JSON(http.StatusOK, user.Result{Status: true, Error: err.Error()})
 	}
 }
 
 func MailVerify(c *gin.Context) {
 	token := c.Param("token")
 
-	result := dbUser.Get(user.MailToken, &user.User{MailToken: token})
-	if !result.Status {
-		result.Error = "Mail Token failed"
-		c.JSON(http.StatusInternalServerError, result)
+	result, err := dbUser.Get(user.MailToken, &user.User{MailToken: token})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error() + "| can not find token data"})
 	}
 
-	if result.UserData[0].Status > 100 || 0 > result.UserData[0].Status {
-		result.Status = false
-		result.Error = "I have already checked."
-		c.JSON(http.StatusInternalServerError, result)
+	if result.Status > 100 || 0 > result.Status {
+		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: "error: user status"})
 	}
 
-	result = dbUser.Update(user.UpdateVerifyMail, &user.User{MailVerify: 1})
-	c.JSON(http.StatusOK, &user.Result{Status: true})
+	if err := dbUser.Update(user.UpdateVerifyMail, &user.User{MailVerify: 1}); err != nil {
+		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
+	} else {
+		c.JSON(http.StatusOK, &user.Result{Status: true})
+	}
 }
 
 func Update(c *gin.Context) {
@@ -78,22 +78,22 @@ func Update(c *gin.Context) {
 
 	target, _ := strconv.Atoi(targetString)
 	if target == user.UpdateName {
-		if result := dbUser.Update(user.UpdatePass, &user.User{ID: authResult.UserData[0].ID, Name: input.Name}); !result.Status {
-			c.JSON(http.StatusInternalServerError, result)
+		if err := dbUser.Update(user.UpdatePass, &user.User{ID: authResult.UserData[0].ID, Name: input.Name}); err != nil {
+			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
 		} else {
-			c.JSON(http.StatusOK, result)
+			c.JSON(http.StatusOK, user.Result{Status: true})
 		}
 	} else if target == user.UpdatePass {
-		if result := dbUser.Update(user.UpdatePass, &user.User{ID: authResult.UserData[0].ID, Pass: input.Pass}); !result.Status {
-			c.JSON(http.StatusInternalServerError, result)
+		if err := dbUser.Update(user.UpdatePass, &user.User{ID: authResult.UserData[0].ID, Pass: input.Pass}); err != nil {
+			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
 		} else {
-			c.JSON(http.StatusOK, result)
+			c.JSON(http.StatusOK, user.Result{Status: true})
 		}
 	} else if target == user.UpdateMail {
-		if result := dbUser.Update(user.UpdatePass, &user.User{ID: authResult.UserData[0].ID, Email: input.Email}); !result.Status {
-			c.JSON(http.StatusInternalServerError, result)
+		if err := dbUser.Update(user.UpdatePass, &user.User{ID: authResult.UserData[0].ID, Email: input.Email}); err != nil {
+			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
 		} else {
-			c.JSON(http.StatusOK, result)
+			c.JSON(http.StatusOK, user.Result{Status: true})
 		}
 	} else {
 		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: "error target"})

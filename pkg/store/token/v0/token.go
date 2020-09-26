@@ -9,15 +9,12 @@ import (
 	"time"
 )
 
-func Create(t *token.Token) token.Result {
+func Create(t *token.Token) error {
 	db := store.ConnectDB()
 	//error check
 	if db == nil {
 		log.Println("database connection error")
-		return token.Result{
-			Status: false,
-			Error:  fmt.Sprintf("(%s)error: database connection", time.Now()),
-		}
+		return fmt.Errorf("(%s)error: database connection", time.Now())
 	}
 	defer db.Close()
 
@@ -25,58 +22,39 @@ func Create(t *token.Token) token.Result {
 "status","user_token","tmp_token","access_token","debug") VALUES (?,?,?,?,?,?,?,?,?,?)`)
 	if err != nil {
 		log.Println("write error |error: ", err)
-		return token.Result{
-			Status: false,
-			Error:  fmt.Sprintf("(%s)error: write error\n %s", time.Now(), err),
-		}
+		return fmt.Errorf("(%s)error: write error", time.Now())
 	}
 	if _, err := writeTable.Exec(time.Now().Unix(), time.Now().Unix(), time.Now().Unix()+int64(t.ExpiredAt),
 		time.Now().Unix()+int64(t.ExpiredAt)+int64(t.DeletedAt), t.UID, t.Status, t.UserToken, t.TmpToken,
 		t.AccessToken, t.Debug); err != nil {
 		log.Println("apply error |error: ", err)
-		return token.Result{
-			Status: false,
-			Error:  fmt.Sprintf("(%s)error: apply error\n %s", time.Now(), err),
-		}
+		return fmt.Errorf("(%s)error: apply error", time.Now())
 	}
-	return token.Result{
-		Status: true,
-	}
+	return nil
 }
 
-func Delete(t *token.Token) token.Result {
+func Delete(t *token.Token) error {
 	db := store.ConnectDB()
 	//error check
 	if db == nil {
 		log.Println("database connection error")
-		return token.Result{
-			Status: false,
-			Error:  fmt.Sprintf("(%s)error: database connection\n", time.Now()),
-		}
+		return fmt.Errorf("(%s)error: database connection", time.Now())
 	}
 	defer db.Close()
 
 	if _, err := db.Exec("DELETE FROM token WHERE id = ?", t.ID); err != nil {
 		log.Println("database delete table error |", err)
-		return token.Result{
-			Status: false,
-			Error:  fmt.Sprintf("(%s)error: delete error\n %s", time.Now(), err),
-		}
+		return fmt.Errorf("(%s)error: delete error", time.Now())
 	}
-	return token.Result{
-		Status: true,
-	}
+	return nil
 }
 
-func Update(base int, t *token.Token) token.Result {
+func Update(base int, t *token.Token) error {
 	db := store.ConnectDB()
 	//error check
 	if db == nil {
 		log.Println("database connection error")
-		return token.Result{
-			Status: false,
-			Error:  fmt.Sprintf("(%s)error: database connection\n", time.Now()),
-		}
+		return fmt.Errorf("(%s)error: database connection", time.Now())
 	}
 	defer db.Close()
 
@@ -91,33 +69,22 @@ func Update(base int, t *token.Token) token.Result {
 			time.Now().Unix(), time.Now().Unix()+int64(t.ExpiredAt), time.Now().Unix()+int64(t.ExpiredAt)+int64(t.DeletedAt), t.ID)
 	} else {
 		log.Println("base select error")
-		return token.Result{
-			Status: false,
-			Error:  fmt.Sprintf("(%s)error: base select\n", time.Now()),
-		}
+		return fmt.Errorf("(%s)error: base select\n %s", time.Now(), err)
 	}
 	if err != nil {
 		log.Println("database update table error |", err)
-		return token.Result{
-			Status: false,
-			Error:  fmt.Sprintf("(%s)error: delete error\n %s", time.Now(), err),
-		}
+		return fmt.Errorf("(%s)error: delete error\n %s", time.Now(), err)
 	}
-	return token.Result{
-		Status: true,
-	}
+	return nil
 }
 
 // value of base can reference from api/core/user/interface.go
-func Get(base int, input *token.Token) token.Result {
+func Get(base int, input *token.Token) (token.Token, error) {
 	db := store.ConnectDB()
 	//error check
 	if db == nil {
 		log.Println("database connection error")
-		return token.Result{
-			Status: false,
-			Error:  fmt.Sprintf("(%s)error: database connection\n", time.Now()),
-		}
+		return token.Token{}, fmt.Errorf("(%s)error: database connection\n", time.Now())
 	}
 	defer db.Close()
 
@@ -129,10 +96,7 @@ func Get(base int, input *token.Token) token.Result {
 		rows = db.QueryRow("SELECT * FROM token WHERE user_token = ? AND access_token = ?", &input.UserToken, &input.AccessToken)
 	} else {
 		log.Println("base select error")
-		return token.Result{
-			Status: false,
-			Error:  fmt.Sprintf("(%s)error: base select\n", time.Now()),
-		}
+		return token.Token{}, fmt.Errorf("(%s)error: base select\n", time.Now())
 	}
 
 	var t token.Token
@@ -140,36 +104,26 @@ func Get(base int, input *token.Token) token.Result {
 		&t.TmpToken, &t.AccessToken, &t.Debug)
 	if err != nil {
 		log.Println("database scan error")
-		return token.Result{
-			Status: false,
-			Error:  fmt.Sprintf("(%s)error: database scan\n", time.Now()),
-		}
+		return token.Token{}, fmt.Errorf("(%s)error: database scan\n", time.Now())
 	}
-	return token.Result{
-		Status: true,
-		Token:  []token.Token{t},
-	}
+	return t, nil
+
 }
 
-func GetAll() token.Result {
+func GetAll() ([]token.Token, error) {
 	db := store.ConnectDB()
 	//error check
 	if db == nil {
 		log.Println("database connection error")
-		return token.Result{
-			Status: false,
-			Error:  fmt.Sprintf("(%s)error: database connection\n", time.Now()),
-		}
+		return []token.Token{}, fmt.Errorf("(%s)error: database connection\n", time.Now())
 	}
 	defer db.Close()
 
 	rows, err := db.Query("SELECT * FROM token")
 	if err != nil {
 		log.Println("database query error")
-		return token.Result{
-			Status: false,
-			Error:  fmt.Sprintf("(%s)error: database query\n", time.Now()),
-		}
+		return []token.Token{}, fmt.Errorf("(%s)error: database query\n", time.Now())
+
 	}
 	defer rows.Close()
 
@@ -180,15 +134,9 @@ func GetAll() token.Result {
 			&t.TmpToken, &t.AccessToken, &t.Debug)
 		if err != nil {
 			log.Println("database scan error")
-			return token.Result{
-				Status: false,
-				Error:  fmt.Sprintf("(%s)error: query\n", time.Now()),
-			}
+			return []token.Token{}, fmt.Errorf("(%s)error: database scan\n", time.Now())
 		}
 		allToken = append(allToken, t)
 	}
-	return token.Result{
-		Status: true,
-		Token:  allToken,
-	}
+	return allToken, nil
 }
