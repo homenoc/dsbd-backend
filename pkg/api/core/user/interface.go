@@ -1,11 +1,18 @@
 package user
 
 const (
-	ID        = 0
-	GID       = 1
-	Name      = 2
-	Email     = 3
-	MailToken = 4
+	ID               = 0
+	GID              = 1
+	Name             = 2
+	Email            = 3
+	MailToken        = 4
+	UpdateVerifyMail = 100
+	UpdateGID        = 101
+	UpdateName       = 102
+	UpdateMail       = 103
+	UpdatePass       = 104
+	UpdateStatus     = 105
+	UpdateLevel      = 106
 )
 
 type User struct {
