@@ -1,5 +1,10 @@
 package token
 
+import (
+	"github.com/jinzhu/gorm"
+	"time"
+)
+
 const (
 	ID                      = 0
 	UserToken               = 10
@@ -9,17 +14,14 @@ const (
 )
 
 type Token struct {
-	ID          int    `json:"id"`
-	CreatedAt   int    `json:"created_at"`
-	UpdatedAt   int    `json:"updated_at"`
-	ExpiredAt   int    `json:"expired_at"`
-	DeletedAt   int    `json:"deleted_at"`
-	UID         int    `json:"uid"`
-	Status      int    `json:"status"` //0: before login 1: after login
-	UserToken   string `json:"user_token"`
-	TmpToken    string `json:"tmp_token"`
-	AccessToken string `json:"access_token"`
-	Debug       string `json:"debug"`
+	gorm.Model
+	ExpiredAt   time.Time `json:"expired_at"`
+	UID         uint      `json:"uid"`
+	Status      uint      `json:"status"` //0: initToken(30m) 1: 30m 2:6h 3: 12h 10: 30d 11:180d
+	UserToken   string    `json:"user_token"`
+	TmpToken    string    `json:"tmp_token"`
+	AccessToken string    `json:"access_token"`
+	Debug       string    `json:"debug"`
 }
 
 type Result struct {

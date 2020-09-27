@@ -1,5 +1,7 @@
 package group
 
+import "github.com/jinzhu/gorm"
+
 const (
 	ID           = 0
 	OrgJa        = 1
@@ -13,18 +15,19 @@ const (
 )
 
 type Group struct {
-	ID        int    `json:"id"`
-	CreatedAt int    `json:"created_at"`
-	UpdatedAt int    `json:"updated_at"`
-	OrgJa     int    `json:"org_ja"`
+	gorm.Model
+	Question  string `json:"question"`
 	Org       string `json:"org"`
-	Status    string `json:"status"`
+	Status    uint   `json:"status"`
 	TechID    string `json:"tech_id"`
-	PostCode  int    `json:"postcode"`
-	AddressJa int    `json:"address_ja"`
-	Address   int    `json:"address"`
+	Bandwidth string `json:"bandwidth"`
+	Name      string `json:"name"`
+	PostCode  string `json:"postcode"`
+	Address   string `json:"address"`
 	Mail      string `json:"mail"`
 	Phone     string `json:"phone"`
+	Country   string `json:"country"`
+	Comment   string `json:"comment"`
 }
 
 type Result struct {

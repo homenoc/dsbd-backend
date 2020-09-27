@@ -1,5 +1,7 @@
 package user
 
+import "github.com/jinzhu/gorm"
+
 const (
 	ID               = 0
 	GID              = 1
@@ -16,16 +18,14 @@ const (
 )
 
 type User struct {
-	ID         int    `json:"id"`
-	CreatedAt  int    `json:"created_at"`
-	UpdatedAt  int    `json:"updated_at"`
-	GID        int    `json:"gid"`
+	gorm.Model
+	GID        uint   `json:"gid"`
 	Name       string `json:"name"`
 	Email      string `json:"email"`
 	Pass       string `json:"pass"`
-	Status     int    `json:"status"`
-	Level      int    `json:"level"`
-	MailVerify int    `json:"mail_verify"`
+	Status     uint   `json:"status"`
+	Level      uint   `json:"level"`
+	MailVerify bool   `json:"mail_verify"`
 	MailToken  string `json:"mail_token"`
 }
 
