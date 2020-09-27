@@ -1,155 +1,103 @@
 package v0
 
 import (
-	"database/sql"
 	"fmt"
-	"git.bgp.ne.jp/dsbd/backend/pkg/tool"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	"github.com/homenoc/dsbd-backend/pkg/store"
+	"github.com/jinzhu/gorm"
 	"log"
 	"time"
 )
 
 func Create(u *user.User) error {
-	db := store.ConnectDB()
-	//error check
-	if db == nil {
+	db, err := store.ConnectDB()
+	if err != nil {
 		log.Println("database connection error")
-		return fmt.Errorf("(%s)error: database connection", time.Now())
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
 	defer db.Close()
 
-	writeTable, err := db.Prepare(`INSERT INTO "user" ("created_at","gid","name","email","pass","level","status","is_verify","mail_token") VALUES (?,?,?,?,?,?,?,?,?)`)
-	if err != nil {
-		log.Println("write error |error: ", err)
-		return fmt.Errorf("(%s)error: write error\n %s", time.Now(), err)
-	}
-
-	token, _ := tool.GenerateToken(4)
-
-	if _, err := writeTable.Exec(time.Now().Unix(), u.GID, u.Name, u.Email, u.Pass, u.Level, u.Status, 0, token); err != nil {
-		log.Println("apply error |error: ", err)
-		return fmt.Errorf("(%s)error: apply error\n %s", time.Now(), err)
-	}
-	return nil
+	return db.Create(u).Error
 }
 
 func Delete(u *user.User) error {
-	db := store.ConnectDB()
-	//error check
-	if db == nil {
+	db, err := store.ConnectDB()
+	if err != nil {
 		log.Println("database connection error")
-		return fmt.Errorf("(%s)error: database error\n", time.Now())
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
 	defer db.Close()
 
-	if _, err := db.Exec("DELETE FROM user WHERE name = ?", u.ID); err != nil {
-		log.Println("database delete table error |", err)
-		return fmt.Errorf("(%s)error: apply error\n %s", time.Now(), err)
-
-	}
-	return nil
+	return db.Delete(u).Error
 }
 
 func Update(base int, u *user.User) error {
-	db := store.ConnectDB()
-	//error check
-	if db == nil {
+	db, err := store.ConnectDB()
+	if err != nil {
 		log.Println("database connection error")
-		return fmt.Errorf("(%s)error: database connection\n", time.Now())
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
 	defer db.Close()
 
-	var err error
+	var result *gorm.DB
 
 	if user.UpdateVerifyMail == base {
-		_, err = db.Exec("UPDATE user SET updated_at = ?,is_verify = ? WHERE id = ?", time.Now().Unix(), u.MailVerify, u.ID)
+		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update("mail_verify", u.MailVerify)
 	} else if user.UpdateGID == base {
-		_, err = db.Exec("UPDATE user SET updated_at = ?,gid = ? WHERE id = ?", time.Now().Unix(), u.GID, u.ID)
+		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update("gid", u.GID)
 	} else if user.UpdateName == base {
-		_, err = db.Exec("UPDATE user SET updated_at = ?,name = ? WHERE id = ?", time.Now().Unix(), u.Name, u.ID)
+		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update("name", u.Name)
 	} else if user.UpdateMail == base {
-		token, _ := tool.GenerateToken(4)
-		_, err = db.Exec("UPDATE user SET updated_at = ?,email = ?,is_verify = ?,mail_token = ? WHERE id = ?",
-			time.Now().Unix(), u.Email, 0, token, u.ID)
+		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update(user.User{Email: u.Email, MailVerify: false, MailToken: u.MailToken})
 	} else if user.UpdatePass == base {
-		_, err = db.Exec("UPDATE user SET updated_at = ?,pass = ? WHERE id = ?", time.Now().Unix(), u.Pass, u.ID)
+		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update("pass", u.Pass)
 	} else if user.UpdateStatus == base {
-		_, err = db.Exec("UPDATE user SET updated_at = ?,status = ? WHERE id = ?", time.Now().Unix(), u.Status, u.ID)
+		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update("status", u.Status)
 	} else if user.UpdateLevel == base {
-		_, err = db.Exec("UPDATE user SET updated_at = ?,level = ? WHERE id = ?", time.Now().Unix(), u.Level, u.ID)
-
+		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update("level", u.Level)
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
 	}
-	if err != nil {
-		log.Println("database update table error |", err)
-		return fmt.Errorf("(%s)error: update error\n", time.Now())
-	}
-	return nil
+
+	return result.Error
 }
 
 // value of base can reference from api/core/user/interface.go
-func Get(base int, data *user.User) (user.User, error) {
-	db := store.ConnectDB()
-	//error check
-	if db == nil {
+func Get(base int, data *user.User) (*user.User, error) {
+	db, err := store.ConnectDB()
+	if err != nil {
 		log.Println("database connection error")
-		return user.User{}, fmt.Errorf("(%s)error: database connection\n", time.Now())
+		return &user.User{}, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
 	defer db.Close()
 
-	var rows *sql.Row
+	var userStruct user.User
 
 	if base == user.ID { //ID
-		rows = db.QueryRow("SELECT * FROM data WHERE id = ?", &data.ID)
+		err = db.First(&userStruct, user.ID).Error
 	} else if base == user.GID { //GID
-		rows = db.QueryRow("SELECT * FROM data WHERE gid = ?", &data.GID)
+		err = db.Where("gid = ?", user.GID).Find(&userStruct).Error
 	} else if base == user.Email { //Mail
-		rows = db.QueryRow("SELECT * FROM data WHERE email = ?", &data.Email)
+		err = db.Where("email = ?", user.Email).Find(&userStruct).Error
 	} else if base == user.MailToken { //Token
-		rows = db.QueryRow("SELECT * FROM data WHERE mail_token = ?", &data.MailToken)
+		err = db.Where("mail_token = ?", user.MailToken).Find(&userStruct).Error
 	} else {
 		log.Println("base select error")
-		return user.User{}, fmt.Errorf("(%s)error: base select\n", time.Now())
+		err = fmt.Errorf("(%s)error: base select\n", time.Now())
 	}
-
-	var u user.User
-	err := rows.Scan(&u.ID, &u.CreatedAt, &u.UpdatedAt, &u.GID, &u.Name, &u.Email, &u.Pass, &u.Level, &u.Status, &u.MailVerify, &u.MailToken)
-	if err != nil {
-		log.Println("database scan error")
-		return user.User{}, fmt.Errorf("(%s)error: database scan\n", time.Now())
-	}
-	return u, nil
+	return &userStruct, err
 }
 
-func GetAll() ([]user.User, error) {
-	db := store.ConnectDB()
-	//error check
-	if db == nil {
-		log.Println("database connection error")
-		return []user.User{}, fmt.Errorf("(%s)error: database connection\n", time.Now())
-
+func GetAll() (*[]user.User, error) {
+	db, err := store.ConnectDB()
+	if err != nil {
+		log.Println("db.Find(&usersatabase connection error")
+		return &[]user.User{}, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
 	defer db.Close()
 
-	rows, err := db.Query("SELECT * FROM user")
-	if err != nil {
-		log.Println("database query error")
-		return []user.User{}, fmt.Errorf("(%s)error: database query\n", time.Now())
-	}
-	defer rows.Close()
-
-	var allUser []user.User
-	for rows.Next() {
-		var u user.User
-		err := rows.Scan(&u.ID, &u.CreatedAt, &u.UpdatedAt, &u.GID, &u.Name, &u.Email, &u.Pass, &u.Level, &u.Status, &u.MailVerify, &u.MailToken)
-		if err != nil {
-			log.Println("database scan error")
-			return []user.User{}, fmt.Errorf("(%s)error: query\n", time.Now())
-		}
-		allUser = append(allUser, u)
-	}
-	return allUser, nil
+	var users []user.User
+	err = db.Find(&users).Error
+	return &users, err
 }

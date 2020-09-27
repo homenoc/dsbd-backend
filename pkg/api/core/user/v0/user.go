@@ -1,10 +1,12 @@
 package v0
 
 import (
+	"git.bgp.ne.jp/dsbd/backend/pkg/tool"
 	"github.com/gin-gonic/gin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/store/user/v0"
+	"github.com/jinzhu/gorm"
 	"net/http"
 	"strconv"
 )
@@ -23,12 +25,12 @@ func Add(c *gin.Context) {
 	if input.GID == 0 { //new user
 		data = user.User{GID: 0, Name: input.Name, Email: input.Email, Pass: input.Pass, Status: 0, Level: 0}
 	} else { //new users for group
-		authResult := authentication(token.Token{UserToken: userToken, AccessToken: accessToken})
-		if authResult.Status == false {
+		authResult, err := authentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+		if err != nil {
 			c.JSON(http.StatusInternalServerError, authResult)
 			return
 		}
-		if authResult.UserData[0].GID != input.GID && authResult.UserData[0].GID > 0 {
+		if authResult.GID != input.GID && authResult.GID > 0 {
 			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: "gid mismatch"})
 			return
 		}
@@ -54,7 +56,7 @@ func MailVerify(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: "error: user status"})
 	}
 
-	if err := dbUser.Update(user.UpdateVerifyMail, &user.User{MailVerify: 1}); err != nil {
+	if err := dbUser.Update(user.UpdateVerifyMail, &user.User{MailVerify: true}); err != nil {
 		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
 	} else {
 		c.JSON(http.StatusOK, &user.Result{Status: true})
@@ -69,28 +71,31 @@ func Update(c *gin.Context) {
 
 	c.BindJSON(&input)
 
-	authResult := authentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	authResult, err := authentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 
-	if !authResult.Status {
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, authResult)
 		return
 	}
 
 	target, _ := strconv.Atoi(targetString)
 	if target == user.UpdateName {
-		if err := dbUser.Update(user.UpdatePass, &user.User{ID: authResult.UserData[0].ID, Name: input.Name}); err != nil {
+		if err := dbUser.Update(user.UpdatePass, &user.User{Model: gorm.Model{ID: authResult.ID}, Name: input.Name}); err != nil {
 			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
 		} else {
 			c.JSON(http.StatusOK, user.Result{Status: true})
 		}
 	} else if target == user.UpdatePass {
-		if err := dbUser.Update(user.UpdatePass, &user.User{ID: authResult.UserData[0].ID, Pass: input.Pass}); err != nil {
+		if err := dbUser.Update(user.UpdatePass, &user.User{Model: gorm.Model{ID: authResult.ID}, Pass: input.Pass}); err != nil {
 			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
 		} else {
 			c.JSON(http.StatusOK, user.Result{Status: true})
 		}
 	} else if target == user.UpdateMail {
-		if err := dbUser.Update(user.UpdatePass, &user.User{ID: authResult.UserData[0].ID, Email: input.Email}); err != nil {
+		token, _ := tool.GenerateToken(4)
+
+		if err := dbUser.Update(user.UpdatePass, &user.User{Model: gorm.Model{ID: authResult.ID},
+			Email: input.Email, MailToken: token}); err != nil {
 			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
 		} else {
 			c.JSON(http.StatusOK, user.Result{Status: true})
