@@ -1,6 +1,9 @@
 package store
 
 import (
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	"github.com/homenoc/dsbd-backend/pkg/config"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -18,4 +21,12 @@ func ConnectDB() (*gorm.DB, error) {
 		return nil, err
 	}
 	return db, nil
+}
+
+func InitDB() error {
+	db, err := ConnectDB()
+	if err != nil {
+		return err
+	}
+	return db.AutoMigrate(&user.User{}, &group.Group{}, &token.Token{}).Error
 }
