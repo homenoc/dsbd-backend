@@ -10,6 +10,11 @@ import (
 )
 
 func Create(u *user.User) error {
+	_, err := Get(user.Email, &user.User{Email: u.Email})
+	if err == nil {
+		log.Println("error: this email is already registered" + u.Email)
+		return fmt.Errorf("error: this email is already registered")
+	}
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -17,7 +22,7 @@ func Create(u *user.User) error {
 	}
 	defer db.Close()
 
-	return db.Create(u).Error
+	return db.Create(&u).Error
 }
 
 func Delete(u *user.User) error {
@@ -42,7 +47,7 @@ func Update(base int, u *user.User) error {
 	var result *gorm.DB
 
 	if user.UpdateVerifyMail == base {
-		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update("mail_verify", u.MailVerify)
+		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update(user.User{MailVerify: u.MailVerify, Status: u.Status})
 	} else if user.UpdateGID == base {
 		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update("gid", u.GID)
 	} else if user.UpdateName == base {
@@ -64,7 +69,7 @@ func Update(base int, u *user.User) error {
 }
 
 // value of base can reference from api/core/user/interface.go
-func Get(base int, data *user.User) (*user.User, error) {
+func Get(base int, u *user.User) (*user.User, error) {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -75,13 +80,13 @@ func Get(base int, data *user.User) (*user.User, error) {
 	var userStruct user.User
 
 	if base == user.ID { //ID
-		err = db.First(&userStruct, user.ID).Error
+		err = db.First(&userStruct, u.ID).Error
 	} else if base == user.GID { //GID
-		err = db.Where("gid = ?", user.GID).Find(&userStruct).Error
+		err = db.Where("gid = ?", u.GID).Find(&userStruct).Error
 	} else if base == user.Email { //Mail
-		err = db.Where("email = ?", user.Email).Find(&userStruct).Error
+		err = db.Where("email = ?", u.Email).First(&userStruct).Error
 	} else if base == user.MailToken { //Token
-		err = db.Where("mail_token = ?", user.MailToken).Find(&userStruct).Error
+		err = db.Where("mail_token = ?", u.MailToken).Find(&userStruct).Error
 	} else {
 		log.Println("base select error")
 		err = fmt.Errorf("(%s)error: base select\n", time.Now())
@@ -92,7 +97,7 @@ func Get(base int, data *user.User) (*user.User, error) {
 func GetAll() (*[]user.User, error) {
 	db, err := store.ConnectDB()
 	if err != nil {
-		log.Println("db.Find(&usersatabase connection error")
+		log.Println("database connection error")
 		return &[]user.User{}, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
 	defer db.Close()
