@@ -16,7 +16,7 @@ func ConnectDB() (*gorm.DB, error) {
 	protocol := "tcp(" + config.Conf.DB.IP + ":" + strconv.Itoa(config.Conf.DB.Port) + ")"
 	dbName := config.Conf.DB.DBName
 
-	db, err := gorm.Open("mysql", user+":"+pass+"@"+protocol+"/"+dbName)
+	db, err := gorm.Open("mysql", user+":"+pass+"@"+protocol+"/"+dbName+"?parseTime=true")
 	if err != nil {
 		return nil, err
 	}
