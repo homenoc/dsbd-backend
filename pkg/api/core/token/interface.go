@@ -29,3 +29,9 @@ type Result struct {
 	Error  string  `json:"error"`
 	Token  []Token `json:"token"`
 }
+
+type ResultTmpToken struct {
+	Status bool   `json:"status"`
+	Error  string `json:"error"`
+	Token  string `json:"token"`
+}

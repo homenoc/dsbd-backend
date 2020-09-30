@@ -16,6 +16,7 @@ const (
 
 type Group struct {
 	gorm.Model
+	Agree     bool   `json:"agree"`
 	Question  string `json:"question"`
 	Org       string `json:"org"`
 	Status    uint   `json:"status"`
