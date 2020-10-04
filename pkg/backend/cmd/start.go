@@ -21,7 +21,7 @@ var startCmd = &cobra.Command{
 			log.Fatalf("error config process |%v", err)
 		}
 
-		go api.UserRestAPI()
+		api.UserRestAPI()
 		//server.Server()
 		log.Println("end")
 	},

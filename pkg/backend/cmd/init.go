@@ -20,7 +20,11 @@ var initCmd = &cobra.Command{
 			log.Fatalf("error config process |%v", err)
 		}
 
-		store.InitDB()
+		if err := store.InitDB(); err != nil {
+			log.Println("Success!!")
+		} else {
+			log.Println("error: " + err.Error())
+		}
 
 		log.Println("end")
 	},
