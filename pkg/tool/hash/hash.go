@@ -1,18 +1,15 @@
 package hash
 
 import (
-	"fmt"
+	"crypto/sha256"
+	"encoding/hex"
 	"golang.org/x/crypto/bcrypt"
-	"log"
+	"strings"
 )
 
-func Generate(data string) (string, error) {
-	hash, err := bcrypt.GenerateFromPassword([]byte(data), bcrypt.DefaultCost)
-	if err != nil {
-		log.Fatal(err)
-		return "", fmt.Errorf("%v", err)
-	}
-	return string(hash), nil
+func Generate(data string) string {
+	hash := sha256.Sum256([]byte(data))
+	return strings.ToUpper(hex.EncodeToString(hash[:]))
 }
 
 func Verify(data string, hash string) bool {
