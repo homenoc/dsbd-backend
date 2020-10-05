@@ -58,5 +58,5 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusInternalServerError, group.Result{Status: true})
+	c.JSON(http.StatusOK, group.Result{Status: true})
 }
