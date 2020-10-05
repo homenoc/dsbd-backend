@@ -15,6 +15,9 @@ import (
 
 func UserAuthentication(data token.Token) auth.UserResult {
 	resultToken := dbToken.Get(token.UserTokenAndAccessToken, &data)
+	if len(resultToken.Token) == 0 {
+		return auth.UserResult{Err: fmt.Errorf("auth failed")}
+	}
 	if resultToken.Err != nil {
 		return auth.UserResult{Err: fmt.Errorf("db error")}
 	}
@@ -32,6 +35,9 @@ func UserAuthentication(data token.Token) auth.UserResult {
 
 func GroupAuthentication(data token.Token) auth.GroupResult {
 	resultToken := dbToken.Get(token.UserTokenAndAccessToken, &data)
+	if len(resultToken.Token) == 0 {
+		return auth.GroupResult{Err: fmt.Errorf("auth failed")}
+	}
 	if resultToken.Err != nil {
 		return auth.GroupResult{Err: fmt.Errorf("db error")}
 	}
