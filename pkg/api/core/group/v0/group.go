@@ -66,6 +66,31 @@ func Update(c *gin.Context) {
 
 }
 
-func groupOrgChange() {
+func Get(c *gin.Context) {
+	var input group.Group
+	userToken := c.Request.Header.Get("USER_TOKEN")
+	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
+	c.BindJSON(&input)
+
+	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	if result.Err != nil {
+		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: result.Err.Error()})
+		return
+	}
+
+	if result.User.Level >= 10 {
+		if result.User.Level > 1 {
+			c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: "You don't have authority this operation"})
+			return
+		}
+	}
+
+	resultGroup := dbGroup.Get(group.ID, &group.Group{Model: gorm.Model{ID: result.Group.ID}})
+	if resultGroup.Err != nil {
+		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: result.Err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, group.Result{Status: true, GroupData: resultGroup.Group})
 }

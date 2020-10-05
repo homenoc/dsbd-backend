@@ -75,6 +75,7 @@ func UserRestAPI() {
 			//
 			// Group Create
 			v1.POST("/group", group.Add)
+			v1.GET("/group", group.Get)
 			// Group Delete
 			//v1.DELETE("/group", group.Delete)
 			// Connection Create
