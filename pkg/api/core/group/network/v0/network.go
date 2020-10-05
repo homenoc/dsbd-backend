@@ -90,5 +90,5 @@ func Confirm(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, network.Result{Status: false, Error: err.Error()})
 		return
 	}
-	c.JSON(http.StatusInternalServerError, group.Result{Status: true})
+	c.JSON(http.StatusOK, group.Result{Status: true})
 }
