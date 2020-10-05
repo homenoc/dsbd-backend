@@ -54,7 +54,7 @@ func Add(c *gin.Context) {
 		return
 	}
 	if err := dbGroup.Update(group.UpdateStatus, group.Group{Model: gorm.Model{ID: result.Group.ID},
-		Status: result.Group.Status + 1}); err != nil {
+		Status: result.Group.Status}); err != nil {
 		c.JSON(http.StatusInternalServerError, network.Result{Status: false, Error: err.Error()})
 		return
 	}

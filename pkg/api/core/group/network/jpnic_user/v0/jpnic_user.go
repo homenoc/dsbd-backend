@@ -7,7 +7,6 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnic_user"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	dbJPNICUser "github.com/homenoc/dsbd-backend/pkg/store/group/network/jpnic_user/v0"
-	dbGroup "github.com/homenoc/dsbd-backend/pkg/store/group/v0"
 	"github.com/jinzhu/gorm"
 	"net/http"
 )
@@ -50,11 +49,7 @@ func Add(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, jpnic_user.Result{Status: false, Error: err.Error()})
 		return
 	}
-	if err := dbGroup.Update(group.UpdateStatus, group.Group{Model: gorm.Model{ID: result.Group.ID},
-		Status: result.Group.Status + 1}); err != nil {
-		c.JSON(http.StatusInternalServerError, jpnic_user.Result{Status: false, Error: err.Error()})
-		return
-	}
+
 	c.JSON(http.StatusInternalServerError, group.Result{Status: true})
 }
 
