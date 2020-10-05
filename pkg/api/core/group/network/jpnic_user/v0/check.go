@@ -46,6 +46,9 @@ func checkNetworkID(input jpnic_user.JPNICUser, groupID uint) error {
 	}
 	if input.OperationID != 0 {
 		result := dbNetwork.Get(network.ID, &network.Network{Model: gorm.Model{ID: input.OperationID}})
+		if len(result.Network) == 0 {
+			return fmt.Errorf("mistake operation ID")
+		}
 		if result.Network[0].GroupID == groupID {
 			return nil
 		} else {
@@ -55,6 +58,9 @@ func checkNetworkID(input jpnic_user.JPNICUser, groupID uint) error {
 
 	if input.TechID != 0 {
 		result := dbNetwork.Get(network.ID, &network.Network{Model: gorm.Model{ID: input.TechID}})
+		if len(result.Network) == 0 {
+			return fmt.Errorf("mistake tech ID")
+		}
 		if result.Network[0].GroupID == groupID {
 			return nil
 		} else {

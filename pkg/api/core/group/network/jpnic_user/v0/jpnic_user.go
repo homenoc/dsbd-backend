@@ -82,9 +82,14 @@ func Update(c *gin.Context) {
 		return
 	}
 
+	//#1 Issue
 	resultJPNICUser := dbJPNICUser.Get(jpnic_user.ID, &jpnic_user.JPNICUser{Model: gorm.Model{ID: input.ID}})
 	if resultJPNICUser.Err != nil {
 		c.JSON(http.StatusInternalServerError, jpnic_user.Result{Status: false, Error: result.Err.Error()})
+		return
+	}
+	if len(resultJPNICUser.JPNICUser) == 0 {
+		c.JSON(http.StatusInternalServerError, jpnic_user.Result{Status: false, Error: "failed JPNIC User ID"})
 		return
 	}
 	if resultJPNICUser.JPNICUser[0].GroupID != result.Group.ID {

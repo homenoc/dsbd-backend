@@ -17,8 +17,8 @@ const (
 type JPNICUser struct {
 	gorm.Model
 	GroupID     uint   `json:"group_id"`
-	OperationID uint   `json:"operation_id`
-	TechID      uint   `json:"tech_id`
+	OperationID uint   `json:"operation_id"`
+	TechID      uint   `json:"tech_id"`
 	NameJa      string `json:"name_ja"`
 	Name        string `json:"name"`
 	OrgJa       string `json:"org_ja"`
