@@ -5,8 +5,8 @@ import "github.com/jinzhu/gorm"
 const (
 	ID          = 0
 	GID         = 1
-	Org         = 2
-	Email       = 3
+	Name        = 2
+	Type        = 3
 	UpdateName  = 100
 	UpdateIP    = 101
 	UpdateDate  = 102
@@ -24,6 +24,10 @@ type Network struct {
 	Route   string `json:"route"`
 	Date    string `json:"date"`
 	Plan    string `json:"plan"`
+}
+
+type Confirm struct {
+	Finish bool `json:"finish"`
 }
 
 type Result struct {
