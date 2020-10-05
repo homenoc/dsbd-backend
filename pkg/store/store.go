@@ -2,11 +2,15 @@ package store
 
 import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
+	connection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
+	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnic_user"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	"github.com/homenoc/dsbd-backend/pkg/config"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"log"
 	"strconv"
 )
 
@@ -23,10 +27,10 @@ func ConnectDB() (*gorm.DB, error) {
 	return db, nil
 }
 
-func InitDB() error {
-	db, err := ConnectDB()
-	if err != nil {
-		return err
-	}
-	return db.AutoMigrate(&user.User{}, &group.Group{}, &token.Token{}).Error
+func InitDB() {
+	db, _ := ConnectDB()
+	result := db.AutoMigrate(&user.User{}, &group.Group{}, &token.Token{}, &network.Network{}, &jpnic_user.JPNICUser{},
+		&connection.Connection{})
+	log.Println(result.Error)
+	//return nil
 }

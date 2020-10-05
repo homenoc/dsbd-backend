@@ -46,7 +46,7 @@ func Update(base int, u jpnicUser.JPNICUser) error {
 		result = db.Model(&jpnicUser.JPNICUser{Model: gorm.Model{ID: u.ID}}).Update(jpnicUser.JPNICUser{
 			NameJa: u.NameJa, Name: u.Name, OrgJa: u.OrgJa, Org: u.Org, PostCode: u.PostCode, AddressJa: u.AddressJa,
 			Address: u.Address, DeptJa: u.DeptJa, Dept: u.Dept, PosJa: u.PosJa, Pos: u.Pos,
-			Mail: u.Mail, Tel: u.Tel, Fax: u.Fax})
+			Mail: u.Mail, Tel: u.Tel, Fax: u.Fax, OperationID: u.OperationID, TechID: u.TechID})
 	} else if jpnicUser.UpdateGID == base {
 		result = db.Model(&jpnicUser.JPNICUser{Model: gorm.Model{ID: u.ID}}).Update(jpnicUser.JPNICUser{GroupID: u.GroupID})
 	} else {
@@ -67,13 +67,13 @@ func Get(base int, data *jpnicUser.JPNICUser) jpnicUser.ResultDatabase {
 	var networkStruct []jpnicUser.JPNICUser
 
 	if base == jpnicUser.ID { //ID
-		err = db.First(&networkStruct, jpnicUser.ID).Error
+		err = db.First(&networkStruct, data.ID).Error
 	} else if base == jpnicUser.Name { //Name
-		err = db.Where("name = ?", jpnicUser.Name).Find(&networkStruct).Error
+		err = db.Where("name = ?", data.Name).Find(&networkStruct).Error
 	} else if base == jpnicUser.Mail { //Name
-		err = db.Where("mail = ?", jpnicUser.Mail).Find(&networkStruct).Error
+		err = db.Where("mail = ?", data.Mail).Find(&networkStruct).Error
 	} else if base == jpnicUser.GID {
-		err = db.Where("group_id = ?", jpnicUser.GID).Find(&networkStruct).Error
+		err = db.Where("group_id = ?", data.GroupID).Find(&networkStruct).Error
 	} else {
 		log.Println("base select error")
 		return jpnicUser.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
