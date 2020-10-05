@@ -7,7 +7,7 @@ import (
 
 func check(input network.Network) error {
 	// check
-	if 1 <= input.Type && input.Type <= 2 || input.Type == 5 {
+	if !(1 <= input.Type && input.Type <= 2 || input.Type == 5) {
 		return fmt.Errorf("error: type value")
 	}
 	if input.Name == "" {
