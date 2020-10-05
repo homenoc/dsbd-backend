@@ -21,6 +21,8 @@ type Group struct {
 	Org       string `json:"org"`
 	Status    uint   `json:"status"`
 	Bandwidth string `json:"bandwidth"`
+	Monitor   bool   `json:"monitor"`
+	Contract  uint   `json:"contract"`
 	Name      string `json:"name"`
 	PostCode  string `json:"postcode"`
 	Address   string `json:"address"`
