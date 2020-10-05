@@ -86,7 +86,7 @@ func Get(base int, u *user.User) user.ResultDatabase {
 
 	if base == user.ID { //ID
 		err = db.First(&userStruct, u.ID).Error
-	} else if base == user.GID { //GID
+	} else if base == user.GID { //GroupID
 		err = db.Where("gid = ?", u.GID).Find(&userStruct).Error
 	} else if base == user.Email { //Mail
 		err = db.Where("email = ?", u.Email).First(&userStruct).Error
@@ -97,7 +97,7 @@ func Get(base int, u *user.User) user.ResultDatabase {
 		return user.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
 	}
 
-	return user.ResultDatabase{User: userStruct, Err: nil}
+	return user.ResultDatabase{User: userStruct, Err: err}
 }
 
 func GetAll() user.ResultDatabase {
@@ -110,5 +110,5 @@ func GetAll() user.ResultDatabase {
 
 	var users []user.User
 	err = db.Find(&users).Error
-	return user.ResultDatabase{User: users, Err: nil}
+	return user.ResultDatabase{User: users, Err: err}
 }

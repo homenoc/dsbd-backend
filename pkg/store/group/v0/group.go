@@ -76,7 +76,7 @@ func Get(base int, data *group.Group) group.ResultDatabase {
 		log.Println("base select error")
 		return group.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
 	}
-	return group.ResultDatabase{Group: groupStruct, Err: nil}
+	return group.ResultDatabase{Group: groupStruct, Err: err}
 }
 
 func GetAll() group.ResultDatabase {
@@ -89,5 +89,5 @@ func GetAll() group.ResultDatabase {
 
 	var groups []group.Group
 	err = db.Find(&groups).Error
-	return group.ResultDatabase{Group: groups, Err: nil}
+	return group.ResultDatabase{Group: groups, Err: err}
 }

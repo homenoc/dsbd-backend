@@ -70,7 +70,7 @@ func Get(base int, input *token.Token) token.ResultDatabase {
 		log.Println("base select error")
 		return token.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
 	}
-	return token.ResultDatabase{Token: tokenStruct, Err: nil}
+	return token.ResultDatabase{Token: tokenStruct, Err: err}
 }
 
 func GetAll() token.ResultDatabase {
@@ -83,5 +83,5 @@ func GetAll() token.ResultDatabase {
 
 	var tokens []token.Token
 	err = db.Find(&tokens).Error
-	return token.ResultDatabase{Token: tokens, Err: nil}
+	return token.ResultDatabase{Token: tokens, Err: err}
 }
