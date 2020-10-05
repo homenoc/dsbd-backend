@@ -52,15 +52,15 @@ func Update(base int, t *token.Token) error {
 }
 
 // value of base can reference from api/core/user/interface.go
-func Get(base int, input *token.Token) (*token.Token, error) {
+func Get(base int, input *token.Token) token.ResultDatabase {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
-		return &token.Token{}, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+		return token.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
 	defer db.Close()
 
-	var tokenStruct token.Token
+	var tokenStruct []token.Token
 
 	if base == token.UserToken {
 		err = db.Where("user_token = ?", input.UserToken).Find(&tokenStruct).Error
@@ -68,20 +68,20 @@ func Get(base int, input *token.Token) (*token.Token, error) {
 		err = db.Where("user_token = ? AND access_token = ?", input.UserToken, input.AccessToken).Find(&tokenStruct).Error
 	} else {
 		log.Println("base select error")
-		err = fmt.Errorf("(%s)error: base select\n", time.Now())
+		return token.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
 	}
-	return &tokenStruct, err
+	return token.ResultDatabase{Token: tokenStruct, Err: nil}
 }
 
-func GetAll() (*[]token.Token, error) {
+func GetAll() token.ResultDatabase {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
-		return &[]token.Token{}, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+		return token.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
 	defer db.Close()
 
 	var tokens []token.Token
 	err = db.Find(&tokens).Error
-	return &tokens, err
+	return token.ResultDatabase{Token: tokens, Err: nil}
 }

@@ -9,15 +9,16 @@ import (
 	"time"
 )
 
-func Create(group *group.Group) error {
+func Create(group *group.Group) (*group.Group, error) {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+		return group, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
 	defer db.Close()
 
-	return db.Create(group).Error
+	err = db.Create(&group).Error
+	return group, err
 }
 
 func Delete(group *group.Group) error {
@@ -45,8 +46,6 @@ func Update(base int, g group.Group) error {
 		result = db.Model(&group.Group{Model: gorm.Model{ID: g.ID}}).Update("org", g.Org)
 	} else if group.UpdateStatus == base {
 		result = db.Model(&group.Group{Model: gorm.Model{ID: g.ID}}).Update("status", g.Status)
-	} else if group.UpdateTechID == base {
-		result = db.Model(&group.Group{Model: gorm.Model{ID: g.ID}}).Update("tech_id", g.TechID)
 	} else if group.UpdateInfo == base {
 		result = db.Model(&group.Group{Model: gorm.Model{ID: g.ID}}).Update(group.Group{
 			Name: g.Name, PostCode: g.PostCode, Address: g.Address, Mail: g.Mail, Phone: g.Phone, Country: g.Country})
@@ -57,36 +56,38 @@ func Update(base int, g group.Group) error {
 	return result.Error
 }
 
-func Get(base int, data *group.Group) *gorm.DB {
+func Get(base int, data *group.Group) group.ResultDatabase {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
-		return &gorm.DB{Error: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+		return group.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
 	defer db.Close()
 
-	var groupStruct group.Group
+	var groupStruct []group.Group
 
 	if base == group.ID { //ID
-		return db.First(&groupStruct, group.ID)
+		err = db.First(&groupStruct, group.ID).Error
 	} else if base == group.Org { //Org
-		return db.Where("org = ?", group.Org).Find(&groupStruct)
+		err = db.Where("org = ?", group.Org).Find(&groupStruct).Error
 	} else if base == group.Email { //Mail
-		return db.Where("email = ?", group.Email).Find(&groupStruct)
+		err = db.Where("email = ?", group.Email).Find(&groupStruct).Error
 	} else {
 		log.Println("base select error")
-		return &gorm.DB{Error: fmt.Errorf("(%s)error: base select\n", time.Now())}
+		return group.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
 	}
+	return group.ResultDatabase{Group: groupStruct, Err: nil}
 }
 
-func GetAll() *gorm.DB {
+func GetAll() group.ResultDatabase {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
-		return &gorm.DB{Error: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+		return group.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
 	defer db.Close()
 
-	var users []group.Group
-	return db.Find(&users)
+	var groups []group.Group
+	err = db.Find(&groups).Error
+	return group.ResultDatabase{Group: groups, Err: nil}
 }
