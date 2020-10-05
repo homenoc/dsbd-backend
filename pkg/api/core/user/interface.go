@@ -10,7 +10,7 @@ const (
 	MailToken        = 4
 	UpdateVerifyMail = 100
 	UpdateGID        = 101
-	UpdateName       = 102
+	UpdateInfo       = 102
 	UpdateMail       = 103
 	UpdatePass       = 104
 	UpdateStatus     = 105
@@ -33,4 +33,9 @@ type Result struct {
 	Status   bool   `json:"status"`
 	Error    string `json:"error"`
 	UserData []User `json:"data"`
+}
+
+type ResultDatabase struct {
+	Err  error
+	User []User
 }

@@ -35,3 +35,8 @@ type ResultTmpToken struct {
 	Error  string `json:"error"`
 	Token  string `json:"token"`
 }
+
+type ResultDatabase struct {
+	Err   error
+	Token []Token
+}

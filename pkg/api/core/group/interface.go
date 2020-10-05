@@ -20,7 +20,6 @@ type Group struct {
 	Question  string `json:"question"`
 	Org       string `json:"org"`
 	Status    uint   `json:"status"`
-	TechID    string `json:"tech_id"`
 	Bandwidth string `json:"bandwidth"`
 	Name      string `json:"name"`
 	PostCode  string `json:"postcode"`
@@ -35,4 +34,9 @@ type Result struct {
 	Status    bool    `json:"status"`
 	Error     string  `json:"error"`
 	GroupData []Group `json:"data"`
+}
+
+type ResultDatabase struct {
+	Err   error
+	Group []Group
 }
