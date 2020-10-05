@@ -69,13 +69,13 @@ func Get(base int, data *connection.Connection) connection.ResultDatabase {
 	var connectionStruct []connection.Connection
 
 	if base == connection.ID { //ID
-		err = db.First(&connectionStruct, connection.ID).Error
+		err = db.First(&connectionStruct, data.ID).Error
 	} else if base == connection.Org { //Org
-		err = db.Where("org = ?", connection.Org).Find(&connectionStruct).Error
+		err = db.Where("org = ?", data.Org).Find(&connectionStruct).Error
 	} else if base == connection.Email { //Mail
-		err = db.Where("email = ?", connection.Email).Find(&connectionStruct).Error
+		err = db.Where("mail = ?", data.Mail).Find(&connectionStruct).Error
 	} else if base == connection.GID {
-		err = db.Where("group_id = ?", connection.GID).Find(&connectionStruct).Error
+		err = db.Where("group_id = ?", data.GroupID).Find(&connectionStruct).Error
 	} else {
 		log.Println("base select error")
 		return connection.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}

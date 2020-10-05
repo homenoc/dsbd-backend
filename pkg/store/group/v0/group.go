@@ -67,11 +67,11 @@ func Get(base int, data *group.Group) group.ResultDatabase {
 	var groupStruct []group.Group
 
 	if base == group.ID { //ID
-		err = db.First(&groupStruct, group.ID).Error
+		err = db.First(&groupStruct, data.ID).Error
 	} else if base == group.Org { //Org
-		err = db.Where("org = ?", group.Org).Find(&groupStruct).Error
+		err = db.Where("org = ?", data.Org).Find(&groupStruct).Error
 	} else if base == group.Email { //Mail
-		err = db.Where("email = ?", group.Email).Find(&groupStruct).Error
+		err = db.Where("mail = ?", data.Mail).Find(&groupStruct).Error
 	} else {
 		log.Println("base select error")
 		return group.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}

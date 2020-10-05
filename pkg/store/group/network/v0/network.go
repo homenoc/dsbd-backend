@@ -70,13 +70,11 @@ func Get(base int, data *network.Network) network.ResultDatabase {
 	var networkStruct []network.Network
 
 	if base == network.ID { //ID
-		err = db.First(&networkStruct, network.ID).Error
-	} else if base == network.Org { //Org
-		err = db.Where("org = ?", network.Org).Find(&networkStruct).Error
-	} else if base == network.Email { //Mail
-		err = db.Where("email = ?", network.Email).Find(&networkStruct).Error
+		err = db.First(&networkStruct, data.ID).Error
+	} else if base == network.Name { //Mail
+		err = db.Where("name = ?", data.Name).Find(&networkStruct).Error
 	} else if base == network.GID {
-		err = db.Where("group_id = ?", network.GID).Find(&networkStruct).Error
+		err = db.Where("group_id = ?", data.GroupID).Find(&networkStruct).Error
 	} else {
 		log.Println("base select error")
 		return network.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
