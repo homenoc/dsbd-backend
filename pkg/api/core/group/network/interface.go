@@ -1,0 +1,38 @@
+package group
+
+import "github.com/jinzhu/gorm"
+
+const (
+	ID          = 0
+	GID         = 1
+	Org         = 2
+	Email       = 3
+	UpdateName  = 100
+	UpdateIP    = 101
+	UpdateDate  = 102
+	UpdateRoute = 103
+	UpdatePlan  = 104
+	UpdateGID   = 104
+)
+
+type Network struct {
+	gorm.Model
+	GroupID uint   `json:"group_id"`
+	Type    uint   `json:"type"`
+	Name    string `json:"name"`
+	IP      string `json:"ip"`
+	Route   string `json:"route"`
+	Date    string `json:"date"`
+	Plan    string `json:"plan"`
+}
+
+type Result struct {
+	Status  bool      `json:"status"`
+	Error   string    `json:"error"`
+	Network []Network `json:"network"`
+}
+
+type ResultDatabase struct {
+	Err     error
+	Network []Network
+}
