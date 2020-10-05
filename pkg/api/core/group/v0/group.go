@@ -26,57 +26,26 @@ func Add(c *gin.Context) {
 		return
 	}
 
+	// check authority
+	if userResult.User.Level > 1 {
+		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: "You don't have authority this operation"})
+		return
+	}
+
 	if userResult.User.GID != 0 {
 		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: "error: You can't create new group", GroupData: nil})
 		return
 	}
 
-	// check
-	if !input.Agree {
-		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: "error: Agreement is false", GroupData: nil})
-		return
-	}
-	if input.Question == "" {
-		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: "no data: question", GroupData: nil})
-		return
-	}
-	if input.Org == "" {
-		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: "no data: org", GroupData: nil})
-		return
-	}
-	if input.Bandwidth == "" {
-		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: "no data: bandwidth", GroupData: nil})
-		return
-	}
-	if input.Name == "" {
-		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: "no data: name", GroupData: nil})
-		return
-	}
-	if input.PostCode == "" {
-		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: "no data: postcode", GroupData: nil})
-		return
-	}
-	if input.Address == "" {
-		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: "no data: address", GroupData: nil})
-		return
-	}
-	if input.Mail == "" {
-		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: "no data: mail", GroupData: nil})
-		return
-	}
-	if input.Phone == "" {
-		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: "no data: phone", GroupData: nil})
-		return
-	}
-	if input.Country == "" {
-		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: "no data: country", GroupData: nil})
+	if err := check(input); err != nil {
+		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: err.Error()})
 		return
 	}
 
 	result, err := dbGroup.Create(&group.Group{
 		Agree: true, Question: input.Question, Org: input.Org, Status: 0, Bandwidth: input.Bandwidth, Name: input.Name,
 		PostCode: input.PostCode, Address: input.Address, Mail: input.Mail, Phone: input.Phone, Country: input.Country,
-		Comment: input.Comment,
+		Comment: input.Comment, Monitor: input.Monitor, Contract: input.Contract,
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: err.Error(), GroupData: nil})
