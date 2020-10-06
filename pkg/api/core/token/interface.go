@@ -11,6 +11,7 @@ const (
 	UserTokenAndAccessToken = 11
 	AddToken                = 100
 	UpdateToken             = 101
+	UpdateAll               = 101
 )
 
 type Token struct {
