@@ -15,6 +15,7 @@ const (
 	UpdatePass       = 104
 	UpdateStatus     = 105
 	UpdateLevel      = 106
+	UpdateAll        = 110
 )
 
 type User struct {
