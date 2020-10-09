@@ -10,6 +10,7 @@ import (
 	toolToken "github.com/homenoc/dsbd-backend/pkg/tool/token"
 	"github.com/jinzhu/gorm"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -87,6 +88,11 @@ func MailVerify(c *gin.Context) {
 func Update(c *gin.Context) {
 	var input user.User
 
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, user.Result{Status: false, Error: fmt.Sprintf("id error")})
+		return
+	}
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
@@ -98,33 +104,51 @@ func Update(c *gin.Context) {
 		return
 	}
 
+	if authResult.User.Status >= 100 {
+		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: "deleted this user"})
+		return
+	}
+
 	if !authResult.User.MailVerify {
 		c.JSON(http.StatusBadRequest, user.Result{Status: false, Error: "not verify for user mail"})
 		return
 	}
 
-	u := user.User{Model: gorm.Model{ID: authResult.User.ID}}
+	if authResult.User.ID != uint(id) {
+		if authResult.User.GID == 0 {
+			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: "error: Group ID = 0"})
+			return
+		}
+		if authResult.User.Level > 1 {
+			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: "error: failed user level"})
+			return
+		}
+		userResult := dbUser.Get(user.ID, &user.User{Model: gorm.Model{ID: uint(id)}})
+		if userResult.Err != nil {
+			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: userResult.Err.Error()})
+			return
+		}
+		if userResult.User[0].GID != authResult.User.GID {
+			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: fmt.Sprintf("failed group authentication")})
+			return
+		}
+	}
+
+	u := authResult.User
 
 	//Name
-	if authResult.User.Name == input.Name {
-		u.Name = authResult.User.Name
-	} else {
+	if authResult.User.Name != input.Name {
 		u.Name = input.Name
 	}
 	//E-Mail
-	if authResult.User.Email == input.Email {
-		u.Email = authResult.User.Email
-		u.MailVerify = false
-	} else {
+	if authResult.User.Email != input.Email {
 		mailToken, _ := toolToken.Generate(4)
 		u.Email = input.Email
 		u.MailVerify = true
 		u.MailToken = mailToken
 	}
 	//Pass
-	if authResult.User.Pass == input.Pass {
-		u.Pass = authResult.User.Pass
-	} else {
+	if authResult.User.Pass != input.Pass {
 		u.Pass = input.Pass
 	}
 
@@ -132,5 +156,20 @@ func Update(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
 	} else {
 		c.JSON(http.StatusOK, user.Result{Status: true})
+	}
+}
+
+func Get(c *gin.Context) {
+	var input user.User
+
+	userToken := c.Request.Header.Get("USER_TOKEN")
+	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
+
+	c.BindJSON(&input)
+
+	authResult := auth.UserAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	if authResult.Err != nil {
+		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: authResult.Err.Error()})
+		return
 	}
 }
