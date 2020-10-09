@@ -3,16 +3,19 @@ package jpnic_user
 import "github.com/jinzhu/gorm"
 
 const (
-	ID           = 0
-	Name         = 1
-	Mail         = 2
-	GID          = 3
-	UpdateID     = 100
-	UpdateOpID   = 101
-	UpdateTechID = 102
-	UpdateGID    = 103
-	UpdateInfo   = 104
-	UpdateAll    = 110
+	ID             = 0
+	Name           = 1
+	Mail           = 2
+	GID            = 3
+	GroupIDAndOp   = 5
+	GroupIDAndTech = 6
+	UpdateID       = 100
+	UpdateOpID     = 101
+	UpdateTechID   = 102
+	UpdateGID      = 103
+	UpdateInfo     = 104
+	UpdateData     = 105
+	UpdateAll      = 110
 )
 
 type JPNICUser struct {
@@ -34,6 +37,7 @@ type JPNICUser struct {
 	Mail        string `json:"mail"`
 	Tel         string `json:"tel"`
 	Fax         string `json:"fax"`
+	Lock        bool   `json:"lock"`
 }
 
 type Result struct {
