@@ -28,7 +28,7 @@ func UserAuthentication(data token.Token) auth.UserResult {
 	}
 	log.Println(resultUser)
 	if 100 <= resultUser.User[0].Status {
-		return auth.UserResult{Err: fmt.Errorf("user status")}
+		return auth.UserResult{Err: fmt.Errorf("deleted this user")}
 	}
 	return auth.UserResult{User: resultUser.User[0], Err: nil}
 }

@@ -104,11 +104,6 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	if authResult.User.Status >= 100 {
-		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: "deleted this user"})
-		return
-	}
-
 	if !authResult.User.MailVerify {
 		c.JSON(http.StatusBadRequest, user.Result{Status: false, Error: "not verify for user mail"})
 		return
