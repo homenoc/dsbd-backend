@@ -12,6 +12,7 @@ const (
 	UpdateTechID = 102
 	UpdateGID    = 103
 	UpdateInfo   = 104
+	UpdateAll    = 110
 )
 
 type JPNICUser struct {

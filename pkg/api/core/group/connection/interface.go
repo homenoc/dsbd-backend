@@ -13,6 +13,7 @@ const (
 	UpdateUserInfo = 102
 	UpdateTechID   = 103
 	UpdateInfo     = 104
+	UpdateAll      = 110
 )
 
 type Connection struct {

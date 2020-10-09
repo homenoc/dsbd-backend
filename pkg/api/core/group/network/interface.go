@@ -13,6 +13,7 @@ const (
 	UpdateRoute = 103
 	UpdatePlan  = 104
 	UpdateGID   = 104
+	UpdateAll   = 110
 )
 
 type Network struct {
