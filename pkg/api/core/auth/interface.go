@@ -15,3 +15,8 @@ type GroupResult struct {
 	User  user.User
 	Err   error
 }
+
+type AdminStruct struct {
+	User string
+	Pass string
+}
