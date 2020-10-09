@@ -31,6 +31,7 @@ type Group struct {
 	Phone     string `json:"phone"`
 	Country   string `json:"country"`
 	Comment   string `json:"comment"`
+	Lock      bool   `json:"lock"`
 }
 
 type Result struct {
