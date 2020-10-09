@@ -24,24 +24,63 @@ func AdminRestAPI() {
 			// User
 			//
 			// User Create
-			v1.POST("/user", user.Add)
+			v1.POST("/user", user.AddAdmin)
 			// User Delete
-			//router.DELETE("/user", user.Delete)
+			v1.DELETE("/user", user.DeleteAdmin)
 			// User Update
-			v1.PUT("/user", user.Update)
-			// User Mail MailVerify
-			v1.POST("/user/verify/:token", user.MailVerify)
-			// get token for CHAP authentication
-			v1.GET("/token/init", token.GenerateInit)
-			// get token for user
-			v1.GET("/token", token.Generate)
+			v1.PUT("/user", user.UpdateAdmin)
+			v1.GET("/user", user.GetAllAdmin)
+			v1.GET("/user/:id", user.GetAllAdmin)
+			//
+			// Token
+			//
+			v1.POST("/token", token.AddAdmin)
+			// User Delete
+			v1.DELETE("/token", token.DeleteAdmin)
+			// User Update
+			v1.PUT("/token", token.UpdateAdmin)
+			v1.GET("/token", token.GetAllAdmin)
+			v1.GET("/token/:id", token.GetAllAdmin)
 			//
 			// Group
 			//
-			// Group Create
-			v1.POST("/group", group.Add)
+			v1.POST("/group", group.AddAdmin)
 			// Group Delete
-			//v1.DELETE("/group", group.Delete)
+			v1.DELETE("/group", group.DeleteAdmin)
+			// Group Update
+			v1.PUT("/group", group.UpdateAdmin)
+			v1.GET("/group", group.GetAllAdmin)
+			v1.GET("/group/:id", group.GetAllAdmin)
+			//
+			// Network
+			//
+			v1.POST("/group/network", network.AddAdmin)
+			// Group Delete
+			v1.DELETE("/group/network", network.DeleteAdmin)
+			// Group Update
+			v1.PUT("/group/network", network.UpdateAdmin)
+			v1.GET("/group/network", network.GetAllAdmin)
+			v1.GET("/group/network/:id", network.GetAllAdmin)
+			//
+			// JPNIC User
+			//
+			v1.POST("/group/network/jpnic", jpnicUser.AddAdmin)
+			// Group Delete
+			v1.DELETE("/group/network/jpnic", jpnicUser.DeleteAdmin)
+			// Group Update
+			v1.PUT("/group/network/jpnic", jpnicUser.UpdateAdmin)
+			v1.GET("/group/network/jpnic", jpnicUser.GetAllAdmin)
+			v1.GET("/group/network/jpnic/:id", jpnicUser.GetAllAdmin)
+			//
+			// Connection
+			//
+			v1.POST("/group/connection", connection.AddAdmin)
+			// Group Delete
+			v1.DELETE("/group/connection", connection.DeleteAdmin)
+			// Group Update
+			v1.PUT("/group/connection", connection.UpdateAdmin)
+			v1.GET("/group/connection", connection.GetAllAdmin)
+			v1.GET("/group/connection/:id", connection.GetAllAdmin)
 		}
 	}
 	log.Fatal(http.ListenAndServe(":8080", router))
