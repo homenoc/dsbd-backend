@@ -65,6 +65,10 @@ func Update(base int, u *user.User) error {
 		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update("status", u.Status)
 	} else if user.UpdateLevel == base {
 		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update("level", u.Level)
+	} else if user.UpdateAll == base {
+		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update(user.User{
+			GID: u.GID, Name: u.Name, Email: u.Email, Pass: u.Pass,
+			Status: u.Status, Level: u.Level, MailVerify: u.MailVerify, MailToken: u.MailToken})
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())

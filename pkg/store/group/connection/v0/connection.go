@@ -76,6 +76,12 @@ func Get(base int, data *connection.Connection) connection.ResultDatabase {
 		err = db.Where("mail = ?", data.Mail).Find(&connectionStruct).Error
 	} else if base == connection.GID {
 		err = db.Where("group_id = ?", data.GroupID).Find(&connectionStruct).Error
+	} else if base == connection.UpdateAll {
+		err = db.Model(&connection.Connection{Model: gorm.Model{ID: data.ID}}).Update(connection.Connection{
+			GroupID: data.GroupID, ServiceID: data.ServiceID, Service: data.Service, NTT: data.NTT, Fee: data.Fee,
+			NOC: data.NOC, TermIP: data.TermIP, LinkV4: data.LinkV4, LinkV6: data.LinkV6, Name: data.Name,
+			Org: data.Org, PostCode: data.PostCode, Address: data.Address, Mail: data.Mail, Phone: data.Phone,
+			Country: data.Country, Comment: data.Comment}).Error
 	} else {
 		log.Println("base select error")
 		return connection.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}

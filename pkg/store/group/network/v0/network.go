@@ -75,6 +75,9 @@ func Get(base int, data *network.Network) network.ResultDatabase {
 		err = db.Where("name = ?", data.Name).Find(&networkStruct).Error
 	} else if base == network.GID {
 		err = db.Where("group_id = ?", data.GroupID).Find(&networkStruct).Error
+	} else if base == network.UpdateAll {
+		err = db.Model(&network.Network{Model: gorm.Model{ID: data.ID}}).Update(network.Network{GroupID: data.GroupID,
+			Type: data.Type, Name: data.Name, IP: data.IP, Route: data.Route, Date: data.Date, Plan: data.Plan}).Error
 	} else {
 		log.Println("base select error")
 		return network.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}

@@ -49,6 +49,11 @@ func Update(base int, u jpnicUser.JPNICUser) error {
 			Mail: u.Mail, Tel: u.Tel, Fax: u.Fax, OperationID: u.OperationID, TechID: u.TechID})
 	} else if jpnicUser.UpdateGID == base {
 		result = db.Model(&jpnicUser.JPNICUser{Model: gorm.Model{ID: u.ID}}).Update(jpnicUser.JPNICUser{GroupID: u.GroupID})
+	} else if base == jpnicUser.UpdateAll {
+		err = db.Model(&jpnicUser.JPNICUser{Model: gorm.Model{ID: u.ID}}).Update(jpnicUser.JPNICUser{
+			GroupID: u.GroupID, OperationID: u.OperationID, TechID: u.TechID, NameJa: u.NameJa, Name: u.Name,
+			OrgJa: u.OrgJa, Org: u.Org, PostCode: u.PostCode, AddressJa: u.AddressJa, Address: u.Address,
+			DeptJa: u.DeptJa, Dept: u.Dept, PosJa: u.PosJa, Pos: u.Pos, Mail: u.Mail, Tel: u.Tel, Fax: u.Fax}).Error
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
