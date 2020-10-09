@@ -196,5 +196,4 @@ func GetAll(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: result.Err.Error()})
 		return
 	}
-})
 }
