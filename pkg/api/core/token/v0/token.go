@@ -55,6 +55,10 @@ func Generate(c *gin.Context) {
 	}
 
 	if hash.Generate(userResult.User[0].Pass+tokenResult.Token[0].TmpToken) != hashPass {
+		log.Println(userResult.User[0].Pass)
+		log.Println(tokenResult.Token[0].TmpToken)
+		log.Println("hash(server): " + hash.Generate(userResult.User[0].Pass+tokenResult.Token[0].TmpToken))
+		log.Println("hash(client): " + hashPass)
 		c.JSON(http.StatusInternalServerError, &token.Result{Status: false, Error: "not match"})
 		return
 	}
