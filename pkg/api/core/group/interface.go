@@ -1,6 +1,12 @@
 package group
 
-import "github.com/jinzhu/gorm"
+import (
+	connection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
+	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
+	jpnicUser "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnic_user"
+	networkUser "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/network_user"
+	"github.com/jinzhu/gorm"
+)
 
 const (
 	ID           = 0
@@ -38,6 +44,16 @@ type Result struct {
 	Status    bool    `json:"status"`
 	Error     string  `json:"error"`
 	GroupData []Group `json:"data"`
+}
+
+type ResultAll struct {
+	Status      bool                      `json:"status"`
+	Error       string                    `json:"error"`
+	Group       Group                     `json:"group"`
+	Network     []network.Network         `json:"network"`
+	JPNICUser   []jpnicUser.JPNICUser     `json:"jpnic_user"`
+	NetworkUser []networkUser.NetworkUser `json:"network_user"`
+	Connection  []connection.Connection   `json:"connection"`
 }
 
 type ResultDatabase struct {

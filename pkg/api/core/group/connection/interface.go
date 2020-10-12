@@ -13,6 +13,7 @@ const (
 	UpdateUserInfo = 102
 	UpdateTechID   = 103
 	UpdateInfo     = 104
+	UpdateData     = 105
 	UpdateAll      = 110
 )
 
