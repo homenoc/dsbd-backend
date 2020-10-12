@@ -48,12 +48,13 @@ func Update(base int, g group.Group) error {
 		result = db.Model(&group.Group{Model: gorm.Model{ID: g.ID}}).Update("status", g.Status)
 	} else if group.UpdateInfo == base {
 		result = db.Model(&group.Group{Model: gorm.Model{ID: g.ID}}).Update(group.Group{
+			Org: g.Org, Bandwidth: g.Bandwidth,
 			Name: g.Name, PostCode: g.PostCode, Address: g.Address, Mail: g.Mail, Phone: g.Phone, Country: g.Country})
 	} else if group.UpdateAll == base {
 		result = db.Model(&group.Group{Model: gorm.Model{ID: g.ID}}).Update(group.Group{
 			Agree: g.Agree, Question: g.Question, Org: g.Org, Status: g.Status, Bandwidth: g.Bandwidth,
 			Monitor: g.Monitor, Contract: g.Contract, Name: g.Name, PostCode: g.PostCode, Address: g.Address,
-			Mail: g.Mail, Phone: g.Phone, Country: g.Country, Comment: g.Comment})
+			Mail: g.Mail, Phone: g.Phone, Country: g.Country, Comment: g.Comment, Lock: g.Lock})
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
