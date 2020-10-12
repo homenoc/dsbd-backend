@@ -7,10 +7,12 @@ import (
 	connection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
 	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
 	jpnicUser "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnic_user"
+	networkUser "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/network_user"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbConnection "github.com/homenoc/dsbd-backend/pkg/store/group/connection/v0"
 	dbJPNICUser "github.com/homenoc/dsbd-backend/pkg/store/group/network/jpnic_user/v0"
+	dbNetworkUser "github.com/homenoc/dsbd-backend/pkg/store/group/network/network_user/v0"
 	dbNetwork "github.com/homenoc/dsbd-backend/pkg/store/group/network/v0"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/store/group/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/store/user/v0"
@@ -162,38 +164,58 @@ func GetAll(c *gin.Context) {
 
 	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
-		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: result.Err.Error()})
+		c.JSON(http.StatusInternalServerError, group.ResultAll{Status: false, Error: result.Err.Error()})
 		return
 	}
 
 	if result.User.Level >= 10 {
 		if result.User.Level > 1 {
-			c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: "You don't have authority this operation"})
+			c.JSON(http.StatusInternalServerError, group.ResultAll{Status: false, Error: "You don't have authority this operation"})
 			return
 		}
 	}
 
-	resultGroup := dbGroup.Get(group.ID, &group.Group{Model: gorm.Model{ID: result.Group.ID}})
-	if resultGroup.Err != nil {
-		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: result.Err.Error()})
-		return
-	}
-
-	resultConnection := dbConnection.Get(connection.GID, &connection.Connection{GroupID: resultGroup.Group[0].ID})
-	if resultConnection.Err != nil {
-		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: result.Err.Error()})
-		return
-	}
-
-	resultNetwork := dbNetwork.Get(network.GID, &network.Network{GroupID: resultGroup.Group[0].ID})
+	resultNetwork := dbNetwork.Get(network.GID, &network.Network{GroupID: result.Group.ID})
 	if resultNetwork.Err != nil {
-		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: result.Err.Error()})
+		c.JSON(http.StatusInternalServerError, group.ResultAll{Status: false, Error: result.Err.Error()})
 		return
+	}
+	if len(resultNetwork.Network) == 0 {
+		resultNetwork.Network = nil
 	}
 
-	resultJPNICUser := dbJPNICUser.Get(jpnicUser.GID, &jpnicUser.JPNICUser{GroupID: resultGroup.Group[0].ID})
-	if resultJPNICUser.Err != nil {
-		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: result.Err.Error()})
+	resultConnection := dbConnection.Get(connection.GID, &connection.Connection{GroupID: result.Group.ID})
+	if resultConnection.Err != nil {
+		c.JSON(http.StatusInternalServerError, group.ResultAll{Status: false, Error: result.Err.Error()})
 		return
 	}
+	if len(resultConnection.Connection) == 0 {
+		resultConnection.Connection = nil
+	}
+
+	var resultNetworkUser []networkUser.NetworkUser = nil
+
+	for _, data := range resultNetwork.Network {
+		tmp := dbNetworkUser.Get(jpnicUser.GID, &networkUser.NetworkUser{NetworkID: data.ID})
+		if tmp.Err != nil {
+			c.JSON(http.StatusInternalServerError, group.ResultAll{Status: false, Error: tmp.Err.Error()})
+			return
+		}
+		if len(tmp.NetworkUser) == 0 {
+			break
+		}
+		resultNetworkUser = append(resultNetworkUser, tmp.NetworkUser[0])
+	}
+
+	resultJPNICUser := dbJPNICUser.Get(jpnicUser.GID, &jpnicUser.JPNICUser{GroupID: result.Group.ID})
+	if resultJPNICUser.Err != nil {
+		c.JSON(http.StatusInternalServerError, group.ResultAll{Status: false, Error: result.Err.Error()})
+	}
+	if len(resultJPNICUser.JPNICUser) == 0 {
+		resultJPNICUser.JPNICUser = nil
+	}
+
+	c.JSON(http.StatusOK, group.ResultAll{
+		Status: true, Group: result.Group, Network: resultNetwork.Network, JPNICUser: resultJPNICUser.JPNICUser,
+		NetworkUser: resultNetworkUser, Connection: resultConnection.Connection})
 }
