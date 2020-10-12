@@ -155,12 +155,8 @@ func Update(c *gin.Context) {
 }
 
 func Get(c *gin.Context) {
-	var input user.User
-
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
-
-	c.BindJSON(&input)
 
 	authResult := auth.UserAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 	if authResult.Err != nil {
