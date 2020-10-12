@@ -8,6 +8,7 @@ import (
 	dbToken "github.com/homenoc/dsbd-backend/pkg/store/token/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/store/user/v0"
 	"github.com/homenoc/dsbd-backend/pkg/tool/hash"
+	logging "github.com/homenoc/dsbd-backend/pkg/tool/log"
 	toolToken "github.com/homenoc/dsbd-backend/pkg/tool/token"
 	"github.com/jinzhu/gorm"
 	"log"
@@ -26,6 +27,8 @@ func GenerateInit(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: err.Error()})
 	} else {
+		log.Println("Time: " + time.Now().String() + " IP: " + c.ClientIP())
+		logging.WriteLog("IP: " + c.ClientIP())
 		c.JSON(http.StatusOK, &token.ResultTmpToken{Status: true, Token: tmpToken})
 	}
 }
