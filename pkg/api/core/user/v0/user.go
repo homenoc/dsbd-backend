@@ -167,4 +167,10 @@ func Get(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: authResult.Err.Error()})
 		return
 	}
+	userResult := dbUser.Get(user.ID, &user.User{Model: gorm.Model{ID: authResult.User.ID}})
+	if userResult.Err != nil {
+		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: userResult.Err.Error()})
+	} else {
+		c.JSON(http.StatusOK, user.Result{Status: true, User: userResult.User})
+	}
 }

@@ -31,9 +31,9 @@ type User struct {
 }
 
 type Result struct {
-	Status   bool   `json:"status"`
-	Error    string `json:"error"`
-	UserData []User `json:"data"`
+	Status bool   `json:"status"`
+	Error  string `json:"error"`
+	User   []User `json:"data"`
 }
 
 type ResultDatabase struct {
