@@ -5,6 +5,7 @@ import (
 	connection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
 	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnic_user"
+	networkUser "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/network_user"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	"github.com/homenoc/dsbd-backend/pkg/tool/config"
@@ -30,7 +31,7 @@ func ConnectDB() (*gorm.DB, error) {
 func InitDB() {
 	db, _ := ConnectDB()
 	result := db.AutoMigrate(&user.User{}, &group.Group{}, &token.Token{}, &network.Network{}, &jpnic_user.JPNICUser{},
-		&connection.Connection{})
+		&connection.Connection{}, &networkUser.NetworkUser{})
 	log.Println(result.Error)
 	//return nil
 }
