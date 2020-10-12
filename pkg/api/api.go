@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	connection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection/v0"
 	jpnicUser "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnic_user/v0"
+	networkUser "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/network_user/v0"
 	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/v0"
 	group "github.com/homenoc/dsbd-backend/pkg/api/core/group/v0"
 	token "github.com/homenoc/dsbd-backend/pkg/api/core/token/v0"
@@ -102,7 +103,7 @@ func UserRestAPI() {
 			// User Delete
 			//router.DELETE("/user", user.Delete)
 			// User Update
-			v1.PUT("/user", user.Update)
+			v1.PUT("/user/:id", user.Update)
 			// User Mail MailVerify
 			v1.POST("/user/verify/:token", user.MailVerify)
 			// get token for CHAP authentication
@@ -115,12 +116,19 @@ func UserRestAPI() {
 			// Group Create
 			v1.POST("/group", group.Add)
 			v1.GET("/group", group.Get)
+			v1.PUT("/group", group.Update)
+			v1.GET("/group/all", group.GetAll)
 			// Group Delete
 			//v1.DELETE("/group", group.Delete)
 			// Connection Create
 			v1.POST("/group/connection", connection.Add)
+			// Network User
+			v1.POST("/group/network/user", networkUser.Add)
+			v1.DELETE("/group/network/user", networkUser.Delete)
+			v1.PUT("/group/network/user", networkUser.Update)
 			// Network add
 			v1.POST("/group/network", network.Add)
+			v1.PUT("/group/network", network.Update)
 			// Network Confirm
 			v1.POST("/group/network/confirm", network.Confirm)
 			// Network JPNIC User
