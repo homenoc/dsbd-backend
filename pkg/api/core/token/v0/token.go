@@ -12,6 +12,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -54,7 +55,7 @@ func Generate(c *gin.Context) {
 		return
 	}
 
-	if hash.Generate(userResult.User[0].Pass+tokenResult.Token[0].TmpToken) != hashPass {
+	if hash.Generate(userResult.User[0].Pass+tokenResult.Token[0].TmpToken) != strings.ToUpper(hashPass) {
 		log.Println(userResult.User[0].Pass)
 		log.Println(tokenResult.Token[0].TmpToken)
 		log.Println("hash(server): " + hash.Generate(userResult.User[0].Pass+tokenResult.Token[0].TmpToken))
@@ -71,4 +72,20 @@ func Generate(c *gin.Context) {
 		tmp := []token.Token{{AccessToken: accessToken}}
 		c.JSON(http.StatusOK, &token.Result{Status: true, Token: tmp})
 	}
+}
+
+func Delete(c *gin.Context) {
+	userToken := c.Request.Header.Get("USER_TOKEN")
+	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
+
+	result := dbToken.Get(token.UserTokenAndAccessToken, &token.Token{UserToken: userToken, AccessToken: accessToken})
+	if result.Err != nil {
+		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: result.Err.Error()})
+		return
+	}
+	if err := dbToken.Delete(&token.Token{Model: gorm.Model{ID: result.Token[0].ID}}); err != nil {
+		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, token.Result{Status: true})
 }

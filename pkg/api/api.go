@@ -106,10 +106,15 @@ func UserRestAPI() {
 			v1.PUT("/user/:id", user.Update)
 			// User Mail MailVerify
 			v1.POST("/user/verify/:token", user.MailVerify)
+			//
+			// Token
+			//
 			// get token for CHAP authentication
 			v1.GET("/token/init", token.GenerateInit)
 			// get token for user
 			v1.GET("/token", token.Generate)
+			// delete
+			v1.DELETE("/token", token.Delete)
 			//
 			// Group
 			//
