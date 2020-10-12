@@ -102,6 +102,10 @@ func UserRestAPI() {
 			v1.POST("/user", user.Add)
 			// User Delete
 			//router.DELETE("/user", user.Delete)
+			// User Get
+			v1.GET("/user", user.Get)
+			// User ID Get
+			// v1.GET("/user/:id",user.GetId)
 			// User Update
 			v1.PUT("/user/:id", user.Update)
 			// User Mail MailVerify
