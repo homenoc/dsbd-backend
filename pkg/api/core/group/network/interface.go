@@ -8,7 +8,6 @@ const (
 	Name        = 2
 	Type        = 3
 	UpdateName  = 100
-	UpdateIP    = 101
 	UpdateDate  = 102
 	UpdateRoute = 103
 	UpdatePlan  = 104
@@ -18,19 +17,19 @@ const (
 )
 
 type Network struct {
-	gorm.Model `json:"base"`
-	GroupID    uint   `json:"group_id"`
-	Type       uint   `json:"type"`
-	Name       string `json:"name"`
-	IP         string `json:"ip"`
-	Route      string `json:"route"`
-	Date       string `json:"date"`
-	Plan       string `json:"plan"`
-	Lock       bool   `json:"lock"`
+	gorm.Model
+	GroupID uint   `json:"group_id"`
+	Type    uint   `json:"type"`
+	Name    string `json:"name"`
+	IP      string `json:"ip"`
+	Route   string `json:"route"`
+	Date    string `json:"date"`
+	Plan    string `json:"plan"`
+	Lock    bool   `json:"lock"`
 }
 
 type NetworkUser struct {
-	gorm.Model  `json:"base"`
+	gorm.Model
 	GroupID     uint   `json:"group_id"`
 	Type        uint   `json:"type"`
 	Name        string `json:"name"`
@@ -41,12 +40,6 @@ type NetworkUser struct {
 	Date        string `json:"date"`
 	Plan        string `json:"plan"`
 	Lock        bool   `json:"lock"`
-}
-
-type NetworkJPNICUser struct {
-	gorm.Model  `json:"base"`
-	NetworkID   uint `json:"network_id"`
-	JPNICUserID uint `json:"jpnic_user_id"`
 }
 
 type Confirm struct {
