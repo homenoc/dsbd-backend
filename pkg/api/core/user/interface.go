@@ -21,6 +21,7 @@ const (
 type User struct {
 	gorm.Model
 	GID        uint   `json:"gid"`
+	Tech       bool   `json:"tech"`
 	Name       string `json:"name"`
 	Email      string `json:"email"`
 	Pass       string `json:"pass"`
@@ -28,6 +29,11 @@ type User struct {
 	Level      uint   `json:"level"`
 	MailVerify bool   `json:"mail_verify"`
 	MailToken  string `json:"mail_token"`
+	Org        string `json:"org"`
+	PostCode   string `json:"postcode"`
+	Address    string `json:"address"`
+	Phone      string `json:"phone"`
+	Country    string `json:"country"`
 }
 
 type ResultOne struct {

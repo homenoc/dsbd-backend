@@ -9,6 +9,7 @@ import (
 	dbUser "github.com/homenoc/dsbd-backend/pkg/store/user/v0"
 	toolToken "github.com/homenoc/dsbd-backend/pkg/tool/token"
 	"github.com/jinzhu/gorm"
+	"github.com/vmmgr/controller/etc"
 	"net/http"
 	"strconv"
 	"strings"
@@ -23,17 +24,28 @@ func Add(c *gin.Context) {
 
 	if !strings.Contains(input.Email, "@") {
 		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: fmt.Sprintf("wrong email address")})
+		return
 	}
 	if input.Pass == "" || input.Name == "" {
 		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: fmt.Sprintf("wrong name or pass")})
+		return
+	}
+
+	if err := check(input); err != nil {
+		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
+		return
 	}
 
 	mailToken, _ := toolToken.Generate(4)
 
 	if input.GID == 0 { //new user
-		data = user.User{GID: 0, Name: input.Name, Email: input.Email, Pass: input.Pass, Status: 0, Level: 0,
+		data = user.User{GID: 0, Name: input.Name, Email: input.Email, Pass: input.Pass, Status: 0, Level: 1,
 			MailVerify: false, MailToken: mailToken}
 	} else { //new users for group
+		if input.Level == 0 || input.Level > 5 {
+			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: fmt.Sprintf("wrong user level")})
+			return
+		}
 		authResult := auth.UserAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 		if authResult.Err != nil {
 			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: authResult.Err.Error()})
@@ -43,9 +55,11 @@ func Add(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: "gid mismatch"})
 			return
 		}
-		data = user.User{GID: input.GID, Name: input.Name, Email: input.Email, Pass: input.Pass, Status: 50,
-			Level: input.Level, MailVerify: false, MailToken: mailToken}
+
+		data = user.User{GID: input.GID, Name: input.Name, Email: input.Email, Pass: etc.GenerateUUID(), Status: 0,
+			Tech: input.Tech, Level: input.Level, MailVerify: false, MailToken: mailToken}
 	}
+
 	//check exist for database
 	if err := dbUser.Create(&data); err != nil {
 		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
@@ -109,7 +123,9 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	if authResult.User.ID != uint(id) {
+	u := authResult.User
+
+	if authResult.User.ID != uint(id) || id != 0 {
 		if authResult.User.GID == 0 {
 			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: "error: Group ID = 0"})
 			return
@@ -127,24 +143,15 @@ func Update(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: fmt.Sprintf("failed group authentication")})
 			return
 		}
+		u.Model.ID = uint(id)
+	} else {
+		u.Model.ID = authResult.User.ID
 	}
 
-	u := authResult.User
-
-	//Name
-	if authResult.User.Name != input.Name {
-		u.Name = input.Name
-	}
-	//E-Mail
-	if authResult.User.Email != input.Email {
-		mailToken, _ := toolToken.Generate(4)
-		u.Email = input.Email
-		u.MailVerify = true
-		u.MailToken = mailToken
-	}
-	//Pass
-	if authResult.User.Pass != input.Pass {
-		u.Pass = input.Pass
+	u, err = replaceUser(authResult.User, input, u)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
+		return
 	}
 
 	if err := dbUser.Update(user.UpdateInfo, &u); err != nil {
@@ -159,6 +166,7 @@ func Get(c *gin.Context) {
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
 	authResult := auth.UserAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	authResult.User.Pass = ""
 	if authResult.Err != nil {
 		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: authResult.Err.Error()})
 	} else {
