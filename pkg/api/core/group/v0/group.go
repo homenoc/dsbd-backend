@@ -51,8 +51,7 @@ func Add(c *gin.Context) {
 	}
 
 	result, err := dbGroup.Create(&group.Group{
-		Agree: true, Question: input.Question, Org: input.Org, Status: 0, Bandwidth: input.Bandwidth, Name: input.Name,
-		PostCode: input.PostCode, Address: input.Address, Mail: input.Mail, Phone: input.Phone, Country: input.Country,
+		Agree: true, Question: input.Question, Org: input.Org, Status: 0, Bandwidth: input.Bandwidth,
 		Comment: input.Comment, Monitor: input.Monitor, Contract: input.Contract,
 	})
 	if err != nil {
@@ -101,24 +100,6 @@ func Update(c *gin.Context) {
 
 	if data.Bandwidth != input.Bandwidth {
 		data.Bandwidth = input.Bandwidth
-	}
-	if data.Name != input.Name {
-		data.Name = input.Name
-	}
-	if data.PostCode != input.PostCode {
-		data.PostCode = input.PostCode
-	}
-	if data.Address != input.Address {
-		data.Address = input.Address
-	}
-	if data.Mail != input.Mail {
-		data.Mail = input.Mail
-	}
-	if data.Phone != input.Phone {
-		data.Phone = input.Phone
-	}
-	if data.Country != input.Country {
-		data.Country = input.Country
 	}
 
 	if err := dbGroup.Update(group.UpdateInfo, data); err != nil {

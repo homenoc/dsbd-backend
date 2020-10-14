@@ -30,12 +30,6 @@ type Group struct {
 	Bandwidth string `json:"bandwidth"`
 	Monitor   bool   `json:"monitor"`
 	Contract  uint   `json:"contract"`
-	Name      string `json:"name"`
-	PostCode  string `json:"postcode"`
-	Address   string `json:"address"`
-	Mail      string `json:"mail"`
-	Phone     string `json:"phone"`
-	Country   string `json:"country"`
 	Comment   string `json:"comment"`
 	Lock      bool   `json:"lock"`
 }
