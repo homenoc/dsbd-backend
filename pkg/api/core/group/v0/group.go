@@ -130,11 +130,8 @@ func Update(c *gin.Context) {
 }
 
 func Get(c *gin.Context) {
-	var input group.Group
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
-
-	c.BindJSON(&input)
 
 	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
