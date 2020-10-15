@@ -11,8 +11,6 @@ const (
 	UpdateVerifyMail = 100
 	UpdateGID        = 101
 	UpdateInfo       = 102
-	UpdateMail       = 103
-	UpdatePass       = 104
 	UpdateStatus     = 105
 	UpdateLevel      = 106
 	UpdateAll        = 110

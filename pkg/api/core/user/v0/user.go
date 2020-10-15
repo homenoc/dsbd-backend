@@ -117,9 +117,13 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	u := authResult.User
+	var u, serverData user.User
 
-	if authResult.User.ID != uint(id) || id != 0 {
+	if authResult.User.ID == uint(id) || id == 0 {
+		serverData = authResult.User
+		u.Model.ID = authResult.User.ID
+		u.Status = authResult.User.Status
+	} else {
 		if authResult.User.GID == 0 {
 			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: "error: Group ID = 0"})
 			return
@@ -137,12 +141,12 @@ func Update(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: fmt.Sprintf("failed group authentication")})
 			return
 		}
+		serverData = userResult.User[0]
 		u.Model.ID = uint(id)
-	} else {
-		u.Model.ID = authResult.User.ID
+		u.Status = userResult.User[0].Status
 	}
 
-	u, err = replaceUser(authResult.User, input, u)
+	u, err = replaceUser(serverData, input, u)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
 		return

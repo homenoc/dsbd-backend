@@ -7,8 +7,10 @@ import (
 	user "github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/store/user/v0"
 	"github.com/jinzhu/gorm"
+	"log"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 func AddAdmin(c *gin.Context) {
@@ -57,6 +59,22 @@ func UpdateAdmin(c *gin.Context) {
 		return
 	}
 	c.BindJSON(&input)
+
+	if !strings.Contains(input.Email, "@") {
+		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: "wrong email address"})
+		return
+	}
+	tmp := dbUser.Get(user.Email, &user.User{Email: input.Email})
+	if tmp.Err != nil {
+		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: tmp.Err.Error()})
+		return
+	}
+
+	if tmp.User[0].ID != input.ID && len(tmp.User) != 0 {
+		log.Println("error: this email is already registered: " + input.Email)
+		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: "error: this email is already registered"})
+		return
+	}
 
 	if err := dbUser.Update(user.UpdateAll, &input); err != nil {
 		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
