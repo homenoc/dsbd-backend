@@ -85,12 +85,6 @@ func MailVerify(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: fmt.Sprintf("error: user status")})
 		return
 	}
-	if result.User[0].Status == 0 {
-		if err := dbUser.Update(user.UpdateStatus, &user.User{Status: 1}); err != nil {
-			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
-			return
-		}
-	}
 
 	if err := dbUser.Update(user.UpdateVerifyMail, &user.User{MailVerify: true}); err != nil {
 		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
@@ -167,6 +161,7 @@ func Get(c *gin.Context) {
 
 	authResult := auth.UserAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 	authResult.User.Pass = ""
+	authResult.User.MailToken = ""
 	if authResult.Err != nil {
 		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: authResult.Err.Error()})
 	} else {
