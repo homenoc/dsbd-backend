@@ -6,14 +6,10 @@ import (
 	dbUser "github.com/homenoc/dsbd-backend/pkg/store/user/v0"
 	toolToken "github.com/homenoc/dsbd-backend/pkg/tool/token"
 	"log"
-	"strconv"
 	"strings"
 )
 
 func replaceUser(serverData, input, replace user.User) (user.User, error) {
-	log.Println("input")
-	log.Println(input)
-
 	updateInfo := 0
 	//Name
 	if input.Name == "" {
@@ -21,8 +17,6 @@ func replaceUser(serverData, input, replace user.User) (user.User, error) {
 	} else {
 		replace.Name = input.Name
 	}
-
-	log.Println(1)
 
 	//E-Mail
 	if input.Email == "" {
@@ -48,15 +42,12 @@ func replaceUser(serverData, input, replace user.User) (user.User, error) {
 		replace.MailToken = mailToken
 	}
 
-	log.Println(2)
-
 	//Pass
 	if input.Pass == "" {
 		replace.Pass = serverData.Pass
 	} else {
 		replace.Pass = input.Pass
 	}
-	log.Println(3)
 
 	//Org
 	if input.Org == "" {
@@ -65,7 +56,6 @@ func replaceUser(serverData, input, replace user.User) (user.User, error) {
 		replace.Org = input.Org
 		updateInfo++
 	}
-	log.Println(4)
 
 	//PostCode
 	if input.PostCode == "" {
@@ -75,8 +65,6 @@ func replaceUser(serverData, input, replace user.User) (user.User, error) {
 		updateInfo++
 	}
 
-	log.Println(5)
-
 	//Address
 	if input.Address == "" {
 		replace.Address = serverData.Address
@@ -85,8 +73,6 @@ func replaceUser(serverData, input, replace user.User) (user.User, error) {
 		updateInfo++
 	}
 
-	log.Println(6)
-
 	//Phone
 	if input.Phone == "" {
 		replace.Phone = serverData.Phone
@@ -94,7 +80,6 @@ func replaceUser(serverData, input, replace user.User) (user.User, error) {
 		replace.Phone = input.Phone
 		updateInfo++
 	}
-	log.Println(7)
 
 	//Country
 	if input.Country == "" {
@@ -103,8 +88,6 @@ func replaceUser(serverData, input, replace user.User) (user.User, error) {
 		replace.Country = input.Country
 		updateInfo++
 	}
-	log.Println(10)
-	log.Println("updateinfo: " + strconv.Itoa(updateInfo))
 
 	if serverData.Status == 0 && updateInfo == 5 {
 		replace.Status = 1
