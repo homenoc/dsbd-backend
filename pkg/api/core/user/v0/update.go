@@ -89,6 +89,13 @@ func replaceUser(serverData, input, replace user.User) (user.User, error) {
 		updateInfo++
 	}
 
+	//Tech
+	if serverData.GID != 0 && serverData.Level <= 1 && input.Status == 1 {
+		replace.Tech = input.Tech
+	} else {
+		replace.Tech = serverData.Tech
+	}
+
 	if serverData.Status == 0 && updateInfo == 5 {
 		replace.Status = 1
 	} else if serverData.Status == 0 && updateInfo < 5 {

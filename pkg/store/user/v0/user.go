@@ -55,7 +55,7 @@ func Update(base int, u *user.User) error {
 		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update(user.User{MailVerify: u.MailVerify})
 	} else if user.UpdateInfo == base {
 		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update(user.User{
-			Name: u.Name, Email: u.Email, Pass: u.Pass, MailVerify: u.MailVerify, MailToken: u.MailToken,
+			Name: u.Name, Email: u.Email, Pass: u.Pass, Tech: u.Tech, MailVerify: u.MailVerify, MailToken: u.MailToken,
 			Org: u.Org, PostCode: u.PostCode, Address: u.Address, Phone: u.Phone, Country: u.Country, Status: u.Status})
 	} else if user.UpdateStatus == base {
 		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update("status", u.Status)
