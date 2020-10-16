@@ -14,10 +14,10 @@ func check(input group.Group) error {
 		return fmt.Errorf("no data: bandwidth")
 	}
 	if input.Org == "" {
-		return fmt.Errorf("no data: position")
+		return fmt.Errorf("no data: org")
 	}
-	if input.Contract > 2 {
-		return fmt.Errorf("no data: failed contract value")
+	if input.Contract == "" {
+		return fmt.Errorf("no data: contract")
 	}
 	return nil
 }

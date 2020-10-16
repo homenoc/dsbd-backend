@@ -52,17 +52,14 @@ func Add(c *gin.Context) {
 
 	result, err := dbGroup.Create(&group.Group{
 		Agree: true, Question: input.Question, Org: input.Org, Status: 0, Bandwidth: input.Bandwidth,
-		Comment: input.Comment, Monitor: input.Monitor, Contract: input.Contract,
+		Comment: input.Comment, Contract: input.Contract,
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: err.Error(), GroupData: nil})
 		return
 	}
-	if err := dbUser.Update(user.UpdateStatus, &user.User{Model: gorm.Model{ID: userResult.User.ID}, Status: 10}); err != nil {
-		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: err.Error(), GroupData: nil})
-		return
-	}
 	if err := dbUser.Update(user.UpdateGID, &user.User{Model: gorm.Model{ID: userResult.User.ID}, GID: result.Model.ID}); err != nil {
+		dbGroup.Delete(&group.Group{Model: gorm.Model{ID: result.ID}})
 		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: err.Error()})
 	} else {
 		c.JSON(http.StatusOK, group.Result{Status: true})
