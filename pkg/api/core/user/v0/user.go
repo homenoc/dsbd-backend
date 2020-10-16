@@ -7,6 +7,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/store/user/v0"
+	"github.com/homenoc/dsbd-backend/pkg/tool/hash"
 	toolToken "github.com/homenoc/dsbd-backend/pkg/tool/token"
 	"github.com/jinzhu/gorm"
 	"github.com/vmmgr/controller/etc"
@@ -62,10 +63,11 @@ func Add(c *gin.Context) {
 		}
 
 		pass := etc.GenerateUUID()
+		log.Println("Email: " + input.Email)
 		log.Println("tmp_Pass: " + pass)
 
-		data = user.User{GID: input.GID, Name: input.Name, Email: input.Email, Pass: pass, Status: 0,
-			Tech: input.Tech, Level: input.Level, MailVerify: false, MailToken: mailToken}
+		data = user.User{GID: input.GID, Name: input.Name, Email: input.Email, Pass: strings.ToLower(hash.Generate(pass)),
+			Status: 0, Tech: input.Tech, Level: input.Level, MailVerify: false, MailToken: mailToken}
 	}
 
 	//check exist for database
@@ -94,7 +96,8 @@ func MailVerify(c *gin.Context) {
 		return
 	}
 
-	if err := dbUser.Update(user.UpdateVerifyMail, &user.User{MailVerify: true}); err != nil {
+	if err := dbUser.Update(user.UpdateVerifyMail, &user.User{Model: gorm.Model{ID: result.User[0].ID},
+		MailVerify: true}); err != nil {
 		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
 	} else {
 		c.JSON(http.StatusOK, &user.Result{Status: true})
