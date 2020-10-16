@@ -58,7 +58,9 @@ func Update(base int, u *user.User) error {
 			Name: u.Name, Email: u.Email, Pass: u.Pass, Tech: u.Tech, MailVerify: u.MailVerify, MailToken: u.MailToken,
 			Org: u.Org, PostCode: u.PostCode, Address: u.Address, Phone: u.Phone, Country: u.Country, Status: u.Status})
 	} else if user.UpdateStatus == base {
-		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update("status", u.Status)
+		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update(user.User{Status: u.Status})
+	} else if user.UpdateGID == base {
+		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update(user.User{GID: u.GID})
 	} else if user.UpdateLevel == base {
 		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update("level", u.Level)
 	} else if user.UpdateAll == base {

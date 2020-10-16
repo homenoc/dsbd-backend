@@ -10,6 +10,7 @@ import (
 	toolToken "github.com/homenoc/dsbd-backend/pkg/tool/token"
 	"github.com/jinzhu/gorm"
 	"github.com/vmmgr/controller/etc"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -26,8 +27,8 @@ func Add(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: fmt.Sprintf("wrong email address")})
 		return
 	}
-	if input.Pass == "" || input.Name == "" {
-		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: fmt.Sprintf("wrong name or pass")})
+	if input.Name == "" {
+		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: fmt.Sprintf("wrong name")})
 		return
 	}
 
@@ -39,6 +40,10 @@ func Add(c *gin.Context) {
 	mailToken, _ := toolToken.Generate(4)
 
 	if input.GID == 0 { //new user
+		if input.Pass == "" {
+			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: fmt.Sprintf("wrong pass")})
+			return
+		}
 		data = user.User{GID: 0, Name: input.Name, Email: input.Email, Pass: input.Pass, Status: 0, Level: 1,
 			MailVerify: false, MailToken: mailToken}
 	} else { //new users for group
@@ -56,7 +61,10 @@ func Add(c *gin.Context) {
 			return
 		}
 
-		data = user.User{GID: input.GID, Name: input.Name, Email: input.Email, Pass: etc.GenerateUUID(), Status: 0,
+		pass := etc.GenerateUUID()
+		log.Println("tmp_Pass: " + pass)
+
+		data = user.User{GID: input.GID, Name: input.Name, Email: input.Email, Pass: pass, Status: 0,
 			Tech: input.Tech, Level: input.Level, MailVerify: false, MailToken: mailToken}
 	}
 
