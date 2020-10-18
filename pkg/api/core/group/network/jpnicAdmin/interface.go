@@ -1,4 +1,4 @@
-package jpnic
+package jpnicAdmin
 
 import "github.com/jinzhu/gorm"
 
@@ -11,7 +11,7 @@ const (
 	UpdateAll        = 110
 )
 
-type Jpnic struct {
+type JpnicAdmin struct {
 	gorm.Model
 	NetworkId uint `json:"network_id"`
 	UserId    uint `json:"group_id"`
@@ -19,12 +19,12 @@ type Jpnic struct {
 }
 
 type Result struct {
-	Status bool    `json:"status"`
-	Error  string  `json:"error"`
-	Jpnic  []Jpnic `json:"jpnic"`
+	Status bool         `json:"status"`
+	Error  string       `json:"error"`
+	Jpnic  []JpnicAdmin `json:"jpnic"`
 }
 
 type ResultDatabase struct {
 	Err   error
-	Jpnic []Jpnic
+	Jpnic []JpnicAdmin
 }

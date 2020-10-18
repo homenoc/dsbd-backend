@@ -5,10 +5,10 @@ import (
 	"github.com/gin-gonic/gin"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnic"
+	jpnic "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicTech"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
-	dbJPNICAdmin "github.com/homenoc/dsbd-backend/pkg/store/group/network/jpnicAdmin/v0"
+	dbJpnic "github.com/homenoc/dsbd-backend/pkg/store/group/network/jpnicTech/v0"
 	dbNetwork "github.com/homenoc/dsbd-backend/pkg/store/group/network/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/store/user/v0"
 	"github.com/jinzhu/gorm"
@@ -17,7 +17,7 @@ import (
 )
 
 func Add(c *gin.Context) {
-	var input jpnic.Jpnic
+	var input jpnic.JpnicTech
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
@@ -67,8 +67,7 @@ func Add(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: "This network id hasn't your group"})
 		return
 	}
-
-	_, err := dbJPNICAdmin.Create(&jpnic.Jpnic{NetworkId: input.NetworkId, UserId: input.UserId, Lock: true})
+	_, err := dbJpnic.Create(&jpnic.JpnicTech{NetworkId: input.NetworkId, UserId: input.UserId, Lock: true})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: err.Error()})
 		return
@@ -104,7 +103,7 @@ func Delete(c *gin.Context) {
 		return
 	}
 
-	resultJpnic := dbJPNICAdmin.Get(jpnic.ID, &jpnic.Jpnic{Model: gorm.Model{ID: uint(id)}})
+	resultJpnic := dbJpnic.Get(jpnic.ID, &jpnic.JpnicTech{Model: gorm.Model{ID: uint(id)}})
 	if resultJpnic.Err != nil {
 		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: resultJpnic.Err.Error()})
 		return
@@ -121,7 +120,7 @@ func Delete(c *gin.Context) {
 		return
 	}
 
-	if err := dbJPNICAdmin.Delete(&jpnic.Jpnic{Model: gorm.Model{ID: uint(id)}}); err != nil {
+	if err := dbJpnic.Delete(&jpnic.JpnicTech{Model: gorm.Model{ID: uint(id)}}); err != nil {
 		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: err.Error()})
 	} else {
 		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: true})
@@ -150,10 +149,10 @@ func Get(c *gin.Context) {
 		return
 	}
 
-	var data []jpnic.Jpnic
+	var data []jpnic.JpnicTech
 
 	for _, net := range networkResult.Network {
-		resultJpnic := dbJPNICAdmin.Get(jpnic.NetworkId, &jpnic.Jpnic{NetworkId: net.ID})
+		resultJpnic := dbJpnic.Get(jpnic.NetworkId, &jpnic.JpnicTech{NetworkId: net.ID})
 		if resultJpnic.Err != nil {
 			c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: resultJpnic.Err.Error()})
 			return

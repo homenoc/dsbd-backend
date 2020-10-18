@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnic"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicAdmin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbJPNICUser "github.com/homenoc/dsbd-backend/pkg/store/group/network/jpnicAdmin/v0"
@@ -17,7 +17,7 @@ import (
 )
 
 func Add(c *gin.Context) {
-	var input jpnic.Jpnic
+	var input jpnicAdmin.JpnicAdmin
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
@@ -25,24 +25,24 @@ func Add(c *gin.Context) {
 
 	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
-		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: result.Err.Error()})
+		c.JSON(http.StatusInternalServerError, jpnicAdmin.Result{Status: false, Error: result.Err.Error()})
 		return
 	}
 
 	if err := check(input); err != nil {
-		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: err.Error()})
+		c.JSON(http.StatusInternalServerError, jpnicAdmin.Result{Status: false, Error: err.Error()})
 		return
 	}
 
 	// check authority
 	if result.User.Level > 1 {
-		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: "You don't have authority this operation"})
+		c.JSON(http.StatusInternalServerError, jpnicAdmin.Result{Status: false, Error: "You don't have authority this operation"})
 		return
 	}
 
 	networkResult := dbNetwork.Get(network.GID, &network.Network{GroupID: result.Group.ID})
 	if networkResult.Err != nil {
-		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: networkResult.Err.Error()})
+		c.JSON(http.StatusInternalServerError, jpnicAdmin.Result{Status: false, Error: networkResult.Err.Error()})
 		return
 	}
 
@@ -53,28 +53,28 @@ func Add(c *gin.Context) {
 		}
 	}
 	if count == 0 {
-		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: fmt.Sprint("This network id hasn't your group")})
+		c.JSON(http.StatusInternalServerError, jpnicAdmin.Result{Status: false, Error: fmt.Sprint("This network id hasn't your group")})
 		return
 	}
 
 	userResult := dbUser.Get(user.ID, &user.User{Model: gorm.Model{ID: input.UserId}})
 	if userResult.Err != nil {
-		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: networkResult.Err.Error()})
+		c.JSON(http.StatusInternalServerError, jpnicAdmin.Result{Status: false, Error: networkResult.Err.Error()})
 		return
 	}
 
 	if userResult.User[0].ID != input.UserId {
-		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: "This network id hasn't your group"})
+		c.JSON(http.StatusInternalServerError, jpnicAdmin.Result{Status: false, Error: "This network id hasn't your group"})
 		return
 	}
 
-	_, err := dbJPNICUser.Create(&jpnic.Jpnic{NetworkId: input.NetworkId, UserId: input.UserId, Lock: true})
+	_, err := dbJPNICUser.Create(&jpnicAdmin.JpnicAdmin{NetworkId: input.NetworkId, UserId: input.UserId, Lock: true})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: err.Error()})
+		c.JSON(http.StatusInternalServerError, jpnicAdmin.Result{Status: false, Error: err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusInternalServerError, jpnic.Result{Status: true})
+	c.JSON(http.StatusInternalServerError, jpnicAdmin.Result{Status: true})
 }
 
 func Delete(c *gin.Context) {
@@ -88,43 +88,43 @@ func Delete(c *gin.Context) {
 	}
 
 	if id <= 0 {
-		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: "wrong id"})
+		c.JSON(http.StatusInternalServerError, jpnicAdmin.Result{Status: false, Error: "wrong id"})
 		return
 	}
 
 	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
-		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: result.Err.Error()})
+		c.JSON(http.StatusInternalServerError, jpnicAdmin.Result{Status: false, Error: result.Err.Error()})
 		return
 	}
 
 	// check authority
 	if result.User.Level > 1 {
-		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: "You don't have authority this operation"})
+		c.JSON(http.StatusInternalServerError, jpnicAdmin.Result{Status: false, Error: "You don't have authority this operation"})
 		return
 	}
 
-	resultJpnic := dbJPNICUser.Get(jpnic.ID, &jpnic.Jpnic{Model: gorm.Model{ID: uint(id)}})
+	resultJpnic := dbJPNICUser.Get(jpnicAdmin.ID, &jpnicAdmin.JpnicAdmin{Model: gorm.Model{ID: uint(id)}})
 	if resultJpnic.Err != nil {
-		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: resultJpnic.Err.Error()})
+		c.JSON(http.StatusInternalServerError, jpnicAdmin.Result{Status: false, Error: resultJpnic.Err.Error()})
 		return
 	}
 
 	networkResult := dbNetwork.Get(network.ID, &network.Network{Model: gorm.Model{ID: resultJpnic.Jpnic[0].NetworkId}})
 	if networkResult.Err != nil {
-		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: networkResult.Err.Error()})
+		c.JSON(http.StatusInternalServerError, jpnicAdmin.Result{Status: false, Error: networkResult.Err.Error()})
 		return
 	}
 
 	if networkResult.Network[0].GroupID != result.Group.ID {
-		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: "group id is not match."})
+		c.JSON(http.StatusInternalServerError, jpnicAdmin.Result{Status: false, Error: "group id is not match."})
 		return
 	}
 
-	if err := dbJPNICUser.Delete(&jpnic.Jpnic{Model: gorm.Model{ID: uint(id)}}); err != nil {
-		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: err.Error()})
+	if err := dbJPNICUser.Delete(&jpnicAdmin.JpnicAdmin{Model: gorm.Model{ID: uint(id)}}); err != nil {
+		c.JSON(http.StatusInternalServerError, jpnicAdmin.Result{Status: false, Error: err.Error()})
 	} else {
-		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: true})
+		c.JSON(http.StatusInternalServerError, jpnicAdmin.Result{Status: true})
 	}
 }
 
@@ -134,33 +134,33 @@ func Get(c *gin.Context) {
 
 	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
-		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: result.Err.Error()})
+		c.JSON(http.StatusInternalServerError, jpnicAdmin.Result{Status: false, Error: result.Err.Error()})
 		return
 	}
 
 	// check authority
 	if result.User.Level > 3 {
-		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: "You don't have authority this operation"})
+		c.JSON(http.StatusInternalServerError, jpnicAdmin.Result{Status: false, Error: "You don't have authority this operation"})
 		return
 	}
 
 	networkResult := dbNetwork.Get(network.GID, &network.Network{GroupID: result.Group.ID})
 	if networkResult.Err != nil {
-		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: networkResult.Err.Error()})
+		c.JSON(http.StatusInternalServerError, jpnicAdmin.Result{Status: false, Error: networkResult.Err.Error()})
 		return
 	}
 
-	var data []jpnic.Jpnic
+	var data []jpnicAdmin.JpnicAdmin
 
 	for _, net := range networkResult.Network {
-		resultJpnic := dbJPNICUser.Get(jpnic.NetworkId, &jpnic.Jpnic{NetworkId: net.ID})
+		resultJpnic := dbJPNICUser.Get(jpnicAdmin.NetworkId, &jpnicAdmin.JpnicAdmin{NetworkId: net.ID})
 		if resultJpnic.Err != nil {
-			c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: resultJpnic.Err.Error()})
+			c.JSON(http.StatusInternalServerError, jpnicAdmin.Result{Status: false, Error: resultJpnic.Err.Error()})
 			return
 		}
 		for _, detail := range resultJpnic.Jpnic {
 			data = append(data, detail)
 		}
 	}
-	c.JSON(http.StatusInternalServerError, jpnic.Result{Status: true, Jpnic: data})
+	c.JSON(http.StatusInternalServerError, jpnicAdmin.Result{Status: true, Jpnic: data})
 }
