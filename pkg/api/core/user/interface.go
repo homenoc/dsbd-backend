@@ -21,6 +21,7 @@ type User struct {
 	GID        uint   `json:"gid"`
 	Tech       bool   `json:"tech"`
 	Name       string `json:"name"`
+	NameEn     string `json:"name_en"`
 	Email      string `json:"email"`
 	Pass       string `json:"pass"`
 	Status     uint   `json:"status"`
@@ -28,9 +29,16 @@ type User struct {
 	MailVerify bool   `json:"mail_verify"`
 	MailToken  string `json:"mail_token"`
 	Org        string `json:"org"`
+	OrgEn      string `json:"org_en"`
 	PostCode   string `json:"postcode"`
 	Address    string `json:"address"`
-	Phone      string `json:"phone"`
+	AddressEn  string `json:"address_en"`
+	Dept       string `json:"dept"`
+	DeptEn     string `json:"dept_en"`
+	Pos        string `json:"pos"`
+	PosEn      string `json:"pos_en"`
+	Tel        string `json:"tel"`
+	Fax        string `json:"fax"`
 	Country    string `json:"country"`
 }
 

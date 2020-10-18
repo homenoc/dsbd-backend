@@ -18,6 +18,13 @@ func replaceUser(serverData, input, replace user.User) (user.User, error) {
 		replace.Name = input.Name
 	}
 
+	//Name (English)
+	if input.NameEn == "" {
+		replace.NameEn = serverData.NameEn
+	} else {
+		replace.NameEn = input.NameEn
+	}
+
 	//E-Mail
 	if input.Email == "" {
 		replace.Email = serverData.Email
@@ -57,6 +64,14 @@ func replaceUser(serverData, input, replace user.User) (user.User, error) {
 		updateInfo++
 	}
 
+	//Org (English)
+	if input.OrgEn == "" {
+		replace.OrgEn = serverData.OrgEn
+	} else {
+		replace.OrgEn = input.OrgEn
+		updateInfo++
+	}
+
 	//PostCode
 	if input.PostCode == "" {
 		replace.PostCode = serverData.PostCode
@@ -73,11 +88,59 @@ func replaceUser(serverData, input, replace user.User) (user.User, error) {
 		updateInfo++
 	}
 
-	//Phone
-	if input.Phone == "" {
-		replace.Phone = serverData.Phone
+	//Address(English)
+	if input.AddressEn == "" {
+		replace.AddressEn = serverData.AddressEn
 	} else {
-		replace.Phone = input.Phone
+		replace.AddressEn = input.AddressEn
+		updateInfo++
+	}
+
+	//Dept
+	if input.Dept == "" {
+		replace.Dept = serverData.Dept
+	} else {
+		replace.Dept = input.Dept
+		updateInfo++
+	}
+
+	//Dept(English)
+	if input.DeptEn == "" {
+		replace.DeptEn = serverData.DeptEn
+	} else {
+		replace.DeptEn = input.DeptEn
+		updateInfo++
+	}
+
+	//Pos
+	if input.Pos == "" {
+		replace.Pos = serverData.Pos
+	} else {
+		replace.Pos = input.Pos
+		updateInfo++
+	}
+
+	//Pos(English)
+	if input.PosEn == "" {
+		replace.PosEn = serverData.PosEn
+	} else {
+		replace.PosEn = input.PosEn
+		updateInfo++
+	}
+
+	//Tel
+	if input.Tel == "" {
+		replace.Tel = serverData.Tel
+	} else {
+		replace.Tel = input.Tel
+		updateInfo++
+	}
+
+	//Fax
+	if input.Fax == "" {
+		replace.Fax = serverData.Fax
+	} else {
+		replace.Fax = input.Fax
 		updateInfo++
 	}
 

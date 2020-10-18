@@ -28,7 +28,7 @@ func Add(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: fmt.Sprintf("wrong email address")})
 		return
 	}
-	if input.Name == "" {
+	if input.Name == "" || input.NameEn == "" {
 		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: fmt.Sprintf("wrong name")})
 		return
 	}
