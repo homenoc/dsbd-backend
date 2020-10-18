@@ -93,7 +93,7 @@ func Get(base int, u *user.User) user.ResultDatabase {
 	if base == user.ID { //ID
 		err = db.First(&userStruct, u.ID).Error
 	} else if base == user.GID { //GroupID
-		err = db.Where("gid = ?", u.GID).Find(&userStruct).Error
+		err = db.Where("g_id = ?", u.GID).Find(&userStruct).Error
 	} else if base == user.Email { //Mail
 		err = db.Where("email = ?", u.Email).First(&userStruct).Error
 	} else if base == user.MailToken { //Token
