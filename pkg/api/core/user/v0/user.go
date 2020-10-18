@@ -183,3 +183,24 @@ func Get(c *gin.Context) {
 		c.JSON(http.StatusOK, user.ResultOne{Status: true, User: authResult.User})
 	}
 }
+
+func GetGroup(c *gin.Context) {
+	userToken := c.Request.Header.Get("USER_TOKEN")
+	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
+
+	authResult := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	result := dbUser.Get(user.GID, &user.User{GID: authResult.Group.ID})
+	if result.Err != nil {
+		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: result.Err.Error()})
+		return
+	}
+
+	var data []user.User
+
+	for _, tmp := range result.User {
+		tmp.Pass = ""
+		tmp.MailToken = ""
+		data = append(data, tmp)
+	}
+	c.JSON(http.StatusOK, user.Result{Status: true, User: data})
+}
