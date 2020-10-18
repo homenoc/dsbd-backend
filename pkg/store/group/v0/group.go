@@ -9,16 +9,25 @@ import (
 	"time"
 )
 
-func Create(group *group.Group) (*group.Group, error) {
+func Create(g *group.Group) (*group.Group, error) {
+	result := Get(group.Org, &group.Group{Org: g.Org})
+	if result.Err != nil {
+		return &group.Group{}, result.Err
+	}
+	if len(result.Group) != 0 {
+		log.Println("error: this Org Name is already registered: " + g.Org)
+		return &group.Group{}, fmt.Errorf("error: this org name is already registered")
+	}
+
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
-		return group, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+		return g, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
 	defer db.Close()
 
-	err = db.Create(&group).Error
-	return group, err
+	err = db.Create(&g).Error
+	return g, err
 }
 
 func Delete(group *group.Group) error {
