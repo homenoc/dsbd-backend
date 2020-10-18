@@ -55,8 +55,10 @@ func Update(base int, u *user.User) error {
 		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update(user.User{MailVerify: u.MailVerify})
 	} else if user.UpdateInfo == base {
 		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update(user.User{
-			Name: u.Name, Email: u.Email, Pass: u.Pass, Tech: u.Tech, MailVerify: u.MailVerify, MailToken: u.MailToken,
-			Org: u.Org, PostCode: u.PostCode, Address: u.Address, Phone: u.Phone, Country: u.Country, Status: u.Status})
+			Name: u.Name, NameEn: u.NameEn, Email: u.Email, Pass: u.Pass, Tech: u.Tech,
+			MailVerify: u.MailVerify, MailToken: u.MailToken, Org: u.Org, OrgEn: u.OrgEn, PostCode: u.PostCode,
+			Address: u.Address, AddressEn: u.AddressEn, Dept: u.Dept, DeptEn: u.DeptEn, Pos: u.Pos, PosEn: u.PosEn,
+			Tel: u.Tel, Country: u.Country})
 	} else if user.UpdateStatus == base {
 		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update(user.User{Status: u.Status})
 	} else if user.UpdateGID == base {
@@ -65,9 +67,10 @@ func Update(base int, u *user.User) error {
 		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update("level", u.Level)
 	} else if user.UpdateAll == base {
 		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update(user.User{
-			GID: u.GID, Name: u.Name, Email: u.Email, Pass: u.Pass, Tech: u.Tech,
-			Status: u.Status, Level: u.Level, MailVerify: u.MailVerify, MailToken: u.MailToken,
-			Org: u.Org, PostCode: u.PostCode, Address: u.Address, Phone: u.Phone, Country: u.Country})
+			GID: u.GID, Name: u.Name, NameEn: u.NameEn, Email: u.Email, Pass: u.Pass, Tech: u.Tech,
+			MailVerify: u.MailVerify, MailToken: u.MailToken, Org: u.Org, OrgEn: u.OrgEn, PostCode: u.PostCode,
+			Address: u.Address, AddressEn: u.AddressEn, Dept: u.Dept, DeptEn: u.DeptEn, Pos: u.Pos, PosEn: u.PosEn,
+			Tel: u.Tel, Country: u.Country, Status: u.Status})
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
