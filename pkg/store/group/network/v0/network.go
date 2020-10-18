@@ -44,8 +44,11 @@ func Update(base int, c network.Network) error {
 
 	if network.UpdatePlan == base {
 		result = db.Model(&network.Network{Model: gorm.Model{ID: c.ID}}).Update(network.Network{Plan: c.Plan})
-	} else if network.UpdateName == base {
-		result = db.Model(&network.Network{Model: gorm.Model{ID: c.ID}}).Update(network.Network{Name: c.Name})
+	} else if network.UpdateData == base {
+		result = db.Model(&network.Network{Model: gorm.Model{ID: c.ID}}).Update(network.Network{
+			Org: c.Org, OrgEn: c.OrgEn, Postcode: c.Postcode, Address: c.Address, AddressEn: c.AddressEn,
+			Route: c.Route, PI: c.PI, ASN: c.ASN, V4: c.V4, V6: c.V6, V4Name: c.V4Name, V6Name: c.V6Name,
+			Date: c.Date, Plan: c.Plan})
 	} else if network.UpdateRoute == base {
 		result = db.Model(&network.Network{Model: gorm.Model{ID: c.ID}}).Update(network.Network{Route: c.Route})
 	} else if network.UpdateDate == base {
@@ -71,16 +74,10 @@ func Get(base int, data *network.Network) network.ResultDatabase {
 
 	if base == network.ID { //ID
 		err = db.First(&networkStruct, data.ID).Error
-	} else if base == network.Name { //Mail
-		err = db.Where("name = ?", data.Name).Find(&networkStruct).Error
+	} else if base == network.Org { //Mail
+		err = db.Where("org = ?", data.Org).Find(&networkStruct).Error
 	} else if base == network.GID {
 		err = db.Where("group_id = ?", data.GroupID).Find(&networkStruct).Error
-	} else if base == network.UpdateData {
-		err = db.Model(&network.Network{Model: gorm.Model{ID: data.ID}}).Update(network.Network{
-			Name: data.Name, IP: data.IP, Route: data.Route, Date: data.Date, Plan: data.Plan}).Error
-	} else if base == network.UpdateAll {
-		err = db.Model(&network.Network{Model: gorm.Model{ID: data.ID}}).Update(network.Network{GroupID: data.GroupID,
-			Type: data.Type, Name: data.Name, IP: data.IP, Route: data.Route, Date: data.Date, Plan: data.Plan}).Error
 	} else {
 		log.Println("base select error")
 		return network.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}

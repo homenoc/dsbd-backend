@@ -5,7 +5,7 @@ import "github.com/jinzhu/gorm"
 const (
 	ID          = 0
 	GID         = 1
-	Name        = 2
+	Org         = 2
 	Type        = 3
 	UpdateName  = 100
 	UpdateDate  = 102
@@ -18,14 +18,22 @@ const (
 
 type Network struct {
 	gorm.Model
-	GroupID uint   `json:"group_id"`
-	Type    uint   `json:"type"`
-	Name    string `json:"name"`
-	IP      string `json:"ip"`
-	Route   string `json:"route"`
-	Date    string `json:"date"`
-	Plan    string `json:"plan"`
-	Lock    bool   `json:"lock"`
+	GroupID   uint   `json:"group_id"`
+	Org       string `json:"org"`
+	OrgEn     string `json:"org_en"`
+	Postcode  string `json:"postcode"`
+	Address   string `json:"address"`
+	AddressEn string `json:"address_en"`
+	Route     string `json:"route"`
+	PI        bool   `json:"pi"`
+	ASN       string `json:"asn"`
+	V4        string `json:"v4"`
+	V6        string `json:"v6"`
+	V4Name    string `json:"v4_name"`
+	V6Name    string `json:"v6_name"`
+	Date      string `json:"date"`
+	Plan      string `json:"plan"`
+	Lock      bool   `json:"lock"`
 }
 
 type NetworkUser struct {
