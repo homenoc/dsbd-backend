@@ -3,8 +3,8 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	connection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection/v0"
-	jpnicUser "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnic_user/v0"
-	networkUser "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/network_user/v0"
+	jpnicAdmin "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicAdmin/v0"
+	jpnicTech "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicTech/v0"
 	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/v0"
 	group "github.com/homenoc/dsbd-backend/pkg/api/core/group/v0"
 	token "github.com/homenoc/dsbd-backend/pkg/api/core/token/v0"
@@ -63,15 +63,17 @@ func AdminRestAPI() {
 			v1.GET("/group/network", network.GetAllAdmin)
 			v1.GET("/group/network/:id", network.GetAllAdmin)
 			//
-			// JPNIC User
+			// JPNIC Admin
 			//
-			v1.POST("/group/network/jpnic", jpnicUser.AddAdmin)
-			// Group Delete
-			v1.DELETE("/group/network/jpnic", jpnicUser.DeleteAdmin)
-			// Group Update
-			v1.PUT("/group/network/jpnic", jpnicUser.UpdateAdmin)
-			v1.GET("/group/network/jpnic", jpnicUser.GetAllAdmin)
-			v1.GET("/group/network/jpnic/:id", jpnicUser.GetAllAdmin)
+			v1.POST("/group/network/jpnic", jpnicAdmin.AddAdmin)
+			v1.DELETE("/group/network/jpnic", jpnicAdmin.DeleteAdmin)
+			v1.GET("/group/network/jpnic", jpnicAdmin.GetAdmin)
+			//
+			// JPNIC Admin
+			//
+			v1.POST("/group/network/jpnic", jpnicTech.AddAdmin)
+			v1.DELETE("/group/network/jpnic", jpnicTech.DeleteAdmin)
+			v1.GET("/group/network/jpnic", jpnicTech.GetAdmin)
 			//
 			// Connection
 			//
@@ -104,6 +106,7 @@ func UserRestAPI() {
 			//router.DELETE("/user", user.Delete)
 			// User Get
 			v1.GET("/user", user.Get)
+			v1.GET("/user/all", user.GetGroup)
 			// User ID Get
 			// v1.GET("/user/:id",user.GetId)
 			// User Update
@@ -131,19 +134,19 @@ func UserRestAPI() {
 			//v1.DELETE("/group", group.Delete)
 			// Connection Create
 			v1.POST("/group/connection", connection.Add)
-			// Network User
-			v1.POST("/group/network/user", networkUser.Add)
-			v1.DELETE("/group/network/user", networkUser.Delete)
-			v1.PUT("/group/network/user", networkUser.Update)
 			// Network add
 			v1.POST("/group/network", network.Add)
 			v1.PUT("/group/network", network.Update)
 			// Network Confirm
 			v1.POST("/group/network/confirm", network.Confirm)
-			// Network JPNIC User
-			v1.POST("/group/network/jpnic", jpnicUser.Add)
-			v1.PUT("/group/network/jpnic", jpnicUser.Update)
-
+			// Network JPNIC Admin
+			v1.POST("/group/network/jpnic/admin", jpnicAdmin.Add)
+			v1.DELETE("/group/network/jpnic/admin", jpnicAdmin.Delete)
+			v1.GET("/group/network/jpnic/admin", jpnicAdmin.Get)
+			// Network JPNIC Tech
+			v1.POST("/group/network/jpnic/tech", jpnicTech.Add)
+			v1.DELETE("/group/network/jpnic/tech", jpnicTech.Delete)
+			v1.GET("/group/network/jpnic/tech", jpnicTech.Get)
 		}
 	}
 	log.Fatal(http.ListenAndServe(":8080", router))
