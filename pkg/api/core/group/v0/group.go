@@ -6,13 +6,13 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	connection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
 	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
-	jpnicUser "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnic_user"
-	networkUser "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/network_user"
+	jpnicAdmin "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicAdmin"
+	jpnicTech "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicTech"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbConnection "github.com/homenoc/dsbd-backend/pkg/store/group/connection/v0"
-	dbJPNICUser "github.com/homenoc/dsbd-backend/pkg/store/group/network/jpnic_user/v0"
-	dbNetworkUser "github.com/homenoc/dsbd-backend/pkg/store/group/network/network_user/v0"
+	dbJpnicAdmin "github.com/homenoc/dsbd-backend/pkg/store/group/network/jpnicAdmin/v0"
+	dbJpnicTech "github.com/homenoc/dsbd-backend/pkg/store/group/network/jpnicTech/v0"
 	dbNetwork "github.com/homenoc/dsbd-backend/pkg/store/group/network/v0"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/store/group/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/store/user/v0"
@@ -168,29 +168,34 @@ func GetAll(c *gin.Context) {
 		resultConnection.Connection = nil
 	}
 
-	var resultNetworkUser []networkUser.NetworkUser = nil
+	var resultJpnicTech []jpnicTech.JpnicTech = nil
+	var resultJpnicAdmin []jpnicAdmin.JpnicAdmin = nil
 
 	for _, data := range resultNetwork.Network {
-		tmp := dbNetworkUser.Get(jpnicUser.GID, &networkUser.NetworkUser{NetworkID: data.ID})
-		if tmp.Err != nil {
-			c.JSON(http.StatusInternalServerError, group.ResultAll{Status: false, Error: tmp.Err.Error()})
+		tmpAdmin := dbJpnicAdmin.Get(jpnicAdmin.NetworkId, &jpnicAdmin.JpnicAdmin{NetworkId: data.ID})
+		if tmpAdmin.Err != nil {
+			c.JSON(http.StatusInternalServerError, group.ResultAll{Status: false, Error: tmpAdmin.Err.Error()})
 			return
 		}
-		if len(tmp.NetworkUser) == 0 {
+		if len(tmpAdmin.Jpnic) == 0 {
 			break
 		}
-		resultNetworkUser = append(resultNetworkUser, tmp.NetworkUser[0])
-	}
+		resultJpnicAdmin = append(resultJpnicAdmin, tmpAdmin.Jpnic[0])
 
-	resultJPNICUser := dbJPNICUser.Get(jpnicUser.GID, &jpnicUser.JPNICUser{GroupID: result.Group.ID})
-	if resultJPNICUser.Err != nil {
-		c.JSON(http.StatusInternalServerError, group.ResultAll{Status: false, Error: result.Err.Error()})
-	}
-	if len(resultJPNICUser.JPNICUser) == 0 {
-		resultJPNICUser.JPNICUser = nil
+		tmpTech := dbJpnicTech.Get(jpnicAdmin.NetworkId, &jpnicTech.JpnicTech{NetworkId: data.ID})
+		if tmpAdmin.Err != nil {
+			c.JSON(http.StatusInternalServerError, group.ResultAll{Status: false, Error: tmpAdmin.Err.Error()})
+			return
+		}
+		if len(tmpTech.Jpnic) == 0 {
+			break
+		}
+		for _, tmpTechDetail := range tmpTech.Jpnic {
+			resultJpnicTech = append(resultJpnicTech, tmpTechDetail)
+		}
 	}
 
 	c.JSON(http.StatusOK, group.ResultAll{
-		Status: true, Group: result.Group, Network: resultNetwork.Network, JPNICUser: resultJPNICUser.JPNICUser,
-		NetworkUser: resultNetworkUser, Connection: resultConnection.Connection})
+		Status: true, Group: result.Group, Network: resultNetwork.Network, JpnicAdmin: resultJpnicAdmin,
+		JpnicTech: resultJpnicTech, Connection: resultConnection.Connection})
 }

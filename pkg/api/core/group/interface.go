@@ -3,8 +3,8 @@ package group
 import (
 	connection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
 	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
-	jpnicUser "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnic_user"
-	networkUser "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/network_user"
+	jpnicAdmin "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicAdmin"
+	jpnicTech "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicTech"
 	"github.com/jinzhu/gorm"
 )
 
@@ -40,13 +40,13 @@ type Result struct {
 }
 
 type ResultAll struct {
-	Status      bool                      `json:"status"`
-	Error       string                    `json:"error"`
-	Group       Group                     `json:"group"`
-	Network     []network.Network         `json:"network"`
-	JPNICUser   []jpnicUser.JPNICUser     `json:"jpnic_user"`
-	NetworkUser []networkUser.NetworkUser `json:"network_user"`
-	Connection  []connection.Connection   `json:"connection"`
+	Status     bool                    `json:"status"`
+	Error      string                  `json:"error"`
+	Group      Group                   `json:"group"`
+	Network    []network.Network       `json:"network"`
+	JpnicAdmin []jpnicAdmin.JpnicAdmin `json:"admin"`
+	JpnicTech  []jpnicTech.JpnicTech   `json:"tech"`
+	Connection []connection.Connection `json:"connection"`
 }
 
 type ResultDatabase struct {
