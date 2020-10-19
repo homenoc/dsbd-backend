@@ -5,7 +5,7 @@ import (
 	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
 )
 
-func check(input network.Network) error {
+func check(input network.NetworkInput) error {
 	// check
 	if input.Route == "" {
 		return fmt.Errorf("no data: route")

@@ -1,7 +1,6 @@
 package v0
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	group "github.com/homenoc/dsbd-backend/pkg/api/core/group"
@@ -11,50 +10,58 @@ import (
 	dbNetwork "github.com/homenoc/dsbd-backend/pkg/store/group/network/v0"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/store/group/v0"
 	"github.com/jinzhu/gorm"
+	"log"
 	"net/http"
 )
 
 func Add(c *gin.Context) {
-	var input network.Network
+	var input network.NetworkInput
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
+	log.Println(c.Request.Header)
+
 	c.BindJSON(&input)
 
+	// group authentication
 	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusInternalServerError, network.Result{Status: false, Error: result.Err.Error()})
 		return
 	}
 
-	// check authority
+	// check user level
 	if result.User.Level > 1 {
 		c.JSON(http.StatusInternalServerError, network.Result{Status: false, Error: "You don't have authority this operation"})
 		return
 	}
 
+	// check json
 	if err := check(input); err != nil {
 		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: err.Error()})
 		return
 	}
 
-	//if result.Group.Status == 111 || 121 || 211 || 221 {
+	//log.Println(input)
+
+	var afterStatus uint
+
+	// status check for group
 	if result.Group.Status == 2 {
 		if input.PI {
-			result.Group.Status = 21
+			afterStatus = 22
 		} else {
-			result.Group.Status = 11
+			afterStatus = 12
 		}
-		if err := dbGroup.Update(group.UpdateStatus, group.Group{Model: gorm.Model{ID: result.Group.ID},
-			Status: result.Group.Status}); err != nil {
-			c.JSON(http.StatusInternalServerError, network.Result{Status: false, Error: err.Error()})
-			return
-		}
-	} else if !(result.Group.Status == 111 || result.Group.Status == 121) {
+	} else if !(result.Group.Status == 111 || result.Group.Status == 121 || result.Group.Status == 11 || result.Group.Status == 21) {
 		c.JSON(http.StatusInternalServerError, network.Result{Status: false, Error: "error: group status"})
 		return
+	} else {
+		// 111,121,11,21の場合はStatusを+1にする
+		afterStatus = result.Group.Status + 1
 	}
 
+	// db create for network
 	net, err := dbNetwork.Create(&network.Network{
 		GroupID: result.Group.ID, Org: input.Org, OrgEn: input.OrgEn, Postcode: input.Postcode, Address: input.Address,
 		AddressEn: input.AddressEn, Route: input.Route, PI: input.PI, ASN: input.ASN, V4: input.V4, V6: input.V6,
@@ -64,9 +71,27 @@ func Add(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, network.Result{Status: false, Error: err.Error()})
 		return
 	}
-	c.JSON(http.StatusInternalServerError, network.ResultOne{Status: true, Network: *net})
+
+	if !input.PI {
+		// jpnic Process
+		err = jpnicProcess(jpnic{admin: input.AdminID, tech: input.TechID, network: *net})
+		if err != nil {
+			dbNetwork.Delete(&network.Network{Model: gorm.Model{ID: net.ID}})
+		}
+	}
+
+	// ---------ここまで処理が通っている場合、DBへの書き込みにすべて成功している
+	// GroupのStatusをAfterStatusにする
+	if err := dbGroup.Update(group.UpdateStatus, group.Group{Model: gorm.Model{ID: result.Group.ID},
+		Status: afterStatus}); err != nil {
+		c.JSON(http.StatusInternalServerError, network.Result{Status: false, Error: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, network.ResultOne{Status: true, Network: *net})
 }
 
+// Todo: 以下の処理は実装中
 func Update(c *gin.Context) {
 	var input network.Network
 	userToken := c.Request.Header.Get("USER_TOKEN")
@@ -115,37 +140,5 @@ func Update(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: err.Error()})
 	}
 
-	c.JSON(http.StatusOK, group.Result{Status: true})
-}
-
-func Confirm(c *gin.Context) {
-	var input network.Network
-	userToken := c.Request.Header.Get("USER_TOKEN")
-	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
-
-	c.BindJSON(&input)
-
-	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
-	if result.Err != nil {
-		c.JSON(http.StatusInternalServerError, network.Result{Status: false, Error: result.Err.Error()})
-		return
-	}
-	// check authority
-	if result.User.Level > 1 {
-		c.JSON(http.StatusInternalServerError, network.Result{Status: false, Error: "You don't have authority this operation"})
-		return
-	}
-
-	if !((result.Group.Status%100 == 11 || result.Group.Status%100 == 21) && (result.Group.Status/100 == 0 ||
-		result.Group.Status/100 == 1)) {
-		c.JSON(http.StatusInternalServerError, network.Result{Status: false, Error: fmt.Sprint("error: status error")})
-		return
-	}
-
-	if err := dbGroup.Update(group.UpdateStatus, group.Group{Model: gorm.Model{ID: result.Group.ID},
-		Status: result.Group.Status + 1}); err != nil {
-		c.JSON(http.StatusInternalServerError, network.Result{Status: false, Error: err.Error()})
-		return
-	}
 	c.JSON(http.StatusOK, group.Result{Status: true})
 }
