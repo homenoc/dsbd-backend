@@ -35,6 +35,7 @@ type Network struct {
 	V6Name    string `json:"v6_name"`
 	Date      string `json:"date"`
 	Plan      string `json:"plan"`
+	Open      bool   `json:"open"`
 	Lock      bool   `json:"lock"`
 }
 

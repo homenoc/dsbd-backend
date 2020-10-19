@@ -10,7 +10,6 @@ import (
 	dbNetwork "github.com/homenoc/dsbd-backend/pkg/store/group/network/v0"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/store/group/v0"
 	"github.com/jinzhu/gorm"
-	"log"
 	"net/http"
 )
 
@@ -18,8 +17,6 @@ func Add(c *gin.Context) {
 	var input network.NetworkInput
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
-
-	log.Println(c.Request.Header)
 
 	c.BindJSON(&input)
 
