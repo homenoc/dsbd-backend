@@ -130,7 +130,7 @@ func Get(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, group.Result{Status: true, Group: resultGroup.Group})
+	c.JSON(http.StatusOK, group.ResultOne{Status: true, Group: resultGroup.Group[0]})
 }
 
 func GetAll(c *gin.Context) {
