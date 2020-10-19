@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	connection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection/v0"
+	info "github.com/homenoc/dsbd-backend/pkg/api/core/group/info/v0"
 	jpnicAdmin "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicAdmin/v0"
 	jpnicTech "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicTech/v0"
 	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/v0"
@@ -137,6 +138,10 @@ func UserRestAPI() {
 			// Network add
 			v1.POST("/group/network", network.Add)
 			//v1.PUT("/group/network", network.Update)
+			//
+			// Info
+			//
+			v1.GET("/group/info", info.Get)
 
 			// 現在検討中
 
