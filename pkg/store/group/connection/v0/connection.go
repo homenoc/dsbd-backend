@@ -44,13 +44,16 @@ func Update(base int, c connection.Connection) error {
 
 	if connection.UpdateInfo == base {
 		result = db.Model(&connection.Connection{Model: gorm.Model{ID: c.ID}}).Update(connection.Connection{
-			Service: c.Service, Fee: c.Fee, NOC: c.NOC, TermIP: c.TermIP, LinkV4: c.LinkV4, LinkV6: c.LinkV6})
+			UserId: c.UserId, Service: c.Service, NTT: c.NTT, NOC: c.NOC, TermIP: c.TermIP, Monitor: c.Monitor})
 	} else if connection.UpdateUserInfo == base {
-		result = db.Model(&connection.Connection{Model: gorm.Model{ID: c.ID}}).Update(connection.Connection{
-			NTT: c.NTT, Name: c.Name, Org: c.Org, PostCode: c.PostCode, Address: c.Address, Mail: c.Mail,
-			Phone: c.Phone, Country: c.Country, Comment: c.Comment})
+		result = db.Model(&connection.Connection{Model: gorm.Model{ID: c.ID}}).Update(connection.Connection{UserId: c.UserId})
 	} else if connection.UpdateGID == base {
 		result = db.Model(&connection.Connection{Model: gorm.Model{ID: c.ID}}).Update(connection.Connection{GroupID: c.GroupID})
+	} else if base == connection.UpdateAll {
+		err = db.Model(&connection.Connection{Model: gorm.Model{ID: c.ID}}).Update(connection.Connection{
+			GroupID: c.GroupID, ServiceID: c.ServiceID, UserId: c.UserId, Service: c.Service, NTT: c.NTT, NOC: c.NOC,
+			TermIP: c.TermIP, Monitor: c.Monitor, LinkV4Our: c.LinkV4Our, LinkV4Your: c.LinkV4Your,
+			LinkV6Our: c.LinkV6Our, LinkV6Your: c.LinkV6Your, Fee: c.Fee}).Error
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
@@ -70,18 +73,8 @@ func Get(base int, data *connection.Connection) connection.ResultDatabase {
 
 	if base == connection.ID { //ID
 		err = db.First(&connectionStruct, data.ID).Error
-	} else if base == connection.Org { //Org
-		err = db.Where("org = ?", data.Org).Find(&connectionStruct).Error
-	} else if base == connection.Email { //Mail
-		err = db.Where("mail = ?", data.Mail).Find(&connectionStruct).Error
 	} else if base == connection.GID {
 		err = db.Where("group_id = ?", data.GroupID).Find(&connectionStruct).Error
-	} else if base == connection.UpdateAll {
-		err = db.Model(&connection.Connection{Model: gorm.Model{ID: data.ID}}).Update(connection.Connection{
-			GroupID: data.GroupID, ServiceID: data.ServiceID, Service: data.Service, NTT: data.NTT, Fee: data.Fee,
-			NOC: data.NOC, TermIP: data.TermIP, LinkV4: data.LinkV4, LinkV6: data.LinkV6, Name: data.Name,
-			Org: data.Org, PostCode: data.PostCode, Address: data.Address, Mail: data.Mail, Phone: data.Phone,
-			Country: data.Country, Comment: data.Comment}).Error
 	} else {
 		log.Println("base select error")
 		return connection.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
