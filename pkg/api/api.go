@@ -136,17 +136,18 @@ func UserRestAPI() {
 			v1.POST("/group/connection", connection.Add)
 			// Network add
 			v1.POST("/group/network", network.Add)
-			v1.PUT("/group/network", network.Update)
-			// Network Confirm
-			v1.POST("/group/network/confirm", network.Confirm)
+			//v1.PUT("/group/network", network.Update)
+
+			// 現在検討中
+
 			// Network JPNIC Admin
-			v1.POST("/group/network/jpnic/admin", jpnicAdmin.Add)
-			v1.DELETE("/group/network/jpnic/admin", jpnicAdmin.Delete)
-			v1.GET("/group/network/jpnic/admin", jpnicAdmin.Get)
+			//v1.POST("/group/network/jpnic/admin", jpnicAdmin.Add)
+			//v1.DELETE("/group/network/jpnic/admin", jpnicAdmin.Delete)
+			//v1.GET("/group/network/jpnic/admin", jpnicAdmin.Get)
 			// Network JPNIC Tech
-			v1.POST("/group/network/jpnic/tech", jpnicTech.Add)
-			v1.DELETE("/group/network/jpnic/tech", jpnicTech.Delete)
-			v1.GET("/group/network/jpnic/tech", jpnicTech.Get)
+			//v1.POST("/group/network/jpnic/tech", jpnicTech.Add)
+			//v1.DELETE("/group/network/jpnic/tech", jpnicTech.Delete)
+			//v1.GET("/group/network/jpnic/tech", jpnicTech.Get)
 		}
 	}
 	log.Fatal(http.ListenAndServe(":8080", router))
