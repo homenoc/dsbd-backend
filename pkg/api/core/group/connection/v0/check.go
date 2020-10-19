@@ -19,26 +19,8 @@ func check(input connection.Connection) error {
 	if input.TermIP == "" {
 		return fmt.Errorf("no data: term ip")
 	}
-	if input.Name == "" {
-		return fmt.Errorf("no data: name")
-	}
-	if input.Org == "" {
-		return fmt.Errorf("no data: org")
-	}
-	if input.PostCode == "" {
-		return fmt.Errorf("no data: postcode")
-	}
-	if input.Address == "" {
-		return fmt.Errorf("no data: address")
-	}
-	if input.Mail == "" {
-		return fmt.Errorf("no data: mail")
-	}
-	if input.Phone == "" {
-		return fmt.Errorf("no data: phone")
-	}
-	if input.Country == "" {
-		return fmt.Errorf("no data: country")
+	if input.UserId == 0 {
+		return fmt.Errorf("no data: userID")
 	}
 	return nil
 }

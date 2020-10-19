@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
-	group "github.com/homenoc/dsbd-backend/pkg/api/core/group"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	connection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	dbConnection "github.com/homenoc/dsbd-backend/pkg/store/group/connection/v0"
@@ -32,8 +32,8 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	if !(result.Group.Status%100 == 13 || result.Group.Status%100 == 23 || result.Group.Status%100 == 33) &&
-		result.Group.Status < 200 {
+	if !((result.Group.Status%100 == 13 || result.Group.Status%100 == 23) && (result.Group.Status/100 == 0 ||
+		result.Group.Status/100 == 1)) {
 		c.JSON(http.StatusInternalServerError, connection.Result{Status: false, Error: fmt.Sprint("error: status error")})
 		return
 	}
@@ -44,9 +44,8 @@ func Add(c *gin.Context) {
 	}
 
 	_, err := dbConnection.Create(&connection.Connection{
-		GroupID: result.Group.ID, NTT: input.NTT, Service: input.Service, NOC: input.NOC, TermIP: input.TermIP,
-		Name: input.Name, Org: input.Org, PostCode: input.PostCode, Address: input.Address, Mail: input.Mail,
-		Phone: input.Phone, Country: input.Country})
+		GroupID: result.Group.ID, UserId: input.UserId, Service: input.Service, NTT: input.NTT, NOC: input.NOC,
+		TermIP: input.TermIP, Monitor: input.Monitor})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, connection.Result{Status: false, Error: err.Error()})
 		return

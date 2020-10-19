@@ -19,23 +19,20 @@ const (
 
 type Connection struct {
 	gorm.Model
-	GroupID   uint   `json:"group_id"`
-	ServiceID string `json:"service_id"`
-	Service   string `json:"service"`
-	NTT       string `json:"ntt"`
-	Fee       string `json:"fee"`
-	NOC       string `json:"noc"`
-	TermIP    string `json:"term_ip"`
-	LinkV4    string `json:"link_v4"`
-	LinkV6    string `json:"link_v6"`
-	Name      string `json:"name"`
-	Org       string `json:"org"`
-	PostCode  string `json:"postcode"`
-	Address   string `json:"address"`
-	Mail      string `json:"mail"`
-	Phone     string `json:"phone"`
-	Country   string `json:"country"`
-	Comment   string `json:"comment"`
+	GroupID    uint   `json:"group_id"`
+	ServiceID  string `json:"service_id"`
+	UserId     uint   `json:"user_id"`
+	Service    string `json:"service"`
+	NTT        string `json:"ntt"`
+	NOC        string `json:"noc"`
+	TermIP     string `json:"term_ip"`
+	Monitor    bool   `json:"monitor"`
+	LinkV4Our  string `json:"link_v4_our"`
+	LinkV4Your string `json:"link_v4_your"`
+	LinkV6Our  string `json:"link_v6_our"`
+	LinkV6Your string `json:"link_v6_your"`
+	Fee        string `json:"fee"`
+	Comment    string `json:"comment"`
 }
 
 type Result struct {
