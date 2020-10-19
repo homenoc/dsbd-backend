@@ -200,7 +200,9 @@ func GetGroup(c *gin.Context) {
 	for _, tmp := range result.User {
 		tmp.Pass = ""
 		tmp.MailToken = ""
-		data = append(data, tmp)
+		if 0 < tmp.Status && tmp.Status < 100 {
+			data = append(data, tmp)
+		}
 	}
 	c.JSON(http.StatusOK, user.Result{Status: true, User: data})
 }
