@@ -44,7 +44,7 @@ func Update(base int, s chat.Chat) error {
 
 	if chat.UpdateAll == base {
 		result = db.Model(&chat.Chat{Model: gorm.Model{ID: s.ID}}).Update(chat.Chat{
-			TicketID: s.TicketID, NextID: s.NextID, Admin: s.Admin, Data: s.Data})
+			NextID: s.NextID, Admin: s.Admin, Data: s.Data})
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
@@ -64,8 +64,6 @@ func Get(base int, data *chat.Chat) chat.ResultDatabase {
 
 	if base == chat.ID { //ID
 		err = db.First(&chatStruct, data.ID).Error
-	} else if base == chat.TicketID { //TicketID
-		err = db.Where("ticket_id = ?", data.TicketID).Find(&chatStruct).Error
 	} else {
 		log.Println("base select error")
 		return chat.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
