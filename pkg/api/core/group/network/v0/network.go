@@ -55,7 +55,7 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	_, err := dbNetwork.Create(&network.Network{
+	net, err := dbNetwork.Create(&network.Network{
 		GroupID: result.Group.ID, Org: input.Org, OrgEn: input.OrgEn, Postcode: input.Postcode, Address: input.Address,
 		AddressEn: input.AddressEn, Route: input.Route, PI: input.PI, ASN: input.ASN, V4: input.V4, V6: input.V6,
 		V4Name: input.V4Name, V6Name: input.V6Name, Date: input.Date, Plan: input.Plan, Lock: false,
@@ -64,7 +64,7 @@ func Add(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, network.Result{Status: false, Error: err.Error()})
 		return
 	}
-	c.JSON(http.StatusInternalServerError, group.Result{Status: true})
+	c.JSON(http.StatusInternalServerError, network.ResultOne{Status: true, Network: *net})
 }
 
 func Update(c *gin.Context) {
@@ -136,8 +136,8 @@ func Confirm(c *gin.Context) {
 		return
 	}
 
-	if !(result.Group.Status%100 == 11 || result.Group.Status%100 == 21 || result.Group.Status%100 == 31) &&
-		result.Group.Status < 200 {
+	if !((result.Group.Status%100 == 11 || result.Group.Status%100 == 21) && (result.Group.Status/100 == 0 ||
+		result.Group.Status/100 == 1)) {
 		c.JSON(http.StatusInternalServerError, network.Result{Status: false, Error: fmt.Sprint("error: status error")})
 		return
 	}

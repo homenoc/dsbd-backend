@@ -60,6 +60,12 @@ type Result struct {
 	Network []Network `json:"network"`
 }
 
+type ResultOne struct {
+	Status  bool    `json:"status"`
+	Error   string  `json:"error"`
+	Network Network `json:"network"`
+}
+
 type ResultDatabase struct {
 	Err     error
 	Network []Network
