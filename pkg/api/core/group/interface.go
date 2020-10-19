@@ -34,9 +34,15 @@ type Group struct {
 }
 
 type Result struct {
-	Status    bool    `json:"status"`
-	Error     string  `json:"error"`
-	GroupData []Group `json:"data"`
+	Status bool    `json:"status"`
+	Error  string  `json:"error"`
+	Group  []Group `json:"group"`
+}
+
+type ResultOne struct {
+	Status bool   `json:"status"`
+	Error  string `json:"error"`
+	Group  Group  `json:"data"`
 }
 
 type ResultAll struct {

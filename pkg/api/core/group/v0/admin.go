@@ -82,7 +82,7 @@ func GetAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, group.Result{Status: true, GroupData: result.Group})
+	c.JSON(http.StatusOK, group.Result{Status: true, Group: result.Group})
 }
 
 func GetAllAdmin(c *gin.Context) {
@@ -95,6 +95,6 @@ func GetAllAdmin(c *gin.Context) {
 	if result := dbGroup.GetAll(); result.Err != nil {
 		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: result.Err.Error()})
 	} else {
-		c.JSON(http.StatusOK, group.Result{Status: true, GroupData: result.Group})
+		c.JSON(http.StatusOK, group.Result{Status: true, Group: result.Group})
 	}
 }
