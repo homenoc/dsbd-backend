@@ -42,7 +42,7 @@ type Result struct {
 type ResultOne struct {
 	Status bool   `json:"status"`
 	Error  string `json:"error"`
-	Group  Group  `json:"data"`
+	Group  Group  `json:"group"`
 }
 
 type ResultAll struct {
