@@ -10,6 +10,7 @@ type Config struct {
 	DB         DB         `json:"db"`
 	Mail       Mail       `json:"mail"`
 	Radius     Radius     `json:"radius"`
+	Slack      []Slack    `json:"slack"`
 }
 
 type Controller struct {
@@ -49,6 +50,12 @@ type Radius struct {
 	Port int    `json:"port"`
 	User string `json:"user"`
 	Pass string `json:"pass"`
+}
+
+type Slack struct {
+	WebHookUrl string `json:"url"`
+	Channel    string `json:"channel"`
+	Name       string `json:"name"`
 }
 
 var Conf Config
