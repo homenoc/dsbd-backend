@@ -2,6 +2,7 @@ package v0
 
 import (
 	"fmt"
+	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/gin-gonic/gin"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
@@ -10,6 +11,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/tool/hash"
 	"github.com/homenoc/dsbd-backend/pkg/tool/mail"
+	"github.com/homenoc/dsbd-backend/pkg/tool/notification"
 	toolToken "github.com/homenoc/dsbd-backend/pkg/tool/token"
 	"github.com/jinzhu/gorm"
 	"github.com/vmmgr/controller/etc"
@@ -90,6 +92,14 @@ func Add(c *gin.Context) {
 				"本人確認が完了次第、ログイン可能になります。\n" + "仮パスワード: " + pass,
 		})
 	}
+
+	attachment := slack.Attachment{}
+	attachment.AddField(slack.Field{Title: "E-Mail", Value: input.Email}).
+		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(input.GID))}).
+		AddField(slack.Field{Title: "Name", Value: input.Name}).
+		AddField(slack.Field{Title: "Name(English)", Value: input.NameEn})
+
+	notification.SendSlack(notification.Slack{Attachment: attachment, Channel: "user", Status: true})
 
 	//check exist for database
 	if err := dbUser.Create(&data); err != nil {
