@@ -7,7 +7,9 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/store/user/v0"
+	"github.com/homenoc/dsbd-backend/pkg/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/tool/hash"
+	"github.com/homenoc/dsbd-backend/pkg/tool/mail"
 	toolToken "github.com/homenoc/dsbd-backend/pkg/tool/token"
 	"github.com/jinzhu/gorm"
 	"github.com/vmmgr/controller/etc"
@@ -40,6 +42,7 @@ func Add(c *gin.Context) {
 
 	mailToken, _ := toolToken.Generate(4)
 
+	// 新規ユーザ
 	if input.GID == 0 { //new user
 		if input.Pass == "" {
 			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: fmt.Sprintf("wrong pass")})
@@ -47,7 +50,17 @@ func Add(c *gin.Context) {
 		}
 		data = user.User{GID: 0, Name: input.Name, Email: input.Email, Pass: input.Pass, Status: 0, Level: 1,
 			MailVerify: false, MailToken: mailToken}
-	} else { //new users for group
+
+		mail.SendMail(mail.Mail{
+			ToMail:  data.Email,
+			Subject: "本人確認のメールにつきまして",
+			Content: " " + input.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
+				config.Conf.Controller.User.Url + "/api/v1/user/verify/" + mailToken + "\n" +
+				"本人確認が完了次第、ログイン可能になります。\n",
+		})
+
+		// グループ所属ユーザの登録
+	} else {
 		if input.Level == 0 || input.Level > 5 {
 			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: fmt.Sprintf("wrong user level")})
 			return
@@ -68,6 +81,14 @@ func Add(c *gin.Context) {
 
 		data = user.User{GID: input.GID, Name: input.Name, Email: input.Email, Pass: strings.ToLower(hash.Generate(pass)),
 			Status: 0, Tech: input.Tech, Level: input.Level, MailVerify: false, MailToken: mailToken}
+
+		mail.SendMail(mail.Mail{
+			ToMail:  data.Email,
+			Subject: "本人確認メールにつきまして",
+			Content: " " + input.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
+				config.Conf.Controller.User.Url + "/api/v1/user/verify/" + mailToken + "\n" +
+				"本人確認が完了次第、ログイン可能になります。\n" + "仮パスワード: " + pass,
+		})
 	}
 
 	//check exist for database
