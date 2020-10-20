@@ -118,7 +118,7 @@ func UserRestAPI() {
 			// User Update
 			v1.PUT("/user/:id", user.Update)
 			// User Mail MailVerify
-			v1.POST("/user/verify/:token", user.MailVerify)
+			v1.GET("/user/verify/:token", user.MailVerify)
 			//
 			// Token
 			//
