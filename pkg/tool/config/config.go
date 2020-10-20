@@ -6,8 +6,24 @@ import (
 )
 
 type Config struct {
-	DB   DB   `json:db`
-	Mail Mail `json:mail`
+	Controller Controller `json:"controller"`
+	DB         DB         `json:"db"`
+	Mail       Mail       `json:"mail"`
+	Radius     Radius     `json:"radius"`
+}
+
+type Controller struct {
+	User  User  `json:"user"`
+	Admin Admin `json:"admin"`
+}
+
+type User struct {
+	Url  string `json:"url"`
+	Port int    `json:"port"`
+}
+
+type Admin struct {
+	Port int `json:"port"`
 }
 
 type DB struct {
@@ -19,10 +35,20 @@ type DB struct {
 }
 
 type Mail struct {
+	Host     string `json:"host"`
+	Port     int    `json:"port"`
+	From     string `json:"from"`
+	CC       string `json:"cc"`
+	Contract string `json:"contract"`
+	User     string `json:"user"`
+	Pass     string `json:"pass"`
+}
+
+type Radius struct {
 	Host string `json:"host"`
 	Port int    `json:"port"`
-	From string `json:"from"`
-	CC   string `json:"cc"`
+	User string `json:"user"`
+	Pass string `json:"pass"`
 }
 
 var Conf Config
