@@ -6,6 +6,9 @@ import (
 	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicAdmin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicTech"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/notice"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/support/chat"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/support/ticket"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	"github.com/homenoc/dsbd-backend/pkg/tool/config"
@@ -31,7 +34,8 @@ func ConnectDB() (*gorm.DB, error) {
 func InitDB() {
 	db, _ := ConnectDB()
 	result := db.AutoMigrate(&user.User{}, &group.Group{}, &token.Token{}, &network.Network{},
-		&connection.Connection{}, &jpnicAdmin.JpnicAdmin{}, &jpnicTech.JpnicTech{})
+		&connection.Connection{}, &jpnicAdmin.JpnicAdmin{}, &jpnicTech.JpnicTech{}, &notice.Notice{},
+		&ticket.Ticket{}, &chat.Chat{})
 	log.Println(result.Error)
 	//return nil
 }
