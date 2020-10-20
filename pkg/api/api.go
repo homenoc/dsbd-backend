@@ -13,8 +13,10 @@ import (
 	ticket "github.com/homenoc/dsbd-backend/pkg/api/core/support/ticket/v0"
 	token "github.com/homenoc/dsbd-backend/pkg/api/core/token/v0"
 	user "github.com/homenoc/dsbd-backend/pkg/api/core/user/v0"
+	"github.com/homenoc/dsbd-backend/pkg/tool/config"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 func AdminRestAPI() {
@@ -90,7 +92,7 @@ func AdminRestAPI() {
 			v1.GET("/group/connection/:id", connection.GetAllAdmin)
 		}
 	}
-	log.Fatal(http.ListenAndServe(":8080", router))
+	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(config.Conf.Controller.Admin.Port), router))
 }
 
 func UserRestAPI() {
@@ -181,7 +183,7 @@ func UserRestAPI() {
 
 	go ticket.HandleMessages()
 
-	log.Fatal(http.ListenAndServe(":8080", router))
+	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(config.Conf.Controller.User.Port), router))
 }
 
 func cors(c *gin.Context) {
