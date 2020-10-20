@@ -112,8 +112,6 @@ func GetTitle(c *gin.Context) {
 		return
 	}
 
-	support.Broadcast <- support.WebSocketResult{Message: "a" + result.Group.Org}
-
 	// Ticket DBからGroup IDのTicketデータを抽出
 	resultTicket := dbTicket.Get(ticket.GID, &ticket.Ticket{GroupID: result.Group.ID})
 	if resultTicket.Err != nil {
@@ -162,6 +160,10 @@ func GetWebSocket(c *gin.Context) {
 		return
 	}
 
+	if ticketResult.Ticket[0].ID != uint(id) {
+		log.Println("ticketID not match.")
+	}
+
 	// WebSocket送信
 	support.Clients[&support.WebSocket{TicketID: uint(id), UserID: result.User.ID, GroupID: result.Group.ID, Socket: conn}] = true
 
@@ -175,8 +177,14 @@ func GetWebSocket(c *gin.Context) {
 				GroupID: result.Group.ID, Socket: conn})
 			break
 		}
-		msg.UserID = result.User.ID
-		support.Broadcast <- msg
+
+		_, err = dbChat.Create(&chat.Chat{TicketID: ticketResult.Ticket[0].ID, UserID: result.User.ID, Data: msg.Message})
+		if err != nil {
+			conn.WriteJSON(&support.WebSocketResult{Err: "db write error"})
+		} else {
+			msg.UserID = result.User.ID
+			support.Broadcast <- msg
+		}
 	}
 }
 

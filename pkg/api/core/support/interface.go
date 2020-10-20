@@ -15,6 +15,7 @@ var Broadcast = make(chan WebSocketResult)
 // websocket用
 type WebSocketResult struct {
 	ID          uint      `json:"id"`
+	Err         string    `json:"error"`
 	CreatedAt   time.Time `json:"created_at"`
 	UserToken   string    `json:"user_token"`
 	AccessToken string    `json:"access_token"`
