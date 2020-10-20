@@ -44,7 +44,7 @@ func Update(base int, t ticket.Ticket) error {
 
 	if ticket.UpdateAll == base {
 		result = db.Model(&ticket.Ticket{Model: gorm.Model{ID: t.ID}}).Update(ticket.Ticket{
-			GroupID: t.GroupID, UserID: t.UserID, ChatID: t.ChatID, Title: t.Title})
+			GroupID: t.GroupID, UserID: t.UserID, ChatIDStart: t.ChatIDStart, ChatIDEnd: t.ChatIDEnd, Title: t.Title})
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
@@ -68,9 +68,10 @@ func Get(base int, data *ticket.Ticket) ticket.ResultDatabase {
 		err = db.Where("group_id = ?", data.GroupID).Find(&ticketStruct).Error
 	} else if base == ticket.UID { //UserID
 		err = db.Where("user_id = ?", data.UserID).Find(&ticketStruct).Error
-	} else if base == ticket.CID { //ChatID
-		err = db.Where("ticket_id = ?", data.ChatID).Find(&ticketStruct).Error
-
+	} else if base == ticket.CIDStart { //ChatID Start
+		err = db.Where("ticket_id = ?", data.ChatIDStart).Find(&ticketStruct).Error
+	} else if base == ticket.CIDEnd { //ChatID End
+		err = db.Where("ticket_id = ?", data.ChatIDEnd).Find(&ticketStruct).Error
 	} else {
 		log.Println("base select error")
 		return ticket.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}

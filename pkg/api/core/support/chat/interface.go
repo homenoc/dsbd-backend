@@ -5,7 +5,7 @@ import "github.com/jinzhu/gorm"
 const (
 	ID           = 0
 	TicketID     = 1
-	UpdateNextID = 2
+	UpdateUserID = 2
 	UpdateAll    = 110
 )
 

@@ -63,11 +63,17 @@ func Add(c *gin.Context) {
 	}
 
 	// Chat DBに登録
-	_, err = dbChat.Create(&chat.Chat{TicketID: resultTicket.Ticket[0].ID, UserID: result.User.ID, Admin: false, Data: input.Data})
+	resultChat, err := dbChat.Create(&chat.Chat{TicketID: resultTicket.Ticket[0].ID, UserID: result.User.ID, Admin: false, Data: input.Data})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: err.Error()})
 		return
 	}
 
+	support.Broadcast <- support.WebSocketResult{
+		ID:        uint(id),
+		CreatedAt: resultChat.CreatedAt,
+		UserID:    resultChat.UserID,
+		Message:   resultChat.Data,
+	}
 	c.JSON(http.StatusOK, support.Result{Status: true})
 }
