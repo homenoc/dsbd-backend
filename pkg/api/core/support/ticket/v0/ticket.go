@@ -112,7 +112,7 @@ func GetTitle(c *gin.Context) {
 		return
 	}
 
-	support.Broadcast <- support.Data{Message: "a" + result.Group.Org}
+	support.Broadcast <- support.WebSocketResult{Message: "a" + result.Group.Org}
 
 	// Ticket DBからGroup IDのTicketデータを抽出
 	resultTicket := dbTicket.Get(ticket.GID, &ticket.Ticket{GroupID: result.Group.ID})
@@ -162,86 +162,50 @@ func GetWebSocket(c *gin.Context) {
 		return
 	}
 
-	// channel定義
-	//messageRev := make(chan support.Data)
-	//stopCh := make(chan struct{})
-	//doneCh := make(chan struct{})
+	// WebSocket送信
+	support.Clients[&support.WebSocket{TicketID: uint(id), UserID: result.User.ID, GroupID: result.Group.ID, Socket: conn}] = true
 
 	//WebSocket受信
-	//go receiveData(conn, stopCh, doneCh)
-	//go sendData(conn, support.Broadcast, stopCh, doneCh)
-	support.Clients[conn] = true
-
-	//WebSocket送信
-	//var tmpMyself string
 	for {
-		// メッセージの入力
-		//_, msg, err := conn.ReadMessage()
-		//if err != nil {
-		//	close(doneCh)
-		//	break
-		//}
-		//support.Broadcast <- support.Data{
-		//	ID: uint(1),
-		//	//CreatedAt: "0",
-		//	UserID:  0,
-		//	Message: string(msg),
-		//}
-		var msg support.Data
+		var msg support.WebSocketResult
 		err := conn.ReadJSON(&msg)
 		if err != nil {
 			log.Printf("error: %v", err)
-			delete(support.Clients, conn)
+			delete(support.Clients, &support.WebSocket{TicketID: uint(id), UserID: result.User.ID,
+				GroupID: result.Group.ID, Socket: conn})
 			break
 		}
+		msg.UserID = result.User.ID
 		support.Broadcast <- msg
-		//log.Println("--receive--")
-		log.Println(msg)
-
-		//select {
-		//// doneCh経由でクローズ信号を受けった場合、停止
-		//case <-doneCh:
-		//	println("stop request received.")
-		//	return
-		//default:
-		//}
 	}
-	// WebSocket送信が完了すれば、stopCh経由で受信処理側にクローズを知らせる
-	//close(stopCh)
 }
-
-//func sendData(conn *websocket.Conn, messageRev chan support.Data, stopCh, doneCh chan struct{}) {
-//	var tmpOther support.Data
-//
-//	for {
-//		select {
-//		case <-stopCh:
-//			println("stop request received.")
-//			return
-//		//case tmpMyself = <-messageRev:
-//		//	conn.WriteMessage(1, []byte(tmpMyself))
-//		case tmpOther = <-messageRev:
-//			log.Println("--send--")
-//			log.Println(tmpOther)
-//			//if tmpOther.ID == uint(1) && tmpOther.UserID != 38 {
-//				conn.WriteMessage(1, []byte(tmpOther.Message))
-//			//}
-//		}
-//	}
-//	// WebSocket送信が完了すれば、stopCh経由で受信処理側にクローズを知らせる
-//	close(doneCh)
-//}
 
 func HandleMessages() {
 	for {
 		msg := <-support.Broadcast
-		log.Println(msg)
+		// 入力されたデータをTokenにて認証
+		resultGroup := auth.GroupAuthentication(token.Token{UserToken: msg.UserToken, AccessToken: msg.AccessToken})
+		if resultGroup.Err != nil {
+			log.Println(resultGroup.Err)
+			return
+		}
+		// Token関連の初期化
+		msg.AccessToken = ""
+		msg.UserToken = ""
+		//登録されているクライアント宛にデータ送信する
 		for client := range support.Clients {
-			err := client.WriteJSON(msg)
-			if err != nil {
-				log.Printf("error: %v", err)
-				client.Close()
-				delete(support.Clients, client)
+			// ユーザのみの場合
+			if client.GroupID == 0 {
+				return
+			} else if client.GroupID == resultGroup.Group.ID {
+				err := client.Socket.WriteJSON(msg)
+				if err != nil {
+					log.Printf("error: %v", err)
+					client.Socket.Close()
+					delete(support.Clients, client)
+				}
+			} else {
+				// 認証失敗時の処理
 			}
 		}
 	}

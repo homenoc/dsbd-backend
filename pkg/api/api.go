@@ -8,6 +8,9 @@ import (
 	jpnicTech "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicTech/v0"
 	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/v0"
 	group "github.com/homenoc/dsbd-backend/pkg/api/core/group/v0"
+	notice "github.com/homenoc/dsbd-backend/pkg/api/core/notice/v0"
+	chat "github.com/homenoc/dsbd-backend/pkg/api/core/support/chat/v0"
+	ticket "github.com/homenoc/dsbd-backend/pkg/api/core/support/ticket/v0"
 	token "github.com/homenoc/dsbd-backend/pkg/api/core/token/v0"
 	user "github.com/homenoc/dsbd-backend/pkg/api/core/user/v0"
 	"log"
@@ -143,6 +146,18 @@ func UserRestAPI() {
 			//
 			v1.GET("/group/info", info.Get)
 
+			//
+			// Support
+			//
+			v1.POST("/support", ticket.Create)
+			v1.GET("/support", ticket.GetTitle)
+			v1.POST("/support/:id", chat.Add)
+			v1.GET("/support/:id", ticket.Get)
+			//
+			// Notice
+			//
+			v1.GET("/notice", notice.Get)
+
 			// 現在検討中
 
 			// Network JPNIC Admin
@@ -155,6 +170,17 @@ func UserRestAPI() {
 			//v1.GET("/group/network/jpnic/tech", jpnicTech.Get)
 		}
 	}
+
+	ws := router.Group("/ws")
+	{
+		v1 := ws.Group("/v1")
+		{
+			v1.GET("/support", ticket.GetWebSocket)
+		}
+	}
+
+	go ticket.HandleMessages()
+
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
 

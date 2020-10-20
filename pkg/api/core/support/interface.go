@@ -8,16 +8,25 @@ import (
 	"time"
 )
 
-// クライアントから受け取るメッセージを格納
-var Clients = make(map[*websocket.Conn]bool)
-var Broadcast = make(chan Data)
+// channel定義(websocketで使用)
+var Clients = make(map[*WebSocket]bool)
+var Broadcast = make(chan WebSocketResult)
 
-// クライアントからは JSON 形式で受け取る
-type Data struct {
-	ID        uint      `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UserID    uint      `json:"user_id"`
-	Message   string    `json:"message"`
+// websocket用
+type WebSocketResult struct {
+	ID          uint      `json:"id"`
+	CreatedAt   time.Time `json:"created_at"`
+	UserToken   string    `json:"user_token"`
+	AccessToken string    `json:"access_token"`
+	UserID      uint      `json:"user_id"`
+	Message     string    `json:"message"`
+}
+
+type WebSocket struct {
+	TicketID uint
+	GroupID  uint
+	UserID   uint
+	Socket   *websocket.Conn
 }
 
 type FirstInput struct {
