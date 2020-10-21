@@ -20,3 +20,8 @@ type AdminStruct struct {
 	User string
 	Pass string
 }
+
+type AdminResult struct {
+	AdminID uint
+	Err     error
+}
