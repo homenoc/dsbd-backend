@@ -16,6 +16,7 @@ type Config struct {
 type Controller struct {
 	User  User  `json:"user"`
 	Admin Admin `json:"admin"`
+	Auth  Auth  `json:"auth"`
 }
 
 type User struct {
@@ -25,6 +26,11 @@ type User struct {
 
 type Admin struct {
 	Port int `json:"port"`
+}
+
+type Auth struct {
+	User string `json:"user"`
+	Pass string `json:"pass"`
 }
 
 type DB struct {
