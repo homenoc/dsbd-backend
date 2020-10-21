@@ -2,8 +2,8 @@ package v0
 
 import (
 	"github.com/gin-gonic/gin"
-	authInterface "github.com/homenoc/dsbd-backend/pkg/api/core/auth"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	user "github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/store/user/v0"
 	"github.com/jinzhu/gorm"
@@ -16,9 +16,9 @@ import (
 func AddAdmin(c *gin.Context) {
 	var input user.User
 
-	if err := auth.AdminAuthentication(authInterface.AdminStruct{User: c.Request.Header.Get("USER"),
-		Pass: c.Request.Header.Get("PASS")}); err != nil {
-		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
+	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	if resultAdmin.Err != nil {
+		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: resultAdmin.Err.Error()})
 		return
 	}
 	c.BindJSON(&input)
@@ -31,9 +31,9 @@ func AddAdmin(c *gin.Context) {
 }
 
 func DeleteAdmin(c *gin.Context) {
-	if err := auth.AdminAuthentication(authInterface.AdminStruct{User: c.Request.Header.Get("USER"),
-		Pass: c.Request.Header.Get("PASS")}); err != nil {
-		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
+	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	if resultAdmin.Err != nil {
+		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: resultAdmin.Err.Error()})
 		return
 	}
 
@@ -53,9 +53,9 @@ func DeleteAdmin(c *gin.Context) {
 func UpdateAdmin(c *gin.Context) {
 	var input user.User
 
-	if err := auth.AdminAuthentication(authInterface.AdminStruct{User: c.Request.Header.Get("USER"),
-		Pass: c.Request.Header.Get("PASS")}); err != nil {
-		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
+	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	if resultAdmin.Err != nil {
+		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: resultAdmin.Err.Error()})
 		return
 	}
 	c.BindJSON(&input)
@@ -84,9 +84,9 @@ func UpdateAdmin(c *gin.Context) {
 }
 
 func GetAdmin(c *gin.Context) {
-	if err := auth.AdminAuthentication(authInterface.AdminStruct{User: c.Request.Header.Get("USER"),
-		Pass: c.Request.Header.Get("PASS")}); err != nil {
-		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
+	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	if resultAdmin.Err != nil {
+		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: resultAdmin.Err.Error()})
 		return
 	}
 	id, err := strconv.Atoi(c.Param("id"))
@@ -104,9 +104,9 @@ func GetAdmin(c *gin.Context) {
 }
 
 func GetAllAdmin(c *gin.Context) {
-	if err := auth.AdminAuthentication(authInterface.AdminStruct{User: c.Request.Header.Get("USER"),
-		Pass: c.Request.Header.Get("PASS")}); err != nil {
-		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
+	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	if resultAdmin.Err != nil {
+		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: resultAdmin.Err.Error()})
 		return
 	}
 

@@ -4,8 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	connection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection/v0"
 	info "github.com/homenoc/dsbd-backend/pkg/api/core/group/info/v0"
-	jpnicAdmin "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicAdmin/v0"
-	jpnicTech "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicTech/v0"
 	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/v0"
 	group "github.com/homenoc/dsbd-backend/pkg/api/core/group/v0"
 	notice "github.com/homenoc/dsbd-backend/pkg/api/core/notice/v0"
@@ -41,13 +39,15 @@ func AdminRestAPI() {
 			//
 			// Token
 			//
+			v1.POST("/token/generate", token.GenerateAdmin)
+
 			v1.POST("/token", token.AddAdmin)
 			// User Delete
 			v1.DELETE("/token", token.DeleteAdmin)
 			// User Update
 			v1.PUT("/token", token.UpdateAdmin)
 			v1.GET("/token", token.GetAllAdmin)
-			v1.GET("/token/:id", token.GetAllAdmin)
+			v1.GET("/token/:id", token.GetAdmin)
 			//
 			// Group
 			//
@@ -57,39 +57,39 @@ func AdminRestAPI() {
 			// Group Update
 			v1.PUT("/group", group.UpdateAdmin)
 			v1.GET("/group", group.GetAllAdmin)
-			v1.GET("/group/:id", group.GetAllAdmin)
-			//
-			// Network
-			//
-			v1.POST("/group/network", network.AddAdmin)
-			// Group Delete
-			v1.DELETE("/group/network", network.DeleteAdmin)
-			// Group Update
-			v1.PUT("/group/network", network.UpdateAdmin)
-			v1.GET("/group/network", network.GetAllAdmin)
-			v1.GET("/group/network/:id", network.GetAllAdmin)
-			//
-			// JPNIC Admin
-			//
-			v1.POST("/group/network/jpnic", jpnicAdmin.AddAdmin)
-			v1.DELETE("/group/network/jpnic", jpnicAdmin.DeleteAdmin)
-			v1.GET("/group/network/jpnic", jpnicAdmin.GetAdmin)
-			//
-			// JPNIC Admin
-			//
-			v1.POST("/group/network/jpnic", jpnicTech.AddAdmin)
-			v1.DELETE("/group/network/jpnic", jpnicTech.DeleteAdmin)
-			v1.GET("/group/network/jpnic", jpnicTech.GetAdmin)
-			//
-			// Connection
-			//
-			v1.POST("/group/connection", connection.AddAdmin)
-			// Group Delete
-			v1.DELETE("/group/connection", connection.DeleteAdmin)
-			// Group Update
-			v1.PUT("/group/connection", connection.UpdateAdmin)
-			v1.GET("/group/connection", connection.GetAllAdmin)
-			v1.GET("/group/connection/:id", connection.GetAllAdmin)
+			v1.GET("/group/:id", group.GetAdmin)
+			////
+			//// Network
+			////
+			//v1.POST("/group/network", network.AddAdmin)
+			//// Group Delete
+			//v1.DELETE("/group/network", network.DeleteAdmin)
+			//// Group Update
+			//v1.PUT("/group/network", network.UpdateAdmin)
+			//v1.GET("/group/network", network.GetAllAdmin)
+			//v1.GET("/group/network/:id", network.GetAdmin)
+			////
+			//// JPNIC Admin
+			////
+			//v1.POST("/group/network/jpnic", jpnicAdmin.AddAdmin)
+			//v1.DELETE("/group/network/jpnic", jpnicAdmin.DeleteAdmin)
+			//v1.GET("/group/network/jpnic", jpnicAdmin.GetAdmin)
+			////
+			//// JPNIC Admin
+			////
+			//v1.POST("/group/network/jpnic", jpnicTech.AddAdmin)
+			//v1.DELETE("/group/network/jpnic", jpnicTech.DeleteAdmin)
+			//v1.GET("/group/network/jpnic", jpnicTech.GetAdmin)
+			////
+			//// Connection
+			////
+			//v1.POST("/group/connection", connection.AddAdmin)
+			//// Group Delete
+			//v1.DELETE("/group/connection", connection.DeleteAdmin)
+			//// Group Update
+			//v1.PUT("/group/connection", connection.UpdateAdmin)
+			//v1.GET("/group/connection", connection.GetAllAdmin)
+			//v1.GET("/group/connection/:id", connection.GetAdmin)
 		}
 	}
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(config.Conf.Controller.Admin.Port), router))

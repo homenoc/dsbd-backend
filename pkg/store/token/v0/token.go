@@ -71,7 +71,7 @@ func Get(base int, input *token.Token) token.ResultDatabase {
 	} else if base == token.UserTokenAndAccessToken {
 		err = db.Where("user_token = ? AND access_token = ? AND admin = ?", input.UserToken, input.AccessToken, false).Find(&tokenStruct).Error
 	} else if base == token.AdminToken {
-		err = db.Where("access_token = ? AND admin = ?", input.AccessToken, false).Find(&tokenStruct).Error
+		err = db.Where("access_token = ? AND admin = ?", input.AccessToken, true).Find(&tokenStruct).Error
 	} else {
 		log.Println("base select error")
 		return token.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
