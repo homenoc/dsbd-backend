@@ -23,7 +23,7 @@ func GenerateInit(c *gin.Context) {
 	log.Println("userToken: " + userToken)
 	tmpToken, _ := toolToken.Generate(2)
 	err := dbToken.Create(&token.Token{ExpiredAt: time.Now().Add(30 * time.Minute), UID: 0, Status: 0,
-		UserToken: userToken, TmpToken: tmpToken, Debug: ip})
+		UserToken: userToken, TmpToken: tmpToken, Debug: ip, Admin: false})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: err.Error()})
 	} else {
