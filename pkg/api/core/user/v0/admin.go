@@ -10,7 +10,6 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
 )
 
 func AddAdmin(c *gin.Context) {
@@ -60,11 +59,7 @@ func UpdateAdmin(c *gin.Context) {
 	}
 	c.BindJSON(&input)
 
-	if !strings.Contains(input.Email, "@") {
-		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: "wrong email address"})
-		return
-	}
-	tmp := dbUser.Get(user.Email, &user.User{Email: input.Email})
+	tmp := dbUser.Get(user.ID, &user.User{Model: gorm.Model{ID: input.ID}})
 	if tmp.Err != nil {
 		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: tmp.Err.Error()})
 		return
@@ -76,7 +71,13 @@ func UpdateAdmin(c *gin.Context) {
 		return
 	}
 
-	if err := dbUser.Update(user.UpdateAll, &input); err != nil {
+	replace, err := updateAdminUser(input, tmp.User[0])
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: "error: this email is already registered"})
+		return
+	}
+
+	if err := dbUser.Update(user.UpdateAll, &replace); err != nil {
 		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
 		return
 	}
