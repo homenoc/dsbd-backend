@@ -7,7 +7,6 @@ import (
 	user "github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/store/user/v0"
 	"github.com/jinzhu/gorm"
-	"log"
 	"net/http"
 	"strconv"
 )
@@ -62,12 +61,6 @@ func UpdateAdmin(c *gin.Context) {
 	tmp := dbUser.Get(user.ID, &user.User{Model: gorm.Model{ID: input.ID}})
 	if tmp.Err != nil {
 		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: tmp.Err.Error()})
-		return
-	}
-
-	if tmp.User[0].ID != input.ID && len(tmp.User) != 0 {
-		log.Println("error: this email is already registered: " + input.Email)
-		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: "error: this email is already registered"})
 		return
 	}
 
