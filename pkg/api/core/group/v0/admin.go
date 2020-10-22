@@ -58,7 +58,19 @@ func UpdateAdmin(c *gin.Context) {
 	}
 	c.BindJSON(&input)
 
-	if err := dbGroup.Update(group.UpdateAll, input); err != nil {
+	tmp := dbGroup.Get(group.ID, &group.Group{Model: gorm.Model{ID: input.ID}})
+	if tmp.Err != nil {
+		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: tmp.Err.Error()})
+		return
+	}
+
+	replace, err := updateAdminUser(input, tmp.Group[0])
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: "error: this email is already registered"})
+		return
+	}
+
+	if err := dbGroup.Update(group.UpdateAll, replace); err != nil {
 		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: err.Error()})
 		return
 	}
