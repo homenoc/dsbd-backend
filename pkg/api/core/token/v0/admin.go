@@ -26,7 +26,7 @@ func GenerateAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, token.Result{Status: false, Token: []token.Token{{AccessToken: accessToken}}})
+	c.JSON(http.StatusOK, token.Result{Status: true, Token: []token.Token{{AccessToken: accessToken}}})
 }
 
 func AddAdmin(c *gin.Context) {
