@@ -31,6 +31,17 @@ func Delete(t *token.Token) error {
 	return db.Delete(t).Error
 }
 
+func DeleteAll() error {
+	db, err := store.ConnectDB()
+	if err != nil {
+		log.Println("database connection error")
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer db.Close()
+
+	return db.Exec("DELETE FROM tokens").Error
+}
+
 func Update(base int, t *token.Token) error {
 	db, err := store.ConnectDB()
 	if err != nil {

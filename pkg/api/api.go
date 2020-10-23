@@ -35,16 +35,17 @@ func AdminRestAPI() {
 			// User Update
 			v1.PUT("/user", user.UpdateAdmin)
 			v1.GET("/user", user.GetAllAdmin)
-			v1.GET("/user/:id", user.GetAllAdmin)
+			v1.GET("/user/:id", user.GetAdmin)
 			//
 			// Token
 			//
 			v1.POST("/token/generate", token.GenerateAdmin)
 
 			v1.POST("/token", token.AddAdmin)
-			// User Delete
-			v1.DELETE("/token", token.DeleteAdmin)
-			// User Update
+			// Token Delete
+			v1.DELETE("/token", token.DeleteAllAdmin)
+			v1.DELETE("/token/:id", token.DeleteAdmin)
+			// Token Update
 			v1.PUT("/token", token.UpdateAdmin)
 			v1.GET("/token", token.GetAllAdmin)
 			v1.GET("/token/:id", token.GetAdmin)

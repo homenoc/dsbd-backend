@@ -69,6 +69,20 @@ func DeleteAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, token.Result{Status: true})
 }
 
+func DeleteAllAdmin(c *gin.Context) {
+	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	if resultAdmin.Err != nil {
+		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: resultAdmin.Err.Error()})
+		return
+	}
+
+	if err := dbToken.DeleteAll(); err != nil {
+		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, token.Result{Status: true})
+}
+
 func UpdateAdmin(c *gin.Context) {
 	var input token.Token
 
