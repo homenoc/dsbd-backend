@@ -27,13 +27,13 @@ type Connection struct {
 	NOC        string `json:"noc"`
 	NOCIP      string `json:"noc_ip"`
 	TermIP     string `json:"term_ip"`
-	Monitor    bool   `json:"monitor"`
+	Monitor    *bool  `json:"monitor"`
 	LinkV4Our  string `json:"link_v4_our"`
 	LinkV4Your string `json:"link_v4_your"`
 	LinkV6Our  string `json:"link_v6_our"`
 	LinkV6Your string `json:"link_v6_your"`
 	Fee        string `json:"fee"`
-	Open       bool   `json:"open"`
+	Open       *bool  `json:"open"`
 	Comment    string `json:"comment"`
 }
 

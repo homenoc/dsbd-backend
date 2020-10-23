@@ -37,7 +37,7 @@ func Get(c *gin.Context) {
 	var information []info.Info
 
 	for _, data := range resultConnection.Connection {
-		if data.Open {
+		if *data.Open {
 			information = append(information, info.Info{
 				ServiceID: data.ServiceID, Service: data.Service, UserID: data.UserId, NOC: data.NOC,
 				Assign: data.NOCIP, TermIP: data.TermIP, LinkV4Our: data.LinkV4Our,
