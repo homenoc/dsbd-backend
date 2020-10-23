@@ -19,5 +19,5 @@ func updateAdminUser(input, replace group.Group) (group.Group, error) {
 		replace.Status = input.Status
 	}
 
-	return group.Group{}, nil
+	return replace, nil
 }
