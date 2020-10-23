@@ -7,6 +7,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	dbNotice "github.com/homenoc/dsbd-backend/pkg/api/store/notice/v0"
 	"github.com/jinzhu/gorm"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -20,6 +21,8 @@ func AddAdmin(c *gin.Context) {
 		return
 	}
 	c.BindJSON(&input)
+
+	log.Println(input.StartTime)
 
 	if err := check(input); err != nil {
 		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: err.Error()})

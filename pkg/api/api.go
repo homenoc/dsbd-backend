@@ -35,6 +35,7 @@ func AdminRestAPI() {
 			v1.POST("/notice", notice.AddAdmin)
 			v1.DELETE("/notice/:id", notice.DeleteAdmin)
 			v1.GET("/notice", notice.GetAllAdmin)
+			v1.GET("/notice/:id", notice.GetAdmin)
 			v1.PUT("/notice/:id", notice.UpdateAdmin)
 
 			//

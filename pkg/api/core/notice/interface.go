@@ -1,6 +1,8 @@
 package notice
 
-import "github.com/jinzhu/gorm"
+import (
+	"github.com/jinzhu/gorm"
+)
 
 const (
 	ID               = 0
