@@ -5,6 +5,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
+	controllerInterface "github.com/homenoc/dsbd-backend/pkg/api/core/controller"
+	controller "github.com/homenoc/dsbd-backend/pkg/api/core/controller/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support/chat"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support/ticket"
@@ -154,9 +156,8 @@ func GetAllAdmin(c *gin.Context) {
 func GetAdminWebSocket(c *gin.Context) {
 	//
 	// /support?id=0?user_token=accessID?access_token=token
-	// id = ticketID, user_token = UserToken, access_token = AccessToken
+	// id = ticketID, access_token = AccessToken
 
-	userToken := c.Query("user_token")
 	accessToken := c.Query("access_token")
 
 	id, err := strconv.Atoi(c.Query("id"))
@@ -173,10 +174,10 @@ func GetAdminWebSocket(c *gin.Context) {
 
 	defer conn.Close()
 
-	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
-	if result.Err != nil {
-		log.Println("ws:// support error:Auth error")
-		conn.WriteMessage(websocket.TextMessage, []byte("error: auth error"))
+	// Admin authentication
+	resultAdmin := auth.AdminAuthentication(accessToken)
+	if resultAdmin.Err != nil {
+		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: resultAdmin.Err.Error()})
 		return
 	}
 
@@ -187,12 +188,9 @@ func GetAdminWebSocket(c *gin.Context) {
 		return
 	}
 
-	if ticketResult.Ticket[0].ID != uint(id) {
-		log.Println("ticketID not match.")
-	}
-
 	// WebSocket送信
-	support.Clients[&support.WebSocket{TicketID: uint(id), UserID: result.User.ID, GroupID: result.Group.ID, Socket: conn}] = true
+	support.Clients[&support.WebSocket{TicketID: uint(id), UserID: resultAdmin.AdminID,
+		GroupID: ticketResult.Ticket[0].GroupID, Socket: conn}] = true
 
 	//WebSocket受信
 	for {
@@ -200,16 +198,27 @@ func GetAdminWebSocket(c *gin.Context) {
 		err := conn.ReadJSON(&msg)
 		if err != nil {
 			log.Printf("error: %v", err)
-			delete(support.Clients, &support.WebSocket{TicketID: uint(id), UserID: result.User.ID,
-				GroupID: result.Group.ID, Socket: conn})
+			delete(support.Clients, &support.WebSocket{TicketID: uint(id), UserID: resultAdmin.AdminID,
+				GroupID: ticketResult.Ticket[0].GroupID, Socket: conn})
 			break
 		}
 
-		_, err = dbChat.Create(&chat.Chat{TicketID: ticketResult.Ticket[0].ID, UserID: result.User.ID, Data: msg.Message})
+		_, err = dbChat.Create(&chat.Chat{TicketID: ticketResult.Ticket[0].ID, UserID: resultAdmin.AdminID, Admin: true,
+			Data: msg.Message})
 		if err != nil {
 			conn.WriteJSON(&support.WebSocketResult{Err: "db write error"})
 		} else {
-			msg.UserID = result.User.ID
+
+			//Admin側に送信
+			controller.SendChatAdmin(controllerInterface.Chat{CreatedAt: msg.CreatedAt, Admin: msg.Admin,
+				UserID: resultAdmin.AdminID, GroupID: ticketResult.Ticket[0].GroupID, Message: msg.Message})
+
+			msg.UserID = resultAdmin.AdminID
+			msg.GroupID = ticketResult.Ticket[0].GroupID
+			msg.Admin = true
+			// Token関連の初期化
+			msg.AccessToken = ""
+			msg.UserToken = ""
 			support.Broadcast <- msg
 		}
 	}
@@ -218,21 +227,12 @@ func GetAdminWebSocket(c *gin.Context) {
 func HandleMessagesAdmin() {
 	for {
 		msg := <-support.Broadcast
-		// 入力されたデータをTokenにて認証
-		resultGroup := auth.GroupAuthentication(token.Token{UserToken: msg.UserToken, AccessToken: msg.AccessToken})
-		if resultGroup.Err != nil {
-			log.Println(resultGroup.Err)
-			return
-		}
-		// Token関連の初期化
-		msg.AccessToken = ""
-		msg.UserToken = ""
 		//登録されているクライアント宛にデータ送信する
 		for client := range support.Clients {
 			// ユーザのみの場合
 			if client.GroupID == 0 {
 				return
-			} else if client.GroupID == resultGroup.Group.ID {
+			} else if client.GroupID == msg.GroupID {
 				err := client.Socket.WriteJSON(msg)
 				if err != nil {
 					log.Printf("error: %v", err)

@@ -5,6 +5,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
+	controllerInterface "github.com/homenoc/dsbd-backend/pkg/api/core/controller"
+	controller "github.com/homenoc/dsbd-backend/pkg/api/core/controller/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support/chat"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support/ticket"
@@ -190,8 +192,13 @@ func GetWebSocket(c *gin.Context) {
 		if err != nil {
 			conn.WriteJSON(&support.WebSocketResult{Err: "db write error"})
 		} else {
+
+			controller.SendChatUser(controllerInterface.Chat{CreatedAt: msg.CreatedAt,
+				UserID: result.User.ID, GroupID: resultGroup.Group.ID, Admin: msg.Admin, Message: msg.Message})
+
 			msg.UserID = result.User.ID
 			msg.GroupID = resultGroup.Group.ID
+			msg.Admin = false
 			// Token関連の初期化
 			msg.AccessToken = ""
 			msg.UserToken = ""
