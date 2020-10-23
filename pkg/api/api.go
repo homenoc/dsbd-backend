@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	controller "github.com/homenoc/dsbd-backend/pkg/api/core/controller/v0"
 	connection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection/v0"
 	info "github.com/homenoc/dsbd-backend/pkg/api/core/group/info/v0"
 	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/v0"
@@ -25,6 +26,10 @@ func AdminRestAPI() {
 	{
 		v1 := api.Group("/v1")
 		{
+			// Controller
+			//
+			v1.POST("/controller/chat", controller.ReceiveChatAdmin)
+
 			//
 			// User
 			//
@@ -106,11 +111,11 @@ func AdminRestAPI() {
 	{
 		v1 := ws.Group("/v1")
 		{
-			v1.GET("/support", ticket.GetWebSocket)
+			v1.GET("/support", ticket.GetAdminWebSocket)
 		}
 	}
 
-	//go ticket.HandleMessages()
+	go ticket.HandleMessagesAdmin()
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(config.Conf.Controller.Admin.Port), router))
 }
 
@@ -122,6 +127,10 @@ func UserRestAPI() {
 	{
 		v1 := api.Group("/v1")
 		{
+			// Controller
+			//
+			v1.POST("/controller/chat", controller.ReceiveChatUser)
+
 			//
 			// User
 			//
