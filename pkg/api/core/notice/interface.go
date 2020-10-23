@@ -18,7 +18,7 @@ const (
 type Notice struct {
 	gorm.Model
 	UserID     uint   `json:"user_id"`
-	GroupID    uint   `json:"next_id"`
+	GroupID    uint   `json:"group_id"`
 	Everyone   *bool  `json:"everyone"`
 	StartTime  uint   `json:"start_time"`
 	EndingTime uint   `json:"ending_time"`
