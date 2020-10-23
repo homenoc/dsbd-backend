@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"github.com/homenoc/dsbd-backend/pkg/store"
-	"github.com/homenoc/dsbd-backend/pkg/tool/config"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
+	"github.com/homenoc/dsbd-backend/pkg/api/store"
 	"github.com/spf13/cobra"
 	"log"
 )

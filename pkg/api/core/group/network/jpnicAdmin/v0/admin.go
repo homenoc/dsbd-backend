@@ -5,7 +5,7 @@ import (
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicAdmin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
-	dbJpnicAdmin "github.com/homenoc/dsbd-backend/pkg/store/group/network/jpnicAdmin/v0"
+	dbJpnicAdmin "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/jpnicAdmin/v0"
 	"github.com/jinzhu/gorm"
 	"net/http"
 	"strconv"

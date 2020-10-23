@@ -7,8 +7,8 @@ import (
 	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicAdmin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
-	dbNetwork "github.com/homenoc/dsbd-backend/pkg/store/group/network/v0"
-	dbGroup "github.com/homenoc/dsbd-backend/pkg/store/group/v0"
+	dbNetwork "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/v0"
+	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	"github.com/jinzhu/gorm"
 	"net/http"
 )

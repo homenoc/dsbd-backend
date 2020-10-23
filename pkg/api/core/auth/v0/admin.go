@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/auth"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
-	dbToken "github.com/homenoc/dsbd-backend/pkg/store/token/v0"
-	"github.com/homenoc/dsbd-backend/pkg/tool/config"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
+	dbToken "github.com/homenoc/dsbd-backend/pkg/api/store/token/v0"
 )
 
 func AdminRadiusAuthentication(data auth.AdminStruct) auth.AdminResult {

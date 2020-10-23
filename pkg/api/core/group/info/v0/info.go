@@ -7,8 +7,8 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/info"
 	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
-	dbConnection "github.com/homenoc/dsbd-backend/pkg/store/group/connection/v0"
-	dbNetwork "github.com/homenoc/dsbd-backend/pkg/store/group/network/v0"
+	dbConnection "github.com/homenoc/dsbd-backend/pkg/api/store/group/connection/v0"
+	dbNetwork "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/v0"
 	"net/http"
 )
 

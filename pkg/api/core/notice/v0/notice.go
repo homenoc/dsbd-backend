@@ -5,7 +5,7 @@ import (
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/notice"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
-	dbNotice "github.com/homenoc/dsbd-backend/pkg/store/notice/v0"
+	dbNotice "github.com/homenoc/dsbd-backend/pkg/api/store/notice/v0"
 	"net/http"
 )
 

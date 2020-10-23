@@ -6,9 +6,9 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
-	dbGroup "github.com/homenoc/dsbd-backend/pkg/store/group/v0"
-	dbToken "github.com/homenoc/dsbd-backend/pkg/store/token/v0"
-	dbUser "github.com/homenoc/dsbd-backend/pkg/store/user/v0"
+	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
+	dbToken "github.com/homenoc/dsbd-backend/pkg/api/store/token/v0"
+	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"github.com/jinzhu/gorm"
 )
 

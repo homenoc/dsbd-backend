@@ -2,9 +2,9 @@ package v0
 
 import (
 	"fmt"
+	toolToken "github.com/homenoc/dsbd-backend/pkg/api/core/tool/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
-	dbUser "github.com/homenoc/dsbd-backend/pkg/store/user/v0"
-	toolToken "github.com/homenoc/dsbd-backend/pkg/tool/token"
+	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"log"
 	"strings"
 )

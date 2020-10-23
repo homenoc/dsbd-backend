@@ -7,8 +7,8 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	connection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
-	dbConnection "github.com/homenoc/dsbd-backend/pkg/store/group/connection/v0"
-	dbGroup "github.com/homenoc/dsbd-backend/pkg/store/group/v0"
+	dbConnection "github.com/homenoc/dsbd-backend/pkg/api/store/group/connection/v0"
+	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	"github.com/jinzhu/gorm"
 	"net/http"
 )

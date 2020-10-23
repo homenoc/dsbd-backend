@@ -6,9 +6,9 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicAdmin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicTech"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
-	dbJpnicAdmin "github.com/homenoc/dsbd-backend/pkg/store/group/network/jpnicAdmin/v0"
-	dbJpnicTech "github.com/homenoc/dsbd-backend/pkg/store/group/network/jpnicTech/v0"
-	dbUser "github.com/homenoc/dsbd-backend/pkg/store/user/v0"
+	dbJpnicAdmin "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/jpnicAdmin/v0"
+	dbJpnicTech "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/jpnicTech/v0"
+	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"github.com/jinzhu/gorm"
 	"log"
 )

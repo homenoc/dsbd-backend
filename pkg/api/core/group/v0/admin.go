@@ -5,7 +5,7 @@ import (
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
-	dbGroup "github.com/homenoc/dsbd-backend/pkg/store/group/v0"
+	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	"github.com/jinzhu/gorm"
 	"net/http"
 	"strconv"

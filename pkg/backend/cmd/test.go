@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/homenoc/dsbd-backend/pkg/tool/hash"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/hash"
 	"github.com/spf13/cobra"
 	"log"
 )
