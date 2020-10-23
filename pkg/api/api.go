@@ -73,6 +73,18 @@ func AdminRestAPI() {
 			//v1.POST("/support/:id", chat.AddAdmin)
 			v1.GET("/support/:id", ticket.GetAdmin)
 			v1.PUT("/support/:id", ticket.UpdateAdmin)
+
+			////
+			//// Connection
+			////
+			v1.POST("/connection", connection.AddAdmin)
+			// Group Delete
+			v1.DELETE("/connection", connection.DeleteAdmin)
+			// Group Update
+			v1.PUT("/connection", connection.UpdateAdmin)
+			v1.GET("/connection", connection.GetAllAdmin)
+			v1.GET("/connection/:id", connection.GetAdmin)
+
 			////
 			//// Network
 			////
@@ -95,16 +107,6 @@ func AdminRestAPI() {
 			//v1.POST("/group/network/jpnic", jpnicTech.AddAdmin)
 			//v1.DELETE("/group/network/jpnic", jpnicTech.DeleteAdmin)
 			//v1.GET("/group/network/jpnic", jpnicTech.GetAdmin)
-			////
-			//// Connection
-			////
-			//v1.POST("/group/connection", connection.AddAdmin)
-			//// Group Delete
-			//v1.DELETE("/group/connection", connection.DeleteAdmin)
-			//// Group Update
-			//v1.PUT("/group/connection", connection.UpdateAdmin)
-			//v1.GET("/group/connection", connection.GetAllAdmin)
-			//v1.GET("/group/connection/:id", connection.GetAdmin)
 		}
 	}
 	ws := router.Group("/ws")

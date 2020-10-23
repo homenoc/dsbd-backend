@@ -58,7 +58,19 @@ func UpdateAdmin(c *gin.Context) {
 	}
 	c.BindJSON(&input)
 
-	if err := dbConnection.Update(connection.UpdateAll, input); err != nil {
+	resultConnection := dbConnection.Get(connection.ID, &connection.Connection{Model: gorm.Model{ID: input.ID}})
+	if resultConnection.Err != nil {
+		c.JSON(http.StatusInternalServerError, connection.Result{Status: false, Error: resultConnection.Err.Error()})
+		return
+	}
+
+	replace, err := updateAdminConnection(input, resultConnection.Connection[0])
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, connection.Result{Status: false, Error: err.Error()})
+		return
+	}
+
+	if err := dbConnection.Update(connection.UpdateAll, replace); err != nil {
 		c.JSON(http.StatusInternalServerError, connection.Result{Status: false, Error: err.Error()})
 		return
 	}
