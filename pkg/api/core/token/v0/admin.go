@@ -10,6 +10,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 func GenerateAdmin(c *gin.Context) {
@@ -21,7 +22,7 @@ func GenerateAdmin(c *gin.Context) {
 	}
 	accessToken, _ := toolToken.Generate(2)
 
-	if err := dbToken.Create(&token.Token{AdminID: resultAuth.AdminID, UID: 0,
+	if err := dbToken.Create(&token.Token{AdminID: resultAuth.AdminID, UID: 0, ExpiredAt: time.Now().Add(60 * time.Minute),
 		Admin: true, AccessToken: accessToken, Debug: "User: " + c.Request.Header.Get("USER")}); err != nil {
 		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: err.Error()})
 		return

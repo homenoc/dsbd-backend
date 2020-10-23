@@ -9,6 +9,7 @@ const (
 	ID                      = 0
 	UserToken               = 10
 	UserTokenAndAccessToken = 11
+	ExpiredTime             = 12
 	AdminToken              = 20
 	AddToken                = 100
 	UpdateToken             = 101

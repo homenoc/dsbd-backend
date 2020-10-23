@@ -22,6 +22,8 @@ func AdminRestAPI() {
 	router := gin.Default()
 	router.Use(cors)
 
+	go token.TokenRemove()
+
 	api := router.Group("/api")
 	{
 		v1 := api.Group("/v1")
