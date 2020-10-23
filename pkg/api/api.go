@@ -59,6 +59,15 @@ func AdminRestAPI() {
 			v1.PUT("/group", group.UpdateAdmin)
 			v1.GET("/group", group.GetAllAdmin)
 			v1.GET("/group/:id", group.GetAdmin)
+
+			//
+			// Support
+			//
+			v1.POST("/support", ticket.CreateAdmin)
+			v1.GET("/support", ticket.GetAllAdmin)
+			//v1.POST("/support/:id", chat.AddAdmin)
+			v1.GET("/support/:id", ticket.GetAdmin)
+			v1.PUT("/support/:id", ticket.UpdateAdmin)
 			////
 			//// Network
 			////
@@ -93,6 +102,15 @@ func AdminRestAPI() {
 			//v1.GET("/group/connection/:id", connection.GetAdmin)
 		}
 	}
+	ws := router.Group("/ws")
+	{
+		v1 := ws.Group("/v1")
+		{
+			v1.GET("/support", ticket.GetWebSocket)
+		}
+	}
+
+	//go ticket.HandleMessages()
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(config.Conf.Controller.Admin.Port), router))
 }
 

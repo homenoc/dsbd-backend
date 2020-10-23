@@ -17,35 +17,33 @@ import (
 	"strconv"
 )
 
-func Create(c *gin.Context) {
+func CreateAdmin(c *gin.Context) {
 	var input support.FirstInput
-	userToken := c.Request.Header.Get("USER_TOKEN")
-	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	c.BindJSON(&input)
-
-	// Group authentication
-	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
-	if result.Err != nil {
-		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: result.Err.Error()})
+	// Admin authentication
+	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	if resultAdmin.Err != nil {
+		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: resultAdmin.Err.Error()})
 		return
 	}
 
+	c.BindJSON(&input)
+
 	// input check
-	if err := check(input); err != nil {
+	if err := checkAdmin(input); err != nil {
 		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: err.Error()})
 		return
 	}
 
 	// Chat DBに登録
-	chatResult, err := dbChat.Create(&chat.Chat{UserID: result.User.ID, Admin: false, Data: input.Data})
+	chatResult, err := dbChat.Create(&chat.Chat{UserID: 0, Admin: true, Data: input.Data})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: err.Error()})
 		return
 	}
 
 	// Ticket DBに登録
-	ticketResult, err := dbTicket.Create(&ticket.Ticket{GroupID: result.Group.ID, UserID: result.User.ID,
+	ticketResult, err := dbTicket.Create(&ticket.Ticket{GroupID: input.GroupID, UserID: 0,
 		ChatIDStart: chatResult.ID, ChatIDEnd: chatResult.ID, Solved: &[]bool{false}[0], Title: input.Title})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: err.Error()})
@@ -53,7 +51,7 @@ func Create(c *gin.Context) {
 	}
 
 	// Chat DBにTicketIDを登録
-	err = dbChat.Update(chat.UpdateAll, chat.Chat{Admin: false, Data: chatResult.Data, TicketID: ticketResult.ID})
+	err = dbChat.Update(chat.UpdateAll, chat.Chat{Admin: true, Data: chatResult.Data, TicketID: ticketResult.ID})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: err.Error()})
 		return
@@ -62,9 +60,14 @@ func Create(c *gin.Context) {
 		Chat: []chat.Chat{*chatResult}})
 }
 
-func Get(c *gin.Context) {
-	userToken := c.Request.Header.Get("USER_TOKEN")
-	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
+func UpdateAdmin(c *gin.Context) {
+	var input ticket.Ticket
+	// Admin authentication
+	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	if resultAdmin.Err != nil {
+		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: resultAdmin.Err.Error()})
+		return
+	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -72,10 +75,42 @@ func Get(c *gin.Context) {
 		return
 	}
 
-	// Group authentication
-	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
-	if result.Err != nil {
-		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: result.Err.Error()})
+	c.BindJSON(&input)
+
+	// Ticket DBからデータを取得
+	ticketResult := dbTicket.Get(ticket.ID, &ticket.Ticket{Model: gorm.Model{ID: uint(id)}})
+	if ticketResult.Err != nil {
+		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: err.Error()})
+		return
+	}
+
+	// input check
+	replace, err := updateAdminTicket(input, ticketResult.Ticket[0])
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: err.Error()})
+		return
+	}
+
+	// Ticketのアップデート
+	err = dbTicket.Update(ticket.UpdateAll, replace)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, support.Result{Status: true})
+}
+
+func GetAdmin(c *gin.Context) {
+	// Admin authentication
+	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	if resultAdmin.Err != nil {
+		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: resultAdmin.Err.Error()})
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, support.Result{Status: false, Error: fmt.Sprintf("id error")})
 		return
 	}
 
@@ -83,12 +118,6 @@ func Get(c *gin.Context) {
 	resultTicket := dbTicket.Get(ticket.ID, &ticket.Ticket{Model: gorm.Model{ID: uint(id)}})
 	if resultTicket.Err != nil {
 		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: resultTicket.Err.Error()})
-		return
-	}
-
-	// GroupIDが一致しない場合はここでエラーを返す
-	if resultTicket.Ticket[0].GroupID != result.Group.ID {
-		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: "Auth Error: group id failed..."})
 		return
 	}
 
@@ -102,18 +131,16 @@ func Get(c *gin.Context) {
 	c.JSON(http.StatusOK, support.Result{Status: true, Ticket: resultTicket.Ticket, Chat: resultChat.Chat})
 }
 
-func GetTitle(c *gin.Context) {
-	userToken := c.Request.Header.Get("USER_TOKEN")
-	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
-
-	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
-	if result.Err != nil {
-		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: result.Err.Error()})
+func GetAllAdmin(c *gin.Context) {
+	// Admin authentication
+	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	if resultAdmin.Err != nil {
+		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: resultAdmin.Err.Error()})
 		return
 	}
 
 	// Ticket DBからGroup IDのTicketデータを抽出
-	resultTicket := dbTicket.Get(ticket.GID, &ticket.Ticket{GroupID: result.Group.ID})
+	resultTicket := dbTicket.GetAll()
 	if resultTicket.Err != nil {
 		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: resultTicket.Err.Error()})
 		return
@@ -124,7 +151,7 @@ func GetTitle(c *gin.Context) {
 	c.JSON(http.StatusOK, support.Result{Status: true, Ticket: resultTicket.Ticket})
 }
 
-func GetWebSocket(c *gin.Context) {
+func GetAdminWebSocket(c *gin.Context) {
 	//
 	// /support?id=0?user_token=accessID?access_token=token
 	// id = ticketID, user_token = UserToken, access_token = AccessToken
@@ -188,7 +215,7 @@ func GetWebSocket(c *gin.Context) {
 	}
 }
 
-func HandleMessages() {
+func HandleMessagesAdmin() {
 	for {
 		msg := <-support.Broadcast
 		// 入力されたデータをTokenにて認証

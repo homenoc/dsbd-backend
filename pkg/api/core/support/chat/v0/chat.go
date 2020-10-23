@@ -52,7 +52,7 @@ func Add(c *gin.Context) {
 		return
 	}
 	// 問題解決時はここでエラーを返す
-	if resultTicket.Ticket[0].Solved {
+	if *resultTicket.Ticket[0].Solved {
 		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: "This problem is closed..."})
 		return
 	}
