@@ -165,7 +165,8 @@ func GetWebSocket(c *gin.Context) {
 	}
 
 	// WebSocket送信
-	support.Clients[&support.WebSocket{TicketID: uint(id), UserID: result.User.ID, GroupID: result.Group.ID, Socket: conn}] = true
+	support.Clients[&support.WebSocket{TicketID: uint(id), Admin: false,
+		UserID: result.User.ID, GroupID: result.Group.ID, Socket: conn}] = true
 
 	//WebSocket受信
 	for {
@@ -173,16 +174,27 @@ func GetWebSocket(c *gin.Context) {
 		err := conn.ReadJSON(&msg)
 		if err != nil {
 			log.Printf("error: %v", err)
-			delete(support.Clients, &support.WebSocket{TicketID: uint(id), UserID: result.User.ID,
+			delete(support.Clients, &support.WebSocket{TicketID: uint(id), Admin: false, UserID: result.User.ID,
 				GroupID: result.Group.ID, Socket: conn})
 			break
 		}
+		// 入力されたデータをTokenにて認証
+		resultGroup := auth.GroupAuthentication(token.Token{UserToken: msg.UserToken, AccessToken: msg.AccessToken})
+		if resultGroup.Err != nil {
+			log.Println(resultGroup.Err)
+			return
+		}
 
-		_, err = dbChat.Create(&chat.Chat{TicketID: ticketResult.Ticket[0].ID, UserID: result.User.ID, Data: msg.Message})
+		_, err = dbChat.Create(&chat.Chat{TicketID: ticketResult.Ticket[0].ID, UserID: result.User.ID, Admin: false,
+			Data: msg.Message})
 		if err != nil {
 			conn.WriteJSON(&support.WebSocketResult{Err: "db write error"})
 		} else {
 			msg.UserID = result.User.ID
+			msg.GroupID = resultGroup.Group.ID
+			// Token関連の初期化
+			msg.AccessToken = ""
+			msg.UserToken = ""
 			support.Broadcast <- msg
 		}
 	}
@@ -191,21 +203,13 @@ func GetWebSocket(c *gin.Context) {
 func HandleMessages() {
 	for {
 		msg := <-support.Broadcast
-		// 入力されたデータをTokenにて認証
-		resultGroup := auth.GroupAuthentication(token.Token{UserToken: msg.UserToken, AccessToken: msg.AccessToken})
-		if resultGroup.Err != nil {
-			log.Println(resultGroup.Err)
-			return
-		}
-		// Token関連の初期化
-		msg.AccessToken = ""
-		msg.UserToken = ""
+
 		//登録されているクライアント宛にデータ送信する
 		for client := range support.Clients {
 			// ユーザのみの場合
 			if client.GroupID == 0 {
 				return
-			} else if client.GroupID == resultGroup.Group.ID {
+			} else if client.GroupID == msg.GroupID {
 				err := client.Socket.WriteJSON(msg)
 				if err != nil {
 					log.Printf("error: %v", err)

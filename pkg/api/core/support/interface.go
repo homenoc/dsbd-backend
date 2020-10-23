@@ -20,6 +20,8 @@ type WebSocketResult struct {
 	UserToken   string    `json:"user_token"`
 	AccessToken string    `json:"access_token"`
 	UserID      uint      `json:"user_id"`
+	GroupID     uint      `json:"group_id"`
+	Admin       bool      `json:"admin"`
 	Message     string    `json:"message"`
 }
 
@@ -27,6 +29,7 @@ type WebSocket struct {
 	TicketID uint
 	GroupID  uint
 	UserID   uint
+	Admin    bool
 	Socket   *websocket.Conn
 }
 
