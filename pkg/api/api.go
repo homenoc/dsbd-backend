@@ -30,6 +30,13 @@ func AdminRestAPI() {
 			//
 			v1.POST("/controller/chat", controller.ReceiveChatAdmin)
 
+			// Notice
+			//
+			v1.POST("/notice", notice.AddAdmin)
+			v1.DELETE("/notice/:id", notice.DeleteAdmin)
+			v1.GET("/notice", notice.GetAllAdmin)
+			v1.PUT("/notice/:id", notice.UpdateAdmin)
+
 			//
 			// User
 			//

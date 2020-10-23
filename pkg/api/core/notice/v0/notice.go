@@ -20,7 +20,8 @@ func Get(c *gin.Context) {
 		return
 	}
 
-	noticeResult := dbNotice.Get(notice.Data, &notice.Notice{UserID: result.User.ID, GroupID: result.Group.ID, Everyone: true})
+	noticeResult := dbNotice.Get(notice.Data, &notice.Notice{UserID: result.User.ID, GroupID: result.Group.ID,
+		Everyone: &[]bool{true}[0]})
 	if noticeResult.Err != nil {
 		c.JSON(http.StatusInternalServerError, notice.Result{Status: false, Error: result.Err.Error()})
 		return
