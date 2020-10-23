@@ -20,17 +20,26 @@ type Controller struct {
 }
 
 type User struct {
+	IP   string `json:"ip"`
 	Url  string `json:"url"`
 	Port int    `json:"port"`
 }
 
 type Admin struct {
-	Port int `json:"port"`
+	IP        string    `json:"ip"`
+	Port      int       `json:"port"`
+	AdminAuth AdminAuth `json:"auth"`
+}
+
+type AdminAuth struct {
+	User string `json:"user"`
+	Pass string `json:"pass"`
 }
 
 type Auth struct {
-	User string `json:"user"`
-	Pass string `json:"pass"`
+	Token1 string `json:"token1"`
+	Token2 string `json:"token2"`
+	Token3 string `json:"token3"`
 }
 
 type DB struct {
