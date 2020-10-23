@@ -10,7 +10,7 @@ import (
 
 func AdminRadiusAuthentication(data auth.AdminStruct) auth.AdminResult {
 
-	if config.Conf.Controller.Auth.User == data.User && config.Conf.Controller.Auth.Pass == data.Pass {
+	if config.Conf.Controller.Admin.AdminAuth.User == data.User && config.Conf.Controller.Admin.AdminAuth.Pass == data.Pass {
 		return auth.AdminResult{AdminID: 0, Err: nil}
 	}
 	// Todo Radius認証追加予定
