@@ -78,13 +78,13 @@ func Get(base int, input *token.Token) token.ResultDatabase {
 	var tokenStruct []token.Token
 
 	if base == token.UserToken {
-		err = db.Where("user_token = ? AND admin = ? AND expired_at < ?",
+		err = db.Where("user_token = ? AND admin = ? AND expired_at > ?",
 			input.UserToken, false, time.Now()).Find(&tokenStruct).Error
 	} else if base == token.UserTokenAndAccessToken {
-		err = db.Where("user_token = ? AND access_token = ? AND admin = ? AND expired_at < ?",
+		err = db.Where("user_token = ? AND access_token = ? AND admin = ? AND expired_at > ?",
 			input.UserToken, input.AccessToken, false, time.Now()).Find(&tokenStruct).Error
 	} else if base == token.AdminToken {
-		err = db.Where("access_token = ? AND admin = ? AND expired_at < ?",
+		err = db.Where("access_token = ? AND admin = ? AND expired_at > ?",
 			input.AccessToken, true, time.Now()).Find(&tokenStruct).Error
 	} else if base == token.ExpiredTime {
 		err = db.Where("expired_at < ? ", time.Now()).Find(&tokenStruct).Error
