@@ -85,16 +85,16 @@ func AdminRestAPI() {
 			v1.GET("/connection", connection.GetAllAdmin)
 			v1.GET("/connection/:id", connection.GetAdmin)
 
-			////
-			//// Network
-			////
-			//v1.POST("/group/network", network.AddAdmin)
-			//// Group Delete
-			//v1.DELETE("/group/network", network.DeleteAdmin)
-			//// Group Update
-			//v1.PUT("/group/network", network.UpdateAdmin)
-			//v1.GET("/group/network", network.GetAllAdmin)
-			//v1.GET("/group/network/:id", network.GetAdmin)
+			//
+			// Network
+			//
+			v1.POST("/network", network.AddAdmin)
+			// Network Delete
+			v1.DELETE("/network", network.DeleteAdmin)
+			// Network Update
+			v1.PUT("/network", network.UpdateAdmin)
+			v1.GET("/network", network.GetAllAdmin)
+			v1.GET("/network/:id", network.GetAdmin)
 			////
 			//// JPNIC Admin
 			////
