@@ -44,6 +44,8 @@ func Add(c *gin.Context) {
 
 	mailToken, _ := toolToken.Generate(4)
 
+	pass := ""
+
 	// 新規ユーザ
 	if input.GID == 0 { //new user
 		if input.Pass == "" {
@@ -52,14 +54,6 @@ func Add(c *gin.Context) {
 		}
 		data = user.User{GID: 0, Name: input.Name, Email: input.Email, Pass: input.Pass, Status: 0, Level: 1,
 			MailVerify: false, MailToken: mailToken}
-
-		mail.SendMail(mail.Mail{
-			ToMail:  data.Email,
-			Subject: "本人確認のメールにつきまして",
-			Content: " " + input.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
-				config.Conf.Controller.User.Url + "/api/v1/user/verify/" + mailToken + "\n" +
-				"本人確認が完了次第、ログイン可能になります。\n",
-		})
 
 		// グループ所属ユーザの登録
 	} else {
@@ -77,34 +71,44 @@ func Add(c *gin.Context) {
 			return
 		}
 
-		pass := etc.GenerateUUID()
+		pass = etc.GenerateUUID()
 		log.Println("Email: " + input.Email)
 		log.Println("tmp_Pass: " + pass)
 
 		data = user.User{GID: input.GID, Name: input.Name, Email: input.Email, Pass: strings.ToLower(hash.Generate(pass)),
 			Status: 0, Tech: input.Tech, Level: input.Level, MailVerify: false, MailToken: mailToken}
-
-		mail.SendMail(mail.Mail{
-			ToMail:  data.Email,
-			Subject: "本人確認メールにつきまして",
-			Content: " " + input.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
-				config.Conf.Controller.User.Url + "/api/v1/user/verify/" + mailToken + "\n" +
-				"本人確認が完了次第、ログイン可能になります。\n" + "仮パスワード: " + pass,
-		})
 	}
-
-	attachment := slack.Attachment{}
-	attachment.AddField(slack.Field{Title: "E-Mail", Value: input.Email}).
-		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(input.GID))}).
-		AddField(slack.Field{Title: "Name", Value: input.Name}).
-		AddField(slack.Field{Title: "Name(English)", Value: input.NameEn})
-
-	notification.SendSlack(notification.Slack{Attachment: attachment, Channel: "user", Status: true})
 
 	//check exist for database
 	if err := dbUser.Create(&data); err != nil {
 		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
 	} else {
+		attachment := slack.Attachment{}
+		attachment.AddField(slack.Field{Title: "E-Mail", Value: input.Email}).
+			AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(input.GID))}).
+			AddField(slack.Field{Title: "Name", Value: input.Name}).
+			AddField(slack.Field{Title: "Name(English)", Value: input.NameEn})
+
+		notification.SendSlack(notification.Slack{Attachment: attachment, Channel: "user", Status: true})
+
+		if pass == "" {
+			mail.SendMail(mail.Mail{
+				ToMail:  data.Email,
+				Subject: "本人確認のメールにつきまして",
+				Content: " " + input.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
+					config.Conf.Controller.User.Url + "/api/v1/user/verify/" + mailToken + "\n" +
+					"本人確認が完了次第、ログイン可能になります。\n",
+			})
+		} else {
+			mail.SendMail(mail.Mail{
+				ToMail:  data.Email,
+				Subject: "本人確認メールにつきまして",
+				Content: " " + input.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
+					config.Conf.Controller.User.Url + "/api/v1/user/verify/" + mailToken + "\n" +
+					"本人確認が完了次第、ログイン可能になります。\n" + "仮パスワード: " + pass,
+			})
+		}
+
 		c.JSON(http.StatusOK, user.Result{Status: true})
 	}
 }
