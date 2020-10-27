@@ -7,6 +7,7 @@ import (
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/gen"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/hash"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/mail"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
@@ -14,7 +15,6 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"github.com/jinzhu/gorm"
-	"github.com/vmmgr/controller/etc"
 	"log"
 	"net/http"
 	"strconv"
@@ -26,19 +26,20 @@ func Add(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	c.BindJSON(&input)
+	err := c.BindJSON(&input)
+	log.Println(err)
 
 	if !strings.Contains(input.Email, "@") {
-		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: fmt.Sprintf("wrong email address")})
+		c.JSON(http.StatusBadRequest, user.Result{Status: false, Error: fmt.Sprintf("wrong email address")})
 		return
 	}
 	if input.Name == "" || input.NameEn == "" {
-		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: fmt.Sprintf("wrong name")})
+		c.JSON(http.StatusBadRequest, user.Result{Status: false, Error: fmt.Sprintf("wrong name")})
 		return
 	}
 
 	if err := check(input); err != nil {
-		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
+		c.JSON(http.StatusBadRequest, user.Result{Status: false, Error: err.Error()})
 		return
 	}
 
@@ -49,7 +50,7 @@ func Add(c *gin.Context) {
 	// 新規ユーザ
 	if input.GID == 0 { //new user
 		if input.Pass == "" {
-			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: fmt.Sprintf("wrong pass")})
+			c.JSON(http.StatusBadRequest, user.Result{Status: false, Error: fmt.Sprintf("wrong pass")})
 			return
 		}
 		data = user.User{GID: 0, Name: input.Name, Email: input.Email, Pass: input.Pass, Status: 0, Level: 1,
@@ -63,7 +64,7 @@ func Add(c *gin.Context) {
 		}
 		authResult := auth.UserAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 		if authResult.Err != nil {
-			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: authResult.Err.Error()})
+			c.JSON(http.StatusForbidden, user.Result{Status: false, Error: authResult.Err.Error()})
 			return
 		}
 		if authResult.User.GID != input.GID && authResult.User.GID > 0 {
@@ -71,7 +72,7 @@ func Add(c *gin.Context) {
 			return
 		}
 
-		pass = etc.GenerateUUID()
+		pass = gen.GenerateUUID()
 		log.Println("Email: " + input.Email)
 		log.Println("tmp_Pass: " + pass)
 
@@ -114,9 +115,9 @@ func Add(c *gin.Context) {
 }
 
 func MailVerify(c *gin.Context) {
-	token := c.Param("token")
+	mailToken := c.Param("token")
 
-	result := dbUser.Get(user.MailToken, &user.User{MailToken: token})
+	result := dbUser.Get(user.MailToken, &user.User{MailToken: mailToken})
 	if result.Err != nil {
 		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: result.Err.Error() + "| we can't find token data"})
 		return
@@ -150,11 +151,11 @@ func Update(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	c.BindJSON(&input)
+	log.Println(c.BindJSON(&input))
 
 	authResult := auth.UserAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 	if authResult.Err != nil {
-		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: authResult.Err.Error()})
+		c.JSON(http.StatusUnauthorized, user.Result{Status: false, Error: authResult.Err.Error()})
 		return
 	}
 
@@ -213,7 +214,7 @@ func Get(c *gin.Context) {
 	authResult.User.Pass = ""
 	authResult.User.MailToken = ""
 	if authResult.Err != nil {
-		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: authResult.Err.Error()})
+		c.JSON(http.StatusUnauthorized, user.Result{Status: false, Error: authResult.Err.Error()})
 	} else {
 		c.JSON(http.StatusOK, user.ResultOne{Status: true, User: authResult.User})
 	}
@@ -226,7 +227,7 @@ func GetGroup(c *gin.Context) {
 	authResult := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 	result := dbUser.Get(user.GID, &user.User{GID: authResult.Group.ID})
 	if result.Err != nil {
-		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: result.Err.Error()})
+		c.JSON(http.StatusUnauthorized, user.Result{Status: false, Error: result.Err.Error()})
 		return
 	}
 
