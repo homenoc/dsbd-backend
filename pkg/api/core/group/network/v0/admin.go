@@ -7,6 +7,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	dbNetwork "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/v0"
 	"github.com/jinzhu/gorm"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -16,10 +17,10 @@ func AddAdmin(c *gin.Context) {
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
-		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: resultAdmin.Err.Error()})
+		c.JSON(http.StatusUnauthorized, token.Result{Status: false, Error: resultAdmin.Err.Error()})
 		return
 	}
-	c.BindJSON(&input)
+	log.Println(c.BindJSON(&input))
 
 	if _, err := dbNetwork.Create(&input); err != nil {
 		c.JSON(http.StatusInternalServerError, network.Result{Status: false, Error: err.Error()})
@@ -31,13 +32,13 @@ func AddAdmin(c *gin.Context) {
 func DeleteAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
-		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: resultAdmin.Err.Error()})
+		c.JSON(http.StatusUnauthorized, token.Result{Status: false, Error: resultAdmin.Err.Error()})
 		return
 	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, network.Result{Status: false, Error: err.Error()})
+		c.JSON(http.StatusBadRequest, network.Result{Status: false, Error: err.Error()})
 		return
 	}
 
@@ -53,10 +54,10 @@ func UpdateAdmin(c *gin.Context) {
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
-		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: resultAdmin.Err.Error()})
+		c.JSON(http.StatusUnauthorized, token.Result{Status: false, Error: resultAdmin.Err.Error()})
 		return
 	}
-	c.BindJSON(&input)
+	log.Println(c.BindJSON(&input))
 
 	if err := dbNetwork.Update(network.UpdateAll, input); err != nil {
 		c.JSON(http.StatusInternalServerError, network.Result{Status: false, Error: err.Error()})
@@ -79,7 +80,7 @@ func GetAdmin(c *gin.Context) {
 
 	result := dbNetwork.Get(network.ID, &network.Network{Model: gorm.Model{ID: uint(id)}})
 	if result.Err != nil {
-		c.JSON(http.StatusInternalServerError, network.Result{Status: false, Error: err.Error()})
+		c.JSON(http.StatusInternalServerError, network.Result{Status: false, Error: result.Err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, network.Result{Status: true, Network: result.Network})
