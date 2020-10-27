@@ -20,7 +20,8 @@ func AddAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: resultAdmin.Err.Error()})
 		return
 	}
-	c.BindJSON(&input)
+	err := c.BindJSON(&input)
+	log.Println(err)
 
 	log.Println(input.StartTime)
 
@@ -64,7 +65,8 @@ func UpdateAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: resultAdmin.Err.Error()})
 		return
 	}
-	c.BindJSON(&input)
+	err := c.BindJSON(&input)
+	log.Println(err)
 
 	tmp := dbNotice.Get(notice.ID, &notice.Notice{Model: gorm.Model{ID: input.ID}})
 	if tmp.Err != nil {
@@ -99,7 +101,7 @@ func GetAdmin(c *gin.Context) {
 
 	result := dbNotice.Get(notice.ID, &notice.Notice{Model: gorm.Model{ID: uint(id)}})
 	if result.Err != nil {
-		c.JSON(http.StatusInternalServerError, notice.Result{Status: false, Error: err.Error()})
+		c.JSON(http.StatusInternalServerError, notice.Result{Status: false, Error: result.Err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, notice.Result{Status: true, Notice: result.Notice})
