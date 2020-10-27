@@ -21,7 +21,7 @@ func SendChatUser(data controller.Chat) {
 	client.Timeout = time.Second * 5
 
 	body, _ := json.Marshal(controller.Chat{Err: data.Err, CreatedAt: data.CreatedAt, UserID: data.UserID,
-		GroupID: data.GroupID, Admin: false, Message: data.Message})
+		GroupID: data.GroupID, Admin: data.Admin, Message: data.Message})
 
 	//Header部分
 	header := http.Header{}

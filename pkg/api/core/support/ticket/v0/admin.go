@@ -208,17 +208,17 @@ func GetAdminWebSocket(c *gin.Context) {
 		if err != nil {
 			conn.WriteJSON(&support.WebSocketResult{Err: "db write error"})
 		} else {
-
-			//Admin側に送信
-			controller.SendChatAdmin(controllerInterface.Chat{CreatedAt: msg.CreatedAt, Admin: msg.Admin,
-				UserID: resultAdmin.AdminID, GroupID: ticketResult.Ticket[0].GroupID, Message: msg.Message})
-
 			msg.UserID = resultAdmin.AdminID
 			msg.GroupID = ticketResult.Ticket[0].GroupID
 			msg.Admin = true
 			// Token関連の初期化
 			msg.AccessToken = ""
 			msg.UserToken = ""
+
+			//Admin側に送信
+			controller.SendChatAdmin(controllerInterface.Chat{CreatedAt: msg.CreatedAt, Admin: msg.Admin,
+				UserID: resultAdmin.AdminID, GroupID: ticketResult.Ticket[0].GroupID, Message: msg.Message})
+
 			support.Broadcast <- msg
 		}
 	}

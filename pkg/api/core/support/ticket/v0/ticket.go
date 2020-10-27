@@ -29,13 +29,13 @@ func Create(c *gin.Context) {
 	// Group authentication
 	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
-		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: result.Err.Error()})
+		c.JSON(http.StatusUnauthorized, support.Result{Status: false, Error: result.Err.Error()})
 		return
 	}
 
 	// input check
 	if err := check(input); err != nil {
-		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: err.Error()})
+		c.JSON(http.StatusBadRequest, support.Result{Status: false, Error: err.Error()})
 		return
 	}
 
@@ -77,7 +77,7 @@ func Get(c *gin.Context) {
 	// Group authentication
 	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
-		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: result.Err.Error()})
+		c.JSON(http.StatusUnauthorized, support.Result{Status: false, Error: result.Err.Error()})
 		return
 	}
 
@@ -110,7 +110,7 @@ func GetTitle(c *gin.Context) {
 
 	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
-		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: result.Err.Error()})
+		c.JSON(http.StatusUnauthorized, support.Result{Status: false, Error: result.Err.Error()})
 		return
 	}
 
@@ -193,15 +193,17 @@ func GetWebSocket(c *gin.Context) {
 			conn.WriteJSON(&support.WebSocketResult{Err: "db write error"})
 		} else {
 
-			controller.SendChatUser(controllerInterface.Chat{CreatedAt: msg.CreatedAt,
-				UserID: result.User.ID, GroupID: resultGroup.Group.ID, Admin: msg.Admin, Message: msg.Message})
-
 			msg.UserID = result.User.ID
 			msg.GroupID = resultGroup.Group.ID
 			msg.Admin = false
 			// Token関連の初期化
 			msg.AccessToken = ""
 			msg.UserToken = ""
+
+			//ユーザ側に送信
+			controller.SendChatUser(controllerInterface.Chat{CreatedAt: msg.CreatedAt,
+				UserID: result.User.ID, GroupID: resultGroup.Group.ID, Admin: msg.Admin, Message: msg.Message})
+
 			support.Broadcast <- msg
 		}
 	}
