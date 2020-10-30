@@ -9,163 +9,129 @@ import (
 	"strings"
 )
 
-func replaceUser(serverData, input, replace user.User) (user.User, error) {
+func replaceUser(serverData, input user.User) (user.User, error) {
 	updateInfo := 0
 	//Name
-	if input.Name == "" {
-		replace.Name = serverData.Name
-	} else {
-		replace.Name = input.Name
+	if input.Name != "" {
+		serverData.Name = input.Name
 	}
 
 	//Name (English)
-	if input.NameEn == "" {
-		replace.NameEn = serverData.NameEn
-	} else {
-		replace.NameEn = input.NameEn
+	if input.NameEn != "" {
+		serverData.NameEn = input.NameEn
 	}
 
 	//E-Mail
-	if input.Email == "" {
-		replace.Email = serverData.Email
-		replace.MailToken = serverData.MailToken
-		replace.MailVerify = serverData.MailVerify
-	} else {
+	if input.Email != "" {
 		if !strings.Contains(input.Email, "@") {
 			return user.User{}, fmt.Errorf("wrong email address")
 		}
 		tmp := dbUser.Get(user.Email, &user.User{Email: input.Email})
 		if tmp.Err != nil {
-			return replace, tmp.Err
+			return serverData, tmp.Err
 		}
 		if len(tmp.User) != 0 {
 			log.Println("error: this email is already registered: " + input.Email)
-			return replace, fmt.Errorf("error: this email is already registered")
+			return serverData, fmt.Errorf("error: this email is already registered")
 		}
 
 		mailToken, _ := toolToken.Generate(4)
-		replace.Email = input.Email
-		replace.MailVerify = &[]bool{false}[0]
-		replace.MailToken = mailToken
+		serverData.Email = input.Email
+		serverData.MailVerify = &[]bool{false}[0]
+		serverData.MailToken = mailToken
 	}
 
 	//Pass
-	if input.Pass == "" {
-		replace.Pass = serverData.Pass
-	} else {
-		replace.Pass = input.Pass
+	if input.Pass != "" {
+		serverData.Pass = input.Pass
 	}
 
 	//Org
-	if input.Org == "" {
-		replace.Org = serverData.Org
-	} else {
-		replace.Org = input.Org
+	if input.Org != "" {
+		serverData.Org = input.Org
 		updateInfo++
 	}
 
 	//Org (English)
-	if input.OrgEn == "" {
-		replace.OrgEn = serverData.OrgEn
-	} else {
-		replace.OrgEn = input.OrgEn
+	if input.OrgEn != "" {
+		serverData.OrgEn = input.OrgEn
 		updateInfo++
 	}
 
 	//PostCode
-	if input.PostCode == "" {
-		replace.PostCode = serverData.PostCode
-	} else {
-		replace.PostCode = input.PostCode
+	if input.PostCode != "" {
+		serverData.PostCode = input.PostCode
 		updateInfo++
 	}
 
 	//Address
-	if input.Address == "" {
-		replace.Address = serverData.Address
-	} else {
-		replace.Address = input.Address
+	if input.Address != "" {
+		serverData.Address = input.Address
 		updateInfo++
 	}
 
 	//Address(English)
-	if input.AddressEn == "" {
-		replace.AddressEn = serverData.AddressEn
-	} else {
-		replace.AddressEn = input.AddressEn
+	if input.AddressEn != "" {
+		serverData.AddressEn = input.AddressEn
 		updateInfo++
 	}
 
 	//Dept
-	if input.Dept == "" {
-		replace.Dept = serverData.Dept
-	} else {
-		replace.Dept = input.Dept
+	if input.Dept != "" {
+		serverData.Dept = input.Dept
 		updateInfo++
 	}
 
 	//Dept(English)
-	if input.DeptEn == "" {
-		replace.DeptEn = serverData.DeptEn
-	} else {
-		replace.DeptEn = input.DeptEn
+	if input.DeptEn != "" {
+		serverData.DeptEn = input.DeptEn
 		updateInfo++
 	}
 
 	//Pos
-	if input.Pos == "" {
-		replace.Pos = serverData.Pos
-	} else {
-		replace.Pos = input.Pos
+	if input.Pos != "" {
+		serverData.Pos = input.Pos
 		updateInfo++
 	}
 
 	//Pos(English)
-	if input.PosEn == "" {
-		replace.PosEn = serverData.PosEn
-	} else {
-		replace.PosEn = input.PosEn
+	if input.PosEn != "" {
+		serverData.PosEn = input.PosEn
 		updateInfo++
 	}
 
 	//Tel
-	if input.Tel == "" {
-		replace.Tel = serverData.Tel
-	} else {
-		replace.Tel = input.Tel
+	if input.Tel != "" {
+		serverData.Tel = input.Tel
 		updateInfo++
 	}
 
 	//Fax
-	if input.Fax == "" {
-		replace.Fax = serverData.Fax
-	} else {
-		replace.Fax = input.Fax
+	if input.Fax != "" {
+		serverData.Fax = input.Fax
 		updateInfo++
 	}
 
 	//Country
-	if input.Country == "" {
-		replace.Country = serverData.Country
-	} else {
-		replace.Country = input.Country
+	if input.Country != "" {
+		serverData.Country = input.Country
 		updateInfo++
 	}
 
 	//Tech
 	if serverData.GroupID != 0 && serverData.Level <= 1 && input.Status == 1 {
-		replace.Tech = input.Tech
-	} else {
-		replace.Tech = serverData.Tech
+		serverData.Tech = input.Tech
 	}
 
-	if serverData.Status == 0 && updateInfo == 5 {
-		replace.Status = 1
-	} else if serverData.Status == 0 && updateInfo < 5 {
-		return replace, fmt.Errorf("lack of information")
+	if serverData.Status == 0 && updateInfo == 12 {
+		serverData.Status = 1
 	}
 
-	return replace, nil
+	log.Println(serverData)
+	log.Println("updateInfo")
+	log.Println(updateInfo)
+
+	return serverData, nil
 }
 
 func updateAdminUser(input, replace user.User) (user.User, error) {

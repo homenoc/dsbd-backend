@@ -76,7 +76,8 @@ func Add(c *gin.Context) {
 		log.Println("Email: " + input.Email)
 		log.Println("tmp_Pass: " + pass)
 
-		data = user.User{GroupID: input.GroupID, Name: input.Name, Email: input.Email, Pass: strings.ToLower(hash.Generate(pass)),
+		data = user.User{GroupID: input.GroupID, Name: input.Name, NameEn: input.NameEn,
+			Email: input.Email, Pass: strings.ToLower(hash.Generate(pass)),
 			Status: 0, Tech: input.Tech, Level: input.Level, MailVerify: &[]bool{false}[0], MailToken: mailToken}
 	}
 
@@ -193,13 +194,13 @@ func Update(c *gin.Context) {
 		u.Status = userResult.User[0].Status
 	}
 
-	u, err = replaceUser(serverData, input, u)
+	u, err = replaceUser(serverData, input)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
 		return
 	}
 
-	if err := dbUser.Update(user.UpdateInfo, &u); err != nil {
+	if err := dbUser.Update(user.UpdateAll, &u); err != nil {
 		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
 	} else {
 		c.JSON(http.StatusOK, user.Result{Status: true})
