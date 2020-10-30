@@ -13,8 +13,8 @@ const (
 
 type JpnicTech struct {
 	gorm.Model
-	NetworkId uint  `json:"network_id"`
-	UserId    uint  `json:"user_id"`
+	NetworkID uint  `json:"network_id"`
+	UserID    uint  `json:"user_id"`
 	Lock      *bool `json:"lock"`
 }
 

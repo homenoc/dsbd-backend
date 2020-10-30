@@ -49,7 +49,7 @@ func Add(c *gin.Context) {
 
 	count := 0
 	for _, data := range networkResult.Network {
-		if data.ID == input.NetworkId {
+		if data.ID == input.NetworkID {
 			count++
 		}
 	}
@@ -58,17 +58,17 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	userResult := dbUser.Get(user.ID, &user.User{Model: gorm.Model{ID: input.UserId}})
+	userResult := dbUser.Get(user.ID, &user.User{Model: gorm.Model{ID: input.UserID}})
 	if userResult.Err != nil {
 		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: networkResult.Err.Error()})
 		return
 	}
 
-	if userResult.User[0].ID != input.UserId {
+	if userResult.User[0].ID != input.UserID {
 		c.JSON(http.StatusBadRequest, jpnic.Result{Status: false, Error: "This network id hasn't your group"})
 		return
 	}
-	_, err := dbJpnic.Create(&jpnic.JpnicTech{NetworkId: input.NetworkId, UserId: input.UserId, Lock: &[]bool{true}[0]})
+	_, err := dbJpnic.Create(&jpnic.JpnicTech{NetworkID: input.NetworkID, UserID: input.UserID, Lock: &[]bool{true}[0]})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: err.Error()})
 		return
@@ -110,7 +110,7 @@ func Delete(c *gin.Context) {
 		return
 	}
 
-	networkResult := dbNetwork.Get(network.ID, &network.Network{Model: gorm.Model{ID: resultJpnic.Jpnic[0].NetworkId}})
+	networkResult := dbNetwork.Get(network.ID, &network.Network{Model: gorm.Model{ID: resultJpnic.Jpnic[0].NetworkID}})
 	if networkResult.Err != nil {
 		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: networkResult.Err.Error()})
 		return
@@ -153,7 +153,7 @@ func Get(c *gin.Context) {
 	var data []jpnic.JpnicTech
 
 	for _, net := range networkResult.Network {
-		resultJpnic := dbJpnic.Get(jpnic.NetworkId, &jpnic.JpnicTech{NetworkId: net.ID})
+		resultJpnic := dbJpnic.Get(jpnic.NetworkId, &jpnic.JpnicTech{NetworkID: net.ID})
 		if resultJpnic.Err != nil {
 			c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: resultJpnic.Err.Error()})
 			return

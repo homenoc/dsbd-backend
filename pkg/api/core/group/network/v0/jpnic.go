@@ -54,7 +54,7 @@ func jpnicProcess(input jpnic) error {
 		}
 
 		// JPNIC Tech tableに保存
-		_, err := dbJpnicTech.Create(&jpnicTech.JpnicTech{NetworkId: input.network.ID, UserId: tmp, Lock: true})
+		_, err := dbJpnicTech.Create(&jpnicTech.JpnicTech{NetworkID: input.network.ID, UserID: tmp, Lock: true})
 		if err != nil {
 			return err
 		}

@@ -183,7 +183,7 @@ func GetAll(c *gin.Context) {
 		}
 		resultJpnicAdmin = append(resultJpnicAdmin, tmpAdmin.Jpnic[0])
 
-		tmpTech := dbJpnicTech.Get(jpnicAdmin.NetworkId, &jpnicTech.JpnicTech{NetworkId: data.ID})
+		tmpTech := dbJpnicTech.Get(jpnicAdmin.NetworkId, &jpnicTech.JpnicTech{NetworkID: data.ID})
 		if tmpAdmin.Err != nil {
 			c.JSON(http.StatusInternalServerError, group.ResultAll{Status: false, Error: tmpAdmin.Err.Error()})
 			return
