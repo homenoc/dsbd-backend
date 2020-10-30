@@ -35,7 +35,7 @@ func jpnicProcess(input jpnic) error {
 	}
 
 	// JPNIC Admin tableに保存
-	_, err := dbJpnicAdmin.Create(&jpnicAdmin.JpnicAdmin{NetworkId: input.network.ID, UserId: input.admin, Lock: true})
+	_, err := dbJpnicAdmin.Create(&jpnicAdmin.JpnicAdmin{NetworkId: input.network.ID, UserId: input.admin, Lock: &[]bool{true}[0]})
 	if err != nil {
 		return err
 	}
@@ -54,7 +54,7 @@ func jpnicProcess(input jpnic) error {
 		}
 
 		// JPNIC Tech tableに保存
-		_, err := dbJpnicTech.Create(&jpnicTech.JpnicTech{NetworkID: input.network.ID, UserID: tmp, Lock: true})
+		_, err := dbJpnicTech.Create(&jpnicTech.JpnicTech{NetworkID: input.network.ID, UserID: tmp, Lock: &[]bool{true}[0]})
 		if err != nil {
 			return err
 		}
