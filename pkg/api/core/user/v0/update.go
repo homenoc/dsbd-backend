@@ -127,10 +127,6 @@ func replaceUser(serverData, input user.User) (user.User, error) {
 		serverData.Status = 1
 	}
 
-	log.Println(serverData)
-	log.Println("updateInfo")
-	log.Println(updateInfo)
-
 	return serverData, nil
 }
 
