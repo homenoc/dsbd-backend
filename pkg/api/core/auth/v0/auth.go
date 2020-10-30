@@ -45,10 +45,10 @@ func GroupAuthentication(data token.Token) auth.GroupResult {
 	if resultUser.User[0].Status == 0 || 100 <= resultUser.User[0].Status {
 		return auth.GroupResult{Err: fmt.Errorf("user status error")}
 	}
-	if resultUser.User[0].GID == 0 {
+	if resultUser.User[0].GroupID == 0 {
 		return auth.GroupResult{Err: fmt.Errorf("no group")}
 	}
-	resultGroup := dbGroup.Get(group.ID, &group.Group{Model: gorm.Model{ID: resultUser.User[0].GID}})
+	resultGroup := dbGroup.Get(group.ID, &group.Group{Model: gorm.Model{ID: resultUser.User[0].GroupID}})
 	if resultGroup.Err != nil {
 		return auth.GroupResult{Err: fmt.Errorf("db error")}
 	}

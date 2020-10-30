@@ -41,7 +41,7 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	if userResult.User.GID != 0 {
+	if userResult.User.GroupID != 0 {
 		c.JSON(http.StatusUnauthorized, group.Result{Status: false, Error: "error: You can't create new group", Group: nil})
 		return
 	}
@@ -59,7 +59,7 @@ func Add(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: err.Error(), Group: nil})
 		return
 	}
-	if err := dbUser.Update(user.UpdateGID, &user.User{Model: gorm.Model{ID: userResult.User.ID}, GID: result.Model.ID}); err != nil {
+	if err := dbUser.Update(user.UpdateGID, &user.User{Model: gorm.Model{ID: userResult.User.ID}, GroupID: result.Model.ID}); err != nil {
 		log.Println(dbGroup.Delete(&group.Group{Model: gorm.Model{ID: result.ID}}))
 		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: err.Error()})
 	} else {

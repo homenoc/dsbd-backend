@@ -18,7 +18,7 @@ const (
 
 type User struct {
 	gorm.Model
-	GID        uint   `json:"gid"`
+	GroupID    uint   `json:"group_id"`
 	Tech       *bool  `json:"tech"`
 	Name       string `json:"name"`
 	NameEn     string `json:"name_en"`

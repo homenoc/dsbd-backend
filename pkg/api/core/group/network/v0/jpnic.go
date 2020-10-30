@@ -30,7 +30,7 @@ func jpnicProcess(input jpnic) error {
 		return resultAdminUser.Err
 	}
 	// 認証ユーザのGroupIDと入力されたjpnicAdminの値が一致しているか確認
-	if resultAdminUser.User[0].GID != groupId {
+	if resultAdminUser.User[0].GroupID != groupId {
 		return fmt.Errorf("This user's group id is not match. ")
 	}
 
@@ -49,7 +49,7 @@ func jpnicProcess(input jpnic) error {
 		}
 
 		// 認証ユーザのGroupIDと入力されたjpnicAdminの値が一致しているか確認
-		if resultTechUser.User[0].GID != groupId {
+		if resultTechUser.User[0].GroupID != groupId {
 			return fmt.Errorf("This user's group id is not match. ")
 		}
 

@@ -48,12 +48,12 @@ func Add(c *gin.Context) {
 	pass := ""
 
 	// 新規ユーザ
-	if input.GID == 0 { //new user
+	if input.GroupID == 0 { //new user
 		if input.Pass == "" {
 			c.JSON(http.StatusBadRequest, user.Result{Status: false, Error: fmt.Sprintf("wrong pass")})
 			return
 		}
-		data = user.User{GID: 0, Name: input.Name, Email: input.Email, Pass: input.Pass, Status: 0, Level: 1,
+		data = user.User{GroupID: 0, Name: input.Name, Email: input.Email, Pass: input.Pass, Status: 0, Level: 1,
 			MailVerify: &[]bool{false}[0], MailToken: mailToken}
 
 		// グループ所属ユーザの登録
@@ -67,7 +67,7 @@ func Add(c *gin.Context) {
 			c.JSON(http.StatusForbidden, user.Result{Status: false, Error: authResult.Err.Error()})
 			return
 		}
-		if authResult.User.GID != input.GID && authResult.User.GID > 0 {
+		if authResult.User.GroupID != input.GroupID && authResult.User.GroupID > 0 {
 			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: "gid mismatch"})
 			return
 		}
@@ -76,7 +76,7 @@ func Add(c *gin.Context) {
 		log.Println("Email: " + input.Email)
 		log.Println("tmp_Pass: " + pass)
 
-		data = user.User{GID: input.GID, Name: input.Name, Email: input.Email, Pass: strings.ToLower(hash.Generate(pass)),
+		data = user.User{GroupID: input.GroupID, Name: input.Name, Email: input.Email, Pass: strings.ToLower(hash.Generate(pass)),
 			Status: 0, Tech: input.Tech, Level: input.Level, MailVerify: &[]bool{false}[0], MailToken: mailToken}
 	}
 
@@ -86,7 +86,7 @@ func Add(c *gin.Context) {
 	} else {
 		attachment := slack.Attachment{}
 		attachment.AddField(slack.Field{Title: "E-Mail", Value: input.Email}).
-			AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(input.GID))}).
+			AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(input.GroupID))}).
 			AddField(slack.Field{Title: "Name", Value: input.Name}).
 			AddField(slack.Field{Title: "Name(English)", Value: input.NameEn})
 
@@ -171,7 +171,7 @@ func Update(c *gin.Context) {
 		u.Model.ID = authResult.User.ID
 		u.Status = authResult.User.Status
 	} else {
-		if authResult.User.GID == 0 {
+		if authResult.User.GroupID == 0 {
 			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: "error: Group ID = 0"})
 			return
 		}
@@ -184,7 +184,7 @@ func Update(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: userResult.Err.Error()})
 			return
 		}
-		if userResult.User[0].GID != authResult.User.GID {
+		if userResult.User[0].GroupID != authResult.User.GroupID {
 			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: fmt.Sprintf("failed group authentication")})
 			return
 		}
@@ -225,7 +225,7 @@ func GetGroup(c *gin.Context) {
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
 	authResult := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
-	result := dbUser.Get(user.GID, &user.User{GID: authResult.Group.ID})
+	result := dbUser.Get(user.GID, &user.User{GroupID: authResult.Group.ID})
 	if result.Err != nil {
 		c.JSON(http.StatusUnauthorized, user.Result{Status: false, Error: result.Err.Error()})
 		return

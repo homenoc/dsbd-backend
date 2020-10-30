@@ -153,7 +153,7 @@ func replaceUser(serverData, input, replace user.User) (user.User, error) {
 	}
 
 	//Tech
-	if serverData.GID != 0 && serverData.Level <= 1 && input.Status == 1 {
+	if serverData.GroupID != 0 && serverData.Level <= 1 && input.Status == 1 {
 		replace.Tech = input.Tech
 	} else {
 		replace.Tech = serverData.Tech

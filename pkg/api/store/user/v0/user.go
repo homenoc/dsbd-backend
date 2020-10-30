@@ -62,12 +62,12 @@ func Update(base int, u *user.User) error {
 	} else if user.UpdateStatus == base {
 		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update(user.User{Status: u.Status})
 	} else if user.UpdateGID == base {
-		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update(user.User{GID: u.GID})
+		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update(user.User{GroupID: u.GroupID})
 	} else if user.UpdateLevel == base {
 		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update("level", u.Level)
 	} else if user.UpdateAll == base {
 		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update(user.User{
-			GID: u.GID, Name: u.Name, NameEn: u.NameEn, Email: u.Email, Pass: u.Pass, Tech: u.Tech,
+			GroupID: u.GroupID, Name: u.Name, NameEn: u.NameEn, Email: u.Email, Pass: u.Pass, Tech: u.Tech,
 			MailVerify: u.MailVerify, MailToken: u.MailToken, Org: u.Org, OrgEn: u.OrgEn, PostCode: u.PostCode,
 			Address: u.Address, AddressEn: u.AddressEn, Dept: u.Dept, DeptEn: u.DeptEn, Pos: u.Pos, PosEn: u.PosEn,
 			Tel: u.Tel, Country: u.Country, Status: u.Status})
@@ -93,7 +93,7 @@ func Get(base int, u *user.User) user.ResultDatabase {
 	if base == user.ID { //ID
 		err = db.First(&userStruct, u.ID).Error
 	} else if base == user.GID { //GroupID
-		err = db.Where("g_id = ?", u.GID).Find(&userStruct).Error
+		err = db.Where("group_id = ?", u.GroupID).Find(&userStruct).Error
 	} else if base == user.Email { //Mail
 		err = db.Where("email = ?", u.Email).First(&userStruct).Error
 	} else if base == user.MailToken { //Token
