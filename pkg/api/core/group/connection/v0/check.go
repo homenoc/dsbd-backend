@@ -19,7 +19,7 @@ func check(input connection.Connection) error {
 	if input.TermIP == "" {
 		return fmt.Errorf("no data: term ip")
 	}
-	if input.UserId == 0 {
+	if input.UserID == 0 {
 		return fmt.Errorf("no data: userID")
 	}
 	return nil

@@ -44,7 +44,7 @@ func Add(c *gin.Context) {
 	}
 
 	_, err := dbConnection.Create(&connection.Connection{
-		GroupID: result.Group.ID, UserId: input.UserId, Service: input.Service, NTT: input.NTT, NOC: input.NOC,
+		GroupID: result.Group.ID, UserID: input.UserID, Service: input.Service, NTT: input.NTT, NOC: input.NOC,
 		TermIP: input.TermIP, Monitor: input.Monitor})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, connection.Result{Status: false, Error: err.Error()})

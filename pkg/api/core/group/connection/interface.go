@@ -21,7 +21,7 @@ type Connection struct {
 	gorm.Model
 	GroupID    uint   `json:"group_id"`
 	ServiceID  string `json:"service_id"`
-	UserId     uint   `json:"user_id"`
+	UserID     uint   `json:"user_id"`
 	Service    string `json:"service"`
 	NTT        string `json:"ntt"`
 	NOC        string `json:"noc"`
