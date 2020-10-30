@@ -27,7 +27,7 @@ type Network struct {
 	Address   string `json:"address"`
 	AddressEn string `json:"address_en"`
 	Route     string `json:"route"`
-	PI        bool   `json:"pi"`
+	PI        *bool  `json:"pi"`
 	ASN       string `json:"asn"`
 	V4        string `json:"v4"`
 	V6        string `json:"v6"`
@@ -35,8 +35,8 @@ type Network struct {
 	V6Name    string `json:"v6_name"`
 	Date      string `json:"date"`
 	Plan      string `json:"plan"`
-	Open      bool   `json:"open"`
-	Lock      bool   `json:"lock"`
+	Open      *bool  `json:"open"`
+	Lock      *bool  `json:"lock"`
 }
 
 type NetworkInput struct {

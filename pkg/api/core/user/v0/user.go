@@ -54,7 +54,7 @@ func Add(c *gin.Context) {
 			return
 		}
 		data = user.User{GID: 0, Name: input.Name, Email: input.Email, Pass: input.Pass, Status: 0, Level: 1,
-			MailVerify: false, MailToken: mailToken}
+			MailVerify: &[]bool{false}[0], MailToken: mailToken}
 
 		// グループ所属ユーザの登録
 	} else {
@@ -77,7 +77,7 @@ func Add(c *gin.Context) {
 		log.Println("tmp_Pass: " + pass)
 
 		data = user.User{GID: input.GID, Name: input.Name, Email: input.Email, Pass: strings.ToLower(hash.Generate(pass)),
-			Status: 0, Tech: input.Tech, Level: input.Level, MailVerify: false, MailToken: mailToken}
+			Status: 0, Tech: input.Tech, Level: input.Level, MailVerify: &[]bool{false}[0], MailToken: mailToken}
 	}
 
 	//check exist for database
@@ -123,7 +123,7 @@ func MailVerify(c *gin.Context) {
 		return
 	}
 
-	if result.User[0].MailVerify {
+	if *result.User[0].MailVerify {
 		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: fmt.Sprintf("This email has already been checked")})
 		return
 	}
@@ -133,7 +133,7 @@ func MailVerify(c *gin.Context) {
 	}
 
 	if err := dbUser.Update(user.UpdateVerifyMail, &user.User{Model: gorm.Model{ID: result.User[0].ID},
-		MailVerify: true}); err != nil {
+		MailVerify: &[]bool{true}[0]}); err != nil {
 		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
 	} else {
 		c.JSON(http.StatusOK, &user.Result{Status: true})
@@ -159,7 +159,7 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	if !authResult.User.MailVerify {
+	if !*authResult.User.MailVerify {
 		c.JSON(http.StatusBadRequest, user.Result{Status: false, Error: "not verify for user mail"})
 		return
 	}

@@ -19,14 +19,14 @@ const (
 type User struct {
 	gorm.Model
 	GID        uint   `json:"gid"`
-	Tech       bool   `json:"tech"`
+	Tech       *bool  `json:"tech"`
 	Name       string `json:"name"`
 	NameEn     string `json:"name_en"`
 	Email      string `json:"email"`
 	Pass       string `json:"pass"`
 	Status     uint   `json:"status"`
 	Level      uint   `json:"level"`
-	MailVerify bool   `json:"mail_verify"`
+	MailVerify *bool  `json:"mail_verify"`
 	MailToken  string `json:"mail_token"`
 	Org        string `json:"org"`
 	OrgEn      string `json:"org_en"`

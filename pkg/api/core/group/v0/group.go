@@ -17,6 +17,7 @@ import (
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"github.com/jinzhu/gorm"
+	"log"
 	"net/http"
 )
 
@@ -26,22 +27,22 @@ func Add(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	c.BindJSON(&input)
+	log.Println(c.BindJSON(&input))
 
 	userResult := auth.UserAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 	if userResult.Err != nil {
-		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: userResult.Err.Error()})
+		c.JSON(http.StatusUnauthorized, group.Result{Status: false, Error: userResult.Err.Error()})
 		return
 	}
 
 	// check authority
 	if userResult.User.Level > 1 {
-		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: "You don't have authority this operation"})
+		c.JSON(http.StatusUnauthorized, group.Result{Status: false, Error: "You don't have authority this operation"})
 		return
 	}
 
 	if userResult.User.GID != 0 {
-		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: "error: You can't create new group", Group: nil})
+		c.JSON(http.StatusUnauthorized, group.Result{Status: false, Error: "error: You can't create new group", Group: nil})
 		return
 	}
 
@@ -51,7 +52,7 @@ func Add(c *gin.Context) {
 	}
 
 	result, err := dbGroup.Create(&group.Group{
-		Agree: true, Question: input.Question, Org: input.Org, Status: 0, Bandwidth: input.Bandwidth,
+		Agree: &[]bool{true}[0], Question: input.Question, Org: input.Org, Status: 0, Bandwidth: input.Bandwidth,
 		Comment: input.Comment, Contract: input.Contract,
 	})
 	if err != nil {
@@ -59,7 +60,7 @@ func Add(c *gin.Context) {
 		return
 	}
 	if err := dbUser.Update(user.UpdateGID, &user.User{Model: gorm.Model{ID: userResult.User.ID}, GID: result.Model.ID}); err != nil {
-		dbGroup.Delete(&group.Group{Model: gorm.Model{ID: result.ID}})
+		log.Println(dbGroup.Delete(&group.Group{Model: gorm.Model{ID: result.ID}}))
 		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: err.Error()})
 	} else {
 		c.JSON(http.StatusOK, group.Result{Status: true})
@@ -72,20 +73,20 @@ func Update(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	c.BindJSON(&input)
+	log.Println(c.BindJSON(&input))
 
 	authResult := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 	if authResult.Err != nil {
-		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: authResult.Err.Error()})
+		c.JSON(http.StatusUnauthorized, user.Result{Status: false, Error: authResult.Err.Error()})
 		return
 	}
 
 	if authResult.User.Level > 1 {
-		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: "error: failed user level"})
+		c.JSON(http.StatusUnauthorized, user.Result{Status: false, Error: "error: failed user level"})
 		return
 	}
-	if authResult.Group.Lock {
-		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: "error: This group is locked"})
+	if *authResult.Group.Lock {
+		c.JSON(http.StatusUnauthorized, user.Result{Status: false, Error: "error: This group is locked"})
 		return
 	}
 
@@ -139,13 +140,13 @@ func GetAll(c *gin.Context) {
 
 	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
-		c.JSON(http.StatusInternalServerError, group.ResultAll{Status: false, Error: result.Err.Error()})
+		c.JSON(http.StatusUnauthorized, group.ResultAll{Status: false, Error: result.Err.Error()})
 		return
 	}
 
 	if result.User.Level >= 10 {
 		if result.User.Level > 1 {
-			c.JSON(http.StatusInternalServerError, group.ResultAll{Status: false, Error: "You don't have authority this operation"})
+			c.JSON(http.StatusUnauthorized, group.ResultAll{Status: false, Error: "You don't have authority this operation"})
 			return
 		}
 	}

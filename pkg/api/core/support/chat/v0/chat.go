@@ -31,17 +31,17 @@ func Add(c *gin.Context) {
 	// Group authentication
 	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
-		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: result.Err.Error()})
+		c.JSON(http.StatusUnauthorized, support.Result{Status: false, Error: result.Err.Error()})
 		return
 	}
 
 	// input check
 	if err := check(input); err != nil {
-		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: err.Error()})
+		c.JSON(http.StatusBadRequest, support.Result{Status: false, Error: err.Error()})
 		return
 	}
 	if uint(id) == 0 {
-		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: "valid id"})
+		c.JSON(http.StatusBadRequest, support.Result{Status: false, Error: "valid id"})
 		return
 	}
 

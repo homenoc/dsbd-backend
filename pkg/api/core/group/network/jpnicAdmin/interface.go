@@ -13,9 +13,9 @@ const (
 
 type JpnicAdmin struct {
 	gorm.Model
-	NetworkId uint `json:"network_id"`
-	UserId    uint `json:"user_id"`
-	Lock      bool `json:"lock"`
+	NetworkId uint  `json:"network_id"`
+	UserId    uint  `json:"user_id"`
+	Lock      *bool `json:"lock"`
 }
 
 type Result struct {

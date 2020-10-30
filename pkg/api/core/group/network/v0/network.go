@@ -62,8 +62,8 @@ func Add(c *gin.Context) {
 	// db create for network
 	net, err := dbNetwork.Create(&network.Network{
 		GroupID: result.Group.ID, Org: input.Org, OrgEn: input.OrgEn, Postcode: input.Postcode, Address: input.Address,
-		AddressEn: input.AddressEn, Route: input.Route, PI: input.PI, ASN: input.ASN, V4: input.V4, V6: input.V6,
-		V4Name: input.V4Name, V6Name: input.V6Name, Date: input.Date, Plan: input.Plan, Lock: false,
+		AddressEn: input.AddressEn, Route: input.Route, PI: &[]bool{input.PI}[0], ASN: input.ASN, V4: input.V4, V6: input.V6,
+		V4Name: input.V4Name, V6Name: input.V6Name, Date: input.Date, Plan: input.Plan, Lock: &[]bool{input.Lock}[0],
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, network.Result{Status: false, Error: err.Error()})
@@ -127,7 +127,7 @@ func Update(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, jpnicAdmin.Result{Status: false, Error: "Authentication failure"})
 		return
 	}
-	if resultNetwork.Network[0].Lock {
+	if *resultNetwork.Network[0].Lock {
 		c.JSON(http.StatusInternalServerError, network.Result{Status: false, Error: "this network is locked..."})
 		return
 	}

@@ -23,7 +23,7 @@ func GenerateInit(c *gin.Context) {
 	log.Println("userToken: " + userToken)
 	tmpToken, _ := toolToken.Generate(2)
 	err := dbToken.Create(&token.Token{ExpiredAt: time.Now().Add(30 * time.Minute), UID: 0, Status: 0,
-		UserToken: userToken, TmpToken: tmpToken, Debug: ip, Admin: false})
+		UserToken: userToken, TmpToken: tmpToken, Debug: ip, Admin: &[]bool{false}[0]})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: err.Error()})
 	} else {
@@ -48,7 +48,7 @@ func Generate(c *gin.Context) {
 		return
 	}
 
-	if !userResult.User[0].MailVerify {
+	if !*userResult.User[0].MailVerify {
 		c.JSON(http.StatusInternalServerError, &token.Result{Status: false, Error: fmt.Sprintf("You don't have email verification.")})
 		return
 	}

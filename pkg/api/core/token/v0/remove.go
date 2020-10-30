@@ -20,7 +20,10 @@ func TokenRemove() {
 					log.Println(result.Err)
 				}
 				for _, tmp := range result.Token {
-					dbToken.Delete(&token.Token{Model: gorm.Model{ID: tmp.ID}})
+					err := dbToken.Delete(&token.Token{Model: gorm.Model{ID: tmp.ID}})
+					if err != nil {
+						log.Println(err)
+					}
 				}
 			}
 		}

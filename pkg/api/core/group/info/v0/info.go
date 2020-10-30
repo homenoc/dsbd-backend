@@ -55,7 +55,7 @@ func Get(c *gin.Context) {
 	var asn string
 
 	for i, data := range resultNetwork.Network {
-		if data.Open {
+		if *data.Open {
 			v4 = append(v4, data.V4)
 			v6 = append(v6, data.V6)
 			if i == 0 {

@@ -45,7 +45,7 @@ func replaceUser(serverData, input, replace user.User) (user.User, error) {
 
 		mailToken, _ := toolToken.Generate(4)
 		replace.Email = input.Email
-		replace.MailVerify = false
+		replace.MailVerify = &[]bool{false}[0]
 		replace.MailToken = mailToken
 	}
 
@@ -195,7 +195,7 @@ func updateAdminUser(input, replace user.User) (user.User, error) {
 
 		mailToken, _ := toolToken.Generate(4)
 		replace.Email = input.Email
-		replace.MailVerify = false
+		replace.MailVerify = &[]bool{false}[0]
 		replace.MailToken = mailToken
 	}
 

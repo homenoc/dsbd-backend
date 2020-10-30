@@ -23,14 +23,14 @@ const (
 
 type Group struct {
 	gorm.Model
-	Agree     bool   `json:"agree"`
+	Agree     *bool  `json:"agree"`
 	Question  string `json:"question"`
 	Org       string `json:"org"`
 	Status    uint   `json:"status"`
 	Bandwidth string `json:"bandwidth"`
 	Contract  string `json:"contract"`
 	Comment   string `json:"comment"`
-	Lock      bool   `json:"lock"`
+	Lock      *bool  `json:"lock"`
 }
 
 type Result struct {

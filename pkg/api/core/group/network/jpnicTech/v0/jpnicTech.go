@@ -12,6 +12,7 @@ import (
 	dbNetwork "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"github.com/jinzhu/gorm"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -21,22 +22,22 @@ func Add(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	c.BindJSON(&input)
+	log.Println(c.BindJSON(&input))
 
 	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
-		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: result.Err.Error()})
+		c.JSON(http.StatusUnauthorized, jpnic.Result{Status: false, Error: result.Err.Error()})
 		return
 	}
 
 	if err := check(input); err != nil {
-		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: err.Error()})
+		c.JSON(http.StatusBadRequest, jpnic.Result{Status: false, Error: err.Error()})
 		return
 	}
 
 	// check authority
 	if result.User.Level > 1 {
-		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: "You don't have authority this operation"})
+		c.JSON(http.StatusUnauthorized, jpnic.Result{Status: false, Error: "You don't have authority this operation"})
 		return
 	}
 
@@ -64,10 +65,10 @@ func Add(c *gin.Context) {
 	}
 
 	if userResult.User[0].ID != input.UserId {
-		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: "This network id hasn't your group"})
+		c.JSON(http.StatusBadRequest, jpnic.Result{Status: false, Error: "This network id hasn't your group"})
 		return
 	}
-	_, err := dbJpnic.Create(&jpnic.JpnicTech{NetworkId: input.NetworkId, UserId: input.UserId, Lock: true})
+	_, err := dbJpnic.Create(&jpnic.JpnicTech{NetworkId: input.NetworkId, UserId: input.UserId, Lock: &[]bool{true}[0]})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: err.Error()})
 		return
@@ -87,19 +88,19 @@ func Delete(c *gin.Context) {
 	}
 
 	if id <= 0 {
-		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: "wrong id"})
+		c.JSON(http.StatusBadRequest, jpnic.Result{Status: false, Error: "wrong id"})
 		return
 	}
 
 	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
-		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: result.Err.Error()})
+		c.JSON(http.StatusUnauthorized, jpnic.Result{Status: false, Error: result.Err.Error()})
 		return
 	}
 
 	// check authority
 	if result.User.Level > 1 {
-		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: "You don't have authority this operation"})
+		c.JSON(http.StatusUnauthorized, jpnic.Result{Status: false, Error: "You don't have authority this operation"})
 		return
 	}
 
@@ -133,13 +134,13 @@ func Get(c *gin.Context) {
 
 	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
-		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: result.Err.Error()})
+		c.JSON(http.StatusUnauthorized, jpnic.Result{Status: false, Error: result.Err.Error()})
 		return
 	}
 
 	// check authority
 	if result.User.Level > 3 {
-		c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: "You don't have authority this operation"})
+		c.JSON(http.StatusUnauthorized, jpnic.Result{Status: false, Error: "You don't have authority this operation"})
 		return
 	}
 
@@ -161,5 +162,5 @@ func Get(c *gin.Context) {
 			data = append(data, detail)
 		}
 	}
-	c.JSON(http.StatusInternalServerError, jpnic.Result{Status: true, Jpnic: data})
+	c.JSON(http.StatusOK, jpnic.Result{Status: true, Jpnic: data})
 }

@@ -8,6 +8,7 @@ import (
 	toolToken "github.com/homenoc/dsbd-backend/pkg/api/core/tool/token"
 	dbToken "github.com/homenoc/dsbd-backend/pkg/api/store/token/v0"
 	"github.com/jinzhu/gorm"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -17,13 +18,13 @@ func GenerateAdmin(c *gin.Context) {
 	resultAuth := auth.AdminRadiusAuthentication(authInterface.AdminStruct{
 		User: c.Request.Header.Get("USER"), Pass: c.Request.Header.Get("PASS")})
 	if resultAuth.Err != nil {
-		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: resultAuth.Err.Error()})
+		c.JSON(http.StatusUnauthorized, token.Result{Status: false, Error: resultAuth.Err.Error()})
 		return
 	}
 	accessToken, _ := toolToken.Generate(2)
 
 	if err := dbToken.Create(&token.Token{AdminID: resultAuth.AdminID, UID: 0, ExpiredAt: time.Now().Add(60 * time.Minute),
-		Admin: true, AccessToken: accessToken, Debug: "User: " + c.Request.Header.Get("USER")}); err != nil {
+		Admin: &[]bool{true}[0], AccessToken: accessToken, Debug: "User: " + c.Request.Header.Get("USER")}); err != nil {
 		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: err.Error()})
 		return
 	}
@@ -35,15 +36,15 @@ func AddAdmin(c *gin.Context) {
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
-		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: resultAdmin.Err.Error()})
+		c.JSON(http.StatusUnauthorized, token.Result{Status: false, Error: resultAdmin.Err.Error()})
 		return
 	}
-	c.BindJSON(&input)
+	log.Println(c.BindJSON(&input))
 
 	accessToken, _ := toolToken.Generate(2)
 
 	if err := dbToken.Create(&token.Token{
-		Admin: true, AccessToken: accessToken, Debug: "User: " + c.Request.Header.Get("USER")}); err != nil {
+		Admin: &[]bool{true}[0], AccessToken: accessToken, Debug: "User: " + c.Request.Header.Get("USER")}); err != nil {
 		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: err.Error()})
 		return
 	}
@@ -53,13 +54,13 @@ func AddAdmin(c *gin.Context) {
 func DeleteAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
-		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: resultAdmin.Err.Error()})
+		c.JSON(http.StatusUnauthorized, token.Result{Status: false, Error: resultAdmin.Err.Error()})
 		return
 	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: err.Error()})
+		c.JSON(http.StatusBadRequest, token.Result{Status: false, Error: err.Error()})
 		return
 	}
 
@@ -73,7 +74,7 @@ func DeleteAdmin(c *gin.Context) {
 func DeleteAllAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
-		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: resultAdmin.Err.Error()})
+		c.JSON(http.StatusUnauthorized, token.Result{Status: false, Error: resultAdmin.Err.Error()})
 		return
 	}
 
@@ -89,10 +90,10 @@ func UpdateAdmin(c *gin.Context) {
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
-		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: resultAdmin.Err.Error()})
+		c.JSON(http.StatusUnauthorized, token.Result{Status: false, Error: resultAdmin.Err.Error()})
 		return
 	}
-	c.BindJSON(&input)
+	log.Println(c.BindJSON(&input))
 
 	if err := dbToken.Update(token.UpdateAll, &input); err != nil {
 		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: err.Error()})
@@ -104,18 +105,18 @@ func UpdateAdmin(c *gin.Context) {
 func GetAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
-		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: resultAdmin.Err.Error()})
+		c.JSON(http.StatusUnauthorized, token.Result{Status: false, Error: resultAdmin.Err.Error()})
 		return
 	}
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: err.Error()})
+		c.JSON(http.StatusBadRequest, token.Result{Status: false, Error: err.Error()})
 		return
 	}
 
 	result := dbToken.Get(token.ID, &token.Token{Model: gorm.Model{ID: uint(id)}})
 	if result.Err != nil {
-		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: err.Error()})
+		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: result.Err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, token.Result{Status: true, Token: result.Token})
@@ -124,7 +125,7 @@ func GetAdmin(c *gin.Context) {
 func GetAllAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
-		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: resultAdmin.Err.Error()})
+		c.JSON(http.StatusUnauthorized, token.Result{Status: false, Error: resultAdmin.Err.Error()})
 		return
 	}
 

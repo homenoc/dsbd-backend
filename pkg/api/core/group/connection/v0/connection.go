@@ -22,24 +22,24 @@ func Add(c *gin.Context) {
 
 	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
-		c.JSON(http.StatusInternalServerError, connection.Result{Status: false, Error: result.Err.Error()})
+		c.JSON(http.StatusUnauthorized, connection.Result{Status: false, Error: result.Err.Error()})
 		return
 	}
 
 	// check authority
 	if result.User.Level > 1 {
-		c.JSON(http.StatusInternalServerError, connection.Result{Status: false, Error: "You don't have authority this operation"})
+		c.JSON(http.StatusUnauthorized, connection.Result{Status: false, Error: "You don't have authority this operation"})
 		return
 	}
 
 	if !((result.Group.Status%100 == 13 || result.Group.Status%100 == 23) && (result.Group.Status/100 == 0 ||
 		result.Group.Status/100 == 1)) {
-		c.JSON(http.StatusInternalServerError, connection.Result{Status: false, Error: fmt.Sprint("error: status error")})
+		c.JSON(http.StatusUnauthorized, connection.Result{Status: false, Error: fmt.Sprint("error: status error")})
 		return
 	}
 
 	if err := check(input); err != nil {
-		c.JSON(http.StatusInternalServerError, connection.Result{Status: false, Error: err.Error()})
+		c.JSON(http.StatusBadRequest, connection.Result{Status: false, Error: err.Error()})
 		return
 	}
 
