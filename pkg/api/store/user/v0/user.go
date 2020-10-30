@@ -70,7 +70,7 @@ func Update(base int, u *user.User) error {
 			GroupID: u.GroupID, Name: u.Name, NameEn: u.NameEn, Email: u.Email, Pass: u.Pass, Tech: u.Tech,
 			MailVerify: u.MailVerify, MailToken: u.MailToken, Org: u.Org, OrgEn: u.OrgEn, PostCode: u.PostCode,
 			Address: u.Address, AddressEn: u.AddressEn, Dept: u.Dept, DeptEn: u.DeptEn, Pos: u.Pos, PosEn: u.PosEn,
-			Tel: u.Tel, Country: u.Country, Status: u.Status})
+			Tel: u.Tel, Fax: u.Fax, Country: u.Country, Status: u.Status})
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
