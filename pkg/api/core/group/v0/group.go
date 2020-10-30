@@ -173,7 +173,7 @@ func GetAll(c *gin.Context) {
 	var resultJpnicAdmin []jpnicAdmin.JpnicAdmin = nil
 
 	for _, data := range resultNetwork.Network {
-		tmpAdmin := dbJpnicAdmin.Get(jpnicAdmin.NetworkId, &jpnicAdmin.JpnicAdmin{NetworkId: data.ID})
+		tmpAdmin := dbJpnicAdmin.Get(jpnicAdmin.NetworkId, &jpnicAdmin.JpnicAdmin{NetworkID: data.ID})
 		if tmpAdmin.Err != nil {
 			c.JSON(http.StatusInternalServerError, group.ResultAll{Status: false, Error: tmpAdmin.Err.Error()})
 			return

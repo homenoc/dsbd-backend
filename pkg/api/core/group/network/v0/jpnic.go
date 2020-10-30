@@ -35,7 +35,7 @@ func jpnicProcess(input jpnic) error {
 	}
 
 	// JPNIC Admin tableに保存
-	_, err := dbJpnicAdmin.Create(&jpnicAdmin.JpnicAdmin{NetworkId: input.network.ID, UserId: input.admin, Lock: &[]bool{true}[0]})
+	_, err := dbJpnicAdmin.Create(&jpnicAdmin.JpnicAdmin{NetworkID: input.network.ID, UserID: input.admin, Lock: &[]bool{true}[0]})
 	if err != nil {
 		return err
 	}

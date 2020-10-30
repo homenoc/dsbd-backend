@@ -44,7 +44,7 @@ func Update(base int, u jpnicAdmin.JpnicAdmin) error {
 
 	if base == jpnicAdmin.UpdateAll {
 		err = db.Model(&jpnicAdmin.JpnicAdmin{Model: gorm.Model{ID: u.ID}}).Update(jpnicAdmin.JpnicAdmin{
-			NetworkId: u.NetworkId, UserId: u.UserId, Lock: u.Lock}).Error
+			NetworkID: u.NetworkID, UserID: u.UserID, Lock: u.Lock}).Error
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
@@ -65,11 +65,11 @@ func Get(base int, data *jpnicAdmin.JpnicAdmin) jpnicAdmin.ResultDatabase {
 	if base == jpnicAdmin.ID { //ID
 		err = db.First(&networkStruct, data.ID).Error
 	} else if base == jpnicAdmin.UserId { //Name
-		err = db.Where("user_id = ?", data.UserId).Find(&networkStruct).Error
+		err = db.Where("user_id = ?", data.UserID).Find(&networkStruct).Error
 	} else if base == jpnicAdmin.NetworkId { //Name
-		err = db.Where("network_id = ?", data.NetworkId).Find(&networkStruct).Error
+		err = db.Where("network_id = ?", data.NetworkID).Find(&networkStruct).Error
 	} else if base == jpnicAdmin.NetworkAndUserId {
-		err = db.Where("network_id = ? AND user_id = ?", data.NetworkId, data.UserId).Find(&networkStruct).Error
+		err = db.Where("network_id = ? AND user_id = ?", data.NetworkID, data.UserID).Find(&networkStruct).Error
 	} else {
 		log.Println("base select error")
 		return jpnicAdmin.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
