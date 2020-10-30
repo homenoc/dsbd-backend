@@ -20,7 +20,7 @@ func UserAuthentication(data token.Token) auth.UserResult {
 	if resultToken.Err != nil {
 		return auth.UserResult{Err: fmt.Errorf("db error")}
 	}
-	resultUser := dbUser.Get(user.ID, &user.User{Model: gorm.Model{ID: resultToken.Token[0].UID}})
+	resultUser := dbUser.Get(user.ID, &user.User{Model: gorm.Model{ID: resultToken.Token[0].UserID}})
 	if resultUser.Err != nil {
 		return auth.UserResult{Err: fmt.Errorf("db error")}
 	}
@@ -38,7 +38,7 @@ func GroupAuthentication(data token.Token) auth.GroupResult {
 	if resultToken.Err != nil {
 		return auth.GroupResult{Err: fmt.Errorf("db error")}
 	}
-	resultUser := dbUser.Get(user.ID, &user.User{Model: gorm.Model{ID: resultToken.Token[0].UID}})
+	resultUser := dbUser.Get(user.ID, &user.User{Model: gorm.Model{ID: resultToken.Token[0].UserID}})
 	if resultUser.Err != nil {
 		return auth.GroupResult{Err: fmt.Errorf("db error")}
 	}

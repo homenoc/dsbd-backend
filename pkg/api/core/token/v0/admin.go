@@ -23,7 +23,7 @@ func GenerateAdmin(c *gin.Context) {
 	}
 	accessToken, _ := toolToken.Generate(2)
 
-	if err := dbToken.Create(&token.Token{AdminID: resultAuth.AdminID, UID: 0, ExpiredAt: time.Now().Add(60 * time.Minute),
+	if err := dbToken.Create(&token.Token{AdminID: resultAuth.AdminID, UserID: 0, ExpiredAt: time.Now().Add(60 * time.Minute),
 		Admin: &[]bool{true}[0], AccessToken: accessToken, Debug: "User: " + c.Request.Header.Get("USER")}); err != nil {
 		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: err.Error()})
 		return

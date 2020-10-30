@@ -52,12 +52,12 @@ func Update(base int, t *token.Token) error {
 
 	if token.AddToken == base {
 		err = db.Model(&token.Token{Model: gorm.Model{ID: t.ID}}).Update(token.Token{Model: gorm.Model{},
-			ExpiredAt: t.ExpiredAt, UID: t.UID, Status: t.Status, AccessToken: t.AccessToken}).Error
+			ExpiredAt: t.ExpiredAt, UserID: t.UserID, Status: t.Status, AccessToken: t.AccessToken}).Error
 	} else if token.UpdateToken == base {
 		err = db.Model(&token.Token{Model: gorm.Model{ID: t.ID}}).Update("expired_at", t.ExpiredAt).Error
 	} else if token.UpdateAll == base {
 		err = db.Model(&token.Token{Model: gorm.Model{ID: t.ID}}).Update(token.Token{
-			ExpiredAt: t.ExpiredAt, UID: t.UID, Status: t.Status, UserToken: t.UserToken, TmpToken: t.TmpToken,
+			ExpiredAt: t.ExpiredAt, UserID: t.UserID, Status: t.Status, UserToken: t.UserToken, TmpToken: t.TmpToken,
 			AccessToken: t.AccessToken, Debug: t.Debug}).Error
 	} else {
 		log.Println("base select error")
