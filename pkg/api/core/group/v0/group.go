@@ -52,7 +52,7 @@ func Add(c *gin.Context) {
 	}
 
 	result, err := dbGroup.Create(&group.Group{
-		Agree: &[]bool{true}[0], Question: input.Question, Org: input.Org, Status: 0, Bandwidth: input.Bandwidth,
+		Agree: &[]bool{true}[0], Question: input.Question, Org: input.Org, Status: 1, Bandwidth: input.Bandwidth,
 		Comment: input.Comment, Contract: input.Contract,
 	})
 	if err != nil {
