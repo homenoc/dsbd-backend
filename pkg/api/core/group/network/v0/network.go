@@ -63,7 +63,7 @@ func Add(c *gin.Context) {
 	net, err := dbNetwork.Create(&network.Network{
 		GroupID: result.Group.ID, Org: input.Org, OrgEn: input.OrgEn, Postcode: input.Postcode, Address: input.Address,
 		AddressEn: input.AddressEn, RouteV4: input.RouteV4, RouteV6: input.RouteV6, PI: &[]bool{input.PI}[0],
-		ASN: input.ASN, V4: input.V4, V6: input.V6,
+		ASN: input.ASN, V4: input.V4, V6: input.V6, Open: &[]bool{false}[0],
 		V4Name: input.V4Name, V6Name: input.V6Name, Date: input.Date, Plan: input.Plan, Lock: &[]bool{input.Lock}[0],
 	})
 	if err != nil {

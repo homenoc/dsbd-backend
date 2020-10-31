@@ -9,6 +9,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	dbConnection "github.com/homenoc/dsbd-backend/pkg/api/store/group/connection/v0"
 	dbNetwork "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/v0"
+	"log"
 	"net/http"
 )
 
@@ -35,6 +36,8 @@ func Get(c *gin.Context) {
 	}
 
 	var information []info.Info
+
+	log.Println(resultConnection.Connection)
 
 	for _, data := range resultConnection.Connection {
 		if *data.Open {
