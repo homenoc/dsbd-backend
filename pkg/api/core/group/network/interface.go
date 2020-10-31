@@ -26,9 +26,10 @@ type Network struct {
 	Postcode  string `json:"postcode"`
 	Address   string `json:"address"`
 	AddressEn string `json:"address_en"`
-	Route     string `json:"route"`
 	PI        *bool  `json:"pi"`
 	ASN       string `json:"asn"`
+	RouteV4   string `json:"route_v4"`
+	RouteV6   string `json:"route_v6"`
 	V4        string `json:"v4"`
 	V6        string `json:"v6"`
 	V4Name    string `json:"v4_name"`
@@ -48,7 +49,8 @@ type NetworkInput struct {
 	Postcode  string `json:"postcode"`
 	Address   string `json:"address"`
 	AddressEn string `json:"address_en"`
-	Route     string `json:"route"`
+	RouteV4   string `json:"route_v4"`
+	RouteV6   string `json:"route_v6"`
 	PI        bool   `json:"pi"`
 	ASN       string `json:"asn"`
 	V4        string `json:"v4"`

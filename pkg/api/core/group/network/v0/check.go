@@ -7,8 +7,11 @@ import (
 
 func check(input network.NetworkInput) error {
 	// check
-	if input.Route == "" {
-		return fmt.Errorf("no data: route")
+	if input.RouteV4 == "" {
+		return fmt.Errorf("no data: route(v4)")
+	}
+	if input.RouteV6 == "" {
+		return fmt.Errorf("no data: route(v6)")
 	}
 	if input.Date == "" {
 		return fmt.Errorf("no data: date")

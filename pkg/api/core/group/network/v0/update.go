@@ -32,9 +32,14 @@ func replaceNetwork(serverData, input network.Network) network.Network {
 		input.AddressEn = serverData.AddressEn
 	}
 
-	//Route
-	if input.Route == "" {
-		input.Route = serverData.Route
+	//Route(V4)
+	if input.RouteV4 == "" {
+		input.RouteV4 = serverData.RouteV4
+	}
+
+	//Route(V4)
+	if input.RouteV6 == "" {
+		input.RouteV6 = serverData.RouteV6
 	}
 
 	//PI

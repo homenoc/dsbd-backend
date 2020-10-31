@@ -47,10 +47,11 @@ func Update(base int, c network.Network) error {
 	} else if network.UpdateData == base {
 		result = db.Model(&network.Network{Model: gorm.Model{ID: c.ID}}).Update(network.Network{
 			Org: c.Org, OrgEn: c.OrgEn, Postcode: c.Postcode, Address: c.Address, AddressEn: c.AddressEn,
-			Route: c.Route, PI: c.PI, ASN: c.ASN, V4: c.V4, V6: c.V6, V4Name: c.V4Name, V6Name: c.V6Name,
-			Date: c.Date, Plan: c.Plan})
+			RouteV4: c.RouteV4, RouteV6: c.RouteV6, PI: c.PI, ASN: c.ASN, V4: c.V4, V6: c.V6,
+			V4Name: c.V4Name, V6Name: c.V6Name, Date: c.Date, Plan: c.Plan})
 	} else if network.UpdateRoute == base {
-		result = db.Model(&network.Network{Model: gorm.Model{ID: c.ID}}).Update(network.Network{Route: c.Route})
+		result = db.Model(&network.Network{Model: gorm.Model{ID: c.ID}}).Update(network.Network{
+			RouteV4: c.RouteV4, RouteV6: c.RouteV6})
 	} else if network.UpdateDate == base {
 		result = db.Model(&network.Network{Model: gorm.Model{ID: c.ID}}).Update(network.Network{Date: c.Date})
 	} else if network.UpdateGID == base {
