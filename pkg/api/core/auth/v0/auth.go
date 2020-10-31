@@ -52,7 +52,7 @@ func GroupAuthentication(data token.Token) auth.GroupResult {
 	if resultGroup.Err != nil {
 		return auth.GroupResult{Err: fmt.Errorf("db error")}
 	}
-	if resultGroup.Group[0].Status < 2 || 1000 <= resultGroup.Group[0].Status {
+	if 1000 <= resultGroup.Group[0].Status {
 		return auth.GroupResult{Err: fmt.Errorf("error: group status")}
 	}
 	return auth.GroupResult{User: resultUser.User[0], Group: resultGroup.Group[0], Err: nil}
