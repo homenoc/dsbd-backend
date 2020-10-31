@@ -46,6 +46,11 @@ func replaceUser(serverData, input user.User) (user.User, error) {
 		serverData.Pass = input.Pass
 	}
 
+	//GroupHandle
+	if input.GroupHandle != serverData.GroupHandle {
+		serverData.GroupHandle = input.GroupHandle
+	}
+
 	//Org
 	if input.Org != "" {
 		serverData.Org = input.Org

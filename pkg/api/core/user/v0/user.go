@@ -54,7 +54,7 @@ func Add(c *gin.Context) {
 			return
 		}
 		data = user.User{GroupID: 0, Name: input.Name, Email: input.Email, Pass: input.Pass, Status: 0, Level: 1,
-			MailVerify: &[]bool{false}[0], MailToken: mailToken}
+			MailVerify: &[]bool{false}[0], MailToken: mailToken, GroupHandle: &[]bool{false}[0]}
 
 		// グループ所属ユーザの登録
 	} else {
@@ -77,7 +77,7 @@ func Add(c *gin.Context) {
 		log.Println("tmp_Pass: " + pass)
 
 		data = user.User{GroupID: input.GroupID, Name: input.Name, NameEn: input.NameEn,
-			Email: input.Email, Pass: strings.ToLower(hash.Generate(pass)),
+			Email: input.Email, Pass: strings.ToLower(hash.Generate(pass)), GroupHandle: input.GroupHandle,
 			Status: 0, Tech: input.Tech, Level: input.Level, MailVerify: &[]bool{false}[0], MailToken: mailToken}
 	}
 
