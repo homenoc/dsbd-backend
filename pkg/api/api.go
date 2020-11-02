@@ -61,7 +61,7 @@ func AdminRestAPI() {
 			v1.DELETE("/token", token.DeleteAllAdmin)
 			v1.DELETE("/token/:id", token.DeleteAdmin)
 			// Token Update
-			v1.PUT("/token", token.UpdateAdmin)
+			v1.PUT("/token/:id", token.UpdateAdmin)
 			v1.GET("/token", token.GetAllAdmin)
 			v1.GET("/token/:id", token.GetAdmin)
 			//
@@ -71,7 +71,7 @@ func AdminRestAPI() {
 			// Group Delete
 			v1.DELETE("/group", group.DeleteAdmin)
 			// Group Update
-			v1.PUT("/group", group.UpdateAdmin)
+			v1.PUT("/group/:id", group.UpdateAdmin)
 			v1.GET("/group", group.GetAllAdmin)
 			v1.GET("/group/:id", group.GetAdmin)
 
@@ -89,9 +89,9 @@ func AdminRestAPI() {
 			////
 			v1.POST("/connection", connection.AddAdmin)
 			// Group Delete
-			v1.DELETE("/connection", connection.DeleteAdmin)
+			v1.DELETE("/connection/:id", connection.DeleteAdmin)
 			// Group Update
-			v1.PUT("/connection", connection.UpdateAdmin)
+			v1.PUT("/connection/:id", connection.UpdateAdmin)
 			v1.GET("/connection", connection.GetAllAdmin)
 			v1.GET("/connection/:id", connection.GetAdmin)
 
@@ -100,9 +100,9 @@ func AdminRestAPI() {
 			//
 			v1.POST("/network", network.AddAdmin)
 			// Network Delete
-			v1.DELETE("/network", network.DeleteAdmin)
+			v1.DELETE("/network/:id", network.DeleteAdmin)
 			// Network Update
-			v1.PUT("/network", network.UpdateAdmin)
+			v1.PUT("/network/:id", network.UpdateAdmin)
 			v1.GET("/network", network.GetAllAdmin)
 			v1.GET("/network/:id", network.GetAdmin)
 			////
