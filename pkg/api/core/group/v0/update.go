@@ -6,7 +6,7 @@ func updateAdminUser(input, replace group.Group) (group.Group, error) {
 
 	//Org
 	if input.Org != "" {
-		replace.Status = input.Status
+		replace.Org = input.Org
 	}
 
 	// uint boolean
