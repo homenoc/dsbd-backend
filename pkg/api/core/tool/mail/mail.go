@@ -52,7 +52,6 @@ func SendMail(d Mail) string {
 	msg := "" +
 		"From:" + from.String() + "\r\n" +
 		"To:" + to.String() + "\r\n" +
-		"Cc:" + cc.String() + "\r\n" +
 		encodeSubject(d.Subject) + "\r\n" +
 		"\r\n" + d.Content + config.Conf.Mail.Contract + "\r\n"
 
