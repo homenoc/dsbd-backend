@@ -48,8 +48,6 @@ var startAdminCmd = &cobra.Command{
 			log.Fatalf("error config process |%v", err)
 		}
 
-		logging.WriteLog("------Application Start(User)------")
-
 		api.AdminRestAPI()
 		log.Println("end")
 	},

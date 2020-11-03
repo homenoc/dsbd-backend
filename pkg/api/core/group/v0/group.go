@@ -1,6 +1,7 @@
 package v0
 
 import (
+	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/gin-gonic/gin"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
@@ -9,6 +10,7 @@ import (
 	jpnicAdmin "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicAdmin"
 	jpnicTech "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicTech"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbConnection "github.com/homenoc/dsbd-backend/pkg/api/store/group/connection/v0"
 	dbJpnicAdmin "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/jpnicAdmin/v0"
@@ -59,6 +61,13 @@ func Add(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: err.Error(), Group: nil})
 		return
 	}
+	attachment := slack.Attachment{}
+	attachment.AddField(slack.Field{Title: "Title", Value: "グループ登録"}).
+		AddField(slack.Field{Title: "Question", Value: input.Question}).
+		AddField(slack.Field{Title: "Bandwidth", Value: input.Bandwidth}).
+		AddField(slack.Field{Title: "Contract", Value: input.Contract})
+	notification.SendSlack(notification.Slack{Attachment: attachment, Channel: "user", Status: true})
+
 	if err := dbUser.Update(user.UpdateGID, &user.User{Model: gorm.Model{ID: userResult.User.ID}, GroupID: result.Model.ID}); err != nil {
 		log.Println(dbGroup.Delete(&group.Group{Model: gorm.Model{ID: result.ID}}))
 		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: err.Error()})
