@@ -53,9 +53,8 @@ func Add(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, user.Result{Status: false, Error: fmt.Sprintf("wrong pass")})
 			return
 		}
-		data = user.User{GroupID: 0, Name: input.Name, Email: input.Email, Pass: input.Pass, Status: 0, Level: 1,
-			MailVerify: &[]bool{false}[0], MailToken: mailToken, GroupHandle: &[]bool{false}[0]}
-
+		data = user.User{GroupID: 0, Name: input.Name, NameEn: input.NameEn, Email: input.Email, Pass: input.Pass,
+			Status: 0, Level: 1, MailVerify: &[]bool{false}[0], MailToken: mailToken, GroupHandle: &[]bool{false}[0]}
 		// グループ所属ユーザの登録
 	} else {
 		if input.Level == 0 || input.Level > 5 {
@@ -86,7 +85,8 @@ func Add(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
 	} else {
 		attachment := slack.Attachment{}
-		attachment.AddField(slack.Field{Title: "E-Mail", Value: input.Email}).
+		attachment.AddField(slack.Field{Title: "Title", Value: "ユーザ登録"}).
+			AddField(slack.Field{Title: "E-Mail", Value: input.Email}).
 			AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(input.GroupID))}).
 			AddField(slack.Field{Title: "Name", Value: input.Name}).
 			AddField(slack.Field{Title: "Name(English)", Value: input.NameEn})
