@@ -1,17 +1,20 @@
 package v0
 
 import (
+	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/gin-gonic/gin"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	group "github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicAdmin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	dbNetwork "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/v0"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	"github.com/jinzhu/gorm"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 func Add(c *gin.Context) {
@@ -78,6 +81,11 @@ func Add(c *gin.Context) {
 			log.Println(dbNetwork.Delete(&network.Network{Model: gorm.Model{ID: net.ID}}))
 		}
 	}
+
+	attachment := slack.Attachment{}
+	attachment.AddField(slack.Field{Title: "Title", Value: "ネットワーク登録"}).
+		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(input.GroupID))})
+	notification.SendSlack(notification.Slack{Attachment: attachment, Channel: "user", Status: true})
 
 	// ---------ここまで処理が通っている場合、DBへの書き込みにすべて成功している
 	// GroupのStatusをAfterStatusにする

@@ -2,15 +2,18 @@ package v0
 
 import (
 	"fmt"
+	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/gin-gonic/gin"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	connection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	dbConnection "github.com/homenoc/dsbd-backend/pkg/api/store/group/connection/v0"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	"github.com/jinzhu/gorm"
 	"net/http"
+	"strconv"
 )
 
 func Add(c *gin.Context) {
@@ -56,6 +59,11 @@ func Add(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, connection.Result{Status: false, Error: err.Error()})
 		return
 	}
+
+	attachment := slack.Attachment{}
+	attachment.AddField(slack.Field{Title: "Title", Value: "接続情報登録"}).
+		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(input.GroupID))})
+	notification.SendSlack(notification.Slack{Attachment: attachment, Channel: "user", Status: true})
 
 	c.JSON(http.StatusOK, group.Result{Status: true})
 }
