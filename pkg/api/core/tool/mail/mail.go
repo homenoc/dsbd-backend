@@ -46,8 +46,7 @@ func encodeSubject(subject string) string {
 func SendMail(d Mail) string {
 	from := mail.Address{Name: "From", Address: config.Conf.Mail.From}
 	to := mail.Address{Name: "to", Address: d.ToMail}
-	cc := mail.Address{Name: "cc", Address: config.Conf.Mail.CC}
-	receivers := []string{to.Address, cc.Address}
+	receivers := []string{to.Address}
 
 	msg := "" +
 		"From:" + from.String() + "\r\n" +
