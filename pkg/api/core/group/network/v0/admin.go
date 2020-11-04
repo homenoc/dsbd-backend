@@ -52,6 +52,12 @@ func DeleteAdmin(c *gin.Context) {
 func UpdateAdmin(c *gin.Context) {
 	var input network.Network
 
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, token.Result{Status: false, Error: err.Error()})
+		return
+	}
+
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, token.Result{Status: false, Error: resultAdmin.Err.Error()})
@@ -59,7 +65,13 @@ func UpdateAdmin(c *gin.Context) {
 	}
 	log.Println(c.BindJSON(&input))
 
-	if err := dbNetwork.Update(network.UpdateAll, input); err != nil {
+	result := dbNetwork.Get(network.ID, &network.Network{Model: gorm.Model{ID: uint(id)}})
+	if result.Err != nil {
+		c.JSON(http.StatusBadRequest, token.Result{Status: false, Error: resultAdmin.Err.Error()})
+		return
+	}
+
+	if err := dbNetwork.Update(network.UpdateAll, replaceNetwork(result.Network[0], input)); err != nil {
 		c.JSON(http.StatusInternalServerError, network.Result{Status: false, Error: err.Error()})
 		return
 	}
