@@ -4,83 +4,85 @@ import (
 	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
 )
 
-func replaceNetwork(serverData, input network.Network) network.Network {
-	input.ID = serverData.ID
-
+func replaceNetwork(replace, input network.Network) network.Network {
 	//Org
-	if input.Org == "" {
-		input.Org = serverData.Org
+	if input.Org != "" {
+		replace.Org = input.Org
 	}
 
 	//Org (English)
-	if input.OrgEn == "" {
-		input.OrgEn = serverData.OrgEn
+	if input.OrgEn != "" {
+		replace.OrgEn = input.OrgEn
 	}
 
 	//Postcode
-	if input.Postcode == "" {
-		input.Postcode = serverData.Postcode
+	if input.Postcode != "" {
+		replace.Postcode = input.Postcode
 	}
 
 	//Address
-	if input.Address == "" {
-		input.Address = serverData.Address
+	if input.Address != "" {
+		replace.Address = input.Address
 	}
 
 	//Address(English)
-	if input.AddressEn == "" {
-		input.AddressEn = serverData.AddressEn
+	if input.AddressEn != "" {
+		replace.AddressEn = input.AddressEn
 	}
 
 	//Route(V4)
-	if input.RouteV4 == "" {
-		input.RouteV4 = serverData.RouteV4
+	if input.RouteV4 != "" {
+		replace.RouteV4 = input.RouteV4
 	}
 
 	//Route(V4)
-	if input.RouteV6 == "" {
-		input.RouteV6 = serverData.RouteV6
+	if input.RouteV6 != "" {
+		replace.RouteV6 = input.RouteV6
 	}
 
 	//PI
-	input.PI = serverData.PI
+	if input.PI != replace.PI {
+		replace.PI = input.PI
+	}
 
 	//Lock
-	input.Lock = serverData.Lock
+	if input.Lock != replace.Lock {
+		replace.Lock = input.Lock
+	}
 
 	//ASN
-	if input.ASN == "" {
-		input.ASN = serverData.ASN
+	if input.ASN != "" {
+		replace.ASN = input.ASN
 	}
 
 	//V4
-	if input.V4 == "" {
-		input.V4 = serverData.V4
+	if input.V4 != "" {
+		replace.V4 = input.V4
 	}
 
 	//V6
-	if input.V6 == "" {
-		input.V6 = serverData.V6
+	if input.V6 != "" {
+		replace.V6 = input.V6
 	}
 
 	//V4Name
-	if input.V4Name == "" {
-		input.V4Name = serverData.V4Name
+	if input.V4Name != "" {
+		replace.V4Name = input.V4Name
 	}
 
 	//V6Name
-	if input.V6Name == "" {
-		input.V6Name = serverData.V6Name
+	if input.V6Name != "" {
+		replace.V6Name = input.V6Name
 	}
 	//Date
-	if input.Date == "" {
-		input.Date = serverData.Date
+	if input.Date != "" {
+		replace.Date = input.Date
 	}
 
 	//Plan
-	if input.Plan == "" {
-		input.Plan = serverData.Plan
+	if input.Plan != "" {
+		replace.Plan = input.Plan
 	}
 
-	return input
+	return replace
 }

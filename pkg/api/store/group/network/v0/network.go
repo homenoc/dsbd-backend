@@ -56,6 +56,11 @@ func Update(base int, c network.Network) error {
 		result = db.Model(&network.Network{Model: gorm.Model{ID: c.ID}}).Update(network.Network{Date: c.Date})
 	} else if network.UpdateGID == base {
 		result = db.Model(&network.Network{Model: gorm.Model{ID: c.ID}}).Update(network.Network{GroupID: c.GroupID})
+	} else if network.UpdateAll == base {
+		result = db.Model(&network.Network{Model: gorm.Model{ID: c.ID}}).Update(network.Network{
+			GroupID: c.GroupID, Org: c.Org, OrgEn: "", Postcode: "", Address: c.Address, AddressEn: c.AddressEn,
+			PI: c.PI, ASN: c.ASN, RouteV4: c.RouteV4, RouteV6: c.RouteV6, V4: c.V4, V6: c.V6, V4Name: c.V4Name,
+			V6Name: c.V6Name, Date: c.Date, Plan: c.Plan, Open: c.Open, Lock: c.Lock})
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
