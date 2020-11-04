@@ -71,7 +71,7 @@ func UpdateAdmin(c *gin.Context) {
 		return
 	}
 
-	if err := dbNetwork.Update(network.UpdateAll, replaceNetwork(result.Network[0], input)); err != nil {
+	if err := dbNetwork.Update(network.UpdateAll, replaceAdminNetwork(result.Network[0], input)); err != nil {
 		c.JSON(http.StatusInternalServerError, network.Result{Status: false, Error: err.Error()})
 		return
 	}
