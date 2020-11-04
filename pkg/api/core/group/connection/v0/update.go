@@ -4,7 +4,7 @@ import (
 	connection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
 )
 
-func updateAdminConnection(input, replace connection.Connection) (connection.Connection, error) {
+func updateAdminConnection(input, replace connection.Connection) connection.Connection {
 
 	//Service ID
 	if input.ServiceID != "" {
@@ -48,13 +48,7 @@ func updateAdminConnection(input, replace connection.Connection) (connection.Con
 
 	// uint boolean
 	// Open
-	if input.Open != replace.Open {
-		replace.Open = input.Open
-	}
-	// Fee
-	if input.Fee != replace.Fee {
-		replace.Fee = input.Fee
-	}
+	replace.Open = input.Open
 
-	return replace, nil
+	return replace
 }

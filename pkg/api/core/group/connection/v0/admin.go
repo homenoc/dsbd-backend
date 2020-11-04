@@ -71,13 +71,7 @@ func UpdateAdmin(c *gin.Context) {
 		return
 	}
 
-	replace, err := updateAdminConnection(input, resultConnection.Connection[0])
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, connection.Result{Status: false, Error: err.Error()})
-		return
-	}
-
-	if err := dbConnection.Update(connection.UpdateAll, replace); err != nil {
+	if err := dbConnection.Update(connection.UpdateAll, updateAdminConnection(input, resultConnection.Connection[0])); err != nil {
 		c.JSON(http.StatusInternalServerError, connection.Result{Status: false, Error: err.Error()})
 		return
 	}
