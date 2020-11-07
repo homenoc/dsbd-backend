@@ -2,6 +2,8 @@ package v0
 
 import (
 	"fmt"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/mail"
 	toolToken "github.com/homenoc/dsbd-backend/pkg/api/core/tool/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
@@ -39,6 +41,14 @@ func replaceUser(serverData, input user.User) (user.User, error) {
 		serverData.Email = input.Email
 		serverData.MailVerify = &[]bool{false}[0]
 		serverData.MailToken = mailToken
+
+		mail.SendMail(mail.Mail{
+			ToMail:  input.Email,
+			Subject: "本人確認のメールにつきまして",
+			Content: " " + serverData.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
+				config.Conf.Controller.User.Url + "/api/v1/user/verify/" + mailToken + "\n" +
+				"本人確認が完了次第、ログイン可能になります。\n",
+		})
 	}
 
 	//Pass
