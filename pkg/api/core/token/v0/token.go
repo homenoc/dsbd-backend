@@ -48,13 +48,18 @@ func Generate(c *gin.Context) {
 		return
 	}
 
+	if len(userResult.User) == 0 {
+		c.JSON(http.StatusInternalServerError, &token.Result{Status: false, Error: "This account or password is not found... "})
+		return
+	}
+
 	if !*userResult.User[0].MailVerify {
-		c.JSON(http.StatusInternalServerError, &token.Result{Status: false, Error: fmt.Sprintf("You don't have email verification.")})
+		c.JSON(http.StatusUnauthorized, &token.Result{Status: false, Error: fmt.Sprintf("You don't have email verification.")})
 		return
 	}
 
 	if userResult.User[0].Status >= 100 {
-		c.JSON(http.StatusInternalServerError, &token.Result{Status: false, Error: fmt.Sprintf("status error")})
+		c.JSON(http.StatusUnauthorized, &token.Result{Status: false, Error: fmt.Sprintf("status error")})
 		return
 	}
 
@@ -63,7 +68,7 @@ func Generate(c *gin.Context) {
 		log.Println(tokenResult.Token[0].TmpToken)
 		log.Println("hash(server): " + hash.Generate(userResult.User[0].Pass+tokenResult.Token[0].TmpToken))
 		log.Println("hash(client): " + hashPass)
-		c.JSON(http.StatusInternalServerError, &token.Result{Status: false, Error: "not match"})
+		c.JSON(http.StatusUnauthorized, &token.Result{Status: false, Error: "not match"})
 		return
 	}
 	accessToken, _ := toolToken.Generate(2)
