@@ -11,8 +11,11 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support/chat"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support/ticket"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/mail"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbChat "github.com/homenoc/dsbd-backend/pkg/api/store/support/chat/v0"
 	dbTicket "github.com/homenoc/dsbd-backend/pkg/api/store/support/ticket/v0"
+	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"github.com/jinzhu/gorm"
 	"log"
 	"net/http"
@@ -218,6 +221,28 @@ func GetAdminWebSocket(c *gin.Context) {
 			//Admin側に送信
 			controller.SendChatAdmin(controllerInterface.Chat{CreatedAt: msg.CreatedAt, Admin: msg.Admin,
 				UserID: resultAdmin.AdminID, GroupID: ticketResult.Ticket[0].GroupID, Message: msg.Message})
+
+			resultTicket := dbTicket.Get(ticket.ID, &ticket.Ticket{Model: gorm.Model{ID: ticketResult.Ticket[0].ID}})
+			if resultTicket.Err != nil {
+				log.Println(resultTicket.Err)
+			}
+			if len(resultTicket.Ticket) != 0 {
+				resultUser := dbUser.Get(user.GIDAndLevel, &user.User{GroupID: resultTicket.Ticket[0].GroupID, Level: 1})
+				if resultUser.Err != nil {
+					log.Println(resultUser.Err)
+				}
+				if len(resultUser.User) != 0 {
+					for _, user := range resultUser.User {
+						//グループ側にメール送信
+						mail.SendMail(mail.Mail{
+							ToMail:  user.Email,
+							Subject: "Supportより新着メッセージ",
+							Content: " " + user.Name + "様\n\n" + "チャットより新着メッセージがあります\n" +
+								"Webシステムよりご覧いただけます。\n",
+						})
+					}
+				}
+			}
 
 			support.Broadcast <- msg
 		}
