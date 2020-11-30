@@ -70,7 +70,7 @@ func ReceiveChatUser(c *gin.Context) {
 	var input controller.Chat
 	log.Println(c.BindJSON(&input))
 
-	support.Broadcast <- support.WebSocketResult{CreatedAt: input.CreatedAt,
+	support.Broadcast <- support.WebSocketResult{CreatedAt: time.Now(),
 		UserID: input.UserID, GroupID: input.GroupID, Admin: input.Admin, Message: input.Message}
 
 }
