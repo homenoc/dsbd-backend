@@ -2,6 +2,7 @@ package v0
 
 import (
 	"fmt"
+	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
@@ -11,6 +12,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support/chat"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support/ticket"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	dbChat "github.com/homenoc/dsbd-backend/pkg/api/store/support/chat/v0"
 	dbTicket "github.com/homenoc/dsbd-backend/pkg/api/store/support/ticket/v0"
 	"github.com/jinzhu/gorm"
@@ -203,6 +205,14 @@ func GetWebSocket(c *gin.Context) {
 			//ユーザ側に送信
 			controller.SendChatUser(controllerInterface.Chat{CreatedAt: msg.CreatedAt,
 				UserID: result.User.ID, GroupID: resultGroup.Group.ID, Admin: msg.Admin, Message: msg.Message})
+
+			//HomeNOC Slackに送信
+			attachment := slack.Attachment{}
+			attachment.AddField(slack.Field{Title: "Title", Value: "Supportメッセージ"}).
+				AddField(slack.Field{Title: "UserID", Value: strconv.Itoa(int(result.User.ID))}).
+				AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(resultGroup.Group.ID)) + "-" + resultGroup.Group.Org}).
+				AddField(slack.Field{Title: "Message", Value: msg.Message})
+			notification.SendSlack(notification.Slack{Attachment: attachment, Channel: "user", Status: true})
 
 			support.Broadcast <- msg
 		}
