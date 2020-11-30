@@ -40,27 +40,21 @@ func CreateAdmin(c *gin.Context) {
 		return
 	}
 
-	// Chat DBに登録
-	chatResult, err := dbChat.Create(&chat.Chat{UserID: 0, Admin: true, Data: input.Data})
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: err.Error()})
-		return
-	}
-
 	// Ticket DBに登録
 	ticketResult, err := dbTicket.Create(&ticket.Ticket{GroupID: input.GroupID, UserID: 0,
-		ChatIDStart: chatResult.ID, ChatIDEnd: chatResult.ID, Solved: &[]bool{false}[0], Title: input.Title})
+		Solved: &[]bool{false}[0], Title: input.Title})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: err.Error()})
 		return
 	}
 
-	// Chat DBにTicketIDを登録
-	err = dbChat.Update(chat.UpdateAll, chat.Chat{Admin: true, Data: chatResult.Data, TicketID: ticketResult.ID})
+	// Chat DBに登録
+	chatResult, err := dbChat.Create(&chat.Chat{UserID: 0, Admin: true, Data: input.Data, TicketID: ticketResult.ID})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: err.Error()})
 		return
 	}
+
 	c.JSON(http.StatusOK, support.Result{Status: true, Ticket: []ticket.Ticket{*ticketResult},
 		Chat: []chat.Chat{*chatResult}})
 }
