@@ -8,6 +8,7 @@ const (
 	Name             = 2
 	Email            = 3
 	MailToken        = 4
+	GIDAndLevel      = 5
 	UpdateVerifyMail = 100
 	UpdateGID        = 101
 	UpdateInfo       = 102
