@@ -43,7 +43,7 @@ func Get(c *gin.Context) {
 		if *data.Open {
 			information = append(information, info.Info{
 				ServiceID: data.ServiceID, Service: data.Service, UserID: data.UserID, NOC: data.NOC,
-				Assign: data.NOCIP, TermIP: data.TermIP, LinkV4Our: data.LinkV4Our,
+				Assign: data.NOCIP, TermIP: data.TermIP, NOCIP: data.NOCIP, LinkV4Our: data.LinkV4Our,
 				LinkV4Your: data.LinkV4Your, LinkV6Our: data.LinkV6Our, LinkV6Your: data.LinkV6Your, Fee: data.Fee})
 		}
 	}
