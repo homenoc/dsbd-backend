@@ -4,8 +4,14 @@ import (
 	"github.com/gin-gonic/gin"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
+	groupConnection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
+	groupNetwork "github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
+	dbConnection "github.com/homenoc/dsbd-backend/pkg/api/store/group/connection/v0"
+	dbNetwork "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/v0"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
+	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"github.com/jinzhu/gorm"
 	"log"
 	"net/http"
@@ -95,7 +101,27 @@ func GetAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: result.Err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, group.Result{Status: true, Group: result.Group})
+
+	resultUser := dbUser.Get(user.GID, &user.User{GroupID: uint(id)})
+	if resultUser.Err != nil {
+		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: result.Err.Error()})
+		return
+	}
+
+	resultNetwork := dbNetwork.Get(groupNetwork.GID, &groupNetwork.Network{GroupID: uint(id)})
+	if resultNetwork.Err != nil {
+		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: result.Err.Error()})
+		return
+	}
+
+	resultConnection := dbConnection.Get(groupConnection.GID, &groupConnection.Connection{GroupID: uint(id)})
+	if resultConnection.Err != nil {
+		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: result.Err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, group.AdminResult{Status: true, User: resultUser.User, Group: result.Group,
+		Network: resultNetwork.Network, Connection: resultConnection.Connection})
 }
 
 func GetAllAdmin(c *gin.Context) {
