@@ -5,6 +5,7 @@ import (
 	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
 	jpnicAdmin "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicAdmin"
 	jpnicTech "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicTech"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	"github.com/jinzhu/gorm"
 )
 
@@ -37,6 +38,15 @@ type Result struct {
 	Status bool    `json:"status"`
 	Error  string  `json:"error"`
 	Group  []Group `json:"group"`
+}
+
+type AdminResult struct {
+	Status     bool                    `json:"status"`
+	Error      string                  `json:"error"`
+	User       []user.User             `json:"user"`
+	Group      []Group                 `json:"group"`
+	Network    []network.Network       `json:"network"`
+	Connection []connection.Connection `json:"connection"`
 }
 
 type ResultOne struct {
