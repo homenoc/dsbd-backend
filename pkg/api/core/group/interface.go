@@ -30,6 +30,7 @@ type Group struct {
 	Status    uint   `json:"status"`
 	Bandwidth string `json:"bandwidth"`
 	Contract  string `json:"contract"`
+	Student   *bool  `json:"student"`
 	Comment   string `json:"comment"`
 	Lock      *bool  `json:"lock"`
 }
