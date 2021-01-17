@@ -44,7 +44,8 @@ func Update(base int, data noc.NOC) error {
 
 	if noc.UpdateAll == base {
 		result = db.Model(&noc.NOC{Model: gorm.Model{ID: data.ID}}).Update(noc.NOC{
-			Host: data.Host, Address: data.Address, Enable: data.Enable})
+			Name: data.Name, Location: data.Location, Bandwidth: data.Bandwidth,
+			Enable: data.Enable, Comment: data.Comment})
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
@@ -64,8 +65,8 @@ func Get(base int, data *noc.NOC) noc.ResultDatabase {
 
 	if base == noc.ID { //ID
 		err = db.First(&nocStruct, data.ID).Error
-	} else if base == noc.Address { //UserID
-		err = db.Where("address = ?", data.Address).Find(&nocStruct).Error
+	} else if base == noc.Name { //UserID
+		err = db.Where("name = ?", data.Name).Find(&nocStruct).Error
 	} else if base == noc.Enable { //GroupID
 		err = db.Where("enable = ?", data.Enable).Find(&nocStruct).Error
 	} else {
