@@ -159,19 +159,13 @@ func replaceAdminNetwork(replace, input network.Network) network.Network {
 
 	// bool
 	//Lock
-	if input.Lock != replace.Lock {
-		replace.Lock = input.Lock
-	}
+	replace.Lock = input.Lock
 
 	//PI
-	if input.PI != replace.PI {
-		replace.PI = input.PI
-	}
+	replace.PI = input.PI
 
 	//Open
-	if input.Open != replace.Open {
-		replace.Open = input.Open
-	}
+	replace.Open = input.Open
 
 	return replace
 }
