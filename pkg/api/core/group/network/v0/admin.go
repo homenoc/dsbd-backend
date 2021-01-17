@@ -64,12 +64,18 @@ func UpdateAdmin(c *gin.Context) {
 		return
 	}
 
+	err = c.BindJSON(&input)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, token.Result{Status: false, Error: err.Error()})
+		return
+	}
+
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, token.Result{Status: false, Error: resultAdmin.Err.Error()})
 		return
 	}
-	log.Println(c.BindJSON(&input))
 
 	result := dbNetwork.Get(network.ID, &network.Network{Model: gorm.Model{ID: uint(id)}})
 	if result.Err != nil {
