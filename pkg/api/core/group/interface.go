@@ -46,8 +46,14 @@ type AdminResult struct {
 	Error      string                  `json:"error"`
 	User       []user.User             `json:"user"`
 	Group      []Group                 `json:"group"`
-	Network    []network.Network       `json:"network"`
+	Network    []NetworkInfo           `json:"network"`
 	Connection []connection.Connection `json:"connection"`
+}
+
+type NetworkInfo struct {
+	Network    network.Network         `json:"network"`
+	JPNICAdmin []jpnicAdmin.JpnicAdmin `json:"jpnic_admin"`
+	JPNICTech  []jpnicTech.JpnicTech   `json:"jpnic_tech"`
 }
 
 type ResultOne struct {
