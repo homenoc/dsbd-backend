@@ -257,5 +257,10 @@ func updateAdminUser(input, replace user.User) (user.User, error) {
 		replace.Level = input.Level
 	}
 
+	//GroupID
+	if input.GroupID != replace.GroupID {
+		replace.GroupID = input.GroupID
+	}
+
 	return replace, nil
 }
