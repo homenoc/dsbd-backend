@@ -4,8 +4,14 @@ import (
 	"github.com/gin-gonic/gin"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicAdmin"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicTech"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
+	dbJPNICAdmin "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/jpnicAdmin/v0"
+	dbJPNICTech "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/jpnicTech/v0"
 	dbNetwork "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/v0"
+	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"github.com/jinzhu/gorm"
 	"log"
 	"net/http"
@@ -58,12 +64,18 @@ func UpdateAdmin(c *gin.Context) {
 		return
 	}
 
+	err = c.BindJSON(&input)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, token.Result{Status: false, Error: err.Error()})
+		return
+	}
+
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, token.Result{Status: false, Error: resultAdmin.Err.Error()})
 		return
 	}
-	log.Println(c.BindJSON(&input))
 
 	result := dbNetwork.Get(network.ID, &network.Network{Model: gorm.Model{ID: uint(id)}})
 	if result.Err != nil {
@@ -95,7 +107,24 @@ func GetAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, network.Result{Status: false, Error: result.Err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, network.Result{Status: true, Network: result.Network})
+	resultJPNICAdmin := dbJPNICAdmin.Get(jpnicAdmin.NetworkId, &jpnicAdmin.JpnicAdmin{NetworkID: uint(id)})
+	if resultJPNICAdmin.Err != nil {
+		c.JSON(http.StatusInternalServerError, network.Result{Status: false, Error: resultJPNICAdmin.Err.Error()})
+		return
+	}
+	resultJPNICTech := dbJPNICTech.Get(jpnicTech.NetworkId, &jpnicTech.JpnicTech{NetworkID: uint(id)})
+	if resultJPNICTech.Err != nil {
+		c.JSON(http.StatusInternalServerError, network.Result{Status: false, Error: resultJPNICTech.Err.Error()})
+		return
+	}
+
+	resultUser := dbUser.Get(user.GID, &user.User{GroupID: uint(id)})
+	if resultUser.Err != nil {
+		c.JSON(http.StatusInternalServerError, network.Result{Status: false, Error: resultUser.Err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, network.Result{User: resultUser.User,
+		Status: true, Network: result.Network, JPNICAdmin: resultJPNICAdmin.Jpnic, JPNICTech: resultJPNICTech.Jpnic})
 }
 
 func GetAllAdmin(c *gin.Context) {

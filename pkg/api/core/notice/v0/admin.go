@@ -74,13 +74,7 @@ func UpdateAdmin(c *gin.Context) {
 		return
 	}
 
-	replace, err := updateAdminUser(input, tmp.Notice[0])
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, notice.Result{Status: false, Error: "error: this email is already registered"})
-		return
-	}
-
-	if err := dbNotice.Update(notice.UpdateAll, replace); err != nil {
+	if err := dbNotice.Update(notice.UpdateAll, updateAdminUser(input, tmp.Notice[0])); err != nil {
 		c.JSON(http.StatusInternalServerError, notice.Result{Status: false, Error: err.Error()})
 		return
 	}
