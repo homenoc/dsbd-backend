@@ -89,11 +89,11 @@ func AdminRestAPI() {
 			//
 			// NOC Router
 			//
-			v1.POST("/noc/router", nocRouter.AddAdmin)
-			v1.GET("/noc/router", nocRouter.GetAllAdmin)
-			v1.DELETE("/noc/router/:id", nocRouter.DeleteAdmin)
-			v1.GET("/noc/router/:id", nocRouter.GetAdmin)
-			v1.PUT("/noc/router/:id", nocRouter.UpdateAdmin)
+			v1.POST("/router", nocRouter.AddAdmin)
+			v1.GET("/router", nocRouter.GetAllAdmin)
+			v1.DELETE("/router/:id", nocRouter.DeleteAdmin)
+			v1.GET("/router/:id", nocRouter.GetAdmin)
+			v1.PUT("/router/:id", nocRouter.UpdateAdmin)
 
 			//
 			// Support
