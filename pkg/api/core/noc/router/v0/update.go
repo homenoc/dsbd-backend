@@ -6,9 +6,9 @@ import (
 
 func replace(input, replace router.Router) router.Router {
 
-	//Host
-	if input.Host != "" {
-		replace.Host = input.Host
+	//HostName
+	if input.HostName != "" {
+		replace.HostName = input.HostName
 	}
 	//Address
 	if input.Address != "" {
@@ -16,7 +16,7 @@ func replace(input, replace router.Router) router.Router {
 	}
 
 	// uint boolean
-	//Host
+	//HostName
 	if input.NOC != 0 {
 		replace.NOC = input.NOC
 	}
