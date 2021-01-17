@@ -2,10 +2,9 @@
 
 ![Go-Develop](https://github.com/homenoc/dsbd-backend/workflows/Go-Develop/badge.svg)
 ## 特徴
-* ユーザ認証
-* ユーザ登録
+* ユーザ認証・登録システム
 * グループ認証
-* 管理システム
+* ネットワーク管理システム
 * メール送信
 * Slack通知
 * 各システムとの連携
