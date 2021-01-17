@@ -7,6 +7,7 @@ import (
 	info "github.com/homenoc/dsbd-backend/pkg/api/core/group/info/v0"
 	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/v0"
 	group "github.com/homenoc/dsbd-backend/pkg/api/core/group/v0"
+	nocRouter "github.com/homenoc/dsbd-backend/pkg/api/core/noc/router/v0"
 	noc "github.com/homenoc/dsbd-backend/pkg/api/core/noc/v0"
 	notice "github.com/homenoc/dsbd-backend/pkg/api/core/notice/v0"
 	chat "github.com/homenoc/dsbd-backend/pkg/api/core/support/chat/v0"
@@ -30,7 +31,7 @@ func AdminRestAPI() {
 		v1 := api.Group("/v1")
 		{
 			// Controller
-			//
+			//noc
 			v1.POST("/controller/chat", controller.ReceiveChatAdmin)
 
 			// Notice
@@ -84,6 +85,15 @@ func AdminRestAPI() {
 			v1.DELETE("/noc/:id", noc.DeleteAdmin)
 			v1.GET("/noc/:id", noc.GetAdmin)
 			v1.PUT("/noc/:id", noc.UpdateAdmin)
+
+			//
+			// NOC Router
+			//
+			v1.POST("/noc/router", nocRouter.AddAdmin)
+			v1.GET("/noc/router", nocRouter.GetAllAdmin)
+			v1.DELETE("/noc/router/:id", nocRouter.DeleteAdmin)
+			v1.GET("/noc/router/:id", nocRouter.GetAdmin)
+			v1.PUT("/noc/router/:id", nocRouter.UpdateAdmin)
 
 			//
 			// Support
