@@ -6,9 +6,8 @@ import (
 
 const (
 	ID        = 0
-	Host      = 1
-	Address   = 2
-	Enable    = 3
+	Name      = 1
+	Enable    = 2
 	UpdateAll = 110
 )
 
