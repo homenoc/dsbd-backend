@@ -7,6 +7,7 @@ import (
 	info "github.com/homenoc/dsbd-backend/pkg/api/core/group/info/v0"
 	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/v0"
 	group "github.com/homenoc/dsbd-backend/pkg/api/core/group/v0"
+	noc "github.com/homenoc/dsbd-backend/pkg/api/core/noc/v0"
 	notice "github.com/homenoc/dsbd-backend/pkg/api/core/notice/v0"
 	chat "github.com/homenoc/dsbd-backend/pkg/api/core/support/chat/v0"
 	ticket "github.com/homenoc/dsbd-backend/pkg/api/core/support/ticket/v0"
@@ -74,6 +75,15 @@ func AdminRestAPI() {
 			v1.PUT("/group/:id", group.UpdateAdmin)
 			v1.GET("/group", group.GetAllAdmin)
 			v1.GET("/group/:id", group.GetAdmin)
+
+			//
+			// NOC
+			//
+			v1.POST("/noc", noc.AddAdmin)
+			v1.GET("/noc", noc.GetAllAdmin)
+			v1.DELETE("/noc/:id", noc.DeleteAdmin)
+			v1.GET("/noc/:id", noc.GetAdmin)
+			v1.PUT("/noc/:id", noc.UpdateAdmin)
 
 			//
 			// Support
