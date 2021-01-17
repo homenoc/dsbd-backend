@@ -1,6 +1,9 @@
 package group
 
 import (
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicAdmin"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicTech"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	"github.com/jinzhu/gorm"
 )
 
@@ -67,9 +70,12 @@ type Confirm struct {
 }
 
 type Result struct {
-	Status  bool      `json:"status"`
-	Error   string    `json:"error"`
-	Network []Network `json:"network"`
+	Status     bool                    `json:"status"`
+	Error      string                  `json:"error"`
+	Network    []Network               `json:"network"`
+	JPNICAdmin []jpnicAdmin.JpnicAdmin `json:"jpnic_admin"`
+	JPNICTech  []jpnicTech.JpnicTech   `json:"jpnic_tech"`
+	User       []user.User             `json:"user"`
 }
 
 type ResultOne struct {
