@@ -123,16 +123,6 @@ func replaceAdminNetwork(replace, input network.Network) network.Network {
 		replace.RouteV6 = input.RouteV6
 	}
 
-	//PI
-	if input.PI != replace.PI {
-		replace.PI = input.PI
-	}
-
-	//Lock
-	if input.Lock != replace.Lock {
-		replace.Lock = input.Lock
-	}
-
 	//ASN
 	if input.ASN != "" {
 		replace.ASN = input.ASN
@@ -167,9 +157,21 @@ func replaceAdminNetwork(replace, input network.Network) network.Network {
 		replace.Plan = input.Plan
 	}
 
-	replace.PI = input.PI
-	replace.Lock = input.Lock
-	replace.Open = input.Open
+	// bool
+	//Lock
+	if input.Lock != replace.Lock {
+		replace.Lock = input.Lock
+	}
+
+	//PI
+	if input.PI != replace.PI {
+		replace.PI = input.PI
+	}
+
+	//Open
+	if input.Open != replace.Open {
+		replace.Open = input.Open
+	}
 
 	return replace
 }
