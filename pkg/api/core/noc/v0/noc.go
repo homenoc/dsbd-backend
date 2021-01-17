@@ -64,14 +64,20 @@ func UpdateAdmin(c *gin.Context) {
 		return
 	}
 
-	err := c.BindJSON(&input)
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, noc.Result{Status: false, Error: err.Error()})
+		return
+	}
+
+	err = c.BindJSON(&input)
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusBadRequest, user.Result{Status: false, Error: err.Error()})
 		return
 	}
 
-	tmp := dbNOC.Get(noc.ID, &noc.NOC{Model: gorm.Model{ID: input.ID}})
+	tmp := dbNOC.Get(noc.ID, &noc.NOC{Model: gorm.Model{ID: uint(id)}})
 	if tmp.Err != nil {
 		c.JSON(http.StatusInternalServerError, noc.Result{Status: false, Error: tmp.Err.Error()})
 		return
