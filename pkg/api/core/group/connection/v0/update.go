@@ -15,6 +15,11 @@ func updateAdminConnection(input, replace connection.Connection) connection.Conn
 		replace.Service = input.Service
 	}
 
+	//NTT
+	if input.NTT != "" {
+		replace.NTT = input.NTT
+	}
+
 	//NOC
 	if input.NOC != "" {
 		replace.NOC = input.NOC
@@ -22,6 +27,11 @@ func updateAdminConnection(input, replace connection.Connection) connection.Conn
 	//NOC IP
 	if input.NOCIP != "" {
 		replace.NOCIP = input.NOCIP
+	}
+
+	//Term IP
+	if input.TermIP != "" {
+		replace.TermIP = input.TermIP
 	}
 
 	//LinkV4Our
@@ -47,8 +57,14 @@ func updateAdminConnection(input, replace connection.Connection) connection.Conn
 	}
 
 	// uint boolean
+	replace.GroupID = input.GroupID
+	replace.UserID = input.UserID
+
 	// Open
 	replace.Open = input.Open
+
+	// Monitor
+	replace.Monitor = input.Monitor
 
 	return replace
 }
