@@ -118,7 +118,7 @@ func GetAdmin(c *gin.Context) {
 		return
 	}
 
-	resultUser := dbUser.Get(user.GID, &user.User{GroupID: uint(id)})
+	resultUser := dbUser.Get(user.GID, &user.User{GroupID: result.Network[0].GroupID})
 	if resultUser.Err != nil {
 		c.JSON(http.StatusInternalServerError, network.Result{Status: false, Error: resultUser.Err.Error()})
 		return
