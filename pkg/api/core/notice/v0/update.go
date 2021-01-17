@@ -4,7 +4,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/notice"
 )
 
-func updateAdminUser(input, replace notice.Notice) (notice.Notice, error) {
+func updateAdminUser(input, replace notice.Notice) notice.Notice {
 
 	//Title
 	if input.Title != "" {
@@ -49,5 +49,5 @@ func updateAdminUser(input, replace notice.Notice) (notice.Notice, error) {
 		replace.Info = input.Info
 	}
 
-	return replace, nil
+	return replace
 }
