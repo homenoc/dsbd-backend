@@ -14,10 +14,10 @@ const (
 
 type Router struct {
 	gorm.Model
-	NOC     uint   `json:"noc"`
-	Host    string `json:"host"`
-	Address string `json:"address"`
-	Enable  *bool  `json:"enable"`
+	NOC      uint   `json:"noc"`
+	HostName string `json:"hostname"`
+	Address  string `json:"address"`
+	Enable   *bool  `json:"enable"`
 }
 
 type Result struct {

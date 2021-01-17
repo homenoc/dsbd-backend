@@ -3,6 +3,7 @@ package v0
 import (
 	"github.com/gin-gonic/gin"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/noc"
 	router "github.com/homenoc/dsbd-backend/pkg/api/core/noc/router"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
@@ -64,14 +65,20 @@ func UpdateAdmin(c *gin.Context) {
 		return
 	}
 
-	err := c.BindJSON(&input)
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, noc.Result{Status: false, Error: err.Error()})
+		return
+	}
+
+	err = c.BindJSON(&input)
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusBadRequest, user.Result{Status: false, Error: err.Error()})
 		return
 	}
 
-	tmp := dbRouter.Get(router.ID, &router.Router{Model: gorm.Model{ID: input.ID}})
+	tmp := dbRouter.Get(router.ID, &router.Router{Model: gorm.Model{ID: uint(id)}})
 	if tmp.Err != nil {
 		c.JSON(http.StatusInternalServerError, router.Result{Status: false, Error: tmp.Err.Error()})
 		return
