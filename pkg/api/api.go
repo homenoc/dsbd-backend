@@ -107,7 +107,7 @@ func AdminRestAPI() {
 			////
 			//// Connection
 			////
-			v1.POST("/connection", connection.AddAdmin)
+			v1.POST("/group/:id/connection", connection.AddAdmin)
 			// Group Delete
 			v1.DELETE("/connection/:id", connection.DeleteAdmin)
 			// Group Update
@@ -118,7 +118,7 @@ func AdminRestAPI() {
 			//
 			// Network
 			//
-			v1.POST("/network", network.AddAdmin)
+			v1.POST("/group/:id/network", network.AddAdmin)
 			// Network Delete
 			v1.DELETE("/network/:id", network.DeleteAdmin)
 			// Network Update

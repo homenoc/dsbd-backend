@@ -1,6 +1,7 @@
 package v0
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	connection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
@@ -13,19 +14,46 @@ import (
 )
 
 func AddAdmin(c *gin.Context) {
+	// ID取得
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, connection.Result{Status: false, Error: err.Error()})
+		return
+	}
+
+	// IDが0の時エラー処理
+	if id == 0 {
+		c.JSON(http.StatusBadRequest, connection.Result{Status: false, Error: fmt.Sprintf("This id is wrong... ")})
+		return
+	}
+
 	var input connection.Connection
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, token.Result{Status: false, Error: resultAdmin.Err.Error()})
+		c.JSON(http.StatusUnauthorized, connection.Result{Status: false, Error: resultAdmin.Err.Error()})
 		return
 	}
-	log.Println(c.BindJSON(&input))
+	err = c.BindJSON(&input)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, connection.Result{Status: false, Error: err.Error()})
+		return
+	}
 
-	if _, err := dbConnection.Create(&input); err != nil {
+	if err = check(input); err != nil {
+		c.JSON(http.StatusBadRequest, connection.Result{Status: false, Error: err.Error()})
+		return
+	}
+
+	_, err = dbConnection.Create(&connection.Connection{
+		GroupID: uint(id), UserID: input.UserID, Service: input.Service, NTT: input.NTT, NOC: input.NOC,
+		TermIP: input.TermIP, Monitor: input.Monitor, Open: &[]bool{false}[0]})
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, connection.Result{Status: false, Error: err.Error()})
 		return
 	}
+
 	c.JSON(http.StatusOK, connection.Result{Status: true})
 }
 
