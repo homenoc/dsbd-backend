@@ -7,12 +7,14 @@ import (
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	controllerInterface "github.com/homenoc/dsbd-backend/pkg/api/core/controller"
 	controller "github.com/homenoc/dsbd-backend/pkg/api/core/controller/v0"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support/chat"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support/ticket"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/mail"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
+	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	dbChat "github.com/homenoc/dsbd-backend/pkg/api/store/support/chat/v0"
 	dbTicket "github.com/homenoc/dsbd-backend/pkg/api/store/support/ticket/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
@@ -134,20 +136,41 @@ func GetAllAdmin(c *gin.Context) {
 	// Admin authentication
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
-		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: resultAdmin.Err.Error()})
+		c.JSON(http.StatusInternalServerError, ticket.AdminAllResult{Status: false, Error: resultAdmin.Err.Error()})
 		return
 	}
 
 	// Ticket DBからGroup IDのTicketデータを抽出
 	resultTicket := dbTicket.GetAll()
 	if resultTicket.Err != nil {
-		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: resultTicket.Err.Error()})
+		c.JSON(http.StatusInternalServerError, ticket.AdminAllResult{Status: false, Error: resultTicket.Err.Error()})
 		return
 	}
 
 	log.Println(resultTicket)
 
-	c.JSON(http.StatusOK, support.Result{Status: true, Ticket: resultTicket.Ticket})
+	var ticketResponse []ticket.AdminResult
+
+	for _, tmp := range resultTicket.Ticket {
+		//user名検索
+		tmpUserResult := dbUser.Get(user.ID, &user.User{Model: gorm.Model{ID: tmp.UserID}})
+		//group名検索
+		tmpGroupResult := dbGroup.Get(group.ID, &group.Group{Model: gorm.Model{ID: tmp.GroupID}})
+
+		ticketResponse = append(ticketResponse, ticket.AdminResult{
+			Model:       tmp.Model,
+			GroupID:     tmp.GroupID,
+			GroupName:   tmpGroupResult.Group[0].Org,
+			UserID:      tmp.UserID,
+			UserName:    tmpUserResult.User[0].Name,
+			ChatIDStart: tmp.ChatIDStart,
+			ChatIDEnd:   tmp.ChatIDEnd,
+			Solved:      tmp.Solved,
+			Title:       tmp.Title,
+		})
+	}
+
+	c.JSON(http.StatusOK, ticket.AdminAllResult{Status: true, Ticket: ticketResponse})
 }
 
 func GetAdminWebSocket(c *gin.Context) {
