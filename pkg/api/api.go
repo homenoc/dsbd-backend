@@ -118,7 +118,7 @@ func AdminRestAPI() {
 			//
 			// Network
 			//
-			v1.POST("/network", network.AddAdmin)
+			v1.POST("/network/:id", network.AddAdmin)
 			// Network Delete
 			v1.DELETE("/network/:id", network.DeleteAdmin)
 			// Network Update
