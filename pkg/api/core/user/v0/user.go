@@ -33,16 +33,7 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	if !strings.Contains(input.Email, "@") {
-		c.JSON(http.StatusBadRequest, user.Result{Status: false, Error: fmt.Sprintf("wrong email address")})
-		return
-	}
-	if input.Name == "" || input.NameEn == "" {
-		c.JSON(http.StatusBadRequest, user.Result{Status: false, Error: fmt.Sprintf("wrong name")})
-		return
-	}
-
-	if err := check(input); err != nil {
+	if err = check(input); err != nil {
 		c.JSON(http.StatusBadRequest, user.Result{Status: false, Error: err.Error()})
 		return
 	}
