@@ -107,7 +107,7 @@ func AdminRestAPI() {
 			////
 			//// Connection
 			////
-			v1.POST("/connection", connection.AddAdmin)
+			v1.POST("/group/:id/connection", connection.AddAdmin)
 			// Group Delete
 			v1.DELETE("/connection/:id", connection.DeleteAdmin)
 			// Group Update
