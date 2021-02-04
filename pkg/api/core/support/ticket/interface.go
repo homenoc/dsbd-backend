@@ -26,6 +26,26 @@ type Ticket struct {
 	Title       string `json:"title"`
 }
 
+type AdminAllResult struct {
+	Status bool          `json:"status"`
+	Error  string        `json:"error"`
+	Ticket []AdminResult `json:"ticket"`
+}
+
+type AdminResult struct {
+	gorm.Model
+	Status      bool   `json:"status"`
+	Error       string `json:"error"`
+	GroupID     uint   `json:"group_id"`
+	GroupName   string `json:"group_name"`
+	UserID      uint   `json:"user_id"`
+	UserName    string `json:"user_name"`
+	ChatIDStart uint   `json:"chat_id_start"`
+	ChatIDEnd   uint   `json:"chat_id_end"`
+	Solved      *bool  `json:"solved"`
+	Title       string `json:"title"`
+}
+
 type ResultDatabase struct {
 	Err    error
 	Ticket []Ticket
