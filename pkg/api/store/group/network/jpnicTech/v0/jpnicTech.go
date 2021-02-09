@@ -66,7 +66,7 @@ func Get(base int, data *jpnicTech.JpnicTech) jpnicTech.ResultDatabase {
 		err = db.First(&networkStruct, data.ID).Error
 	} else if base == jpnicTech.UserId { //Name
 		err = db.Where("user_id = ?", data.UserID).Find(&networkStruct).Error
-	} else if base == jpnicTech.NetworkId { //Name
+	} else if base == jpnicTech.NetworkID { //Name
 		err = db.Where("network_id = ?", data.NetworkID).Find(&networkStruct).Error
 	} else if base == jpnicTech.NetworkAndUserId {
 		err = db.Where("network_id = ? AND user_id = ?", data.NetworkID, data.UserID).Find(&networkStruct).Error

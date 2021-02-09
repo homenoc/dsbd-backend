@@ -52,15 +52,13 @@ func Update(base int, c network.Network) error {
 	} else if network.UpdateRoute == base {
 		result = db.Model(&network.Network{Model: gorm.Model{ID: c.ID}}).Update(network.Network{
 			RouteV4: c.RouteV4, RouteV6: c.RouteV6})
-	} else if network.UpdateDate == base {
-		result = db.Model(&network.Network{Model: gorm.Model{ID: c.ID}}).Update(network.Network{Date: c.Date})
 	} else if network.UpdateGID == base {
 		result = db.Model(&network.Network{Model: gorm.Model{ID: c.ID}}).Update(network.Network{GroupID: c.GroupID})
 	} else if network.UpdateAll == base {
 		result = db.Model(&network.Network{Model: gorm.Model{ID: c.ID}}).Update(network.Network{
 			GroupID: c.GroupID, Org: c.Org, OrgEn: c.Org, Postcode: c.Postcode, Address: c.Address, AddressEn: c.AddressEn,
-			PI: c.PI, ASN: c.ASN, RouteV4: c.RouteV4, RouteV6: c.RouteV6, V4: c.V4, V6: c.V6, V4Name: c.V4Name,
-			V6Name: c.V6Name, Date: c.Date, Plan: c.Plan, Open: c.Open, Lock: c.Lock})
+			PI: c.PI, ASN: c.ASN, RouteV4: c.RouteV4, RouteV6: c.RouteV6, IP: c.IP, V4Name: c.V4Name, V6Name: c.V6Name,
+			JPNICAdmin: c.JPNICAdmin, JPNICTech: c.JPNICTech, Open: c.Open, Lock: c.Lock})
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
@@ -79,11 +77,14 @@ func Get(base int, data *network.Network) network.ResultDatabase {
 	var networkStruct []network.Network
 
 	if base == network.ID { //ID
-		err = db.First(&networkStruct, data.ID).Error
+		err = db.Preload("IP").Preload("Connection").Preload("JPNICAdmin").Preload("JPNICTech").
+			First(&networkStruct, data.ID).Error
 	} else if base == network.Org { //Mail
-		err = db.Where("org = ?", data.Org).Find(&networkStruct).Error
+		err = db.Preload("IP").Preload("Connection").Preload("JPNICAdmin").Preload("JPNICTech").
+			Where("org = ?", data.Org).Find(&networkStruct).Error
 	} else if base == network.GID {
-		err = db.Where("group_id = ?", data.GroupID).Find(&networkStruct).Error
+		err = db.Preload("IP").Preload("Connection").Preload("JPNICAdmin").Preload("JPNICTech").
+			Where("group_id = ?", data.GroupID).Find(&networkStruct).Error
 	} else {
 		log.Println("base select error")
 		return network.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
@@ -100,6 +101,6 @@ func GetAll() network.ResultDatabase {
 	defer db.Close()
 
 	var networks []network.Network
-	err = db.Find(&networks).Error
+	err = db.Preload("IP").Preload("Connection").Preload("JPNICAdmin").Preload("JPNICTech").Find(&networks).Error
 	return network.ResultDatabase{Network: networks, Err: err}
 }
