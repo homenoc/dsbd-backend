@@ -21,9 +21,7 @@ type NOC struct {
 }
 
 type Result struct {
-	Status bool   `json:"status"`
-	Error  string `json:"error"`
-	NOC    []NOC  `json:"noc"`
+	NOC []NOC `json:"noc"`
 }
 
 type ResultDatabase struct {

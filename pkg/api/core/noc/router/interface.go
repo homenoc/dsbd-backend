@@ -21,8 +21,6 @@ type Router struct {
 }
 
 type Result struct {
-	Status bool     `json:"status"`
-	Error  string   `json:"error"`
 	Router []Router `json:"router"`
 }
 

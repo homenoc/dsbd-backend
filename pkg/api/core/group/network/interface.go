@@ -110,8 +110,6 @@ type Confirm struct {
 }
 
 type Result struct {
-	Status     bool                    `json:"status"`
-	Error      string                  `json:"error"`
 	Network    []Network               `json:"network"`
 	JPNICAdmin []jpnicAdmin.JpnicAdmin `json:"jpnic_admin"`
 	JPNICTech  []jpnicTech.JpnicTech   `json:"jpnic_tech"`
@@ -119,8 +117,6 @@ type Result struct {
 }
 
 type ResultOne struct {
-	Status  bool    `json:"status"`
-	Error   string  `json:"error"`
 	Network Network `json:"network"`
 }
 

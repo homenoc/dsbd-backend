@@ -32,8 +32,6 @@ type Notice struct {
 }
 
 type Result struct {
-	Status bool     `json:"status"`
-	Error  string   `json:"error"`
 	Notice []Notice `json:"notice"`
 }
 

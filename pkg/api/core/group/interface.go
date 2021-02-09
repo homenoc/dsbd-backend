@@ -42,8 +42,6 @@ type Result struct {
 }
 
 type AdminResult struct {
-	Status     bool                    `json:"status"`
-	Error      string                  `json:"error"`
 	User       []user.User             `json:"user"`
 	Group      []Group                 `json:"group"`
 	Network    []network.Network       `json:"network"`
@@ -51,14 +49,10 @@ type AdminResult struct {
 }
 
 type ResultOne struct {
-	Status bool   `json:"status"`
-	Error  string `json:"error"`
-	Group  Group  `json:"group"`
+	Group Group `json:"group"`
 }
 
 type ResultAll struct {
-	Status     bool                    `json:"status"`
-	Error      string                  `json:"error"`
 	Group      Group                   `json:"group"`
 	Network    []network.Network       `json:"network"`
 	JpnicAdmin []jpnicAdmin.JpnicAdmin `json:"admin"`

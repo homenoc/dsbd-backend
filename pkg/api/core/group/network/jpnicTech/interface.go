@@ -19,9 +19,7 @@ type JpnicTech struct {
 }
 
 type Result struct {
-	Status bool        `json:"status"`
-	Error  string      `json:"error"`
-	Jpnic  []JpnicTech `json:"jpnic"`
+	Jpnic []JpnicTech `json:"jpnic"`
 }
 
 type ResultDatabase struct {

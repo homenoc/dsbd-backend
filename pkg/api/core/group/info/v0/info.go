@@ -3,6 +3,7 @@ package v0
 import (
 	"github.com/gin-gonic/gin"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/info"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
@@ -17,21 +18,15 @@ func Get(c *gin.Context) {
 
 	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
-		c.JSON(http.StatusUnauthorized, info.Result{Status: false, Error: result.Err.Error()})
+		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
 	}
 
 	resultNetwork := dbNetwork.Get(network.GID, &network.Network{GroupID: result.Group.ID})
 	if resultNetwork.Err != nil {
-		c.JSON(http.StatusInternalServerError, info.Result{Status: false, Error: result.Err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
 	}
-
-	//resultConnection := dbConnection.Get(connection.GID, &connection.Connection{GroupID: result.Group.ID})
-	//if resultConnection.Err != nil {
-	//	c.JSON(http.StatusInternalServerError, info.Result{Status: false, Error: result.Err.Error()})
-	//	return
-	//}
 
 	var information []info.Info
 	var v4 []string
@@ -67,12 +62,10 @@ func Get(c *gin.Context) {
 		}
 	}
 
-	log.Println(information)
-
 	if len(information) == 0 {
-		c.JSON(http.StatusInternalServerError, info.Result{Status: false, Error: "not opening"})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: "not opening"})
 		return
 	}
 
-	c.JSON(http.StatusOK, info.Result{Status: true, Info: information})
+	c.JSON(http.StatusOK, info.Result{Info: information})
 }

@@ -45,15 +45,11 @@ type User struct {
 }
 
 type ResultOne struct {
-	Status bool   `json:"status"`
-	Error  string `json:"error"`
-	User   User   `json:"data"`
+	User User `json:"data"`
 }
 
 type Result struct {
-	Status bool   `json:"status"`
-	Error  string `json:"error"`
-	User   []User `json:"data"`
+	User []User `json:"data"`
 }
 
 type ResultDatabase struct {

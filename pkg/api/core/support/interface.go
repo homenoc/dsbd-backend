@@ -42,8 +42,6 @@ type FirstInput struct {
 }
 
 type Result struct {
-	Status bool            `json:"status"`
-	Error  string          `json:"error"`
 	Ticket []ticket.Ticket `json:"support_ticket"`
 	Chat   []chat.Chat     `json:"support_chat"`
 }

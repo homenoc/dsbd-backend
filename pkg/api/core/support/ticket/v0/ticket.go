@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	controllerInterface "github.com/homenoc/dsbd-backend/pkg/api/core/controller"
 	controller "github.com/homenoc/dsbd-backend/pkg/api/core/controller/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support"
@@ -26,18 +27,23 @@ func Create(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	c.BindJSON(&input)
+	err := c.BindJSON(&input)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
 
 	// Group authentication
 	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
-		c.JSON(http.StatusUnauthorized, support.Result{Status: false, Error: result.Err.Error()})
+		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
 	}
 
 	// input check
 	if err := check(input); err != nil {
-		c.JSON(http.StatusBadRequest, support.Result{Status: false, Error: err.Error()})
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 		return
 	}
 
@@ -45,7 +51,7 @@ func Create(c *gin.Context) {
 	ticketResult, err := dbTicket.Create(&ticket.Ticket{GroupID: result.Group.ID, UserID: result.User.ID,
 		Solved: &[]bool{false}[0], Title: input.Title})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
 
@@ -53,12 +59,11 @@ func Create(c *gin.Context) {
 	chatResult, err := dbChat.Create(&chat.Chat{UserID: result.User.ID, Admin: false, Data: input.Data,
 		TicketID: ticketResult.ID})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, support.Result{Status: true, Ticket: []ticket.Ticket{*ticketResult},
-		Chat: []chat.Chat{*chatResult}})
+	c.JSON(http.StatusOK, support.Result{Ticket: []ticket.Ticket{*ticketResult}, Chat: []chat.Chat{*chatResult}})
 }
 
 func Get(c *gin.Context) {
@@ -67,27 +72,27 @@ func Get(c *gin.Context) {
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, support.Result{Status: false, Error: fmt.Sprintf("id error")})
+		c.JSON(http.StatusBadRequest, common.Error{Error: fmt.Sprintf("id error")})
 		return
 	}
 
 	// Group authentication
 	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
-		c.JSON(http.StatusUnauthorized, support.Result{Status: false, Error: result.Err.Error()})
+		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
 	}
 
 	// IDからDBからチケットを検索
 	resultTicket := dbTicket.Get(ticket.ID, &ticket.Ticket{Model: gorm.Model{ID: uint(id)}})
 	if resultTicket.Err != nil {
-		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: resultTicket.Err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: resultTicket.Err.Error()})
 		return
 	}
 
 	// GroupIDが一致しない場合はここでエラーを返す
 	if resultTicket.Ticket[0].GroupID != result.Group.ID {
-		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: "Auth Error: group id failed..."})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: "Auth Error: group id failed..."})
 		return
 	}
 
@@ -95,10 +100,10 @@ func Get(c *gin.Context) {
 	// このとき、データはIDの昇順で出力
 	resultChat := dbChat.Get(chat.TicketID, &chat.Chat{TicketID: resultTicket.Ticket[0].ID})
 	if resultChat.Err != nil {
-		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: resultTicket.Err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: resultTicket.Err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, support.Result{Status: true, Ticket: resultTicket.Ticket, Chat: resultChat.Chat})
+	c.JSON(http.StatusOK, support.Result{Ticket: resultTicket.Ticket, Chat: resultChat.Chat})
 }
 
 func GetTitle(c *gin.Context) {
@@ -107,20 +112,20 @@ func GetTitle(c *gin.Context) {
 
 	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
-		c.JSON(http.StatusUnauthorized, support.Result{Status: false, Error: result.Err.Error()})
+		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
 	}
 
 	// Ticket DBからGroup IDのTicketデータを抽出
 	resultTicket := dbTicket.Get(ticket.GID, &ticket.Ticket{GroupID: result.Group.ID})
 	if resultTicket.Err != nil {
-		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: resultTicket.Err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: resultTicket.Err.Error()})
 		return
 	}
 
 	log.Println(resultTicket)
 
-	c.JSON(http.StatusOK, support.Result{Status: true, Ticket: resultTicket.Ticket})
+	c.JSON(http.StatusOK, support.Result{Ticket: resultTicket.Ticket})
 }
 
 func GetWebSocket(c *gin.Context) {
@@ -170,7 +175,7 @@ func GetWebSocket(c *gin.Context) {
 	//WebSocket受信
 	for {
 		var msg support.WebSocketResult
-		err := conn.ReadJSON(&msg)
+		err = conn.ReadJSON(&msg)
 		if err != nil {
 			log.Printf("error: %v", err)
 			delete(support.Clients, &support.WebSocket{TicketID: uint(id), Admin: false, UserID: result.User.ID,
