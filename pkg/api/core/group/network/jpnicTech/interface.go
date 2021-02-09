@@ -4,7 +4,7 @@ import "github.com/jinzhu/gorm"
 
 const (
 	ID               = 0
-	NetworkId        = 1
+	NetworkID        = 1
 	UserId           = 2
 	NetworkAndUserId = 3
 	UpdateLock       = 100

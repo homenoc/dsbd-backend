@@ -1,10 +1,12 @@
-package group
+package network
 
 import (
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicAdmin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicTech"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	"github.com/jinzhu/gorm"
+	"time"
 )
 
 const (
@@ -23,46 +25,84 @@ const (
 
 type Network struct {
 	gorm.Model
-	GroupID   uint   `json:"group_id"`
-	Org       string `json:"org"`
-	OrgEn     string `json:"org_en"`
-	Postcode  string `json:"postcode"`
-	Address   string `json:"address"`
-	AddressEn string `json:"address_en"`
-	PI        *bool  `json:"pi"`
-	ASN       string `json:"asn"`
-	RouteV4   string `json:"route_v4"`
-	RouteV6   string `json:"route_v6"`
-	V4        string `json:"v4"`
-	V6        string `json:"v6"`
-	V4Name    string `json:"v4_name"`
-	V6Name    string `json:"v6_name"`
-	Date      string `json:"date"`
-	Plan      string `json:"plan"`
-	Open      *bool  `json:"open"`
-	Lock      *bool  `json:"lock"`
+	GroupID    uint                    `json:"group_id"`
+	Org        string                  `json:"org"`
+	OrgEn      string                  `json:"org_en"`
+	Postcode   string                  `json:"postcode"`
+	Address    string                  `json:"address"`
+	AddressEn  string                  `json:"address_en"`
+	PI         *bool                   `json:"pi"`
+	ASN        string                  `json:"asn"`
+	RouteV4    string                  `json:"route_v4"`
+	RouteV6    string                  `json:"route_v6"`
+	V4         string                  `json:"v4"`
+	V6         string                  `json:"v6"`
+	V4Name     string                  `json:"v4_name"`
+	V6Name     string                  `json:"v6_name"`
+	Date       string                  `json:"date"`
+	IP         []IP                    `json:"ip"`
+	Connection []connection.Connection `json:"connection"`
+	JPNICAdmin JPNICAdmin              `json:"jpnic_admin"`
+	JPNICTech  []JPNICTech             `json:"jpnic_tech"`
+	Plan       string                  `json:"plan"`
+	Open       *bool                   `json:"open"`
+	Lock       *bool                   `json:"lock"`
 }
 
-type NetworkInput struct {
-	AdminID   uint   `json:"admin_id"`
-	TechID    []uint `json:"tech_id"`
-	GroupID   uint   `json:"group_id"`
-	Org       string `json:"org"`
-	OrgEn     string `json:"org_en"`
-	Postcode  string `json:"postcode"`
-	Address   string `json:"address"`
-	AddressEn string `json:"address_en"`
-	RouteV4   string `json:"route_v4"`
-	RouteV6   string `json:"route_v6"`
-	PI        bool   `json:"pi"`
-	ASN       string `json:"asn"`
-	V4        string `json:"v4"`
-	V6        string `json:"v6"`
-	V4Name    string `json:"v4_name"`
-	V6Name    string `json:"v6_name"`
-	Date      string `json:"date"`
-	Plan      string `json:"plan"`
-	Lock      bool   `json:"lock"`
+type IP struct {
+	gorm.Model
+	NetworkID uint       `json:"network_id"`
+	Version   uint       `json:"version"`
+	IP        string     `json:"ip"`
+	Plan      *string    `json:"plan"`
+	StartDate time.Time  `json:"start_date"`
+	EndDate   *time.Time `json:"end_date"`
+	UseCase   string     `json:"use_case"`
+	Open      *bool      `json:"open"`
+}
+
+type JPNICAdmin struct {
+	gorm.Model
+	NetworkID uint  `json:"network_id"`
+	UserID    uint  `json:"user_id"`
+	Lock      *bool `json:"lock"`
+}
+
+type JPNICTech struct {
+	gorm.Model
+	NetworkID uint  `json:"network_id"`
+	UserID    uint  `json:"user_id"`
+	Lock      *bool `json:"lock"`
+}
+
+type Input struct {
+	AdminID   uint       `json:"admin_id"`
+	TechID    []uint     `json:"tech_id"`
+	GroupID   uint       `json:"group_id"`
+	Org       string     `json:"org"`
+	OrgEn     string     `json:"org_en"`
+	Postcode  string     `json:"postcode"`
+	Address   string     `json:"address"`
+	AddressEn string     `json:"address_en"`
+	RouteV4   string     `json:"route_v4"`
+	RouteV6   string     `json:"route_v6"`
+	PI        bool       `json:"pi"`
+	ASN       string     `json:"asn"`
+	IP        *[]IPInput `json:"ip"`
+	V4Name    *string    `json:"v4_name"`
+	V6Name    *string    `json:"v6_name"`
+	Lock      bool       `json:"lock"`
+	//Plan      string    `json:"plan"`
+	//Date      string `json:"date"`
+}
+
+type IPInput struct {
+	Version   uint    `json:"version"`
+	IP        string  `json:"ip"`
+	Plan      *string `json:"plan"`
+	StartDate string  `json:"start_date"`
+	EndDate   *string `json:"end_date"`
+	UseCase   string  `json:"use_case"`
 }
 
 type Confirm struct {

@@ -153,7 +153,7 @@ func Get(c *gin.Context) {
 	var data []jpnic.JpnicTech
 
 	for _, net := range networkResult.Network {
-		resultJpnic := dbJpnic.Get(jpnic.NetworkId, &jpnic.JpnicTech{NetworkID: net.ID})
+		resultJpnic := dbJpnic.Get(jpnic.NetworkID, &jpnic.JpnicTech{NetworkID: net.ID})
 		if resultJpnic.Err != nil {
 			c.JSON(http.StatusInternalServerError, jpnic.Result{Status: false, Error: resultJpnic.Err.Error()})
 			return
