@@ -4,11 +4,12 @@ import (
 	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/gin-gonic/gin"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
-	connection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
-	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
-	jpnicAdmin "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicAdmin"
-	jpnicTech "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicTech"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicAdmin"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicTech"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
@@ -29,27 +30,32 @@ func Add(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	log.Println(c.BindJSON(&input))
+	err := c.BindJSON(&input)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
 
 	userResult := auth.UserAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 	if userResult.Err != nil {
-		c.JSON(http.StatusUnauthorized, group.Result{Status: false, Error: userResult.Err.Error()})
+		c.JSON(http.StatusUnauthorized, common.Error{Error: userResult.Err.Error()})
 		return
 	}
 
 	// check authority
 	if userResult.User.Level > 1 {
-		c.JSON(http.StatusUnauthorized, group.Result{Status: false, Error: "You don't have authority this operation"})
+		c.JSON(http.StatusUnauthorized, common.Error{Error: "You don't have authority this operation"})
 		return
 	}
 
 	if userResult.User.GroupID != 0 {
-		c.JSON(http.StatusUnauthorized, group.Result{Status: false, Error: "error: You can't create new group", Group: nil})
+		c.JSON(http.StatusUnauthorized, common.Error{Error: "error: You can't create new group"})
 		return
 	}
 
-	if err := check(input); err != nil {
-		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: err.Error()})
+	if err = check(input); err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
 
@@ -58,7 +64,7 @@ func Add(c *gin.Context) {
 		Comment: input.Comment, Contract: input.Contract,
 	})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: err.Error(), Group: nil})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
 	attachment := slack.Attachment{}
@@ -70,9 +76,9 @@ func Add(c *gin.Context) {
 
 	if err := dbUser.Update(user.UpdateGID, &user.User{Model: gorm.Model{ID: userResult.User.ID}, GroupID: result.Model.ID}); err != nil {
 		log.Println(dbGroup.Delete(&group.Group{Model: gorm.Model{ID: result.ID}}))
-		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 	} else {
-		c.JSON(http.StatusOK, group.Result{Status: true})
+		c.JSON(http.StatusOK, group.Result{})
 	}
 }
 
@@ -86,16 +92,16 @@ func Update(c *gin.Context) {
 
 	authResult := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 	if authResult.Err != nil {
-		c.JSON(http.StatusUnauthorized, user.Result{Status: false, Error: authResult.Err.Error()})
+		c.JSON(http.StatusUnauthorized, common.Error{Error: authResult.Err.Error()})
 		return
 	}
 
 	if authResult.User.Level > 1 {
-		c.JSON(http.StatusUnauthorized, user.Result{Status: false, Error: "error: failed user level"})
+		c.JSON(http.StatusUnauthorized, common.Error{Error: "error: failed user level"})
 		return
 	}
 	if *authResult.Group.Lock {
-		c.JSON(http.StatusUnauthorized, user.Result{Status: false, Error: "error: This group is locked"})
+		c.JSON(http.StatusUnauthorized, common.Error{Error: "error: This group is locked"})
 		return
 	}
 
@@ -110,10 +116,10 @@ func Update(c *gin.Context) {
 	}
 
 	if err := dbGroup.Update(group.UpdateInfo, data); err != nil {
-		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: authResult.Err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: authResult.Err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, user.Result{Status: true})
+	c.JSON(http.StatusOK, user.Result{})
 
 }
 
@@ -123,24 +129,24 @@ func Get(c *gin.Context) {
 
 	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
-		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: result.Err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
 	}
 
 	if result.User.Level >= 10 {
 		if result.User.Level > 1 {
-			c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: "You don't have authority this operation"})
+			c.JSON(http.StatusInternalServerError, common.Error{Error: "You don't have authority this operation"})
 			return
 		}
 	}
 
 	resultGroup := dbGroup.Get(group.ID, &group.Group{Model: gorm.Model{ID: result.Group.ID}})
 	if resultGroup.Err != nil {
-		c.JSON(http.StatusInternalServerError, group.Result{Status: false, Error: result.Err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, group.ResultOne{Status: true, Group: resultGroup.Group[0]})
+	c.JSON(http.StatusOK, group.ResultOne{Group: resultGroup.Group[0]})
 }
 
 func GetAll(c *gin.Context) {
@@ -149,20 +155,20 @@ func GetAll(c *gin.Context) {
 
 	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
-		c.JSON(http.StatusUnauthorized, group.ResultAll{Status: false, Error: result.Err.Error()})
+		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
 	}
 
 	if result.User.Level >= 10 {
 		if result.User.Level > 1 {
-			c.JSON(http.StatusUnauthorized, group.ResultAll{Status: false, Error: "You don't have authority this operation"})
+			c.JSON(http.StatusUnauthorized, common.Error{Error: "You don't have authority this operation"})
 			return
 		}
 	}
 
 	resultNetwork := dbNetwork.Get(network.GID, &network.Network{GroupID: result.Group.ID})
 	if resultNetwork.Err != nil {
-		c.JSON(http.StatusInternalServerError, group.ResultAll{Status: false, Error: result.Err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
 	}
 	if len(resultNetwork.Network) == 0 {
@@ -171,7 +177,7 @@ func GetAll(c *gin.Context) {
 
 	resultConnection := dbConnection.Get(connection.GID, &connection.Connection{GroupID: result.Group.ID})
 	if resultConnection.Err != nil {
-		c.JSON(http.StatusInternalServerError, group.ResultAll{Status: false, Error: result.Err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
 	}
 	if len(resultConnection.Connection) == 0 {
@@ -184,7 +190,7 @@ func GetAll(c *gin.Context) {
 	for _, data := range resultNetwork.Network {
 		tmpAdmin := dbJpnicAdmin.Get(jpnicAdmin.NetworkId, &jpnicAdmin.JpnicAdmin{NetworkID: data.ID})
 		if tmpAdmin.Err != nil {
-			c.JSON(http.StatusInternalServerError, group.ResultAll{Status: false, Error: tmpAdmin.Err.Error()})
+			c.JSON(http.StatusInternalServerError, common.Error{Error: tmpAdmin.Err.Error()})
 			return
 		}
 		if len(tmpAdmin.Jpnic) == 0 {
@@ -194,7 +200,7 @@ func GetAll(c *gin.Context) {
 
 		tmpTech := dbJpnicTech.Get(jpnicAdmin.NetworkId, &jpnicTech.JpnicTech{NetworkID: data.ID})
 		if tmpAdmin.Err != nil {
-			c.JSON(http.StatusInternalServerError, group.ResultAll{Status: false, Error: tmpAdmin.Err.Error()})
+			c.JSON(http.StatusInternalServerError, common.Error{Error: tmpAdmin.Err.Error()})
 			return
 		}
 		if len(tmpTech.Jpnic) == 0 {
@@ -206,6 +212,6 @@ func GetAll(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, group.ResultAll{
-		Status: true, Group: result.Group, Network: resultNetwork.Network, JpnicAdmin: resultJpnicAdmin,
+		Group: result.Group, Network: resultNetwork.Network, JpnicAdmin: resultJpnicAdmin,
 		JpnicTech: resultJpnicTech, Connection: resultConnection.Connection})
 }

@@ -27,8 +27,6 @@ type Ticket struct {
 }
 
 type AdminAllResult struct {
-	Status bool          `json:"status"`
-	Error  string        `json:"error"`
 	Ticket []AdminResult `json:"ticket"`
 }
 

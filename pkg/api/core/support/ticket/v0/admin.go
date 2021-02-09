@@ -5,13 +5,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	controllerInterface "github.com/homenoc/dsbd-backend/pkg/api/core/controller"
 	controller "github.com/homenoc/dsbd-backend/pkg/api/core/controller/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support/chat"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support/ticket"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/mail"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
@@ -30,15 +30,20 @@ func CreateAdmin(c *gin.Context) {
 	// Admin authentication
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
-		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: resultAdmin.Err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: resultAdmin.Err.Error()})
 		return
 	}
 
-	c.BindJSON(&input)
+	err := c.BindJSON(&input)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
 
 	// input check
-	if err := checkAdmin(input); err != nil {
-		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: err.Error()})
+	if err = checkAdmin(input); err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
 
@@ -46,18 +51,18 @@ func CreateAdmin(c *gin.Context) {
 	ticketResult, err := dbTicket.Create(&ticket.Ticket{GroupID: input.GroupID, UserID: 0,
 		Solved: &[]bool{false}[0], Title: input.Title})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
 
 	// Chat DBに登録
 	chatResult, err := dbChat.Create(&chat.Chat{UserID: 0, Admin: true, Data: input.Data, TicketID: ticketResult.ID})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, support.Result{Status: true, Ticket: []ticket.Ticket{*ticketResult},
+	c.JSON(http.StatusOK, support.Result{Ticket: []ticket.Ticket{*ticketResult},
 		Chat: []chat.Chat{*chatResult}})
 }
 
@@ -66,59 +71,64 @@ func UpdateAdmin(c *gin.Context) {
 	// Admin authentication
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
-		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: resultAdmin.Err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: resultAdmin.Err.Error()})
 		return
 	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, support.Result{Status: false, Error: fmt.Sprintf("id error")})
+		c.JSON(http.StatusBadRequest, common.Error{Error: fmt.Sprintf("id error")})
 		return
 	}
 
-	c.BindJSON(&input)
+	err = c.BindJSON(&input)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
 
 	// Ticket DBからデータを取得
 	ticketResult := dbTicket.Get(ticket.ID, &ticket.Ticket{Model: gorm.Model{ID: uint(id)}})
 	if ticketResult.Err != nil {
-		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: ticketResult.Err.Error()})
 		return
 	}
 
 	// input check
 	replace, err := updateAdminTicket(input, ticketResult.Ticket[0])
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
 
 	// Ticketのアップデート
 	err = dbTicket.Update(ticket.UpdateAll, replace)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, support.Result{Status: true})
+	c.JSON(http.StatusOK, support.Result{})
 }
 
 func GetAdmin(c *gin.Context) {
 	// Admin authentication
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
-		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: resultAdmin.Err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: resultAdmin.Err.Error()})
 		return
 	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, support.Result{Status: false, Error: fmt.Sprintf("id error")})
+		c.JSON(http.StatusBadRequest, common.Error{Error: fmt.Sprintf("id error")})
 		return
 	}
 
 	// IDからDBからチケットを検索
 	resultTicket := dbTicket.Get(ticket.ID, &ticket.Ticket{Model: gorm.Model{ID: uint(id)}})
 	if resultTicket.Err != nil {
-		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: resultTicket.Err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: resultTicket.Err.Error()})
 		return
 	}
 
@@ -126,28 +136,26 @@ func GetAdmin(c *gin.Context) {
 	// このとき、データはIDの昇順で出力
 	resultChat := dbChat.Get(chat.TicketID, &chat.Chat{TicketID: resultTicket.Ticket[0].ID})
 	if resultChat.Err != nil {
-		c.JSON(http.StatusInternalServerError, support.Result{Status: false, Error: resultTicket.Err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: resultTicket.Err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, support.Result{Status: true, Ticket: resultTicket.Ticket, Chat: resultChat.Chat})
+	c.JSON(http.StatusOK, support.Result{Ticket: resultTicket.Ticket, Chat: resultChat.Chat})
 }
 
 func GetAllAdmin(c *gin.Context) {
 	// Admin authentication
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
-		c.JSON(http.StatusInternalServerError, ticket.AdminAllResult{Status: false, Error: resultAdmin.Err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: resultAdmin.Err.Error()})
 		return
 	}
 
 	// Ticket DBからGroup IDのTicketデータを抽出
 	resultTicket := dbTicket.GetAll()
 	if resultTicket.Err != nil {
-		c.JSON(http.StatusInternalServerError, ticket.AdminAllResult{Status: false, Error: resultTicket.Err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: resultTicket.Err.Error()})
 		return
 	}
-
-	log.Println(resultTicket)
 
 	var ticketResponse []ticket.AdminResult
 
@@ -170,7 +178,7 @@ func GetAllAdmin(c *gin.Context) {
 		})
 	}
 
-	c.JSON(http.StatusOK, ticket.AdminAllResult{Status: true, Ticket: ticketResponse})
+	c.JSON(http.StatusOK, ticket.AdminAllResult{Ticket: ticketResponse})
 }
 
 func GetAdminWebSocket(c *gin.Context) {
@@ -197,7 +205,7 @@ func GetAdminWebSocket(c *gin.Context) {
 	// Admin authentication
 	resultAdmin := auth.AdminAuthentication(accessToken)
 	if resultAdmin.Err != nil {
-		c.JSON(http.StatusInternalServerError, token.Result{Status: false, Error: resultAdmin.Err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: resultAdmin.Err.Error()})
 		return
 	}
 
@@ -215,7 +223,7 @@ func GetAdminWebSocket(c *gin.Context) {
 	//WebSocket受信
 	for {
 		var msg support.WebSocketResult
-		err := conn.ReadJSON(&msg)
+		err = conn.ReadJSON(&msg)
 		if err != nil {
 			log.Printf("error: %v", err)
 			delete(support.Clients, &support.WebSocket{TicketID: uint(id), UserID: resultAdmin.AdminID,
@@ -249,12 +257,12 @@ func GetAdminWebSocket(c *gin.Context) {
 					log.Println(resultUser.Err)
 				}
 				if len(resultUser.User) != 0 {
-					for _, user := range resultUser.User {
+					for _, userTmp := range resultUser.User {
 						//グループ側にメール送信
 						mail.SendMail(mail.Mail{
-							ToMail:  user.Email,
+							ToMail:  userTmp.Email,
 							Subject: "Supportより新着メッセージ",
-							Content: " " + user.Name + "様\n\n" + "チャットより新着メッセージがあります\n" +
+							Content: " " + userTmp.Name + "様\n\n" + "チャットより新着メッセージがあります\n" +
 								"Webシステムよりご覧いただけます。\n",
 						})
 					}

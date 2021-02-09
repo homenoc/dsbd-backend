@@ -19,7 +19,5 @@ type Info struct {
 }
 
 type Result struct {
-	Status bool   `json:"status"`
-	Error  string `json:"error"`
-	Info   []Info `json:"info"`
+	Info []Info `json:"info"`
 }

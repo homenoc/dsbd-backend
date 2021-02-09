@@ -1,7 +1,7 @@
 package v0
 
 import (
-	connection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
 )
 
 func updateAdminConnection(input, replace connection.Connection) connection.Connection {
@@ -13,6 +13,11 @@ func updateAdminConnection(input, replace connection.Connection) connection.Conn
 	//Service
 	if input.Service != "" {
 		replace.Service = input.Service
+	}
+
+	//ServiceType
+	if input.ServiceType != "" {
+		replace.ServiceType = input.ServiceType
 	}
 
 	//NTT
@@ -59,6 +64,8 @@ func updateAdminConnection(input, replace connection.Connection) connection.Conn
 	// uint boolean
 	replace.GroupID = input.GroupID
 	replace.UserID = input.UserID
+	replace.ServiceYear = input.ServiceYear
+	replace.ServiceNumber = input.ServiceNumber
 
 	// Open
 	replace.Open = input.Open

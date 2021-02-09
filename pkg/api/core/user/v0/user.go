@@ -5,6 +5,7 @@ import (
 	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/gin-gonic/gin"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/gen"
@@ -29,12 +30,12 @@ func Add(c *gin.Context) {
 	err := c.BindJSON(&input)
 	if err != nil {
 		log.Println(err)
-		c.JSON(http.StatusBadRequest, user.Result{Status: false, Error: fmt.Sprintf("wrong email address")})
+		c.JSON(http.StatusBadRequest, common.Error{Error: fmt.Sprintf("wrong email address")})
 		return
 	}
 
 	if err = check(input); err != nil {
-		c.JSON(http.StatusBadRequest, user.Result{Status: false, Error: err.Error()})
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 		return
 	}
 
@@ -45,7 +46,7 @@ func Add(c *gin.Context) {
 	// 新規ユーザ
 	if input.GroupID == 0 { //new user
 		if input.Pass == "" {
-			c.JSON(http.StatusBadRequest, user.Result{Status: false, Error: fmt.Sprintf("wrong pass")})
+			c.JSON(http.StatusBadRequest, common.Error{Error: fmt.Sprintf("wrong pass")})
 			return
 		}
 		data = user.User{GroupID: 0, Name: input.Name, NameEn: input.NameEn, Email: input.Email, Pass: input.Pass,
@@ -53,16 +54,16 @@ func Add(c *gin.Context) {
 		// グループ所属ユーザの登録
 	} else {
 		if input.Level == 0 || input.Level > 5 {
-			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: fmt.Sprintf("wrong user level")})
+			c.JSON(http.StatusInternalServerError, common.Error{Error: fmt.Sprintf("wrong user level")})
 			return
 		}
 		authResult := auth.UserAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 		if authResult.Err != nil {
-			c.JSON(http.StatusForbidden, user.Result{Status: false, Error: authResult.Err.Error()})
+			c.JSON(http.StatusForbidden, common.Error{Error: authResult.Err.Error()})
 			return
 		}
 		if authResult.User.GroupID != input.GroupID && authResult.User.GroupID > 0 {
-			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: "gid mismatch"})
+			c.JSON(http.StatusInternalServerError, common.Error{Error: "gid mismatch"})
 			return
 		}
 
@@ -78,7 +79,7 @@ func Add(c *gin.Context) {
 	//check exist for database
 	err = dbUser.Create(&data)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 	}
 	attachment := slack.Attachment{}
 	attachment.AddField(slack.Field{Title: "Title", Value: "ユーザ登録"}).
@@ -107,7 +108,7 @@ func Add(c *gin.Context) {
 		})
 	}
 
-	c.JSON(http.StatusOK, user.Result{Status: true})
+	c.JSON(http.StatusOK, user.Result{})
 }
 
 func MailVerify(c *gin.Context) {
@@ -115,24 +116,24 @@ func MailVerify(c *gin.Context) {
 
 	result := dbUser.Get(user.MailToken, &user.User{MailToken: mailToken})
 	if result.Err != nil {
-		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: result.Err.Error() + "| we can't find token data"})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error() + "| we can't find token data"})
 		return
 	}
 
 	if *result.User[0].MailVerify {
-		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: fmt.Sprintf("This email has already been checked")})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: fmt.Sprintf("This email has already been checked")})
 		return
 	}
 	if result.User[0].Status >= 100 {
-		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: fmt.Sprintf("error: user status")})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: fmt.Sprintf("error: user status")})
 		return
 	}
 
 	if err := dbUser.Update(user.UpdateVerifyMail, &user.User{Model: gorm.Model{ID: result.User[0].ID},
 		MailVerify: &[]bool{true}[0]}); err != nil {
-		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 	} else {
-		c.JSON(http.StatusOK, &user.Result{Status: true})
+		c.JSON(http.StatusOK, &user.Result{})
 	}
 }
 
@@ -141,7 +142,7 @@ func Update(c *gin.Context) {
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, user.Result{Status: false, Error: fmt.Sprintf("id error")})
+		c.JSON(http.StatusBadRequest, common.Error{Error: fmt.Sprintf("id error")})
 		return
 	}
 	userToken := c.Request.Header.Get("USER_TOKEN")
@@ -151,12 +152,12 @@ func Update(c *gin.Context) {
 
 	authResult := auth.UserAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 	if authResult.Err != nil {
-		c.JSON(http.StatusUnauthorized, user.Result{Status: false, Error: authResult.Err.Error()})
+		c.JSON(http.StatusUnauthorized, common.Error{Error: authResult.Err.Error()})
 		return
 	}
 
 	if !*authResult.User.MailVerify {
-		c.JSON(http.StatusBadRequest, user.Result{Status: false, Error: "not verify for user mail"})
+		c.JSON(http.StatusBadRequest, common.Error{Error: "not verify for user mail"})
 		return
 	}
 
@@ -168,20 +169,20 @@ func Update(c *gin.Context) {
 		u.Status = authResult.User.Status
 	} else {
 		if authResult.User.GroupID == 0 {
-			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: "error: Group ID = 0"})
+			c.JSON(http.StatusInternalServerError, common.Error{Error: "error: Group ID = 0"})
 			return
 		}
 		if authResult.User.Level > 1 {
-			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: "error: failed user level"})
+			c.JSON(http.StatusInternalServerError, common.Error{Error: "error: failed user level"})
 			return
 		}
 		userResult := dbUser.Get(user.ID, &user.User{Model: gorm.Model{ID: uint(id)}})
 		if userResult.Err != nil {
-			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: userResult.Err.Error()})
+			c.JSON(http.StatusInternalServerError, common.Error{Error: userResult.Err.Error()})
 			return
 		}
 		if userResult.User[0].GroupID != authResult.User.GroupID {
-			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: fmt.Sprintf("failed group authentication")})
+			c.JSON(http.StatusInternalServerError, common.Error{Error: fmt.Sprintf("failed group authentication")})
 			return
 		}
 		serverData = userResult.User[0]
@@ -191,14 +192,14 @@ func Update(c *gin.Context) {
 
 	u, err = replaceUser(serverData, input)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
 
 	if err := dbUser.Update(user.UpdateAll, &u); err != nil {
-		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 	} else {
-		c.JSON(http.StatusOK, user.Result{Status: true})
+		c.JSON(http.StatusOK, user.Result{})
 	}
 }
 
@@ -210,9 +211,9 @@ func Get(c *gin.Context) {
 	authResult.User.Pass = ""
 	authResult.User.MailToken = ""
 	if authResult.Err != nil {
-		c.JSON(http.StatusUnauthorized, user.Result{Status: false, Error: authResult.Err.Error()})
+		c.JSON(http.StatusUnauthorized, common.Error{Error: authResult.Err.Error()})
 	} else {
-		c.JSON(http.StatusOK, user.ResultOne{Status: true, User: authResult.User})
+		c.JSON(http.StatusOK, user.ResultOne{User: authResult.User})
 	}
 }
 
@@ -223,7 +224,7 @@ func GetGroup(c *gin.Context) {
 	authResult := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 	result := dbUser.Get(user.GID, &user.User{GroupID: authResult.Group.ID})
 	if result.Err != nil {
-		c.JSON(http.StatusUnauthorized, user.Result{Status: false, Error: result.Err.Error()})
+		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
 	}
 
@@ -236,5 +237,5 @@ func GetGroup(c *gin.Context) {
 			data = append(data, tmp)
 		}
 	}
-	c.JSON(http.StatusOK, user.Result{Status: true, User: data})
+	c.JSON(http.StatusOK, user.Result{User: data})
 }
