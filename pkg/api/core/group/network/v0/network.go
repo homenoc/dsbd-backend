@@ -4,8 +4,8 @@ import (
 	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/gin-gonic/gin"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
-	group "github.com/homenoc/dsbd-backend/pkg/api/core/group"
-	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicAdmin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
@@ -18,7 +18,7 @@ import (
 )
 
 func Add(c *gin.Context) {
-	var input network.NetworkInput
+	var input network.Input
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
@@ -62,24 +62,36 @@ func Add(c *gin.Context) {
 		afterStatus = result.Group.Status + 1
 	}
 
+	grpIP, err := ipProcess(input)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, network.Result{Status: false, Error: err.Error()})
+		return
+	}
+
+	jh := jpnicHandler{
+		admin: input.AdminID, tech: input.TechID, groupID: result.Group.ID, jpnicAdmin: nil, jpnicTech: nil,
+	}
+
+	// PIアドレスではない場合、jpnic Processを実行
+	if !input.PI {
+		if err = jh.jpnicProcess(); err != nil {
+			log.Println(err)
+			c.JSON(http.StatusBadRequest, network.Result{Status: false, Error: err.Error()})
+			return
+		}
+	}
+
 	// db create for network
 	net, err := dbNetwork.Create(&network.Network{
 		GroupID: result.Group.ID, Org: input.Org, OrgEn: input.OrgEn, Postcode: input.Postcode, Address: input.Address,
 		AddressEn: input.AddressEn, RouteV4: input.RouteV4, RouteV6: input.RouteV6, PI: &[]bool{input.PI}[0],
-		ASN: input.ASN, V4: input.V4, V6: input.V6, Open: &[]bool{false}[0],
-		V4Name: input.V4Name, V6Name: input.V6Name, Date: input.Date, Plan: input.Plan, Lock: &[]bool{input.Lock}[0],
+		ASN: input.ASN, Open: &[]bool{false}[0], IP: *grpIP, JPNICAdmin: *jh.jpnicAdmin, JPNICTech: *jh.jpnicTech,
+		V4Name: *input.V4Name, V6Name: *input.V6Name, Lock: &[]bool{input.Lock}[0],
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, network.Result{Status: false, Error: err.Error()})
 		return
-	}
-
-	if !input.PI {
-		// jpnic Process
-		err = jpnicProcess(jpnic{admin: input.AdminID, tech: input.TechID, network: *net})
-		if err != nil {
-			log.Println(dbNetwork.Delete(&network.Network{Model: gorm.Model{ID: net.ID}}))
-		}
 	}
 
 	attachment := slack.Attachment{}
@@ -89,7 +101,7 @@ func Add(c *gin.Context) {
 
 	// ---------ここまで処理が通っている場合、DBへの書き込みにすべて成功している
 	// GroupのStatusをAfterStatusにする
-	if err := dbGroup.Update(group.UpdateStatus, group.Group{Model: gorm.Model{ID: result.Group.ID},
+	if err = dbGroup.Update(group.UpdateStatus, group.Group{Model: gorm.Model{ID: result.Group.ID},
 		Status: afterStatus}); err != nil {
 		c.JSON(http.StatusInternalServerError, network.Result{Status: false, Error: err.Error()})
 		return
@@ -148,4 +160,18 @@ func Update(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, group.Result{Status: true})
+}
+
+func GetAllAdmin(c *gin.Context) {
+	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	if resultAdmin.Err != nil {
+		c.JSON(http.StatusUnauthorized, token.Result{Status: false, Error: resultAdmin.Err.Error()})
+		return
+	}
+
+	if result := dbNetwork.GetAll(); result.Err != nil {
+		c.JSON(http.StatusInternalServerError, network.Result{Status: false, Error: result.Err.Error()})
+	} else {
+		c.JSON(http.StatusOK, network.Result{Status: true, Network: result.Network})
+	}
 }

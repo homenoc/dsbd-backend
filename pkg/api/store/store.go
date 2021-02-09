@@ -35,7 +35,8 @@ func ConnectDB() (*gorm.DB, error) {
 
 func InitDB() {
 	db, _ := ConnectDB()
-	result := db.AutoMigrate(&user.User{}, &group.Group{}, &token.Token{}, &network.Network{},
+	result := db.AutoMigrate(&user.User{}, &group.Group{}, &token.Token{}, &network.Network{}, &network.IP{},
+		&network.JPNICAdmin{}, &network.JPNICTech{},
 		&connection.Connection{}, &jpnicAdmin.JpnicAdmin{}, &jpnicTech.JpnicTech{}, &notice.Notice{},
 		&ticket.Ticket{}, &chat.Chat{}, &noc.NOC{}, &nocRouter.Router{})
 	log.Println(result.Error)
