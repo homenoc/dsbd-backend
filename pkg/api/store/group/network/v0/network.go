@@ -2,7 +2,7 @@ package v0
 
 import (
 	"fmt"
-	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
 	"github.com/jinzhu/gorm"
 	"log"
@@ -85,6 +85,9 @@ func Get(base int, data *network.Network) network.ResultDatabase {
 	} else if base == network.GID {
 		err = db.Preload("IP").Preload("Connection").Preload("JPNICAdmin").Preload("JPNICTech").
 			Where("group_id = ?", data.GroupID).Find(&networkStruct).Error
+	} else if base == network.Open {
+		err = db.Preload("IP", "open = 1").Preload("Connection", "open = 1").Preload("JPNICAdmin").Preload("JPNICTech").
+			Where("group_id = ? AND open = ?", data.GroupID, true).Find(&networkStruct).Error
 	} else {
 		log.Println("base select error")
 		return network.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}

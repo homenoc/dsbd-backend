@@ -49,7 +49,15 @@ type AdminResult struct {
 }
 
 type ResultOne struct {
-	Group Group `json:"group"`
+	ID        uint   `json:"id"`
+	Agree     *bool  `json:"agree"`
+	Question  string `json:"question"`
+	Org       string `json:"org"`
+	Status    uint   `json:"status"`
+	Bandwidth string `json:"bandwidth"`
+	Contract  string `json:"contract"`
+	Student   *bool  `json:"student"`
+	Open      *bool  `json:"open"`
 }
 
 type ResultAll struct {

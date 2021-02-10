@@ -146,7 +146,28 @@ func Get(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, group.ResultOne{Group: resultGroup.Group[0]})
+	resultNetwork := dbNetwork.Get(network.Open, &network.Network{GroupID: result.Group.ID})
+	if resultNetwork.Err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
+		return
+	}
+
+	open := false
+	if len(resultNetwork.Network) > 0 {
+		open = true
+	}
+
+	c.JSON(http.StatusOK, group.ResultOne{
+		ID:        resultGroup.Group[0].ID,
+		Agree:     resultGroup.Group[0].Agree,
+		Question:  resultGroup.Group[0].Question,
+		Org:       resultGroup.Group[0].Org,
+		Status:    resultGroup.Group[0].Status,
+		Bandwidth: resultGroup.Group[0].Bandwidth,
+		Contract:  resultGroup.Group[0].Contract,
+		Student:   resultGroup.Group[0].Student,
+		Open:      &open,
+	})
 }
 
 func GetAll(c *gin.Context) {
