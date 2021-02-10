@@ -22,7 +22,7 @@ func Get(c *gin.Context) {
 		return
 	}
 
-	resultNetwork := dbNetwork.Get(network.GID, &network.Network{GroupID: result.Group.ID})
+	resultNetwork := dbNetwork.Get(network.Open, &network.Network{GroupID: result.Group.ID})
 	if resultNetwork.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
@@ -51,11 +51,12 @@ func Get(c *gin.Context) {
 				for _, tmpConnection := range tmpNetwork.Connection {
 					if *tmpConnection.Open {
 						information = append(information, info.Info{
-							ServiceID: tmpConnection.ServiceID, Service: tmpConnection.Service, UserID: tmpConnection.UserID,
-							NOC: tmpConnection.NOC, V4: v4, V6: v6, ASN: asn,
+							ServiceID: tmpConnection.ServiceID, Service: tmpConnection.Service,
+							UserID: tmpConnection.UserID, NOC: tmpConnection.NOC, V4: v4, V6: v6, ASN: asn,
 							Assign: tmpConnection.NOCIP, TermIP: tmpConnection.TermIP, NOCIP: tmpConnection.NOCIP,
 							LinkV4Our: tmpConnection.LinkV4Our, LinkV4Your: tmpConnection.LinkV4Your,
-							LinkV6Our: tmpConnection.LinkV6Our, LinkV6Your: tmpConnection.LinkV6Your, Fee: tmpConnection.Fee})
+							LinkV6Our: tmpConnection.LinkV6Our, LinkV6Your: tmpConnection.LinkV6Your,
+							Fee: tmpConnection.Fee})
 					}
 				}
 			}
