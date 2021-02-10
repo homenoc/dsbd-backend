@@ -13,7 +13,7 @@ const (
 	ID          = 0
 	GID         = 1
 	Org         = 2
-	Type        = 3
+	Open        = 3
 	UpdateName  = 100
 	UpdateDate  = 102
 	UpdateRoute = 103
