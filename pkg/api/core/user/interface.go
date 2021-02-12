@@ -45,11 +45,36 @@ type User struct {
 }
 
 type ResultOne struct {
-	User User `json:"data"`
+	ID          uint   `json:"id"`
+	GroupID     uint   `json:"group_id"`
+	Tech        *bool  `json:"tech"`
+	GroupHandle *bool  `json:"group_handle"`
+	Name        string `json:"name"`
+	NameEn      string `json:"name_en"`
+	Email       string `json:"email"`
+	Status      uint   `json:"status"`
+	Level       uint   `json:"level"`
+	MailVerify  *bool  `json:"mail_verify"`
+	Org         string `json:"org"`
+	OrgEn       string `json:"org_en"`
+	PostCode    string `json:"postcode"`
+	Address     string `json:"address"`
+	AddressEn   string `json:"address_en"`
+	Dept        string `json:"dept"`
+	DeptEn      string `json:"dept_en"`
+	Pos         string `json:"pos"`
+	PosEn       string `json:"pos_en"`
+	Tel         string `json:"tel"`
+	Fax         string `json:"fax"`
+	Country     string `json:"country"`
 }
 
 type Result struct {
-	User []User `json:"data"`
+	User []ResultOne `json:"user"`
+}
+
+type ResultAll struct {
+	User []User `json:"user"`
 }
 
 type ResultDatabase struct {

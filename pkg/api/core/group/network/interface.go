@@ -2,8 +2,6 @@ package network
 
 import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicAdmin"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicTech"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	"github.com/jinzhu/gorm"
 	"time"
@@ -35,11 +33,6 @@ type Network struct {
 	ASN        string                  `json:"asn"`
 	RouteV4    string                  `json:"route_v4"`
 	RouteV6    string                  `json:"route_v6"`
-	V4         string                  `json:"v4"`
-	V6         string                  `json:"v6"`
-	V4Name     string                  `json:"v4_name"`
-	V6Name     string                  `json:"v6_name"`
-	Date       string                  `json:"date"`
 	IP         []IP                    `json:"ip"`
 	Connection []connection.Connection `json:"connection"`
 	JPNICAdmin JPNICAdmin              `json:"jpnic_admin"`
@@ -53,6 +46,7 @@ type IP struct {
 	gorm.Model
 	NetworkID uint       `json:"network_id"`
 	Version   uint       `json:"version"`
+	Name      string     `json:"name"`
 	IP        string     `json:"ip"`
 	Plan      *string    `json:"plan"`
 	StartDate time.Time  `json:"start_date"`
@@ -89,15 +83,12 @@ type Input struct {
 	PI        bool       `json:"pi"`
 	ASN       string     `json:"asn"`
 	IP        *[]IPInput `json:"ip"`
-	V4Name    *string    `json:"v4_name"`
-	V6Name    *string    `json:"v6_name"`
 	Lock      bool       `json:"lock"`
-	//Plan      string    `json:"plan"`
-	//Date      string `json:"date"`
 }
 
 type IPInput struct {
 	Version   uint    `json:"version"`
+	Name      string  `json:"name"`
 	IP        string  `json:"ip"`
 	Plan      *string `json:"plan"`
 	StartDate string  `json:"start_date"`
@@ -110,10 +101,8 @@ type Confirm struct {
 }
 
 type Result struct {
-	Network    []Network               `json:"network"`
-	JPNICAdmin []jpnicAdmin.JpnicAdmin `json:"jpnic_admin"`
-	JPNICTech  []jpnicTech.JpnicTech   `json:"jpnic_tech"`
-	User       []user.User             `json:"user"`
+	Network []Network   `json:"network"`
+	User    []user.User `json:"user"`
 }
 
 type ResultOne struct {

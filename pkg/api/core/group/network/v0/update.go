@@ -55,29 +55,29 @@ func replaceNetwork(replace, input network.Network) network.Network {
 		replace.ASN = input.ASN
 	}
 
-	//V4
-	if input.V4 != "" {
-		replace.V4 = input.V4
-	}
-
-	//V6
-	if input.V6 != "" {
-		replace.V6 = input.V6
-	}
-
-	//V4Name
-	if input.V4Name != "" {
-		replace.V4Name = input.V4Name
-	}
-
-	//V6Name
-	if input.V6Name != "" {
-		replace.V6Name = input.V6Name
-	}
-	//Date
-	if input.Date != "" {
-		replace.Date = input.Date
-	}
+	////V4
+	//if input.V4 != "" {
+	//	replace.V4 = input.V4
+	//}
+	//
+	////V6
+	//if input.V6 != "" {
+	//	replace.V6 = input.V6
+	//}
+	//
+	////V4Name
+	//if input.V4Name != "" {
+	//	replace.V4Name = input.V4Name
+	//}
+	//
+	////V6Name
+	//if input.V6Name != "" {
+	//	replace.V6Name = input.V6Name
+	//}
+	////Date
+	//if input.Date != "" {
+	//	replace.Date = input.Date
+	//}
 
 	//Plan
 	if input.Plan != "" {
@@ -128,29 +128,29 @@ func replaceAdminNetwork(replace, input network.Network) network.Network {
 		replace.ASN = input.ASN
 	}
 
-	//V4
-	if input.V4 != "" {
-		replace.V4 = input.V4
-	}
-
-	//V6
-	if input.V6 != "" {
-		replace.V6 = input.V6
-	}
-
-	//V4Name
-	if input.V4Name != "" {
-		replace.V4Name = input.V4Name
-	}
-
-	//V6Name
-	if input.V6Name != "" {
-		replace.V6Name = input.V6Name
-	}
-	//Date
-	if input.Date != "" {
-		replace.Date = input.Date
-	}
+	////V4
+	//if input.V4 != "" {
+	//	replace.V4 = input.V4
+	//}
+	//
+	////V6
+	//if input.V6 != "" {
+	//	replace.V6 = input.V6
+	//}
+	//
+	////V4Name
+	//if input.V4Name != "" {
+	//	replace.V4Name = input.V4Name
+	//}
+	//
+	////V6Name
+	//if input.V6Name != "" {
+	//	replace.V6Name = input.V6Name
+	//}
+	////Date
+	//if input.Date != "" {
+	//	replace.Date = input.Date
+	//}
 
 	//Plan
 	if input.Plan != "" {

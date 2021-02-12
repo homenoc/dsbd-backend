@@ -101,7 +101,7 @@ func GetAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, user.Result{User: result.User})
+	c.JSON(http.StatusOK, user.ResultAll{User: result.User})
 }
 
 func GetAllAdmin(c *gin.Context) {
@@ -114,6 +114,6 @@ func GetAllAdmin(c *gin.Context) {
 	if result := dbUser.GetAll(); result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 	} else {
-		c.JSON(http.StatusOK, user.Result{User: result.User})
+		c.JSON(http.StatusOK, user.ResultAll{User: result.User})
 	}
 }

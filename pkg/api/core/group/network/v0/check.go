@@ -34,9 +34,6 @@ func check(input network.Input) error {
 		if len(*input.IP) == 0 {
 			return fmt.Errorf("no data: ip address data")
 		}
-		if input.V4Name == nil && input.V6Name == nil {
-			return fmt.Errorf("no data: v4 and v6 Name")
-		}
 	}
 	return nil
 }
@@ -47,6 +44,9 @@ func ipCheck(ip network.IPInput) error {
 
 	if ip.Version != 4 && ip.Version != 6 {
 		return fmt.Errorf("invalid ip version")
+	}
+	if ip.Name == "" {
+		return fmt.Errorf("no network name")
 	}
 
 	startDate, _ := time.Parse("2006-01-02", ip.StartDate)
