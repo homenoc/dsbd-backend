@@ -71,7 +71,7 @@ func AddAdmin(c *gin.Context) {
 		GroupID: uint(id), Org: input.Org, OrgEn: input.OrgEn, Postcode: input.Postcode, Address: input.Address,
 		AddressEn: input.AddressEn, RouteV4: input.RouteV4, RouteV6: input.RouteV6, PI: &[]bool{input.PI}[0],
 		ASN: input.ASN, Open: &[]bool{false}[0], IP: *grpIP, JPNICAdmin: *jh.jpnicAdmin, JPNICTech: *jh.jpnicTech,
-		V4Name: *input.V4Name, V6Name: *input.V6Name, Lock: &[]bool{input.Lock}[0],
+		Lock: &[]bool{input.Lock}[0],
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})

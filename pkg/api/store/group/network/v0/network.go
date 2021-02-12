@@ -47,8 +47,7 @@ func Update(base int, c network.Network) error {
 	} else if network.UpdateData == base {
 		result = db.Model(&network.Network{Model: gorm.Model{ID: c.ID}}).Update(network.Network{
 			Org: c.Org, OrgEn: c.OrgEn, Postcode: c.Postcode, Address: c.Address, AddressEn: c.AddressEn,
-			RouteV4: c.RouteV4, RouteV6: c.RouteV6, PI: c.PI, ASN: c.ASN, V4: c.V4, V6: c.V6,
-			V4Name: c.V4Name, V6Name: c.V6Name, Date: c.Date, Plan: c.Plan})
+			RouteV4: c.RouteV4, RouteV6: c.RouteV6, PI: c.PI, ASN: c.ASN, Plan: c.Plan})
 	} else if network.UpdateRoute == base {
 		result = db.Model(&network.Network{Model: gorm.Model{ID: c.ID}}).Update(network.Network{
 			RouteV4: c.RouteV4, RouteV6: c.RouteV6})
@@ -57,7 +56,7 @@ func Update(base int, c network.Network) error {
 	} else if network.UpdateAll == base {
 		result = db.Model(&network.Network{Model: gorm.Model{ID: c.ID}}).Update(network.Network{
 			GroupID: c.GroupID, Org: c.Org, OrgEn: c.Org, Postcode: c.Postcode, Address: c.Address, AddressEn: c.AddressEn,
-			PI: c.PI, ASN: c.ASN, RouteV4: c.RouteV4, RouteV6: c.RouteV6, IP: c.IP, V4Name: c.V4Name, V6Name: c.V6Name,
+			PI: c.PI, ASN: c.ASN, RouteV4: c.RouteV4, RouteV6: c.RouteV6, IP: c.IP,
 			JPNICAdmin: c.JPNICAdmin, JPNICTech: c.JPNICTech, Open: c.Open, Lock: c.Lock})
 	} else {
 		log.Println("base select error")

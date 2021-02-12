@@ -21,6 +21,7 @@ func ipProcess(input network.Input) (*[]network.IP, error) {
 		}
 		net = append(net, network.IP{
 			Version:   tmpIP.Version,
+			Name:      tmpIP.Name,
 			IP:        tmpIP.IP,
 			Plan:      tmpIP.Plan,
 			StartDate: startDate,

@@ -213,7 +213,30 @@ func Get(c *gin.Context) {
 	if authResult.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: authResult.Err.Error()})
 	} else {
-		c.JSON(http.StatusOK, user.ResultOne{User: authResult.User})
+		c.JSON(http.StatusOK, user.ResultOne{
+			ID:          authResult.User.ID,
+			GroupID:     authResult.User.GroupID,
+			Tech:        authResult.User.Tech,
+			GroupHandle: authResult.User.GroupHandle,
+			Name:        authResult.User.Name,
+			NameEn:      authResult.User.NameEn,
+			Email:       authResult.User.Email,
+			Status:      authResult.User.Status,
+			Level:       authResult.User.Level,
+			MailVerify:  authResult.User.MailVerify,
+			Org:         authResult.User.Org,
+			OrgEn:       authResult.User.OrgEn,
+			PostCode:    authResult.User.PostCode,
+			Address:     authResult.User.Address,
+			AddressEn:   authResult.User.AddressEn,
+			Dept:        authResult.User.Dept,
+			DeptEn:      authResult.User.DeptEn,
+			Pos:         authResult.User.Pos,
+			PosEn:       authResult.User.PosEn,
+			Tel:         authResult.User.Tel,
+			Fax:         authResult.User.Fax,
+			Country:     authResult.User.Country,
+		})
 	}
 }
 
@@ -228,14 +251,77 @@ func GetGroup(c *gin.Context) {
 		return
 	}
 
-	var data []user.User
+	var data user.Result
 
-	for _, tmp := range result.User {
-		tmp.Pass = ""
-		tmp.MailToken = ""
-		if 0 < tmp.Status && tmp.Status < 100 {
-			data = append(data, tmp)
+	if authResult.User.Level > 1 {
+		data.User = append(data.User, user.ResultOne{
+			ID:          authResult.User.ID,
+			GroupID:     authResult.User.GroupID,
+			Tech:        authResult.User.Tech,
+			GroupHandle: authResult.User.GroupHandle,
+			Name:        authResult.User.Name,
+			NameEn:      authResult.User.NameEn,
+			Email:       authResult.User.Email,
+			Status:      authResult.User.Status,
+			Level:       authResult.User.Level,
+			MailVerify:  authResult.User.MailVerify,
+			Org:         authResult.User.Org,
+			OrgEn:       authResult.User.OrgEn,
+			PostCode:    authResult.User.PostCode,
+			Address:     authResult.User.Address,
+			AddressEn:   authResult.User.AddressEn,
+			Dept:        authResult.User.Dept,
+			DeptEn:      authResult.User.DeptEn,
+			Pos:         authResult.User.Pos,
+			PosEn:       authResult.User.PosEn,
+			Tel:         authResult.User.Tel,
+			Fax:         authResult.User.Fax,
+			Country:     authResult.User.Country,
+		})
+	} else {
+		resultUser := dbUser.Get(user.GID, &user.User{GroupID: authResult.Group.ID})
+		if result.Err != nil {
+			c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
+			return
+		}
+
+		for _, grp := range resultUser.User {
+			data.User = append(data.User, user.ResultOne{
+				ID:          grp.ID,
+				GroupID:     grp.GroupID,
+				Tech:        grp.Tech,
+				GroupHandle: grp.GroupHandle,
+				Name:        grp.Name,
+				NameEn:      grp.NameEn,
+				Email:       grp.Email,
+				Status:      grp.Status,
+				Level:       grp.Level,
+				MailVerify:  grp.MailVerify,
+				Org:         grp.Org,
+				OrgEn:       grp.OrgEn,
+				PostCode:    grp.PostCode,
+				Address:     grp.Address,
+				AddressEn:   grp.AddressEn,
+				Dept:        grp.Dept,
+				DeptEn:      grp.DeptEn,
+				Pos:         grp.Pos,
+				PosEn:       grp.PosEn,
+				Tel:         grp.Tel,
+				Fax:         grp.Fax,
+				Country:     grp.Country,
+			})
 		}
 	}
-	c.JSON(http.StatusOK, user.Result{User: data})
+
+	log.Println(result)
+
+	//for _, tmp := range result.User{
+	//	tmp.Pass = ""
+	//	tmp.MailToken = ""
+	//	if 0 < tmp.Status && tmp.Status < 100 {
+	//		data = append(data, tmp)
+	//	}
+	//}
+
+	c.JSON(http.StatusOK, data)
 }
