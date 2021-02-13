@@ -171,14 +171,15 @@ func UserRestAPI() {
 			// User Delete
 			//router.DELETE("/user", user.Delete)
 			// User Get
-			v1.GET("/user", user.Get)
-			v1.GET("/user/all", user.GetGroup)
+			v1.GET("/login", user.GetOwn)
+			v1.GET("/user/:id", user.Get)
+			v1.GET("/user", user.GetGroup)
 			// User ID Get
-			// v1.GET("/user/:id",user.GetId)
 			// User Update
 			v1.PUT("/user/:id", user.Update)
+
 			// User Mail MailVerify
-			v1.GET("/user/verify/:token", user.MailVerify)
+			v1.GET("/verify/:token", user.MailVerify)
 			//
 			// Token
 			//
