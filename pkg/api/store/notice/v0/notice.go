@@ -73,10 +73,14 @@ func Get(base int, data *notice.Notice) notice.ResultDatabase {
 		err = db.Where("group_id = ?", data.GroupID).Find(&noticeStruct).Error
 	} else if base == notice.UserIDAndGroupID { //UserID And GroupID
 		err = db.Where("user_id = ? AND group_id = ?", data.UserID, data.GroupID).Find(&noticeStruct).Error
-	} else if base == notice.Data { //Data
+	} else if base == notice.GroupData { //GroupData
 		err = db.Where("everyone = ? AND start_time < ? AND ? < ending_time ", data.Everyone, dateTime, dateTime).
 			Or("user_id = ? AND group_id = ? AND start_time < ? AND ? < ending_time", data.UserID, data.GroupID, dateTime, dateTime).
 			Or("group_id = ? AND start_time < ? AND ? < ending_time", data.GroupID, dateTime, dateTime).
+			Order("id asc").Find(&noticeStruct).Error
+	} else if base == notice.UserData { //UserData
+		err = db.Where("everyone = ? AND start_time < ? AND ? < ending_time ", data.Everyone, dateTime, dateTime).
+			Or("user_id = ? AND start_time < ? AND ? < ending_time", data.UserID, dateTime, dateTime).
 			Order("id asc").Find(&noticeStruct).Error
 	} else if base == notice.Everyone { //Everyone
 		err = db.Where("everyone = ?", data.Everyone).Find(&noticeStruct).Error

@@ -10,7 +10,8 @@ const (
 	GroupID          = 2
 	UserIDAndGroupID = 3
 	Everyone         = 4
-	Data             = 5
+	GroupData        = 5
+	UserData         = 6
 	Important        = 10
 	Fault            = 11
 	Info             = 12
