@@ -95,7 +95,7 @@ func Add(c *gin.Context) {
 			ToMail:  data.Email,
 			Subject: "本人確認のメールにつきまして",
 			Content: " " + input.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
-				config.Conf.Controller.User.Url + "/api/v1/user/verify/" + mailToken + "\n" +
+				config.Conf.Controller.User.Url + "/api/v1/verify/" + mailToken + "\n" +
 				"本人確認が完了次第、ログイン可能になります。\n",
 		})
 	} else {
@@ -103,7 +103,7 @@ func Add(c *gin.Context) {
 			ToMail:  data.Email,
 			Subject: "本人確認メールにつきまして",
 			Content: " " + input.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
-				config.Conf.Controller.User.Url + "/api/v1/user/verify/" + mailToken + "\n" +
+				config.Conf.Controller.User.Url + "/api/v1/verify/" + mailToken + "\n" +
 				"本人確認が完了次第、ログイン可能になります。\n" + "仮パスワード: " + pass,
 		})
 	}
@@ -204,6 +204,66 @@ func Update(c *gin.Context) {
 }
 
 func Get(c *gin.Context) {
+	userToken := c.Request.Header.Get("USER_TOKEN")
+	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: fmt.Sprintf("id error")})
+		return
+	}
+
+	authResult := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	authResult.User.Pass = ""
+	authResult.User.MailToken = ""
+	if authResult.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: authResult.Err.Error()})
+		return
+	}
+
+	if authResult.User.Level >= 2 {
+		c.JSON(http.StatusForbidden, common.Error{Error: "You don't have the authority."})
+		return
+	}
+
+	resultUser := dbUser.Get(user.ID, &user.User{Model: gorm.Model{ID: uint(id)}})
+	if resultUser.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: resultUser.Err.Error()})
+		return
+	}
+
+	if resultUser.User[0].GroupID != authResult.Group.ID {
+		c.JSON(http.StatusBadRequest, common.Error{Error: "GroupID is not match."})
+		return
+	}
+
+	c.JSON(http.StatusOK, user.ResultOne{
+		ID:          resultUser.User[0].ID,
+		GroupID:     resultUser.User[0].GroupID,
+		Tech:        resultUser.User[0].Tech,
+		GroupHandle: resultUser.User[0].GroupHandle,
+		Name:        resultUser.User[0].Name,
+		NameEn:      resultUser.User[0].NameEn,
+		Email:       resultUser.User[0].Email,
+		Status:      resultUser.User[0].Status,
+		Level:       resultUser.User[0].Level,
+		MailVerify:  resultUser.User[0].MailVerify,
+		Org:         resultUser.User[0].Org,
+		OrgEn:       resultUser.User[0].OrgEn,
+		PostCode:    resultUser.User[0].PostCode,
+		Address:     resultUser.User[0].Address,
+		AddressEn:   resultUser.User[0].AddressEn,
+		Dept:        resultUser.User[0].Dept,
+		DeptEn:      resultUser.User[0].DeptEn,
+		Pos:         resultUser.User[0].Pos,
+		PosEn:       resultUser.User[0].PosEn,
+		Tel:         resultUser.User[0].Tel,
+		Fax:         resultUser.User[0].Fax,
+		Country:     resultUser.User[0].Country,
+	})
+}
+
+func GetOwn(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
