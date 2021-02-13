@@ -221,45 +221,52 @@ func Get(c *gin.Context) {
 		return
 	}
 
-	if authResult.User.Level >= 2 {
-		c.JSON(http.StatusForbidden, common.Error{Error: "You don't have the authority."})
-		return
-	}
+	var tmpUser user.User
 
-	resultUser := dbUser.Get(user.ID, &user.User{Model: gorm.Model{ID: uint(id)}})
-	if resultUser.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultUser.Err.Error()})
-		return
-	}
+	if authResult.User.ID == uint(id) {
+		tmpUser = authResult.User
+	} else {
+		if authResult.User.Level >= 2 {
+			c.JSON(http.StatusForbidden, common.Error{Error: "You don't have the authority."})
+			return
+		}
 
-	if resultUser.User[0].GroupID != authResult.Group.ID {
-		c.JSON(http.StatusBadRequest, common.Error{Error: "GroupID is not match."})
-		return
+		resultUser := dbUser.Get(user.ID, &user.User{Model: gorm.Model{ID: uint(id)}})
+		if resultUser.Err != nil {
+			c.JSON(http.StatusUnauthorized, common.Error{Error: resultUser.Err.Error()})
+			return
+		}
+
+		if resultUser.User[0].GroupID != authResult.Group.ID {
+			c.JSON(http.StatusBadRequest, common.Error{Error: "GroupID is not match."})
+			return
+		}
+		tmpUser = resultUser.User[0]
 	}
 
 	c.JSON(http.StatusOK, user.ResultOne{
-		ID:          resultUser.User[0].ID,
-		GroupID:     resultUser.User[0].GroupID,
-		Tech:        resultUser.User[0].Tech,
-		GroupHandle: resultUser.User[0].GroupHandle,
-		Name:        resultUser.User[0].Name,
-		NameEn:      resultUser.User[0].NameEn,
-		Email:       resultUser.User[0].Email,
-		Status:      resultUser.User[0].Status,
-		Level:       resultUser.User[0].Level,
-		MailVerify:  resultUser.User[0].MailVerify,
-		Org:         resultUser.User[0].Org,
-		OrgEn:       resultUser.User[0].OrgEn,
-		PostCode:    resultUser.User[0].PostCode,
-		Address:     resultUser.User[0].Address,
-		AddressEn:   resultUser.User[0].AddressEn,
-		Dept:        resultUser.User[0].Dept,
-		DeptEn:      resultUser.User[0].DeptEn,
-		Pos:         resultUser.User[0].Pos,
-		PosEn:       resultUser.User[0].PosEn,
-		Tel:         resultUser.User[0].Tel,
-		Fax:         resultUser.User[0].Fax,
-		Country:     resultUser.User[0].Country,
+		ID:          tmpUser.ID,
+		GroupID:     tmpUser.GroupID,
+		Tech:        tmpUser.Tech,
+		GroupHandle: tmpUser.GroupHandle,
+		Name:        tmpUser.Name,
+		NameEn:      tmpUser.NameEn,
+		Email:       tmpUser.Email,
+		Status:      tmpUser.Status,
+		Level:       tmpUser.Level,
+		MailVerify:  tmpUser.MailVerify,
+		Org:         tmpUser.Org,
+		OrgEn:       tmpUser.OrgEn,
+		PostCode:    tmpUser.PostCode,
+		Address:     tmpUser.Address,
+		AddressEn:   tmpUser.AddressEn,
+		Dept:        tmpUser.Dept,
+		DeptEn:      tmpUser.DeptEn,
+		Pos:         tmpUser.Pos,
+		PosEn:       tmpUser.PosEn,
+		Tel:         tmpUser.Tel,
+		Fax:         tmpUser.Fax,
+		Country:     tmpUser.Country,
 	})
 }
 
