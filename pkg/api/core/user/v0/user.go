@@ -213,7 +213,7 @@ func Get(c *gin.Context) {
 		return
 	}
 
-	authResult := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	authResult := auth.UserAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
 	authResult.User.Pass = ""
 	authResult.User.MailToken = ""
 	if authResult.Err != nil {
@@ -225,7 +225,7 @@ func Get(c *gin.Context) {
 
 	if authResult.User.ID == uint(id) {
 		tmpUser = authResult.User
-	} else {
+	} else if authResult.User.GroupID != 0 {
 		if authResult.User.Level >= 2 {
 			c.JSON(http.StatusForbidden, common.Error{Error: "You don't have the authority."})
 			return
@@ -237,7 +237,7 @@ func Get(c *gin.Context) {
 			return
 		}
 
-		if resultUser.User[0].GroupID != authResult.Group.ID {
+		if resultUser.User[0].GroupID != authResult.User.GroupID {
 			c.JSON(http.StatusBadRequest, common.Error{Error: "GroupID is not match."})
 			return
 		}
@@ -345,7 +345,7 @@ func GetGroup(c *gin.Context) {
 			Fax:         authResult.User.Fax,
 			Country:     authResult.User.Country,
 		})
-	} else {
+	} else if authResult.Group.ID != 0 || authResult.User.GroupID != 0 {
 		resultUser := dbUser.Get(user.GID, &user.User{GroupID: authResult.Group.ID})
 		if result.Err != nil {
 			c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
@@ -379,16 +379,6 @@ func GetGroup(c *gin.Context) {
 			})
 		}
 	}
-
-	log.Println(result)
-
-	//for _, tmp := range result.User{
-	//	tmp.Pass = ""
-	//	tmp.MailToken = ""
-	//	if 0 < tmp.Status && tmp.Status < 100 {
-	//		data = append(data, tmp)
-	//	}
-	//}
 
 	c.JSON(http.StatusOK, data)
 }
