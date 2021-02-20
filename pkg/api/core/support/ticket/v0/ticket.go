@@ -20,6 +20,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 func Create(c *gin.Context) {
@@ -62,6 +63,14 @@ func Create(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
+
+	//HomeNOC Slackに送信
+	attachment := slack.Attachment{}
+	attachment.AddField(slack.Field{Title: "Title", Value: "Support Ticket Open"}).
+		AddField(slack.Field{Title: "UserID", Value: strconv.Itoa(int(result.User.ID))}).
+		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(result.Group.ID)) + "-" + result.Group.Org}).
+		AddField(slack.Field{Title: "Message", Value: input.Data})
+	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 
 	c.JSON(http.StatusOK, support.Result{Ticket: []ticket.Ticket{*ticketResult}, Chat: []chat.Chat{*chatResult}})
 }
@@ -212,7 +221,7 @@ func GetWebSocket(c *gin.Context) {
 				AddField(slack.Field{Title: "UserID", Value: strconv.Itoa(int(result.User.ID))}).
 				AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(resultGroup.Group.ID)) + "-" + resultGroup.Group.Org}).
 				AddField(slack.Field{Title: "Message", Value: msg.Message})
-			notification.SendSlack(notification.Slack{Attachment: attachment, Channel: "user", Status: true})
+			notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 
 			support.Broadcast <- msg
 		}
@@ -229,7 +238,13 @@ func HandleMessages() {
 			if client.GroupID == 0 {
 				return
 			} else if client.GroupID == msg.GroupID {
-				err := client.Socket.WriteJSON(msg)
+				err := client.Socket.WriteJSON(support.WebSocketChatResponse{
+					CreatedAt: time.Now(),
+					UserID:    msg.UserID,
+					GroupID:   msg.GroupID,
+					Admin:     msg.Admin,
+					Message:   msg.Message,
+				})
 				if err != nil {
 					log.Printf("error: %v", err)
 					client.Socket.Close()
