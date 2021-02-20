@@ -116,12 +116,12 @@ func MailVerify(c *gin.Context) {
 
 	result := dbUser.Get(user.MailToken, &user.User{MailToken: mailToken})
 	if result.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error() + "| we can't find token data"})
+		c.JSON(http.StatusBadRequest, common.Error{Error: result.Err.Error() + "| we can't find token data"})
 		return
 	}
 
 	if *result.User[0].MailVerify {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: fmt.Sprintf("This email has already been checked")})
+		c.JSON(http.StatusBadRequest, common.Error{Error: fmt.Sprintf("This email has already been checked")})
 		return
 	}
 	if result.User[0].Status >= 100 {
@@ -133,7 +133,7 @@ func MailVerify(c *gin.Context) {
 		MailVerify: &[]bool{true}[0]}); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 	} else {
-		c.JSON(http.StatusOK, &user.Result{})
+		c.JSON(http.StatusOK, &common.Result{Result: "OK"})
 	}
 }
 
