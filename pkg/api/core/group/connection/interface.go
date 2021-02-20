@@ -42,7 +42,7 @@ type Connection struct {
 }
 
 type Result struct {
-	ConnectionData []Connection `json:"data"`
+	Connection []Connection `json:"connection"`
 }
 
 type ResultDatabase struct {
