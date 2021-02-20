@@ -25,6 +25,14 @@ type WebSocketResult struct {
 	Message     string    `json:"message"`
 }
 
+type WebSocketChatResponse struct {
+	CreatedAt time.Time `json:"created_at"`
+	UserID    uint      `json:"user_id"`
+	GroupID   uint      `json:"group_id"`
+	Admin     bool      `json:"admin"`
+	Message   string    `json:"message"`
+}
+
 type WebSocket struct {
 	TicketID uint
 	GroupID  uint
