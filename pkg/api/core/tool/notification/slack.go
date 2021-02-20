@@ -26,7 +26,6 @@ func SendSlack(data Slack) {
 				Username:    tmp.Name,
 				Channel:     tmp.Channel,
 				Attachments: []slack.Attachment{data.Attachment},
-				Text:        "# test ```test```",
 				Markdown:    true,
 			}
 			err := slack.Send(tmp.WebHookUrl, "", payload)
