@@ -72,7 +72,7 @@ func Add(c *gin.Context) {
 		AddField(slack.Field{Title: "Question", Value: input.Question}).
 		AddField(slack.Field{Title: "Bandwidth", Value: input.Bandwidth}).
 		AddField(slack.Field{Title: "Contract", Value: input.Contract})
-	notification.SendSlack(notification.Slack{Attachment: attachment, Channel: "user", Status: true})
+	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 
 	if err := dbUser.Update(user.UpdateGID, &user.User{Model: gorm.Model{ID: userResult.User.ID}, GroupID: result.Model.ID}); err != nil {
 		log.Println(dbGroup.Delete(&group.Group{Model: gorm.Model{ID: result.ID}}))

@@ -3,23 +3,18 @@ package notification
 import (
 	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
-	"os"
-)
-
-var (
-	// change token
-	IncomingUrl string = "https://hooks.slack.com/services/xxxxxxxxxxxx/xxxxxxxxxxxx/xxxxxxxxx"
+	"log"
 )
 
 type Slack struct {
+	ID         string
 	Status     bool
 	Attachment slack.Attachment
-	Channel    string
 }
 
 func SendSlack(data Slack) {
 	for _, tmp := range config.Conf.Slack {
-		if tmp.Channel == data.Channel {
+		if tmp.ID == data.ID {
 			var color string
 			if data.Status {
 				color = "good"
@@ -31,11 +26,14 @@ func SendSlack(data Slack) {
 				Username:    tmp.Name,
 				Channel:     tmp.Channel,
 				Attachments: []slack.Attachment{data.Attachment},
+				Text:        "# test ```test```",
+				Markdown:    true,
 			}
 			err := slack.Send(tmp.WebHookUrl, "", payload)
 			if err != nil {
-				os.Exit(1)
+				log.Println(err)
 			}
+			return
 		}
 	}
 }

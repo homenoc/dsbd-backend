@@ -70,7 +70,7 @@ func Add(c *gin.Context) {
 	attachment := slack.Attachment{}
 	attachment.AddField(slack.Field{Title: "Title", Value: "接続情報登録"}).
 		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(input.GroupID))})
-	notification.SendSlack(notification.Slack{Attachment: attachment, Channel: "user", Status: true})
+	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 
 	c.JSON(http.StatusOK, group.Result{})
 }
