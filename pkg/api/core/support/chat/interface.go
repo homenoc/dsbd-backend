@@ -14,7 +14,7 @@ type Chat struct {
 	TicketID uint   `json:"ticket_id"`
 	UserID   uint   `json:"user_id"`
 	Admin    bool   `json:"admin"`
-	Data     string `json:"data"`
+	Data     string `json:"data" gorm:"size:65535"`
 }
 
 type ResultDatabase struct {

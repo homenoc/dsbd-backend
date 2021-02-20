@@ -22,6 +22,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 func CreateAdmin(c *gin.Context) {
@@ -283,7 +284,13 @@ func HandleMessagesAdmin() {
 			if client.GroupID == 0 {
 				return
 			} else if client.GroupID == msg.GroupID {
-				err := client.Socket.WriteJSON(msg)
+				err := client.Socket.WriteJSON(support.WebSocketChatResponse{
+					CreatedAt: time.Now(),
+					UserID:    msg.UserID,
+					GroupID:   msg.GroupID,
+					Admin:     msg.Admin,
+					Message:   msg.Message,
+				})
 				if err != nil {
 					log.Printf("error: %v", err)
 					client.Socket.Close()

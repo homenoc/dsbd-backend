@@ -20,10 +20,19 @@ type Ticket struct {
 	gorm.Model
 	GroupID     uint   `json:"group_id"`
 	UserID      uint   `json:"user_id"`
+	Chat        []Chat `json:"chat"`
 	ChatIDStart uint   `json:"chat_id_start"`
 	ChatIDEnd   uint   `json:"chat_id_end"`
 	Solved      *bool  `json:"solved"`
 	Title       string `json:"title"`
+}
+
+type Chat struct {
+	gorm.Model
+	TicketID uint   `json:"ticket_id"`
+	UserID   uint   `json:"user_id"`
+	Admin    bool   `json:"admin"`
+	Data     string `json:"data" gorm:"size:65535"`
 }
 
 type AdminAllResult struct {

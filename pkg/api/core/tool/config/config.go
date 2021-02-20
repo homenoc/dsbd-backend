@@ -68,6 +68,7 @@ type Radius struct {
 }
 
 type Slack struct {
+	ID         string `json:"id"`
 	WebHookUrl string `json:"url"`
 	Channel    string `json:"channel"`
 	Name       string `json:"name"`
