@@ -88,7 +88,7 @@ func Add(c *gin.Context) {
 		AddField(slack.Field{Title: "Name", Value: input.Name}).
 		AddField(slack.Field{Title: "Name(English)", Value: input.NameEn})
 
-	notification.SendSlack(notification.Slack{Attachment: attachment, Channel: "user", Status: true})
+	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 
 	if pass == "" {
 		mail.SendMail(mail.Mail{

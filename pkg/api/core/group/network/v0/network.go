@@ -102,7 +102,7 @@ func Add(c *gin.Context) {
 	attachment := slack.Attachment{}
 	attachment.AddField(slack.Field{Title: "Title", Value: "ネットワーク登録"}).
 		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(input.GroupID))})
-	notification.SendSlack(notification.Slack{Attachment: attachment, Channel: "user", Status: true})
+	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 
 	// ---------ここまで処理が通っている場合、DBへの書き込みにすべて成功している
 	// GroupのStatusをAfterStatusにする
