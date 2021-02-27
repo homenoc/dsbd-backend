@@ -63,6 +63,8 @@ func Update(base int, c network.Network) error {
 			AddressEn:  c.AddressEn,
 			PI:         c.PI,
 			ASN:        c.ASN,
+			V4Name:     c.V4Name,
+			V6Name:     c.V6Name,
 			RouteV4:    c.RouteV4,
 			RouteV6:    c.RouteV6,
 			IP:         c.IP,
