@@ -34,6 +34,8 @@ type Network struct {
 	ASN         string                  `json:"asn"`
 	RouteV4     string                  `json:"route_v4"`
 	RouteV6     string                  `json:"route_v6"`
+	V4Name      string                  `json:"v4_name"`
+	V6Name      string                  `json:"v6_name"`
 	IP          []IP                    `json:"ip"`
 	Connection  []connection.Connection `json:"connection"`
 	JPNICAdmin  JPNICAdmin              `json:"jpnic_admin"`
