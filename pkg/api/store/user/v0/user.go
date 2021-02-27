@@ -55,10 +55,27 @@ func Update(base int, u *user.User) error {
 		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update(user.User{MailVerify: u.MailVerify})
 	} else if user.UpdateInfo == base {
 		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update(user.User{
-			Name: u.Name, NameEn: u.NameEn, Email: u.Email, Pass: u.Pass, Tech: u.Tech, Level: u.Level,
-			MailVerify: u.MailVerify, MailToken: u.MailToken, Org: u.Org, OrgEn: u.OrgEn, PostCode: u.PostCode,
-			Address: u.Address, AddressEn: u.AddressEn, Dept: u.Dept, DeptEn: u.DeptEn, Pos: u.Pos, PosEn: u.PosEn,
-			Tel: u.Tel, Fax: u.Fax, Country: u.Country})
+			Name:       u.Name,
+			NameEn:     u.NameEn,
+			Email:      u.Email,
+			Pass:       u.Pass,
+			Tech:       u.Tech,
+			Level:      u.Level,
+			MailVerify: u.MailVerify,
+			MailToken:  u.MailToken,
+			Org:        u.Org,
+			OrgEn:      u.OrgEn,
+			PostCode:   u.PostCode,
+			Address:    u.Address,
+			AddressEn:  u.AddressEn,
+			Dept:       u.Dept,
+			DeptEn:     u.DeptEn,
+			Pos:        u.Pos,
+			PosEn:      u.PosEn,
+			Tel:        u.Tel,
+			Fax:        u.Fax,
+			Country:    u.Country,
+		})
 	} else if user.UpdateStatus == base {
 		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update(user.User{Status: u.Status})
 	} else if user.UpdateGID == base {
@@ -67,10 +84,29 @@ func Update(base int, u *user.User) error {
 		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update("level", u.Level)
 	} else if user.UpdateAll == base {
 		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update(user.User{
-			GroupID: u.GroupID, Name: u.Name, NameEn: u.NameEn, Email: u.Email, Pass: u.Pass, Tech: u.Tech, Level: u.Level,
-			MailVerify: u.MailVerify, MailToken: u.MailToken, Org: u.Org, OrgEn: u.OrgEn, PostCode: u.PostCode,
-			Address: u.Address, AddressEn: u.AddressEn, Dept: u.Dept, DeptEn: u.DeptEn, Pos: u.Pos, PosEn: u.PosEn,
-			Tel: u.Tel, Fax: u.Fax, Country: u.Country, Status: u.Status})
+			GroupID:    u.GroupID,
+			Name:       u.Name,
+			NameEn:     u.NameEn,
+			Email:      u.Email,
+			Pass:       u.Pass,
+			Tech:       u.Tech,
+			Level:      u.Level,
+			MailVerify: u.MailVerify,
+			MailToken:  u.MailToken,
+			Org:        u.Org,
+			OrgEn:      u.OrgEn,
+			PostCode:   u.PostCode,
+			Address:    u.Address,
+			AddressEn:  u.AddressEn,
+			Dept:       u.Dept,
+			DeptEn:     u.DeptEn,
+			Pos:        u.Pos,
+			PosEn:      u.PosEn,
+			Tel:        u.Tel,
+			Fax:        u.Fax,
+			Country:    u.Country,
+			Status:     u.Status,
+		})
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())

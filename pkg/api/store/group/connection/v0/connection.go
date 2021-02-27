@@ -51,9 +51,21 @@ func Update(base int, c connection.Connection) error {
 		result = db.Model(&connection.Connection{Model: gorm.Model{ID: c.ID}}).Update(connection.Connection{GroupID: c.GroupID})
 	} else if base == connection.UpdateAll {
 		result = db.Model(&connection.Connection{Model: gorm.Model{ID: c.ID}}).Update(connection.Connection{
-			GroupID: c.GroupID, ServiceID: c.ServiceID, UserID: c.UserID, Service: c.Service, NTT: c.NTT, NOC: c.NOC,
-			TermIP: c.TermIP, Monitor: c.Monitor, LinkV4Our: c.LinkV4Our, LinkV4Your: c.LinkV4Your,
-			LinkV6Our: c.LinkV6Our, LinkV6Your: c.LinkV6Your, Fee: c.Fee, Open: c.Open})
+			GroupID:    c.GroupID,
+			ServiceID:  c.ServiceID,
+			UserID:     c.UserID,
+			Service:    c.Service,
+			NTT:        c.NTT,
+			NOC:        c.NOC,
+			TermIP:     c.TermIP,
+			Monitor:    c.Monitor,
+			LinkV4Our:  c.LinkV4Our,
+			LinkV4Your: c.LinkV4Your,
+			LinkV6Our:  c.LinkV6Our,
+			LinkV6Your: c.LinkV6Your,
+			Fee:        c.Fee,
+			Open:       c.Open,
+		})
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())

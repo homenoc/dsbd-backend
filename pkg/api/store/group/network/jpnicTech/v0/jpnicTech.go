@@ -44,7 +44,10 @@ func Update(base int, u jpnicTech.JpnicTech) error {
 
 	if base == jpnicTech.UpdateAll {
 		err = db.Model(&jpnicTech.JpnicTech{Model: gorm.Model{ID: u.ID}}).Update(jpnicTech.JpnicTech{
-			NetworkID: u.NetworkID, UserID: u.UserID, Lock: u.Lock}).Error
+			NetworkID: u.NetworkID,
+			UserID:    u.UserID,
+			Lock:      u.Lock,
+		}).Error
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())

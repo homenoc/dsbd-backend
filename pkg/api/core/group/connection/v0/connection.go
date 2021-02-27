@@ -53,8 +53,14 @@ func Add(c *gin.Context) {
 	}
 
 	_, err = dbConnection.Create(&connection.Connection{
-		GroupID: result.Group.ID, UserID: input.UserID, Service: input.Service, NTT: input.NTT, NOC: input.NOC,
-		TermIP: input.TermIP, Monitor: input.Monitor, Open: &[]bool{false}[0]})
+		GroupID: result.Group.ID,
+		UserID:  input.UserID,
+		Service: input.Service,
+		NTT:     input.NTT,
+		NOC:     input.NOC,
+		TermIP:  input.TermIP,
+		Monitor: input.Monitor,
+		Open:    &[]bool{false}[0]})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return

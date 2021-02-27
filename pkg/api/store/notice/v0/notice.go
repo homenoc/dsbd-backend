@@ -44,8 +44,16 @@ func Update(base int, data notice.Notice) error {
 
 	if notice.UpdateAll == base {
 		result = db.Model(&notice.Notice{Model: gorm.Model{ID: data.ID}}).Update(notice.Notice{
-			UserID: data.UserID, GroupID: data.GroupID, StartTime: data.StartTime, EndingTime: data.EndingTime,
-			Important: data.Important, Fault: data.Fault, Info: data.Info, Title: data.Title, Data: data.Data})
+			UserID:     data.UserID,
+			GroupID:    data.GroupID,
+			StartTime:  data.StartTime,
+			EndingTime: data.EndingTime,
+			Important:  data.Important,
+			Fault:      data.Fault,
+			Info:       data.Info,
+			Title:      data.Title,
+			Data:       data.Data,
+		})
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
