@@ -30,7 +30,7 @@ func Add(c *gin.Context) {
 	}
 
 	// group authentication
-	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthentication(0, token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
@@ -42,29 +42,22 @@ func Add(c *gin.Context) {
 		return
 	}
 
+	// check lock
+	if *result.Group.Lock {
+		c.JSON(http.StatusForbidden, common.Error{Error: "Lock status"})
+		return
+	}
+
 	// check json
 	if err := check(input); err != nil {
 		c.JSON(http.StatusBadRequest, group.Result{Error: err.Error()})
 		return
 	}
 
-	//log.Println(input)
-
-	var afterStatus uint
-
 	// status check for group
-	if result.Group.Status == 2 {
-		if input.PI {
-			afterStatus = 22
-		} else {
-			afterStatus = 12
-		}
-	} else if !(result.Group.Status == 111 || result.Group.Status == 121 || result.Group.Status == 11 || result.Group.Status == 21) {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: "error: group status"})
+	if !(*result.Group.Status == 1 && *result.Group.ExpiredStatus == 0 && *result.Group.Pass) {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: "error: failed group status"})
 		return
-	} else {
-		// 111,121,11,21の場合はStatusを+1にする
-		afterStatus = result.Group.Status + 1
 	}
 
 	grpIP, err := ipProcess(input)
@@ -89,10 +82,21 @@ func Add(c *gin.Context) {
 
 	// db create for network
 	net, err := dbNetwork.Create(&network.Network{
-		GroupID: result.Group.ID, Org: input.Org, OrgEn: input.OrgEn, Postcode: input.Postcode, Address: input.Address,
-		AddressEn: input.AddressEn, RouteV4: input.RouteV4, RouteV6: input.RouteV6, PI: &[]bool{input.PI}[0],
-		ASN: input.ASN, Open: &[]bool{false}[0], IP: *grpIP, JPNICAdmin: *jh.jpnicAdmin, JPNICTech: *jh.jpnicTech,
-		Lock: &[]bool{input.Lock}[0],
+		GroupID:    result.Group.ID,
+		Org:        input.Org,
+		OrgEn:      input.OrgEn,
+		Postcode:   input.Postcode,
+		Address:    input.Address,
+		AddressEn:  input.AddressEn,
+		RouteV4:    input.RouteV4,
+		RouteV6:    input.RouteV6,
+		PI:         &[]bool{input.PI}[0],
+		ASN:        input.ASN,
+		Open:       &[]bool{false}[0],
+		IP:         *grpIP,
+		JPNICAdmin: *jh.jpnicAdmin,
+		JPNICTech:  *jh.jpnicTech,
+		Lock:       &[]bool{input.Lock}[0],
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
@@ -107,7 +111,7 @@ func Add(c *gin.Context) {
 	// ---------ここまで処理が通っている場合、DBへの書き込みにすべて成功している
 	// GroupのStatusをAfterStatusにする
 	if err = dbGroup.Update(group.UpdateStatus, group.Group{Model: gorm.Model{ID: result.Group.ID},
-		Status: afterStatus}); err != nil {
+		Status: &[]uint{2}[0]}); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
@@ -123,7 +127,7 @@ func Update(c *gin.Context) {
 
 	log.Println(c.BindJSON(&input))
 
-	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthentication(0, token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
@@ -135,10 +139,10 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	if !(result.Group.Status == 211 || result.Group.Status == 221) {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: "error: group status"})
-		return
-	}
+	//if !(result.Group.Status == 211 || result.Group.Status == 221) {
+	//	c.JSON(http.StatusUnauthorized, common.Error{Error: "error: group status"})
+	//	return
+	//}
 
 	resultNetwork := dbNetwork.Get(network.ID, &network.Network{Model: gorm.Model{ID: input.ID}})
 	if resultNetwork.Err != nil {

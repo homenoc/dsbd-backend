@@ -311,7 +311,7 @@ func GetGroup(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	authResult := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	authResult := auth.GroupAuthentication(0, token.Token{UserToken: userToken, AccessToken: accessToken})
 	result := dbUser.Get(user.GID, &user.User{GroupID: authResult.Group.ID})
 	if result.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})

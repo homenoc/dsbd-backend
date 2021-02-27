@@ -36,7 +36,7 @@ func Create(c *gin.Context) {
 	}
 
 	// Group authentication
-	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthentication(0, token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
@@ -86,7 +86,7 @@ func Get(c *gin.Context) {
 	}
 
 	// Group authentication
-	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthentication(0, token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
@@ -119,7 +119,7 @@ func GetTitle(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthentication(0, token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
@@ -159,7 +159,7 @@ func GetWebSocket(c *gin.Context) {
 
 	defer conn.Close()
 
-	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthentication(0, token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		log.Println("ws:// support error:Auth error")
 		conn.WriteMessage(websocket.TextMessage, []byte("error: auth error"))
@@ -192,7 +192,7 @@ func GetWebSocket(c *gin.Context) {
 			break
 		}
 		// 入力されたデータをTokenにて認証
-		resultGroup := auth.GroupAuthentication(token.Token{UserToken: msg.UserToken, AccessToken: msg.AccessToken})
+		resultGroup := auth.GroupAuthentication(0, token.Token{UserToken: msg.UserToken, AccessToken: msg.AccessToken})
 		if resultGroup.Err != nil {
 			log.Println(resultGroup.Err)
 			return

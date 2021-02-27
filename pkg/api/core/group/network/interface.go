@@ -23,23 +23,24 @@ const (
 
 type Network struct {
 	gorm.Model
-	GroupID    uint                    `json:"group_id"`
-	Org        string                  `json:"org"`
-	OrgEn      string                  `json:"org_en"`
-	Postcode   string                  `json:"postcode"`
-	Address    string                  `json:"address"`
-	AddressEn  string                  `json:"address_en"`
-	PI         *bool                   `json:"pi"`
-	ASN        string                  `json:"asn"`
-	RouteV4    string                  `json:"route_v4"`
-	RouteV6    string                  `json:"route_v6"`
-	IP         []IP                    `json:"ip"`
-	Connection []connection.Connection `json:"connection"`
-	JPNICAdmin JPNICAdmin              `json:"jpnic_admin"`
-	JPNICTech  []JPNICTech             `json:"jpnic_tech"`
-	Plan       string                  `json:"plan"`
-	Open       *bool                   `json:"open"`
-	Lock       *bool                   `json:"lock"`
+	GroupID     uint                    `json:"group_id"`
+	NetworkType string                  `json:"network_type"`
+	Org         string                  `json:"org"`
+	OrgEn       string                  `json:"org_en"`
+	Postcode    string                  `json:"postcode"`
+	Address     string                  `json:"address"`
+	AddressEn   string                  `json:"address_en"`
+	PI          *bool                   `json:"pi"`
+	ASN         string                  `json:"asn"`
+	RouteV4     string                  `json:"route_v4"`
+	RouteV6     string                  `json:"route_v6"`
+	IP          []IP                    `json:"ip"`
+	Connection  []connection.Connection `json:"connection"`
+	JPNICAdmin  JPNICAdmin              `json:"jpnic_admin"`
+	JPNICTech   []JPNICTech             `json:"jpnic_tech"`
+	Plan        string                  `json:"plan"`
+	Open        *bool                   `json:"open"`
+	Lock        *bool                   `json:"lock"`
 }
 
 type IP struct {

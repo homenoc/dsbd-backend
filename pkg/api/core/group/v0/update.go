@@ -1,8 +1,10 @@
 package v0
 
-import "github.com/homenoc/dsbd-backend/pkg/api/core/group"
+import (
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
+)
 
-func updateAdminUser(input, replace group.Group) (group.Group, error) {
+func updateAdminGroup(input, replace group.Group) (group.Group, error) {
 
 	//Org
 	if input.Org != "" {
@@ -10,13 +12,21 @@ func updateAdminUser(input, replace group.Group) (group.Group, error) {
 	}
 
 	// uint boolean
-	//Lock
+	// Lock
 	if input.Lock != replace.Lock {
 		replace.Lock = input.Lock
 	}
-	//Status
+	// Pass
+	if input.Pass != replace.Pass {
+		replace.Pass = input.Pass
+	}
+	// Status
 	if input.Status != replace.Status {
 		replace.Status = input.Status
+	}
+	// ExpiredStatus
+	if input.ExpiredStatus != replace.ExpiredStatus {
+		replace.ExpiredStatus = input.ExpiredStatus
 	}
 
 	return replace, nil

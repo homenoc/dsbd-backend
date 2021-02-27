@@ -77,7 +77,7 @@ func UpdateAdmin(c *gin.Context) {
 		return
 	}
 
-	replace, err := updateAdminUser(input, tmp.Group[0])
+	replace, err := updateAdminGroup(input, tmp.Group[0])
 	if err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: "error: this email is already registered"})
 		return

@@ -30,13 +30,14 @@ func UserAuthentication(data token.Token) auth.UserResult {
 	return auth.UserResult{User: resultUser.User[0], Err: nil}
 }
 
-func GroupAuthentication(data token.Token) auth.GroupResult {
+// errorType 0: 未審査の場合でもエラーを返す　1: 未審査の場合エラーを返さない
+func GroupAuthentication(errorType uint, data token.Token) auth.GroupResult {
 	resultToken := dbToken.Get(token.UserTokenAndAccessToken, &data)
 	if len(resultToken.Token) == 0 {
 		return auth.GroupResult{Err: fmt.Errorf("auth failed")}
 	}
 	if resultToken.Err != nil {
-		return auth.GroupResult{Err: fmt.Errorf("db error")}
+		return auth.GroupResult{Err: fmt.Errorf("error: no token")}
 	}
 	resultUser := dbUser.Get(user.ID, &user.User{Model: gorm.Model{ID: resultToken.Token[0].UserID}})
 	if resultUser.Err != nil {
@@ -52,8 +53,20 @@ func GroupAuthentication(data token.Token) auth.GroupResult {
 	if resultGroup.Err != nil {
 		return auth.GroupResult{Err: fmt.Errorf("db error")}
 	}
-	if 1000 <= resultGroup.Group[0].Status {
-		return auth.GroupResult{Err: fmt.Errorf("error: group status")}
+	// 未審査＋errorType = 0の場合
+	if !*resultGroup.Group[0].Pass && errorType == 0 {
+		return auth.GroupResult{Err: fmt.Errorf("error: unexamined")}
 	}
+	// アカウント失効時の動作
+	if *resultGroup.Group[0].ExpiredStatus == 1 {
+		return auth.GroupResult{Err: fmt.Errorf("error: discontinued by Master Account")}
+	}
+	if *resultGroup.Group[0].ExpiredStatus == 2 {
+		return auth.GroupResult{Err: fmt.Errorf("error: discontinuation by the steering committee")}
+	}
+	if *resultGroup.Group[0].ExpiredStatus == 3 {
+		return auth.GroupResult{Err: fmt.Errorf("error: discontinuation due to failed review")}
+	}
+
 	return auth.GroupResult{User: resultUser.User[0], Group: resultGroup.Group[0], Err: nil}
 }
