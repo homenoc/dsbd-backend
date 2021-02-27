@@ -60,8 +60,13 @@ func Add(c *gin.Context) {
 	}
 
 	result, err := dbGroup.Create(&group.Group{
-		Agree: &[]bool{true}[0], Question: input.Question, Org: input.Org, Status: 1, Bandwidth: input.Bandwidth,
-		Comment: input.Comment, Contract: input.Contract,
+		Agree:     &[]bool{true}[0],
+		Question:  input.Question,
+		Org:       input.Org,
+		Status:    &[]uint{1}[0],
+		Bandwidth: input.Bandwidth,
+		Comment:   input.Comment,
+		Contract:  input.Contract,
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
@@ -74,11 +79,11 @@ func Add(c *gin.Context) {
 		AddField(slack.Field{Title: "Contract", Value: input.Contract})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 
-	if err := dbUser.Update(user.UpdateGID, &user.User{Model: gorm.Model{ID: userResult.User.ID}, GroupID: result.Model.ID}); err != nil {
+	if err = dbUser.Update(user.UpdateGID, &user.User{Model: gorm.Model{ID: userResult.User.ID}, GroupID: result.Model.ID}); err != nil {
 		log.Println(dbGroup.Delete(&group.Group{Model: gorm.Model{ID: result.ID}}))
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 	} else {
-		c.JSON(http.StatusOK, group.Result{})
+		c.JSON(http.StatusOK, common.Result{})
 	}
 }
 
@@ -90,7 +95,7 @@ func Update(c *gin.Context) {
 
 	log.Println(c.BindJSON(&input))
 
-	authResult := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	authResult := auth.GroupAuthentication(0, token.Token{UserToken: userToken, AccessToken: accessToken})
 	if authResult.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: authResult.Err.Error()})
 		return
@@ -119,7 +124,7 @@ func Update(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: authResult.Err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, user.Result{})
+	c.JSON(http.StatusOK, common.Result{})
 
 }
 
@@ -127,7 +132,7 @@ func Get(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthentication(1, token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
@@ -146,6 +151,7 @@ func Get(c *gin.Context) {
 		return
 	}
 
+	// Network情報にて開通しているものを抜き出す
 	resultNetwork := dbNetwork.Get(network.Open, &network.Network{GroupID: result.Group.ID})
 	if resultNetwork.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
@@ -158,15 +164,18 @@ func Get(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, group.ResultOne{
-		ID:        resultGroup.Group[0].ID,
-		Agree:     resultGroup.Group[0].Agree,
-		Question:  resultGroup.Group[0].Question,
-		Org:       resultGroup.Group[0].Org,
-		Status:    resultGroup.Group[0].Status,
-		Bandwidth: resultGroup.Group[0].Bandwidth,
-		Contract:  resultGroup.Group[0].Contract,
-		Student:   resultGroup.Group[0].Student,
-		Open:      &open,
+		ID:            resultGroup.Group[0].ID,
+		Agree:         resultGroup.Group[0].Agree,
+		Question:      resultGroup.Group[0].Question,
+		Org:           resultGroup.Group[0].Org,
+		Status:        *resultGroup.Group[0].Status,
+		Bandwidth:     resultGroup.Group[0].Bandwidth,
+		Contract:      resultGroup.Group[0].Contract,
+		Student:       resultGroup.Group[0].Student,
+		Pass:          resultGroup.Group[0].Pass,
+		Lock:          resultGroup.Group[0].Lock,
+		ExpiredStatus: *resultGroup.Group[0].ExpiredStatus,
+		Open:          &open,
 	})
 }
 
@@ -174,7 +183,7 @@ func GetAll(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthentication(0, token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
@@ -233,6 +242,19 @@ func GetAll(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, group.ResultAll{
-		Group: result.Group, Network: resultNetwork.Network, JpnicAdmin: resultJpnicAdmin,
-		JpnicTech: resultJpnicTech, Connection: resultConnection.Connection})
+		Group: group.ResultOne{
+			ID:        result.Group.ID,
+			Agree:     result.Group.Agree,
+			Question:  result.Group.Question,
+			Org:       result.Group.Org,
+			Status:    *result.Group.Status,
+			Bandwidth: result.Group.Bandwidth,
+			Contract:  result.Group.Contract,
+			Student:   result.Group.Student,
+		},
+		Network:    resultNetwork.Network,
+		JpnicAdmin: resultJpnicAdmin,
+		JpnicTech:  resultJpnicTech,
+		Connection: resultConnection.Connection,
+	})
 }

@@ -16,7 +16,7 @@ func Get(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthentication(0, token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return

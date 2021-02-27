@@ -36,7 +36,7 @@ func Add(c *gin.Context) {
 	}
 
 	// Group authentication
-	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthentication(0, token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return

@@ -1,7 +1,6 @@
 package v0
 
 import (
-	"fmt"
 	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/gin-gonic/gin"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
@@ -30,7 +29,7 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthentication(0, token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
@@ -42,9 +41,9 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	if !((result.Group.Status%100 == 13 || result.Group.Status%100 == 23) && (result.Group.Status/100 == 0 ||
-		result.Group.Status/100 == 1)) {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: fmt.Sprint("error: status error")})
+	// status check for group
+	if !(*result.Group.Status == 3 && *result.Group.ExpiredStatus == 0 && *result.Group.Pass) {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: "error: failed group status"})
 		return
 	}
 
@@ -62,7 +61,7 @@ func Add(c *gin.Context) {
 	}
 
 	if err = dbGroup.Update(group.UpdateStatus, group.Group{Model: gorm.Model{ID: result.Group.ID},
-		Status: result.Group.Status + 1}); err != nil {
+		Status: &[]uint{4}[0]}); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
