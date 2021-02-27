@@ -46,7 +46,11 @@ func Update(base int, s chat.Chat) error {
 		result = db.Model(&chat.Chat{Model: gorm.Model{ID: s.ID}}).Update(chat.Chat{UserID: s.UserID})
 	} else if chat.UpdateAll == base {
 		result = db.Model(&chat.Chat{Model: gorm.Model{ID: s.ID}}).Update(chat.Chat{
-			TicketID: s.TicketID, UserID: s.UserID, Admin: s.Admin, Data: s.Data})
+			TicketID: s.TicketID,
+			UserID:   s.UserID,
+			Admin:    s.Admin,
+			Data:     s.Data,
+		})
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())

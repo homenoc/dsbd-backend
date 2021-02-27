@@ -44,7 +44,10 @@ func Update(base int, u jpnicAdmin.JpnicAdmin) error {
 
 	if base == jpnicAdmin.UpdateAll {
 		err = db.Model(&jpnicAdmin.JpnicAdmin{Model: gorm.Model{ID: u.ID}}).Update(jpnicAdmin.JpnicAdmin{
-			NetworkID: u.NetworkID, UserID: u.UserID, Lock: u.Lock}).Error
+			NetworkID: u.NetworkID,
+			UserID:    u.UserID,
+			Lock:      u.Lock,
+		}).Error
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
