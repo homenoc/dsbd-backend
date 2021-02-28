@@ -8,7 +8,6 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	dbNetwork "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/v0"
-	"log"
 	"net/http"
 )
 
@@ -46,7 +45,6 @@ func Get(c *gin.Context) {
 					v6 = append(v6, tmpIP.IP)
 				}
 			}
-			log.Println(tmpNetwork.Connection)
 			if len(tmpNetwork.Connection) > 0 {
 				for _, tmpConnection := range tmpNetwork.Connection {
 					if *tmpConnection.Open {

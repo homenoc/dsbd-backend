@@ -76,7 +76,6 @@ func AddAdmin(c *gin.Context) {
 		AddressEn:  input.AddressEn,
 		RouteV4:    input.RouteV4,
 		RouteV6:    input.RouteV6,
-		PI:         &[]bool{input.PI}[0],
 		ASN:        input.ASN,
 		Open:       &[]bool{false}[0],
 		IP:         *grpIP,

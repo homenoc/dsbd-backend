@@ -42,12 +42,17 @@ func Update(base int, c network.Network) error {
 
 	var result *gorm.DB
 
-	if network.UpdatePlan == base {
-		result = db.Model(&network.Network{Model: gorm.Model{ID: c.ID}}).Update(network.Network{Plan: c.Plan})
-	} else if network.UpdateData == base {
+	if network.UpdateData == base {
 		result = db.Model(&network.Network{Model: gorm.Model{ID: c.ID}}).Update(network.Network{
-			Org: c.Org, OrgEn: c.OrgEn, Postcode: c.Postcode, Address: c.Address, AddressEn: c.AddressEn,
-			RouteV4: c.RouteV4, RouteV6: c.RouteV6, PI: c.PI, ASN: c.ASN, Plan: c.Plan})
+			Org:       c.Org,
+			OrgEn:     c.OrgEn,
+			Postcode:  c.Postcode,
+			Address:   c.Address,
+			AddressEn: c.AddressEn,
+			RouteV4:   c.RouteV4,
+			RouteV6:   c.RouteV6,
+			ASN:       c.ASN,
+		})
 	} else if network.UpdateRoute == base {
 		result = db.Model(&network.Network{Model: gorm.Model{ID: c.ID}}).Update(network.Network{
 			RouteV4: c.RouteV4, RouteV6: c.RouteV6})
@@ -61,7 +66,6 @@ func Update(base int, c network.Network) error {
 			Postcode:   c.Postcode,
 			Address:    c.Address,
 			AddressEn:  c.AddressEn,
-			PI:         c.PI,
 			ASN:        c.ASN,
 			V4Name:     c.V4Name,
 			V6Name:     c.V6Name,
@@ -99,9 +103,15 @@ func Get(base int, data *network.Network) network.ResultDatabase {
 	} else if base == network.GID {
 		err = db.Preload("IP").Preload("Connection").Preload("JPNICAdmin").Preload("JPNICTech").
 			Where("group_id = ?", data.GroupID).Find(&networkStruct).Error
+	} else if base == network.SearchNumber {
+		err = db.Where("group_id = ?", data.GroupID).Find(&networkStruct).Error
 	} else if base == network.Open {
-		err = db.Preload("IP", "open = 1").Preload("Connection", "open = 1").Preload("JPNICAdmin").Preload("JPNICTech").
-			Where("group_id = ? AND open = ?", data.GroupID, true).Find(&networkStruct).Error
+		err = db.Where("group_id = ? AND open = ?", data.GroupID, true).
+			Preload("IP", "open = ?", true).
+			Preload("Connection", "open = ?", true).
+			Preload("JPNICAdmin").
+			Preload("JPNICTech").
+			Find(&networkStruct).Error
 	} else {
 		log.Println("base select error")
 		return network.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
