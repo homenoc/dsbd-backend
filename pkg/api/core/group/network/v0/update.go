@@ -40,11 +40,6 @@ func replaceNetwork(replace, input network.Network) network.Network {
 		replace.RouteV6 = input.RouteV6
 	}
 
-	//PI
-	if input.PI != replace.PI {
-		replace.PI = input.PI
-	}
-
 	//Lock
 	if input.Lock != replace.Lock {
 		replace.Lock = input.Lock
@@ -78,11 +73,6 @@ func replaceNetwork(replace, input network.Network) network.Network {
 	//if input.Date != "" {
 	//	replace.Date = input.Date
 	//}
-
-	//Plan
-	if input.Plan != "" {
-		replace.Plan = input.Plan
-	}
 
 	return replace
 }
@@ -152,17 +142,9 @@ func replaceAdminNetwork(replace, input network.Network) network.Network {
 	//	replace.Date = input.Date
 	//}
 
-	//Plan
-	if input.Plan != "" {
-		replace.Plan = input.Plan
-	}
-
 	// bool
 	//Lock
 	replace.Lock = input.Lock
-
-	//PI
-	replace.PI = input.PI
 
 	//Open
 	replace.Open = input.Open

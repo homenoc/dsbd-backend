@@ -42,14 +42,8 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	// check lock
-	if *result.Group.Lock {
-		c.JSON(http.StatusForbidden, common.Error{Error: "Lock status"})
-		return
-	}
-
 	// check json
-	if err := check(input); err != nil {
+	if err = check(input); err != nil {
 		c.JSON(http.StatusBadRequest, group.Result{Error: err.Error()})
 		return
 	}
@@ -60,43 +54,73 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	grpIP, err := ipProcess(input)
-	if err != nil {
-		log.Println(err)
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
+	var grpIP *[]network.IP
+
+	if !(input.NetworkType == "ET00") {
+		grpIP, err = ipProcess(input)
+		if err != nil {
+			log.Println(err)
+			c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+			return
+		}
+	} else {
+		grpIP = nil
 	}
 
 	jh := jpnicHandler{
-		admin: input.AdminID, tech: input.TechID, groupID: result.Group.ID, jpnicAdmin: nil, jpnicTech: nil,
+		admin:      input.AdminID,
+		tech:       input.TechID,
+		groupID:    result.Group.ID,
+		jpnicAdmin: nil,
+		jpnicTech:  nil,
 	}
 
-	// PIアドレスではない場合、jpnic Processを実行
-	if !input.PI {
+	// 2000,3S00,3B00の場合
+	if input.NetworkType == "2000" || input.NetworkType == "3S00" ||
+		input.NetworkType == "3B00" || input.NetworkType == "IP3B" {
 		if err = jh.jpnicProcess(); err != nil {
-			log.Println(err)
 			c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 			return
 		}
 	}
 
+	resultNetwork := dbNetwork.Get(network.SearchNumber, &network.Network{GroupID: result.Group.ID})
+	if resultNetwork.Err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: resultNetwork.Err.Error()})
+		return
+	}
+	var number uint = 1
+	log.Println(resultNetwork.Network)
+	for _, tmp := range resultNetwork.Network {
+		if tmp.NetworkNumber >= 1 {
+			number = tmp.NetworkNumber + 1
+		}
+	}
+
+	if number >= 999 {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: "error: over number"})
+		return
+	}
+
 	// db create for network
 	net, err := dbNetwork.Create(&network.Network{
-		GroupID:    result.Group.ID,
-		Org:        input.Org,
-		OrgEn:      input.OrgEn,
-		Postcode:   input.Postcode,
-		Address:    input.Address,
-		AddressEn:  input.AddressEn,
-		RouteV4:    input.RouteV4,
-		RouteV6:    input.RouteV6,
-		PI:         &[]bool{input.PI}[0],
-		ASN:        input.ASN,
-		Open:       &[]bool{false}[0],
-		IP:         *grpIP,
-		JPNICAdmin: *jh.jpnicAdmin,
-		JPNICTech:  *jh.jpnicTech,
-		Lock:       &[]bool{input.Lock}[0],
+		GroupID:        result.Group.ID,
+		NetworkType:    input.NetworkType,
+		NetworkComment: input.NetworkComment,
+		NetworkNumber:  number,
+		Org:            input.Org,
+		OrgEn:          input.OrgEn,
+		Postcode:       input.Postcode,
+		Address:        input.Address,
+		AddressEn:      input.AddressEn,
+		RouteV4:        input.RouteV4,
+		RouteV6:        input.RouteV6,
+		ASN:            input.ASN,
+		Open:           &[]bool{false}[0],
+		IP:             *grpIP,
+		JPNICAdmin:     *jh.jpnicAdmin,
+		JPNICTech:      *jh.jpnicTech,
+		Lock:           &[]bool{true}[0],
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
@@ -138,11 +162,6 @@ func Update(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: "You don't have authority this operation"})
 		return
 	}
-
-	//if !(result.Group.Status == 211 || result.Group.Status == 221) {
-	//	c.JSON(http.StatusUnauthorized, common.Error{Error: "error: group status"})
-	//	return
-	//}
 
 	resultNetwork := dbNetwork.Get(network.ID, &network.Network{Model: gorm.Model{ID: input.ID}})
 	if resultNetwork.Err != nil {

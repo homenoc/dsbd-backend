@@ -5,6 +5,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
+	"log"
 )
 
 type jpnicHandler struct {
@@ -16,35 +17,42 @@ type jpnicHandler struct {
 }
 
 func (jpnic *jpnicHandler) jpnicProcess() error {
+	log.Println(jpnic)
 	// 入力されたユーザのGroupIDを検索
 	resultGroupUser := dbUser.Get(user.GID, &user.User{GroupID: jpnic.groupID})
 	if resultGroupUser.Err != nil {
 		return resultGroupUser.Err
 	}
+
 	// 管理者連絡窓口
-	if jpnic.groupID != 0 {
-		for _, tmpUser := range resultGroupUser.User {
-			if tmpUser.GroupID != jpnic.admin {
-				return fmt.Errorf("This user have no authorization. ")
-			}
+	for _, tmpUser := range resultGroupUser.User {
+		if tmpUser.ID == jpnic.admin {
+			jpnic.jpnicAdmin = &network.JPNICAdmin{UserID: jpnic.admin, Lock: &[]bool{true}[0]}
+			break
 		}
 	}
-	jpnicAdmin := network.JPNICAdmin{UserID: jpnic.admin}
-	jpnic.jpnicAdmin = &jpnicAdmin
+
+	// groupIDに対してJPNICAdminが見つからなかった場合
+	if jpnic.jpnicAdmin == nil {
+		return fmt.Errorf("This user have no authorization. ")
+	}
 
 	// 技術連絡担当者
 	var jpnicTech []network.JPNICTech
 	for _, tmpTechUserID := range jpnic.tech {
 		// ユーザの権限確認
-		if jpnic.groupID != 0 {
-			for _, tmpUser := range resultGroupUser.User {
-				if tmpUser.GroupID != tmpTechUserID {
-					return fmt.Errorf("This user have no authorization. ")
-				}
+		for _, tmpUser := range resultGroupUser.User {
+			if tmpUser.ID == tmpTechUserID {
+				jpnicTech = append(jpnicTech, network.JPNICTech{UserID: jpnic.admin, Lock: &[]bool{true}[0]})
+				break
 			}
 		}
-		jpnicTech = append(jpnicTech, network.JPNICTech{UserID: jpnic.admin})
 	}
+
+	if jpnicTech == nil {
+		return fmt.Errorf("This user have no authorization. ")
+	}
+
 	jpnic.jpnicTech = &jpnicTech
 
 	return nil

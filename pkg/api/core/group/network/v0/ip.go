@@ -8,8 +8,12 @@ import (
 func ipProcess(input network.Input) (*[]network.IP, error) {
 	var net []network.IP
 
-	for _, tmpIP := range *input.IP {
-		if err := ipCheck(tmpIP); err != nil {
+	for _, tmpIP := range input.IP {
+		restrict := true
+		if input.NetworkType == "IP3B" {
+			restrict = false
+		}
+		if err := ipCheck(restrict, tmpIP); err != nil {
 			return nil, err
 		}
 
@@ -30,6 +34,5 @@ func ipProcess(input network.Input) (*[]network.IP, error) {
 			Open:      &[]bool{false}[0],
 		})
 	}
-
 	return &net, nil
 }
