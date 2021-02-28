@@ -75,7 +75,7 @@
     },
     {
       "id": "ET",
-      "hidden": false,
+      "hidden": true,
       "name": "その他",
       "comment": "その他"
     }
@@ -101,7 +101,7 @@
     },
     {
       "id": "ETC",
-      "hidden": false,
+      "hidden": true,
       "name": "その他",
       "comment": "その他の接続方式"
     }
