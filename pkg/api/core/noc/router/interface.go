@@ -1,6 +1,7 @@
 package noc
 
 import (
+	"github.com/homenoc/dsbd-backend/pkg/api/core/noc/gateway"
 	"github.com/jinzhu/gorm"
 )
 
@@ -14,10 +15,11 @@ const (
 
 type Router struct {
 	gorm.Model
-	NOC      uint   `json:"noc"`
-	HostName string `json:"hostname"`
-	Address  string `json:"address"`
-	Enable   *bool  `json:"enable"`
+	NOC      uint              `json:"noc"`
+	HostName string            `json:"hostname"`
+	Address  string            `json:"address"`
+	Gateway  []gateway.Gateway `json:"gateway"`
+	Enable   *bool             `json:"enable"`
 }
 
 type Result struct {
