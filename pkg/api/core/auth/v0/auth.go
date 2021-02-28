@@ -79,7 +79,6 @@ func GroupAuthentication(errorType uint, data token.Token) auth.GroupResult {
 }
 
 func renewProcess(t token.Token) {
-	log.Println(t.ExpiredAt.UTC(), time.Now().UTC().Add(10*time.Minute))
 	if t.ExpiredAt.UTC().Unix() < time.Now().Add(10*time.Minute).UTC().Unix() {
 		result := dbToken.Update(token.UpdateToken, &token.Token{
 			Model:     gorm.Model{ID: t.ID},
