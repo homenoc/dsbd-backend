@@ -6,11 +6,13 @@ import (
 )
 
 type Config struct {
-	Controller Controller `json:"controller"`
-	DB         DB         `json:"db"`
-	Mail       Mail       `json:"mail"`
-	Radius     Radius     `json:"radius"`
-	Slack      []Slack    `json:"slack"`
+	Controller Controller   `json:"controller"`
+	DB         DB           `json:"db"`
+	Mail       Mail         `json:"mail"`
+	Radius     Radius       `json:"radius"`
+	Slack      []Slack      `json:"slack"`
+	Network    []Network    `json:"network"`
+	Connection []Connection `json:"connection"`
 }
 
 type Controller struct {
@@ -72,6 +74,20 @@ type Slack struct {
 	WebHookUrl string `json:"url"`
 	Channel    string `json:"channel"`
 	Name       string `json:"name"`
+}
+
+type Network struct {
+	ID      string `json:"id"`
+	Hidden  bool   `json:"hidden"`
+	Name    string `json:"name"`
+	Comment string `json:"comment"`
+}
+
+type Connection struct {
+	ID      string `json:"id"`
+	Hidden  bool   `json:"hidden"`
+	Name    string `json:"name"`
+	Comment string `json:"comment"`
 }
 
 var Conf Config
