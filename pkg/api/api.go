@@ -7,9 +7,11 @@ import (
 	info "github.com/homenoc/dsbd-backend/pkg/api/core/group/info/v0"
 	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/v0"
 	group "github.com/homenoc/dsbd-backend/pkg/api/core/group/v0"
+	nocGateway "github.com/homenoc/dsbd-backend/pkg/api/core/noc/gateway/v0"
 	nocRouter "github.com/homenoc/dsbd-backend/pkg/api/core/noc/router/v0"
 	noc "github.com/homenoc/dsbd-backend/pkg/api/core/noc/v0"
 	notice "github.com/homenoc/dsbd-backend/pkg/api/core/notice/v0"
+	service "github.com/homenoc/dsbd-backend/pkg/api/core/service/v0"
 	chat "github.com/homenoc/dsbd-backend/pkg/api/core/support/chat/v0"
 	ticket "github.com/homenoc/dsbd-backend/pkg/api/core/support/ticket/v0"
 	token "github.com/homenoc/dsbd-backend/pkg/api/core/token/v0"
@@ -94,6 +96,18 @@ func AdminRestAPI() {
 			v1.DELETE("/router/:id", nocRouter.DeleteAdmin)
 			v1.GET("/router/:id", nocRouter.GetAdmin)
 			v1.PUT("/router/:id", nocRouter.UpdateAdmin)
+
+			//
+			// NOC Gateway
+			//
+			v1.POST("/gateway", nocGateway.AddAdmin)
+			v1.GET("/gateway", nocGateway.GetAllAdmin)
+			v1.DELETE("/gateway/:id", nocGateway.DeleteAdmin)
+			v1.GET("/gateway/:id", nocGateway.GetAdmin)
+			v1.PUT("/gateway/:id", nocGateway.UpdateAdmin)
+
+			// Service
+			v1.GET("/service", service.GetAdmin)
 
 			//
 			// Support
@@ -208,6 +222,12 @@ func UserRestAPI() {
 			// Info
 			//
 			v1.GET("/group/info", info.Get)
+
+			// Service
+			v1.GET("/service", service.Get)
+
+			// NOC
+			v1.GET("/noc", noc.GetAll)
 
 			//
 			// Support
