@@ -7,6 +7,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicAdmin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicTech"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/noc"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/noc/gateway"
 	nocRouter "github.com/homenoc/dsbd-backend/pkg/api/core/noc/router"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/notice"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support/chat"
@@ -38,7 +39,7 @@ func InitDB() {
 	result := db.AutoMigrate(&user.User{}, &group.Group{}, &token.Token{}, &network.Network{}, &network.IP{},
 		&network.JPNICAdmin{}, &network.JPNICTech{},
 		&connection.Connection{}, &jpnicAdmin.JpnicAdmin{}, &jpnicTech.JpnicTech{}, &notice.Notice{},
-		&ticket.Ticket{}, &chat.Chat{}, &noc.NOC{}, &nocRouter.Router{})
+		&ticket.Ticket{}, &chat.Chat{}, &noc.NOC{}, &gateway.Gateway{}, &nocRouter.Router{})
 	log.Println(result.Error)
 	//return nil
 }
