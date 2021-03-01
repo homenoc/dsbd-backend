@@ -8,6 +8,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/tech"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/noc"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/noc/gateway"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/noc/gatewayIP"
 	nocRouter "github.com/homenoc/dsbd-backend/pkg/api/core/noc/router"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/notice"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support/chat"
@@ -52,6 +53,7 @@ func InitDB() {
 		&chat.Chat{},
 		&noc.NOC{},
 		&gateway.Gateway{},
+		&gatewayIP.GatewayIP{},
 		&nocRouter.Router{},
 	)
 	log.Println(result.Error)

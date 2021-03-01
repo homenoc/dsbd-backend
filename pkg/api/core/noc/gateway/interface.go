@@ -14,11 +14,10 @@ const (
 
 type Gateway struct {
 	gorm.Model
-	RouterID uint   `json:"router_id"`
+	NOCID    uint   `json:"noc_id"`
 	HostName string `json:"hostname"`
-	V4       string `json:"v4"`
-	V6       string `json:"v6"`
 	Capacity uint   `json:"capacity"`
+	Comment  string `json:"comment"`
 	Enable   bool   `json:"enable"`
 }
 
