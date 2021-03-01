@@ -7,7 +7,6 @@ import (
 	dbNOC "github.com/homenoc/dsbd-backend/pkg/api/store/noc/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"github.com/jinzhu/gorm"
-	"log"
 )
 
 func check(groupID uint, restrict bool, input connection.Connection) error {
@@ -60,9 +59,6 @@ func check(groupID uint, restrict bool, input connection.Connection) error {
 		if resultUser.Err != nil {
 			return resultUser.Err
 		}
-
-		log.Println(groupID)
-		log.Println(resultUser.User[0].GroupID)
 
 		if groupID != resultUser.User[0].GroupID {
 			return fmt.Errorf("error: not match groupID")
