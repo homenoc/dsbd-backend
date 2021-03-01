@@ -67,6 +67,7 @@ func Get(c *gin.Context) {
 						var nocIP string
 
 						// Todo: 良くない実装
+						// サービス名の検索(networkコンフィグから検索)
 						for _, tmpNetworkCode := range config.Conf.Network {
 							if tmpNetworkCode.ID == tmpNetwork.NetworkType {
 								serviceName = tmpNetworkCode.Name
@@ -74,6 +75,7 @@ func Get(c *gin.Context) {
 							}
 						}
 
+						// 当団体側の終端アドレスの検索(gatewayIPから検索)
 						for _, tmpGatewayIP := range resultGatewayIP.GatewayIP {
 							if tmpGatewayIP.ID == *tmpConnection.GatewayIPID {
 								nocIP = tmpGatewayIP.IP
