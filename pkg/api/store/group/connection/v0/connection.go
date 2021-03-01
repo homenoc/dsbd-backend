@@ -44,27 +44,33 @@ func Update(base int, c connection.Connection) error {
 
 	if connection.UpdateInfo == base {
 		result = db.Model(&connection.Connection{Model: gorm.Model{ID: c.ID}}).Update(connection.Connection{
-			UserID: c.UserID, Service: c.Service, NTT: c.NTT, NOC: c.NOC, TermIP: c.TermIP, Monitor: c.Monitor})
+			UserID:  c.UserID,
+			NTT:     c.NTT,
+			NOC:     c.NOC,
+			TermIP:  c.TermIP,
+			Monitor: c.Monitor,
+		})
 	} else if connection.UpdateUserInfo == base {
 		result = db.Model(&connection.Connection{Model: gorm.Model{ID: c.ID}}).Update(connection.Connection{UserID: c.UserID})
 	} else if connection.UpdateGID == base {
 		result = db.Model(&connection.Connection{Model: gorm.Model{ID: c.ID}}).Update(connection.Connection{GroupID: c.GroupID})
 	} else if base == connection.UpdateAll {
 		result = db.Model(&connection.Connection{Model: gorm.Model{ID: c.ID}}).Update(connection.Connection{
-			GroupID:    c.GroupID,
-			ServiceID:  c.ServiceID,
-			UserID:     c.UserID,
-			Service:    c.Service,
-			NTT:        c.NTT,
-			NOC:        c.NOC,
-			TermIP:     c.TermIP,
-			Monitor:    c.Monitor,
-			LinkV4Our:  c.LinkV4Our,
-			LinkV4Your: c.LinkV4Your,
-			LinkV6Our:  c.LinkV6Our,
-			LinkV6Your: c.LinkV6Your,
-			Fee:        c.Fee,
-			Open:       c.Open,
+			NetworkID:   c.NetworkID,
+			GroupID:     c.GroupID,
+			UserID:      c.UserID,
+			GatewayIPID: c.GatewayIPID,
+			RouterID:    c.RouterID,
+			NTT:         c.NTT,
+			NOC:         c.NOC,
+			TermIP:      c.TermIP,
+			Monitor:     c.Monitor,
+			LinkV4Our:   c.LinkV4Our,
+			LinkV4Your:  c.LinkV4Your,
+			LinkV6Our:   c.LinkV6Our,
+			LinkV6Your:  c.LinkV6Your,
+			Fee:         c.Fee,
+			Open:        c.Open,
 		})
 	} else {
 		log.Println("base select error")

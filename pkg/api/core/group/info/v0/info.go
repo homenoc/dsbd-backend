@@ -1,14 +1,18 @@
 package v0
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/info"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	dbNetwork "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/v0"
+	dbGatewayIP "github.com/homenoc/dsbd-backend/pkg/api/store/noc/gatewayIP/v0"
 	"net/http"
+	"strconv"
 )
 
 func Get(c *gin.Context) {
@@ -23,6 +27,12 @@ func Get(c *gin.Context) {
 
 	resultNetwork := dbNetwork.Get(network.Open, &network.Network{GroupID: result.Group.ID})
 	if resultNetwork.Err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
+		return
+	}
+
+	resultGatewayIP := dbGatewayIP.GetAll()
+	if resultGatewayIP.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
 	}
@@ -48,13 +58,49 @@ func Get(c *gin.Context) {
 			if len(tmpNetwork.Connection) > 0 {
 				for _, tmpConnection := range tmpNetwork.Connection {
 					if *tmpConnection.Open {
-						information = append(information, info.Info{
-							ServiceID: tmpConnection.ServiceID, Service: tmpConnection.Service,
-							UserID: tmpConnection.UserID, NOC: tmpConnection.NOC, V4: v4, V6: v6, ASN: asn,
-							Assign: tmpConnection.NOCIP, TermIP: tmpConnection.TermIP, NOCIP: tmpConnection.NOCIP,
-							LinkV4Our: tmpConnection.LinkV4Our, LinkV4Your: tmpConnection.LinkV4Your,
-							LinkV6Our: tmpConnection.LinkV6Our, LinkV6Your: tmpConnection.LinkV6Your,
-							Fee: tmpConnection.Fee})
+						serviceID := strconv.Itoa(int(tmpConnection.GroupID)) + "-" +
+							tmpNetwork.NetworkType + fmt.Sprintf("%03d", tmpNetwork.NetworkNumber) + "-" +
+							tmpConnection.ConnectionType + fmt.Sprintf("%03d", tmpConnection.ConnectionNumber)
+
+						var serviceName string
+						var existsGatewayIP bool = false
+						var nocIP string
+
+						// Todo: 良くない実装
+						for _, tmpNetworkCode := range config.Conf.Network {
+							if tmpNetworkCode.ID == tmpNetwork.NetworkType {
+								serviceName = tmpNetworkCode.Name
+								break
+							}
+						}
+
+						for _, tmpGatewayIP := range resultGatewayIP.GatewayIP {
+							if tmpGatewayIP.ID == *tmpConnection.GatewayIPID {
+								nocIP = tmpGatewayIP.IP
+								existsGatewayIP = true
+								break
+							}
+						}
+
+						if existsGatewayIP {
+							information = append(information, info.Info{
+								ServiceID:  serviceID,
+								Service:    serviceName,
+								UserID:     tmpConnection.UserID,
+								NOC:        tmpConnection.NOC,
+								V4:         v4,
+								V6:         v6,
+								ASN:        asn,
+								Assign:     nocIP,
+								TermIP:     tmpConnection.TermIP,
+								NOCIP:      nocIP,
+								LinkV4Our:  tmpConnection.LinkV4Our,
+								LinkV4Your: tmpConnection.LinkV4Your,
+								LinkV6Our:  tmpConnection.LinkV6Our,
+								LinkV6Your: tmpConnection.LinkV6Your,
+								Fee:        tmpConnection.Fee,
+							})
+						}
 					}
 				}
 			}
