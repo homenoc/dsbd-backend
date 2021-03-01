@@ -143,6 +143,14 @@ func Add(c *gin.Context) {
 		return
 	}
 
+	attachment = slack.Attachment{}
+	attachment.AddField(slack.Field{Title: "Title", Value: "ステータス変更"}).
+		AddField(slack.Field{Title: "申請者", Value: "System"}).
+		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(result.Group.ID)) + ":" + result.Group.Org}).
+		AddField(slack.Field{Title: "現在ステータス情報", Value: "審査中"}).
+		AddField(slack.Field{Title: "ステータス履歴", Value: "1[ネットワーク情報記入段階(User)] =>2[審査中] "})
+	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+
 	c.JSON(http.StatusOK, network.ResultOne{Network: *net})
 }
 
