@@ -103,7 +103,7 @@ func Get(base int, data *network.Network) network.ResultDatabase {
 	} else if base == network.GID {
 		err = db.Preload("IP").Preload("Connection").Preload("JPNICAdmin").Preload("JPNICTech").
 			Where("group_id = ?", data.GroupID).Find(&networkStruct).Error
-	} else if base == network.SearchNumber {
+	} else if base == network.SearchNewNumber {
 		err = db.Where("group_id = ?", data.GroupID).Find(&networkStruct).Error
 	} else if base == network.Open {
 		err = db.Where("group_id = ? AND open = ?", data.GroupID, true).
