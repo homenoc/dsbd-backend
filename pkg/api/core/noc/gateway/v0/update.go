@@ -10,16 +10,17 @@ func replace(input, replace gateway.Gateway) gateway.Gateway {
 	if input.HostName != "" {
 		replace.HostName = input.HostName
 	}
-	//V4
-	if input.V4 != "" {
-		replace.V4 = input.V4
-	}
-	//V6
-	if input.V6 != "" {
-		replace.V6 = input.V6
+
+	//Comment
+	if input.Comment != "" {
+		replace.Comment = input.Comment
 	}
 
 	// uint boolean
+	//NOCID
+	if input.NOCID != 0 {
+		replace.NOCID = input.NOCID
+	}
 	//Capacity
 	if input.Capacity != 0 {
 		replace.Capacity = input.Capacity
