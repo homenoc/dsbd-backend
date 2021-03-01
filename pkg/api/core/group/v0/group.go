@@ -93,7 +93,12 @@ func Update(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	log.Println(c.BindJSON(&input))
+	err := c.BindJSON(&input)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
 
 	authResult := auth.GroupAuthentication(0, token.Token{UserToken: userToken, AccessToken: accessToken})
 	if authResult.Err != nil {
