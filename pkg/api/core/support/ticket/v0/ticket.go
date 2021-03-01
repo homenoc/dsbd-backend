@@ -66,9 +66,10 @@ func Create(c *gin.Context) {
 
 	//HomeNOC Slackに送信
 	attachment := slack.Attachment{}
-	attachment.AddField(slack.Field{Title: "Title", Value: "Support Ticket Open"}).
-		AddField(slack.Field{Title: "UserID", Value: strconv.Itoa(int(result.User.ID))}).
-		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(result.Group.ID)) + "-" + result.Group.Org}).
+	attachment.AddField(slack.Field{Title: "Title", Value: "新規チケット作成"}).
+		AddField(slack.Field{Title: "発行者", Value: strconv.Itoa(int(result.User.ID))}).
+		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(result.Group.ID)) + "-" + result.Group.Org}).
+		AddField(slack.Field{Title: "Title", Value: input.Title}).
 		AddField(slack.Field{Title: "Message", Value: input.Data})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 
@@ -215,11 +216,12 @@ func GetWebSocket(c *gin.Context) {
 			controller.SendChatUser(controllerInterface.Chat{CreatedAt: msg.CreatedAt,
 				UserID: result.User.ID, GroupID: resultGroup.Group.ID, Admin: msg.Admin, Message: msg.Message})
 
-			//HomeNOC Slackに送信
+			//Slackに送信
 			attachment := slack.Attachment{}
-			attachment.AddField(slack.Field{Title: "Title", Value: "Supportメッセージ"}).
-				AddField(slack.Field{Title: "UserID", Value: strconv.Itoa(int(result.User.ID))}).
-				AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(resultGroup.Group.ID)) + "-" + resultGroup.Group.Org}).
+			attachment.AddField(slack.Field{Title: "Title", Value: "Support(新規メッセージ)"}).
+				AddField(slack.Field{Title: "発行者", Value: strconv.Itoa(int(result.User.ID))}).
+				AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(result.Group.ID)) + "-" + result.Group.Org}).
+				AddField(slack.Field{Title: "Title", Value: ticketResult.Ticket[0].Title}).
 				AddField(slack.Field{Title: "Message", Value: msg.Message})
 			notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 
