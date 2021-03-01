@@ -2,10 +2,10 @@ package v0
 
 import (
 	"fmt"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicAdmin"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/admin"
 )
 
-func check(input jpnicAdmin.JpnicAdmin) error {
+func check(input admin.Admin) error {
 	// check
 	if input.UserID <= 0 {
 		return fmt.Errorf("failed data: user id")

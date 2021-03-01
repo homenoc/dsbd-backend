@@ -4,8 +4,8 @@ import (
 	"github.com/gin-gonic/gin"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicAdmin"
-	dbJpnicAdmin "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/jpnicAdmin/v0"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/tech"
+	dbTech "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/tech/v0"
 	"github.com/jinzhu/gorm"
 	"log"
 	"net/http"
@@ -13,7 +13,7 @@ import (
 )
 
 func AddAdmin(c *gin.Context) {
-	var input jpnicAdmin.JpnicAdmin
+	var input tech.Tech
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
@@ -28,11 +28,11 @@ func AddAdmin(c *gin.Context) {
 		return
 	}
 
-	if _, err = dbJpnicAdmin.Create(&input); err != nil {
+	if _, err = dbTech.Create(&input); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, jpnicAdmin.Result{})
+	c.JSON(http.StatusOK, tech.Result{})
 }
 
 func DeleteAdmin(c *gin.Context) {
@@ -44,52 +44,58 @@ func DeleteAdmin(c *gin.Context) {
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	if err = dbJpnicAdmin.Delete(&jpnicAdmin.JpnicAdmin{Model: gorm.Model{ID: uint(id)}}); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, jpnicAdmin.Result{})
+
+	if err = dbTech.Delete(&tech.Tech{Model: gorm.Model{ID: uint(id)}}); err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, tech.Result{})
 }
 
 func UpdateAdmin(c *gin.Context) {
-	var input jpnicAdmin.JpnicAdmin
+	var input tech.Tech
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
 		return
 	}
-	log.Println(c.BindJSON(&input))
 
-	if err := dbJpnicAdmin.Update(jpnicAdmin.UpdateAll, input); err != nil {
+	err := c.BindJSON(&input)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	if err = dbTech.Update(tech.UpdateAll, input); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, jpnicAdmin.Result{})
+	c.JSON(http.StatusOK, tech.Result{})
 }
 
 func GetAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: resultAdmin.Err.Error()})
 		return
 	}
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
 
-	result := dbJpnicAdmin.Get(jpnicAdmin.ID, &jpnicAdmin.JpnicAdmin{Model: gorm.Model{ID: uint(id)}})
+	result := dbTech.Get(tech.ID, &tech.Tech{Model: gorm.Model{ID: uint(id)}})
 	if result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, jpnicAdmin.Result{Jpnic: result.Jpnic})
+	c.JSON(http.StatusOK, tech.Result{Tech: result.Tech})
 }
 
 func GetAllAdmin(c *gin.Context) {
@@ -99,9 +105,9 @@ func GetAllAdmin(c *gin.Context) {
 		return
 	}
 
-	if result := dbJpnicAdmin.GetAll(); result.Err != nil {
+	if result := dbTech.GetAll(); result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 	} else {
-		c.JSON(http.StatusOK, jpnicAdmin.Result{Jpnic: result.Jpnic})
+		c.JSON(http.StatusOK, tech.Result{Tech: result.Tech})
 	}
 }

@@ -1,10 +1,10 @@
 package group
 
 import (
-	connection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
-	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
-	jpnicAdmin "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicAdmin"
-	jpnicTech "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicTech"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/admin"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/tech"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	"github.com/jinzhu/gorm"
 )
@@ -24,15 +24,18 @@ const (
 
 type Group struct {
 	gorm.Model
-	Agree     *bool  `json:"agree"`
-	Question  string `json:"question"`
-	Org       string `json:"org"`
-	Status    uint   `json:"status"`
-	Bandwidth string `json:"bandwidth"`
-	Contract  string `json:"contract"`
-	Student   *bool  `json:"student"`
-	Comment   string `json:"comment"`
-	Lock      *bool  `json:"lock"`
+	Agree         *bool  `json:"agree"`
+	Question      string `json:"question"`
+	Org           string `json:"org"`
+	Status        *uint  `json:"status"`
+	Bandwidth     string `json:"bandwidth"`
+	Contract      string `json:"contract"`
+	Student       *bool  `json:"student"`
+	Fee           *uint  `json:"fee"`
+	Comment       string `json:"comment"`
+	Pass          *bool  `json:"pass"`
+	Lock          *bool  `json:"lock"`
+	ExpiredStatus *uint  `json:"expired_status"`
 }
 
 type Result struct {
@@ -49,22 +52,25 @@ type AdminResult struct {
 }
 
 type ResultOne struct {
-	ID        uint   `json:"id"`
-	Agree     *bool  `json:"agree"`
-	Question  string `json:"question"`
-	Org       string `json:"org"`
-	Status    uint   `json:"status"`
-	Bandwidth string `json:"bandwidth"`
-	Contract  string `json:"contract"`
-	Student   *bool  `json:"student"`
-	Open      *bool  `json:"open"`
+	ID            uint   `json:"id"`
+	Agree         *bool  `json:"agree"`
+	Question      string `json:"question"`
+	Org           string `json:"org"`
+	Status        uint   `json:"status"`
+	Bandwidth     string `json:"bandwidth"`
+	Contract      string `json:"contract"`
+	Student       *bool  `json:"student"`
+	Pass          *bool  `json:"pass"`
+	Lock          *bool  `json:"lock"`
+	ExpiredStatus uint   `json:"expired_status"`
+	Open          *bool  `json:"open"`
 }
 
 type ResultAll struct {
-	Group      Group                   `json:"group"`
+	Group      ResultOne               `json:"group"`
 	Network    []network.Network       `json:"network"`
-	JpnicAdmin []jpnicAdmin.JpnicAdmin `json:"admin"`
-	JpnicTech  []jpnicTech.JpnicTech   `json:"tech"`
+	Admin      []admin.Admin           `json:"admin"`
+	Tech       []tech.Tech             `json:"tech"`
 	Connection []connection.Connection `json:"connection"`
 }
 

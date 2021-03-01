@@ -16,8 +16,19 @@ type NOC struct {
 	Name      string `json:"name"`
 	Location  string `json:"location"`
 	Bandwidth string `json:"bandwidth"`
+	New       *bool  `json:"new"`
 	Enable    *bool  `json:"enable"`
 	Comment   string `json:"comment"`
+}
+
+type ResultOneUser struct {
+	Name     string `json:"name"`
+	Location string `json:"location"`
+	New      *bool  `json:"new"`
+}
+
+type ResultAllUser struct {
+	NOC []ResultOneUser `json:"noc"`
 }
 
 type Result struct {

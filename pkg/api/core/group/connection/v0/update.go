@@ -5,19 +5,9 @@ import (
 )
 
 func updateAdminConnection(input, replace connection.Connection) connection.Connection {
-
-	//Service ID
-	if input.ServiceID != "" {
-		replace.ServiceID = input.ServiceID
-	}
-	//Service
-	if input.Service != "" {
-		replace.Service = input.Service
-	}
-
 	//ServiceType
-	if input.ServiceType != "" {
-		replace.ServiceType = input.ServiceType
+	if input.ConnectionType != "" {
+		replace.ConnectionType = input.ConnectionType
 	}
 
 	//NTT
@@ -28,10 +18,6 @@ func updateAdminConnection(input, replace connection.Connection) connection.Conn
 	//NOC
 	if input.NOC != "" {
 		replace.NOC = input.NOC
-	}
-	//NOC IP
-	if input.NOCIP != "" {
-		replace.NOCIP = input.NOCIP
 	}
 
 	//Term IP
@@ -62,10 +48,12 @@ func updateAdminConnection(input, replace connection.Connection) connection.Conn
 	}
 
 	// uint boolean
+	replace.NetworkID = input.NetworkID
 	replace.GroupID = input.GroupID
 	replace.UserID = input.UserID
-	replace.ServiceYear = input.ServiceYear
-	replace.ServiceNumber = input.ServiceNumber
+	replace.GatewayIPID = input.GatewayIPID
+	replace.RouterID = input.RouterID
+	replace.ConnectionNumber = input.ConnectionNumber
 
 	// Open
 	replace.Open = input.Open

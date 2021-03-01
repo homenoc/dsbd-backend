@@ -2,14 +2,14 @@ package v0
 
 import (
 	"fmt"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicAdmin"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/admin"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
 	"github.com/jinzhu/gorm"
 	"log"
 	"time"
 )
 
-func Create(network *jpnicAdmin.JpnicAdmin) (*jpnicAdmin.JpnicAdmin, error) {
+func Create(network *admin.Admin) (*admin.Admin, error) {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -21,7 +21,7 @@ func Create(network *jpnicAdmin.JpnicAdmin) (*jpnicAdmin.JpnicAdmin, error) {
 	return network, err
 }
 
-func Delete(network *jpnicAdmin.JpnicAdmin) error {
+func Delete(network *admin.Admin) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -32,7 +32,7 @@ func Delete(network *jpnicAdmin.JpnicAdmin) error {
 	return db.Delete(network).Error
 }
 
-func Update(base int, u jpnicAdmin.JpnicAdmin) error {
+func Update(base int, u admin.Admin) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -42,9 +42,12 @@ func Update(base int, u jpnicAdmin.JpnicAdmin) error {
 
 	var result *gorm.DB
 
-	if base == jpnicAdmin.UpdateAll {
-		err = db.Model(&jpnicAdmin.JpnicAdmin{Model: gorm.Model{ID: u.ID}}).Update(jpnicAdmin.JpnicAdmin{
-			NetworkID: u.NetworkID, UserID: u.UserID, Lock: u.Lock}).Error
+	if base == admin.UpdateAll {
+		err = db.Model(&admin.Admin{Model: gorm.Model{ID: u.ID}}).Update(admin.Admin{
+			NetworkID: u.NetworkID,
+			UserID:    u.UserID,
+			Lock:      u.Lock,
+		}).Error
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
@@ -52,40 +55,40 @@ func Update(base int, u jpnicAdmin.JpnicAdmin) error {
 	return result.Error
 }
 
-func Get(base int, data *jpnicAdmin.JpnicAdmin) jpnicAdmin.ResultDatabase {
+func Get(base int, data *admin.Admin) admin.ResultDatabase {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
-		return jpnicAdmin.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+		return admin.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
 	defer db.Close()
 
-	var networkStruct []jpnicAdmin.JpnicAdmin
+	var networkStruct []admin.Admin
 
-	if base == jpnicAdmin.ID { //ID
+	if base == admin.ID { //ID
 		err = db.First(&networkStruct, data.ID).Error
-	} else if base == jpnicAdmin.UserId { //Name
+	} else if base == admin.UserId { //Name
 		err = db.Where("user_id = ?", data.UserID).Find(&networkStruct).Error
-	} else if base == jpnicAdmin.NetworkId { //Name
+	} else if base == admin.NetworkId { //Name
 		err = db.Where("network_id = ?", data.NetworkID).Find(&networkStruct).Error
-	} else if base == jpnicAdmin.NetworkAndUserId {
+	} else if base == admin.NetworkAndUserId {
 		err = db.Where("network_id = ? AND user_id = ?", data.NetworkID, data.UserID).Find(&networkStruct).Error
 	} else {
 		log.Println("base select error")
-		return jpnicAdmin.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
+		return admin.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
 	}
-	return jpnicAdmin.ResultDatabase{Jpnic: networkStruct, Err: err}
+	return admin.ResultDatabase{Admins: networkStruct, Err: err}
 }
 
-func GetAll() jpnicAdmin.ResultDatabase {
+func GetAll() admin.ResultDatabase {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
-		return jpnicAdmin.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+		return admin.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
 	defer db.Close()
 
-	var networks []jpnicAdmin.JpnicAdmin
+	var networks []admin.Admin
 	err = db.Find(&networks).Error
-	return jpnicAdmin.ResultDatabase{Jpnic: networks, Err: err}
+	return admin.ResultDatabase{Admins: networks, Err: err}
 }

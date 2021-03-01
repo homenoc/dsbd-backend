@@ -36,7 +36,7 @@ func Create(c *gin.Context) {
 	}
 
 	// Group authentication
-	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthentication(0, token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
@@ -66,9 +66,10 @@ func Create(c *gin.Context) {
 
 	//HomeNOC Slackに送信
 	attachment := slack.Attachment{}
-	attachment.AddField(slack.Field{Title: "Title", Value: "Support Ticket Open"}).
-		AddField(slack.Field{Title: "UserID", Value: strconv.Itoa(int(result.User.ID))}).
-		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(result.Group.ID)) + "-" + result.Group.Org}).
+	attachment.AddField(slack.Field{Title: "Title", Value: "新規チケット作成"}).
+		AddField(slack.Field{Title: "発行者", Value: strconv.Itoa(int(result.User.ID))}).
+		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(result.Group.ID)) + "-" + result.Group.Org}).
+		AddField(slack.Field{Title: "Title", Value: input.Title}).
 		AddField(slack.Field{Title: "Message", Value: input.Data})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 
@@ -86,7 +87,7 @@ func Get(c *gin.Context) {
 	}
 
 	// Group authentication
-	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthentication(0, token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
@@ -119,7 +120,7 @@ func GetTitle(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthentication(0, token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
@@ -159,7 +160,7 @@ func GetWebSocket(c *gin.Context) {
 
 	defer conn.Close()
 
-	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthentication(0, token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		log.Println("ws:// support error:Auth error")
 		conn.WriteMessage(websocket.TextMessage, []byte("error: auth error"))
@@ -192,7 +193,7 @@ func GetWebSocket(c *gin.Context) {
 			break
 		}
 		// 入力されたデータをTokenにて認証
-		resultGroup := auth.GroupAuthentication(token.Token{UserToken: msg.UserToken, AccessToken: msg.AccessToken})
+		resultGroup := auth.GroupAuthentication(0, token.Token{UserToken: msg.UserToken, AccessToken: msg.AccessToken})
 		if resultGroup.Err != nil {
 			log.Println(resultGroup.Err)
 			return
@@ -215,11 +216,12 @@ func GetWebSocket(c *gin.Context) {
 			controller.SendChatUser(controllerInterface.Chat{CreatedAt: msg.CreatedAt,
 				UserID: result.User.ID, GroupID: resultGroup.Group.ID, Admin: msg.Admin, Message: msg.Message})
 
-			//HomeNOC Slackに送信
+			//Slackに送信
 			attachment := slack.Attachment{}
-			attachment.AddField(slack.Field{Title: "Title", Value: "Supportメッセージ"}).
-				AddField(slack.Field{Title: "UserID", Value: strconv.Itoa(int(result.User.ID))}).
-				AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(resultGroup.Group.ID)) + "-" + resultGroup.Group.Org}).
+			attachment.AddField(slack.Field{Title: "Title", Value: "Support(新規メッセージ)"}).
+				AddField(slack.Field{Title: "発行者", Value: strconv.Itoa(int(result.User.ID))}).
+				AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(result.Group.ID)) + "-" + result.Group.Org}).
+				AddField(slack.Field{Title: "Title", Value: ticketResult.Ticket[0].Title}).
 				AddField(slack.Field{Title: "Message", Value: msg.Message})
 			notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 

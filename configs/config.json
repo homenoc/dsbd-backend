@@ -1,0 +1,109 @@
+{
+  "controller": {
+    "user": {
+      "ip": "127.0.0.1",
+      "url": "http://localhost:8080",
+      "port": 8080
+    },
+    "admin": {
+      "ip": "127.0.0.1",
+      "port": 81,
+      "auth": {
+        "user": "test",
+        "pass": "test"
+      }
+    },
+    "auth": {
+      "token1": "token1",
+      "token2": "token2",
+      "token3": "token3"
+    }
+  },
+  "db": {
+    "ip": "127.0.0.1",
+    "port": 3306,
+    "user": "root",
+    "pass": "test",
+    "dbName": "test"
+  },
+  "mail": {
+    "Host": "mail.example",
+    "Port": 587,
+    "From": "mail.example",
+    "User": "user",
+    "Pass": "pass",
+    "Contract": "contract"
+  },
+  "slack": [
+    {
+      "id": "main",
+      "url": "https://hooks.slack.com/services/xxxxxxx",
+      "channel": "xxxx",
+      "name": "xxxxx"
+    }
+  ],
+  "network": [
+    {
+      "id": "20",
+      "hidden": false,
+      "name": "L2",
+      "comment": "L2接続"
+    },
+    {
+      "id": "3S",
+      "hidden": false,
+      "name": "L3 Static",
+      "comment": "Staticにて接続"
+    },
+    {
+      "id": "3B",
+      "hidden": false,
+      "name": "L3 BGP",
+      "comment": "BGPにて接続"
+    },
+    {
+      "id": "IP",
+      "hidden": false,
+      "name": "トランジット提供",
+      "comment": "グローバルAS＋PIアドレス持ち込みのユーザに対するトランジット提供"
+    },
+    {
+      "id": "CL",
+      "hidden": true,
+      "name": "CoLocation",
+      "comment": "団体所有のラックにおけるコロケーションサービス"
+    },
+    {
+      "id": "ET",
+      "hidden": true,
+      "name": "その他",
+      "comment": "その他"
+    }
+  ],
+  "connection": [
+    {
+      "id": "EIP",
+      "hidden": false,
+      "name": "Ether IP",
+      "comment": "EtherIP上で提供"
+    },
+    {
+      "id": "IPT",
+      "hidden": false,
+      "name": "IPトンネル",
+      "comment": "IP-IPトンネル上で/30のP2P接続を行う"
+    },
+    {
+      "id": "CC0",
+      "hidden": false,
+      "name": "Cross Connect",
+      "comment": "校内接続、構内線、キャリア専用線上で提供\n"
+    },
+    {
+      "id": "ETC",
+      "hidden": true,
+      "name": "その他",
+      "comment": "その他の接続方式"
+    }
+  ]
+}

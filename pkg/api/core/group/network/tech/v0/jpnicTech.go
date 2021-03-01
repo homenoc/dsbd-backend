@@ -6,10 +6,10 @@ import (
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicAdmin"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/tech"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
-	dbJPNICUser "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/jpnicAdmin/v0"
+	dbTech "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/tech/v0"
 	dbNetwork "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"github.com/jinzhu/gorm"
@@ -19,7 +19,7 @@ import (
 )
 
 func Add(c *gin.Context) {
-	var input jpnicAdmin.JpnicAdmin
+	var input tech.Tech
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
@@ -30,7 +30,7 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthentication(0, token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
@@ -74,14 +74,13 @@ func Add(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, common.Error{Error: "This network id hasn't your group"})
 		return
 	}
-
-	_, err = dbJPNICUser.Create(&jpnicAdmin.JpnicAdmin{NetworkID: input.NetworkID, UserID: input.UserID, Lock: &[]bool{true}[0]})
+	_, err = dbTech.Create(&tech.Tech{NetworkID: input.NetworkID, UserID: input.UserID, Lock: &[]bool{true}[0]})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, jpnicAdmin.Result{})
+	c.JSON(http.StatusOK, tech.Result{})
 }
 
 func Delete(c *gin.Context) {
@@ -99,7 +98,7 @@ func Delete(c *gin.Context) {
 		return
 	}
 
-	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthentication(0, token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
@@ -111,13 +110,13 @@ func Delete(c *gin.Context) {
 		return
 	}
 
-	resultJpnic := dbJPNICUser.Get(jpnicAdmin.ID, &jpnicAdmin.JpnicAdmin{Model: gorm.Model{ID: uint(id)}})
-	if resultJpnic.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: resultJpnic.Err.Error()})
+	resultTech := dbTech.Get(tech.ID, &tech.Tech{Model: gorm.Model{ID: uint(id)}})
+	if resultTech.Err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: resultTech.Err.Error()})
 		return
 	}
 
-	networkResult := dbNetwork.Get(network.ID, &network.Network{Model: gorm.Model{ID: resultJpnic.Jpnic[0].NetworkID}})
+	networkResult := dbNetwork.Get(network.ID, &network.Network{Model: gorm.Model{ID: resultTech.Tech[0].NetworkID}})
 	if networkResult.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: networkResult.Err.Error()})
 		return
@@ -128,10 +127,10 @@ func Delete(c *gin.Context) {
 		return
 	}
 
-	if err := dbJPNICUser.Delete(&jpnicAdmin.JpnicAdmin{Model: gorm.Model{ID: uint(id)}}); err != nil {
+	if err = dbTech.Delete(&tech.Tech{Model: gorm.Model{ID: uint(id)}}); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 	} else {
-		c.JSON(http.StatusOK, jpnicAdmin.Result{})
+		c.JSON(http.StatusOK, tech.Result{})
 	}
 }
 
@@ -139,7 +138,7 @@ func Get(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthentication(0, token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
@@ -157,17 +156,17 @@ func Get(c *gin.Context) {
 		return
 	}
 
-	var data []jpnicAdmin.JpnicAdmin
+	var data []tech.Tech
 
 	for _, net := range networkResult.Network {
-		resultJpnic := dbJPNICUser.Get(jpnicAdmin.NetworkId, &jpnicAdmin.JpnicAdmin{NetworkID: net.ID})
-		if resultJpnic.Err != nil {
-			c.JSON(http.StatusInternalServerError, common.Error{Error: resultJpnic.Err.Error()})
+		resultAdminTech := dbTech.Get(tech.NetworkID, &tech.Tech{NetworkID: net.ID})
+		if resultAdminTech.Err != nil {
+			c.JSON(http.StatusInternalServerError, common.Error{Error: resultAdminTech.Err.Error()})
 			return
 		}
-		for _, detail := range resultJpnic.Jpnic {
+		for _, detail := range resultAdminTech.Tech {
 			data = append(data, detail)
 		}
 	}
-	c.JSON(http.StatusOK, jpnicAdmin.Result{Jpnic: data})
+	c.JSON(http.StatusOK, tech.Result{Tech: data})
 }

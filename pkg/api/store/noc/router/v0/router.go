@@ -44,7 +44,11 @@ func Update(base int, data router.Router) error {
 
 	if router.UpdateAll == base {
 		result = db.Model(&router.Router{Model: gorm.Model{ID: data.ID}}).Update(router.Router{
-			NOC: data.NOC, HostName: data.HostName, Address: data.Address, Enable: data.Enable})
+			NOC:      data.NOC,
+			HostName: data.HostName,
+			Address:  data.Address,
+			Enable:   data.Enable,
+		})
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())

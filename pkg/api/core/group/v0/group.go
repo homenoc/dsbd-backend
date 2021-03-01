@@ -8,14 +8,14 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicAdmin"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicTech"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/admin"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/tech"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbConnection "github.com/homenoc/dsbd-backend/pkg/api/store/group/connection/v0"
-	dbJpnicAdmin "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/jpnicAdmin/v0"
-	dbJpnicTech "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/jpnicTech/v0"
+	dbAdmin "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/admin/v0"
+	dbTech "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/tech/v0"
 	dbNetwork "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/v0"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
@@ -60,8 +60,13 @@ func Add(c *gin.Context) {
 	}
 
 	result, err := dbGroup.Create(&group.Group{
-		Agree: &[]bool{true}[0], Question: input.Question, Org: input.Org, Status: 1, Bandwidth: input.Bandwidth,
-		Comment: input.Comment, Contract: input.Contract,
+		Agree:     &[]bool{true}[0],
+		Question:  input.Question,
+		Org:       input.Org,
+		Status:    &[]uint{1}[0],
+		Bandwidth: input.Bandwidth,
+		Comment:   input.Comment,
+		Contract:  input.Contract,
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
@@ -74,11 +79,11 @@ func Add(c *gin.Context) {
 		AddField(slack.Field{Title: "Contract", Value: input.Contract})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 
-	if err := dbUser.Update(user.UpdateGID, &user.User{Model: gorm.Model{ID: userResult.User.ID}, GroupID: result.Model.ID}); err != nil {
+	if err = dbUser.Update(user.UpdateGID, &user.User{Model: gorm.Model{ID: userResult.User.ID}, GroupID: result.Model.ID}); err != nil {
 		log.Println(dbGroup.Delete(&group.Group{Model: gorm.Model{ID: result.ID}}))
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 	} else {
-		c.JSON(http.StatusOK, group.Result{})
+		c.JSON(http.StatusOK, common.Result{})
 	}
 }
 
@@ -88,9 +93,14 @@ func Update(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	log.Println(c.BindJSON(&input))
+	err := c.BindJSON(&input)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
 
-	authResult := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	authResult := auth.GroupAuthentication(0, token.Token{UserToken: userToken, AccessToken: accessToken})
 	if authResult.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: authResult.Err.Error()})
 		return
@@ -119,7 +129,7 @@ func Update(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: authResult.Err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, user.Result{})
+	c.JSON(http.StatusOK, common.Result{})
 
 }
 
@@ -127,7 +137,7 @@ func Get(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthentication(1, token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
@@ -146,6 +156,7 @@ func Get(c *gin.Context) {
 		return
 	}
 
+	// Network情報にて開通しているものを抜き出す
 	resultNetwork := dbNetwork.Get(network.Open, &network.Network{GroupID: result.Group.ID})
 	if resultNetwork.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
@@ -158,15 +169,18 @@ func Get(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, group.ResultOne{
-		ID:        resultGroup.Group[0].ID,
-		Agree:     resultGroup.Group[0].Agree,
-		Question:  resultGroup.Group[0].Question,
-		Org:       resultGroup.Group[0].Org,
-		Status:    resultGroup.Group[0].Status,
-		Bandwidth: resultGroup.Group[0].Bandwidth,
-		Contract:  resultGroup.Group[0].Contract,
-		Student:   resultGroup.Group[0].Student,
-		Open:      &open,
+		ID:            resultGroup.Group[0].ID,
+		Agree:         resultGroup.Group[0].Agree,
+		Question:      resultGroup.Group[0].Question,
+		Org:           resultGroup.Group[0].Org,
+		Status:        *resultGroup.Group[0].Status,
+		Bandwidth:     resultGroup.Group[0].Bandwidth,
+		Contract:      resultGroup.Group[0].Contract,
+		Student:       resultGroup.Group[0].Student,
+		Pass:          resultGroup.Group[0].Pass,
+		Lock:          resultGroup.Group[0].Lock,
+		ExpiredStatus: *resultGroup.Group[0].ExpiredStatus,
+		Open:          &open,
 	})
 }
 
@@ -174,7 +188,7 @@ func GetAll(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthentication(0, token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
@@ -205,34 +219,47 @@ func GetAll(c *gin.Context) {
 		resultConnection.Connection = nil
 	}
 
-	var resultJpnicTech []jpnicTech.JpnicTech = nil
-	var resultJpnicAdmin []jpnicAdmin.JpnicAdmin = nil
+	var resultTech []tech.Tech = nil
+	var resultAdmin []admin.Admin = nil
 
 	for _, data := range resultNetwork.Network {
-		tmpAdmin := dbJpnicAdmin.Get(jpnicAdmin.NetworkId, &jpnicAdmin.JpnicAdmin{NetworkID: data.ID})
+		tmpAdmin := dbAdmin.Get(admin.NetworkId, &admin.Admin{NetworkID: data.ID})
 		if tmpAdmin.Err != nil {
 			c.JSON(http.StatusInternalServerError, common.Error{Error: tmpAdmin.Err.Error()})
 			return
 		}
-		if len(tmpAdmin.Jpnic) == 0 {
+		if len(tmpAdmin.Admins) == 0 {
 			break
 		}
-		resultJpnicAdmin = append(resultJpnicAdmin, tmpAdmin.Jpnic[0])
+		resultAdmin = append(resultAdmin, tmpAdmin.Admins[0])
 
-		tmpTech := dbJpnicTech.Get(jpnicAdmin.NetworkId, &jpnicTech.JpnicTech{NetworkID: data.ID})
+		tmpTech := dbTech.Get(admin.NetworkId, &tech.Tech{NetworkID: data.ID})
 		if tmpAdmin.Err != nil {
 			c.JSON(http.StatusInternalServerError, common.Error{Error: tmpAdmin.Err.Error()})
 			return
 		}
-		if len(tmpTech.Jpnic) == 0 {
+		if len(tmpTech.Tech) == 0 {
 			break
 		}
-		for _, tmpTechDetail := range tmpTech.Jpnic {
-			resultJpnicTech = append(resultJpnicTech, tmpTechDetail)
+		for _, tmpTechDetail := range tmpTech.Tech {
+			resultTech = append(resultTech, tmpTechDetail)
 		}
 	}
 
 	c.JSON(http.StatusOK, group.ResultAll{
-		Group: result.Group, Network: resultNetwork.Network, JpnicAdmin: resultJpnicAdmin,
-		JpnicTech: resultJpnicTech, Connection: resultConnection.Connection})
+		Group: group.ResultOne{
+			ID:        result.Group.ID,
+			Agree:     result.Group.Agree,
+			Question:  result.Group.Question,
+			Org:       result.Group.Org,
+			Status:    *result.Group.Status,
+			Bandwidth: result.Group.Bandwidth,
+			Contract:  result.Group.Contract,
+			Student:   result.Group.Student,
+		},
+		Network:    resultNetwork.Network,
+		Admin:      resultAdmin,
+		Tech:       resultTech,
+		Connection: resultConnection.Connection,
+	})
 }

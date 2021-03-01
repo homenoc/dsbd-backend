@@ -5,121 +5,38 @@ import (
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/noc"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	dbNOC "github.com/homenoc/dsbd-backend/pkg/api/store/noc/v0"
-	"github.com/jinzhu/gorm"
-	"log"
 	"net/http"
-	"strconv"
 )
 
-func AddAdmin(c *gin.Context) {
-	var input noc.NOC
+func GetAll(c *gin.Context) {
+	userToken := c.Request.Header.Get("USER_TOKEN")
+	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
-	err := c.BindJSON(&input)
-	if err != nil {
-		log.Println(err)
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+	userResult := auth.UserAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	if userResult.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: userResult.Err.Error()})
 		return
 	}
 
-	if _, err = dbNOC.Create(&input); err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, noc.Result{})
-}
-
-func DeleteAdmin(c *gin.Context) {
-	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
-
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	if err := dbNOC.Delete(&noc.NOC{Model: gorm.Model{ID: uint(id)}}); err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, noc.Result{})
-}
-
-func UpdateAdmin(c *gin.Context) {
-	var input noc.NOC
-
-	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
-
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	err = c.BindJSON(&input)
-	if err != nil {
-		log.Println(err)
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	tmp := dbNOC.Get(noc.ID, &noc.NOC{Model: gorm.Model{ID: uint(id)}})
-	if tmp.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: tmp.Err.Error()})
-		return
-	}
-
-	if err = dbNOC.Update(noc.UpdateAll, replace(input, tmp.NOC[0])); err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, noc.Result{})
-}
-
-func GetAdmin(c *gin.Context) {
-	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	result := dbNOC.Get(noc.ID, &noc.NOC{Model: gorm.Model{ID: uint(id)}})
+	result := dbNOC.GetAll()
 	if result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, noc.Result{NOC: result.NOC})
-}
+	var nocTmp noc.ResultAllUser
 
-func GetAllAdmin(c *gin.Context) {
-	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
+	for _, tmp := range result.NOC {
+		if (*tmp.Enable) && (*tmp.New) {
+			nocTmp.NOC = append(nocTmp.NOC, noc.ResultOneUser{
+				Name:     tmp.Name,
+				Location: tmp.Location,
+				New:      tmp.New,
+			})
+		}
 	}
 
-	if result := dbNOC.GetAll(); result.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
-	} else {
-		c.JSON(http.StatusOK, noc.Result{NOC: result.NOC})
-	}
+	c.JSON(http.StatusOK, nocTmp)
 }

@@ -1,6 +1,7 @@
 package v0
 
 import (
+	"fmt"
 	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/gin-gonic/gin"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
@@ -30,7 +31,7 @@ func Add(c *gin.Context) {
 	}
 
 	// group authentication
-	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthentication(0, token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
@@ -43,56 +44,83 @@ func Add(c *gin.Context) {
 	}
 
 	// check json
-	if err := check(input); err != nil {
+	if err = check(input); err != nil {
 		c.JSON(http.StatusBadRequest, group.Result{Error: err.Error()})
 		return
 	}
 
-	//log.Println(input)
-
-	var afterStatus uint
-
 	// status check for group
-	if result.Group.Status == 2 {
-		if input.PI {
-			afterStatus = 22
-		} else {
-			afterStatus = 12
-		}
-	} else if !(result.Group.Status == 111 || result.Group.Status == 121 || result.Group.Status == 11 || result.Group.Status == 21) {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: "error: group status"})
-		return
-	} else {
-		// 111,121,11,21の場合はStatusを+1にする
-		afterStatus = result.Group.Status + 1
-	}
-
-	grpIP, err := ipProcess(input)
-	if err != nil {
-		log.Println(err)
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+	if !(*result.Group.Status == 1 && *result.Group.ExpiredStatus == 0 && *result.Group.Pass) {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: "error: failed group status"})
 		return
 	}
 
-	jh := jpnicHandler{
-		admin: input.AdminID, tech: input.TechID, groupID: result.Group.ID, jpnicAdmin: nil, jpnicTech: nil,
-	}
+	var grpIP *[]network.IP
 
-	// PIアドレスではない場合、jpnic Processを実行
-	if !input.PI {
-		if err = jh.jpnicProcess(); err != nil {
+	if !(input.NetworkType == "ET00") {
+		grpIP, err = ipProcess(input)
+		if err != nil {
 			log.Println(err)
+			c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+			return
+		}
+	} else {
+		grpIP = nil
+	}
+
+	jh := adminTechHandler{
+		admin:       input.AdminID,
+		tech:        input.TechID,
+		groupID:     result.Group.ID,
+		resultAdmin: nil,
+		resultTech:  nil,
+	}
+
+	// 2000,3S00,3B00の場合
+	if input.NetworkType == "2000" || input.NetworkType == "3S00" ||
+		input.NetworkType == "3B00" || input.NetworkType == "IP3B" {
+		if err = jh.AdminTechProcess(); err != nil {
 			c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 			return
 		}
 	}
 
+	resultNetwork := dbNetwork.Get(network.SearchNewNumber, &network.Network{GroupID: result.Group.ID})
+	if resultNetwork.Err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: resultNetwork.Err.Error()})
+		return
+	}
+	var number uint = 1
+	for _, tmp := range resultNetwork.Network {
+		if tmp.NetworkNumber >= 1 {
+			number = tmp.NetworkNumber + 1
+		}
+	}
+
+	if number >= 999 {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: "error: over number"})
+		return
+	}
+
 	// db create for network
 	net, err := dbNetwork.Create(&network.Network{
-		GroupID: result.Group.ID, Org: input.Org, OrgEn: input.OrgEn, Postcode: input.Postcode, Address: input.Address,
-		AddressEn: input.AddressEn, RouteV4: input.RouteV4, RouteV6: input.RouteV6, PI: &[]bool{input.PI}[0],
-		ASN: input.ASN, Open: &[]bool{false}[0], IP: *grpIP, JPNICAdmin: *jh.jpnicAdmin, JPNICTech: *jh.jpnicTech,
-		Lock: &[]bool{input.Lock}[0],
+		GroupID:        result.Group.ID,
+		NetworkType:    input.NetworkType,
+		NetworkComment: input.NetworkComment,
+		NetworkNumber:  number,
+		Org:            input.Org,
+		OrgEn:          input.OrgEn,
+		Postcode:       input.Postcode,
+		Address:        input.Address,
+		AddressEn:      input.AddressEn,
+		RouteV4:        input.RouteV4,
+		RouteV6:        input.RouteV6,
+		ASN:            input.ASN,
+		Open:           &[]bool{false}[0],
+		IP:             *grpIP,
+		Admin:          *jh.resultAdmin,
+		Tech:           *jh.resultTech,
+		Lock:           &[]bool{true}[0],
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
@@ -100,17 +128,28 @@ func Add(c *gin.Context) {
 	}
 
 	attachment := slack.Attachment{}
-	attachment.AddField(slack.Field{Title: "Title", Value: "ネットワーク登録"}).
-		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(input.GroupID))})
+	attachment.AddField(slack.Field{Title: "Title", Value: "ネットワーク情報登録"}).
+		AddField(slack.Field{Title: "申請者", Value: strconv.Itoa(int(result.User.ID)) + ":" + result.User.Name}).
+		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(result.Group.ID)) + ":" + result.Group.Org}).
+		AddField(slack.Field{Title: "サービスコード（新規発番）", Value: input.NetworkType + fmt.Sprintf("%03d", number)}).
+		AddField(slack.Field{Title: "サービスコード（補足情報）", Value: input.NetworkComment})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 
 	// ---------ここまで処理が通っている場合、DBへの書き込みにすべて成功している
 	// GroupのStatusをAfterStatusにする
 	if err = dbGroup.Update(group.UpdateStatus, group.Group{Model: gorm.Model{ID: result.Group.ID},
-		Status: afterStatus}); err != nil {
+		Status: &[]uint{2}[0]}); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
+
+	attachment = slack.Attachment{}
+	attachment.AddField(slack.Field{Title: "Title", Value: "ステータス変更"}).
+		AddField(slack.Field{Title: "申請者", Value: "System"}).
+		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(result.Group.ID)) + ":" + result.Group.Org}).
+		AddField(slack.Field{Title: "現在ステータス情報", Value: "審査中"}).
+		AddField(slack.Field{Title: "ステータス履歴", Value: "1[ネットワーク情報記入段階(User)] =>2[審査中] "})
+	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 
 	c.JSON(http.StatusOK, network.ResultOne{Network: *net})
 }
@@ -121,9 +160,14 @@ func Update(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	log.Println(c.BindJSON(&input))
+	err := c.BindJSON(&input)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
 
-	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthentication(0, token.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
@@ -132,11 +176,6 @@ func Update(c *gin.Context) {
 	// check authority
 	if result.User.Level > 1 {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: "You don't have authority this operation"})
-		return
-	}
-
-	if !(result.Group.Status == 211 || result.Group.Status == 221) {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: "error: group status"})
 		return
 	}
 
