@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/gin-gonic/gin"
+	authInterface "github.com/homenoc/dsbd-backend/pkg/api/core/auth"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
@@ -42,6 +43,7 @@ func Add(c *gin.Context) {
 	mailToken, _ := toolToken.Generate(4)
 
 	pass := ""
+	var authResult authInterface.GroupResult
 
 	// 新規ユーザ
 	if input.GroupID == 0 { //new user
@@ -57,19 +59,17 @@ func Add(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, common.Error{Error: fmt.Sprintf("wrong user level")})
 			return
 		}
-		authResult := auth.UserAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+		authResult = auth.GroupAuthentication(0, token.Token{UserToken: userToken, AccessToken: accessToken})
 		if authResult.Err != nil {
 			c.JSON(http.StatusForbidden, common.Error{Error: authResult.Err.Error()})
 			return
 		}
-		if authResult.User.GroupID != input.GroupID && authResult.User.GroupID > 0 {
+		if authResult.Group.ID != input.GroupID {
 			c.JSON(http.StatusInternalServerError, common.Error{Error: "gid mismatch"})
 			return
 		}
 
 		pass = gen.GenerateUUID()
-		log.Println("Email: " + input.Email)
-		log.Println("tmp_Pass: " + pass)
 
 		data = user.User{
 			GroupID:     input.GroupID,
@@ -91,12 +91,21 @@ func Add(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 	}
+
 	attachment := slack.Attachment{}
-	attachment.AddField(slack.Field{Title: "Title", Value: "ユーザ登録"}).
-		AddField(slack.Field{Title: "E-Mail", Value: input.Email}).
-		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(input.GroupID))}).
-		AddField(slack.Field{Title: "Name", Value: input.Name}).
-		AddField(slack.Field{Title: "Name(English)", Value: input.NameEn})
+
+	if input.GroupID == 0 {
+		attachment.AddField(slack.Field{Title: "Title", Value: "新規ユーザ登録"}).
+			AddField(slack.Field{Title: "メールアドレス", Value: input.Email}).
+			AddField(slack.Field{Title: "Name", Value: input.Name}).
+			AddField(slack.Field{Title: "Name(English)", Value: input.NameEn})
+	} else {
+		attachment.AddField(slack.Field{Title: "Title", Value: "グループ内ユーザ登録"}).
+			AddField(slack.Field{Title: "メールアドレス", Value: input.Email}).
+			AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(input.GroupID)) + ":" + authResult.Group.Org}).
+			AddField(slack.Field{Title: "Name", Value: input.Name}).
+			AddField(slack.Field{Title: "Name(English)", Value: input.NameEn})
+	}
 
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 
