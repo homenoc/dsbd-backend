@@ -71,9 +71,19 @@ func Add(c *gin.Context) {
 		log.Println("Email: " + input.Email)
 		log.Println("tmp_Pass: " + pass)
 
-		data = user.User{GroupID: input.GroupID, Name: input.Name, NameEn: input.NameEn,
-			Email: input.Email, Pass: strings.ToLower(hash.Generate(pass)), GroupHandle: input.GroupHandle,
-			Status: 0, Tech: input.Tech, Level: input.Level, MailVerify: &[]bool{false}[0], MailToken: mailToken}
+		data = user.User{
+			GroupID:     input.GroupID,
+			Name:        input.Name,
+			NameEn:      input.NameEn,
+			Email:       input.Email,
+			Pass:        strings.ToLower(hash.Generate(pass)),
+			GroupHandle: input.GroupHandle,
+			Status:      0,
+			Tech:        input.Tech,
+			Level:       input.Level,
+			MailVerify:  &[]bool{false}[0],
+			MailToken:   mailToken,
+		}
 	}
 
 	//check exist for database
