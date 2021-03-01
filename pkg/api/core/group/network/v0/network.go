@@ -1,6 +1,7 @@
 package v0
 
 import (
+	"fmt"
 	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/gin-gonic/gin"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
@@ -90,7 +91,6 @@ func Add(c *gin.Context) {
 		return
 	}
 	var number uint = 1
-	log.Println(resultNetwork.Network)
 	for _, tmp := range resultNetwork.Network {
 		if tmp.NetworkNumber >= 1 {
 			number = tmp.NetworkNumber + 1
@@ -128,8 +128,11 @@ func Add(c *gin.Context) {
 	}
 
 	attachment := slack.Attachment{}
-	attachment.AddField(slack.Field{Title: "Title", Value: "ネットワーク登録"}).
-		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(input.GroupID))})
+	attachment.AddField(slack.Field{Title: "Title", Value: "ネットワーク情報登録"}).
+		AddField(slack.Field{Title: "申請者", Value: strconv.Itoa(int(result.User.ID)) + ":" + result.User.Name}).
+		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(result.Group.ID)) + ":" + result.Group.Org}).
+		AddField(slack.Field{Title: "サービスコード（新規発番）", Value: input.NetworkType + fmt.Sprintf("%03d", number)}).
+		AddField(slack.Field{Title: "サービスコード（補足情報）", Value: input.NetworkComment})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 
 	// ---------ここまで処理が通っている場合、DBへの書き込みにすべて成功している
