@@ -1,17 +1,17 @@
-package jpnicAdmin
+package tech
 
 import "github.com/jinzhu/gorm"
 
 const (
 	ID               = 0
-	NetworkId        = 1
+	NetworkID        = 1
 	UserId           = 2
 	NetworkAndUserId = 3
 	UpdateLock       = 100
 	UpdateAll        = 110
 )
 
-type JpnicAdmin struct {
+type Tech struct {
 	gorm.Model
 	NetworkID uint  `json:"network_id"`
 	UserID    uint  `json:"user_id"`
@@ -19,10 +19,10 @@ type JpnicAdmin struct {
 }
 
 type Result struct {
-	Jpnic []JpnicAdmin `json:"jpnic"`
+	Tech []Tech `json:"tech"`
 }
 
 type ResultDatabase struct {
-	Err   error
-	Jpnic []JpnicAdmin
+	Err  error
+	Tech []Tech
 }

@@ -40,8 +40,8 @@ type Network struct {
 	V6Name         string                  `json:"v6_name"`
 	IP             []IP                    `json:"ip"`
 	Connection     []connection.Connection `json:"connection"`
-	JPNICAdmin     JPNICAdmin              `json:"jpnic_admin"`
-	JPNICTech      []JPNICTech             `json:"jpnic_tech"`
+	Admin          Admin                   `json:"admin"`
+	Tech           []Tech                  `json:"tech"`
 	Open           *bool                   `json:"open"`
 	Lock           *bool                   `json:"lock"`
 }
@@ -59,14 +59,14 @@ type IP struct {
 	Open      *bool      `json:"open"`
 }
 
-type JPNICAdmin struct {
+type Admin struct {
 	gorm.Model
 	NetworkID uint  `json:"network_id"`
 	UserID    uint  `json:"user_id"`
 	Lock      *bool `json:"lock"`
 }
 
-type JPNICTech struct {
+type Tech struct {
 	gorm.Model
 	NetworkID uint  `json:"network_id"`
 	UserID    uint  `json:"user_id"`

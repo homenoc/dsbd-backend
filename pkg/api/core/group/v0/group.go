@@ -8,14 +8,14 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicAdmin"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicTech"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/admin"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/tech"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbConnection "github.com/homenoc/dsbd-backend/pkg/api/store/group/connection/v0"
-	dbJpnicAdmin "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/jpnicAdmin/v0"
-	dbJpnicTech "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/jpnicTech/v0"
+	dbAdmin "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/admin/v0"
+	dbTech "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/tech/v0"
 	dbNetwork "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/v0"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
@@ -219,30 +219,30 @@ func GetAll(c *gin.Context) {
 		resultConnection.Connection = nil
 	}
 
-	var resultJpnicTech []jpnicTech.JpnicTech = nil
-	var resultJpnicAdmin []jpnicAdmin.JpnicAdmin = nil
+	var resultTech []tech.Tech = nil
+	var resultAdmin []admin.Admin = nil
 
 	for _, data := range resultNetwork.Network {
-		tmpAdmin := dbJpnicAdmin.Get(jpnicAdmin.NetworkId, &jpnicAdmin.JpnicAdmin{NetworkID: data.ID})
+		tmpAdmin := dbAdmin.Get(admin.NetworkId, &admin.Admin{NetworkID: data.ID})
 		if tmpAdmin.Err != nil {
 			c.JSON(http.StatusInternalServerError, common.Error{Error: tmpAdmin.Err.Error()})
 			return
 		}
-		if len(tmpAdmin.Jpnic) == 0 {
+		if len(tmpAdmin.Admins) == 0 {
 			break
 		}
-		resultJpnicAdmin = append(resultJpnicAdmin, tmpAdmin.Jpnic[0])
+		resultAdmin = append(resultAdmin, tmpAdmin.Admins[0])
 
-		tmpTech := dbJpnicTech.Get(jpnicAdmin.NetworkId, &jpnicTech.JpnicTech{NetworkID: data.ID})
+		tmpTech := dbTech.Get(admin.NetworkId, &tech.Tech{NetworkID: data.ID})
 		if tmpAdmin.Err != nil {
 			c.JSON(http.StatusInternalServerError, common.Error{Error: tmpAdmin.Err.Error()})
 			return
 		}
-		if len(tmpTech.Jpnic) == 0 {
+		if len(tmpTech.Tech) == 0 {
 			break
 		}
-		for _, tmpTechDetail := range tmpTech.Jpnic {
-			resultJpnicTech = append(resultJpnicTech, tmpTechDetail)
+		for _, tmpTechDetail := range tmpTech.Tech {
+			resultTech = append(resultTech, tmpTechDetail)
 		}
 	}
 
@@ -258,8 +258,8 @@ func GetAll(c *gin.Context) {
 			Student:   result.Group.Student,
 		},
 		Network:    resultNetwork.Network,
-		JpnicAdmin: resultJpnicAdmin,
-		JpnicTech:  resultJpnicTech,
+		Admin:      resultAdmin,
+		Tech:       resultTech,
 		Connection: resultConnection.Connection,
 	})
 }

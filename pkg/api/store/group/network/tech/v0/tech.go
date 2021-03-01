@@ -2,14 +2,14 @@ package v0
 
 import (
 	"fmt"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicTech"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/tech"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
 	"github.com/jinzhu/gorm"
 	"log"
 	"time"
 )
 
-func Create(network *jpnicTech.JpnicTech) (*jpnicTech.JpnicTech, error) {
+func Create(network *tech.Tech) (*tech.Tech, error) {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -21,7 +21,7 @@ func Create(network *jpnicTech.JpnicTech) (*jpnicTech.JpnicTech, error) {
 	return network, err
 }
 
-func Delete(network *jpnicTech.JpnicTech) error {
+func Delete(network *tech.Tech) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -32,7 +32,7 @@ func Delete(network *jpnicTech.JpnicTech) error {
 	return db.Delete(network).Error
 }
 
-func Update(base int, u jpnicTech.JpnicTech) error {
+func Update(base int, u tech.Tech) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -42,8 +42,8 @@ func Update(base int, u jpnicTech.JpnicTech) error {
 
 	var result *gorm.DB
 
-	if base == jpnicTech.UpdateAll {
-		err = db.Model(&jpnicTech.JpnicTech{Model: gorm.Model{ID: u.ID}}).Update(jpnicTech.JpnicTech{
+	if base == tech.UpdateAll {
+		err = db.Model(&tech.Tech{Model: gorm.Model{ID: u.ID}}).Update(tech.Tech{
 			NetworkID: u.NetworkID,
 			UserID:    u.UserID,
 			Lock:      u.Lock,
@@ -55,40 +55,40 @@ func Update(base int, u jpnicTech.JpnicTech) error {
 	return result.Error
 }
 
-func Get(base int, data *jpnicTech.JpnicTech) jpnicTech.ResultDatabase {
+func Get(base int, data *tech.Tech) tech.ResultDatabase {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
-		return jpnicTech.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+		return tech.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
 	defer db.Close()
 
-	var networkStruct []jpnicTech.JpnicTech
+	var networkStruct []tech.Tech
 
-	if base == jpnicTech.ID { //ID
+	if base == tech.ID { //ID
 		err = db.First(&networkStruct, data.ID).Error
-	} else if base == jpnicTech.UserId { //Name
+	} else if base == tech.UserId { //Name
 		err = db.Where("user_id = ?", data.UserID).Find(&networkStruct).Error
-	} else if base == jpnicTech.NetworkID { //Name
+	} else if base == tech.NetworkID { //Name
 		err = db.Where("network_id = ?", data.NetworkID).Find(&networkStruct).Error
-	} else if base == jpnicTech.NetworkAndUserId {
+	} else if base == tech.NetworkAndUserId {
 		err = db.Where("network_id = ? AND user_id = ?", data.NetworkID, data.UserID).Find(&networkStruct).Error
 	} else {
 		log.Println("base select error")
-		return jpnicTech.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
+		return tech.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
 	}
-	return jpnicTech.ResultDatabase{Jpnic: networkStruct, Err: err}
+	return tech.ResultDatabase{Tech: networkStruct, Err: err}
 }
 
-func GetAll() jpnicTech.ResultDatabase {
+func GetAll() tech.ResultDatabase {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
-		return jpnicTech.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+		return tech.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
 	defer db.Close()
 
-	var networks []jpnicTech.JpnicTech
+	var networks []tech.Tech
 	err = db.Find(&networks).Error
-	return jpnicTech.ResultDatabase{Jpnic: networks, Err: err}
+	return tech.ResultDatabase{Tech: networks, Err: err}
 }
