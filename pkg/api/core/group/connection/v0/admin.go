@@ -41,7 +41,7 @@ func AddAdmin(c *gin.Context) {
 		return
 	}
 
-	if err = check(input); err != nil {
+	if err = check(0, false, input); err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 		return
 	}

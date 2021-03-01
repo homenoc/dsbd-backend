@@ -16,8 +16,8 @@ func updateAdminConnection(input, replace connection.Connection) connection.Conn
 	}
 
 	//ServiceType
-	if input.ServiceType != "" {
-		replace.ServiceType = input.ServiceType
+	if input.ConnectionType != "" {
+		replace.ConnectionType = input.ConnectionType
 	}
 
 	//NTT
@@ -64,8 +64,8 @@ func updateAdminConnection(input, replace connection.Connection) connection.Conn
 	// uint boolean
 	replace.GroupID = input.GroupID
 	replace.UserID = input.UserID
-	replace.ServiceYear = input.ServiceYear
-	replace.ServiceNumber = input.ServiceNumber
+	replace.GatewayID = input.GatewayID
+	replace.ConnectionNumber = input.ConnectionNumber
 
 	// Open
 	replace.Open = input.Open
