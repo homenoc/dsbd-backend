@@ -1,10 +1,10 @@
 package group
 
 import (
-	connection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
-	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
-	jpnicAdmin "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicAdmin"
-	jpnicTech "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicTech"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/admin"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/tech"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	"github.com/jinzhu/gorm"
 )
@@ -69,8 +69,8 @@ type ResultOne struct {
 type ResultAll struct {
 	Group      ResultOne               `json:"group"`
 	Network    []network.Network       `json:"network"`
-	JpnicAdmin []jpnicAdmin.JpnicAdmin `json:"admin"`
-	JpnicTech  []jpnicTech.JpnicTech   `json:"tech"`
+	Admin      []admin.Admin           `json:"admin"`
+	Tech       []tech.Tech             `json:"tech"`
 	Connection []connection.Connection `json:"connection"`
 }
 

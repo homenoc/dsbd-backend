@@ -4,8 +4,8 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	connection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
 	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicAdmin"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicTech"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/admin"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/tech"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/noc"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/noc/gateway"
 	nocRouter "github.com/homenoc/dsbd-backend/pkg/api/core/noc/router"
@@ -42,11 +42,11 @@ func InitDB() {
 		&token.Token{},
 		&network.Network{},
 		&network.IP{},
-		&network.JPNICAdmin{},
-		&network.JPNICTech{},
+		&network.Admin{},
+		&network.Tech{},
 		&connection.Connection{},
-		&jpnicAdmin.JpnicAdmin{},
-		&jpnicTech.JpnicTech{},
+		&admin.Admin{},
+		&tech.Tech{},
 		&notice.Notice{},
 		&ticket.Ticket{},
 		&chat.Chat{},

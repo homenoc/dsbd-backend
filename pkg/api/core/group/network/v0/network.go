@@ -68,18 +68,18 @@ func Add(c *gin.Context) {
 		grpIP = nil
 	}
 
-	jh := jpnicHandler{
-		admin:      input.AdminID,
-		tech:       input.TechID,
-		groupID:    result.Group.ID,
-		jpnicAdmin: nil,
-		jpnicTech:  nil,
+	jh := adminTechHandler{
+		admin:       input.AdminID,
+		tech:        input.TechID,
+		groupID:     result.Group.ID,
+		resultAdmin: nil,
+		resultTech:  nil,
 	}
 
 	// 2000,3S00,3B00の場合
 	if input.NetworkType == "2000" || input.NetworkType == "3S00" ||
 		input.NetworkType == "3B00" || input.NetworkType == "IP3B" {
-		if err = jh.jpnicProcess(); err != nil {
+		if err = jh.AdminTechProcess(); err != nil {
 			c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 			return
 		}
@@ -118,8 +118,8 @@ func Add(c *gin.Context) {
 		ASN:            input.ASN,
 		Open:           &[]bool{false}[0],
 		IP:             *grpIP,
-		JPNICAdmin:     *jh.jpnicAdmin,
-		JPNICTech:      *jh.jpnicTech,
+		Admin:          *jh.resultAdmin,
+		Tech:           *jh.resultTech,
 		Lock:           &[]bool{true}[0],
 	})
 	if err != nil {
