@@ -69,7 +69,13 @@ func UpdateAdmin(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
 		return
 	}
-	log.Println(c.BindJSON(&input))
+
+	err := c.BindJSON(&input)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
 
 	tmp := dbGroup.Get(group.ID, &group.Group{Model: gorm.Model{ID: input.ID}})
 	if tmp.Err != nil {

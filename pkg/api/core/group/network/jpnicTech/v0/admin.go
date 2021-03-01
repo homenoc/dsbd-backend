@@ -63,9 +63,15 @@ func UpdateAdmin(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
 		return
 	}
-	log.Println(c.BindJSON(&input))
 
-	if err := dbJPNICTech.Update(jpnicTech.UpdateAll, input); err != nil {
+	err := c.BindJSON(&input)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	if err = dbJPNICTech.Update(jpnicTech.UpdateAll, input); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}

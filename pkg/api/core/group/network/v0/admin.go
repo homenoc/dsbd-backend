@@ -36,7 +36,12 @@ func AddAdmin(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
 		return
 	}
-	log.Println(c.BindJSON(&input))
+	err = c.BindJSON(&input)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
 
 	// check json
 	if err := check(input); err != nil {
