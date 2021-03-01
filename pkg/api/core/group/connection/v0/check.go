@@ -9,7 +9,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-func check(groupID uint, restrict bool, input connection.Connection) error {
+func check(groupID uint, input connection.Connection) error {
 	// check
 
 	resultNOC := dbNOC.GetAll()
@@ -54,15 +54,13 @@ func check(groupID uint, restrict bool, input connection.Connection) error {
 		return fmt.Errorf("no data: userID")
 	}
 
-	if restrict {
-		resultUser := dbUser.Get(user.ID, &user.User{Model: gorm.Model{ID: input.UserID}})
-		if resultUser.Err != nil {
-			return resultUser.Err
-		}
+	resultUser := dbUser.Get(user.ID, &user.User{Model: gorm.Model{ID: input.UserID}})
+	if resultUser.Err != nil {
+		return resultUser.Err
+	}
 
-		if groupID != resultUser.User[0].GroupID {
-			return fmt.Errorf("error: not match groupID")
-		}
+	if groupID != resultUser.User[0].GroupID {
+		return fmt.Errorf("error: not match groupID")
 	}
 
 	return nil

@@ -48,7 +48,7 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	if err = check(result.Group.ID, true, input); err != nil {
+	if err = check(result.Group.ID, input); err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 		return
 	}
