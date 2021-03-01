@@ -87,6 +87,14 @@ func Add(c *gin.Context) {
 		return
 	}
 
+	attachment := slack.Attachment{}
+	attachment.AddField(slack.Field{Title: "Title", Value: "接続情報登録"}).
+		AddField(slack.Field{Title: "申請者", Value: strconv.Itoa(int(result.User.ID)) + ":" + result.User.Name}).
+		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(result.Group.ID)) + ":" + result.Group.Org}).
+		AddField(slack.Field{Title: "接続コード（新規発番）", Value: input.ConnectionType + fmt.Sprintf("%03d", number)}).
+		AddField(slack.Field{Title: "接続コード（補足情報）", Value: input.ConnectionComment})
+	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+
 	if err = dbGroup.Update(group.UpdateStatus, group.Group{
 		Model:  gorm.Model{ID: result.Group.ID},
 		Status: &[]uint{4}[0],
@@ -95,12 +103,12 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	attachment := slack.Attachment{}
-	attachment.AddField(slack.Field{Title: "Title", Value: "接続情報登録"}).
-		AddField(slack.Field{Title: "申請者", Value: strconv.Itoa(int(result.User.ID)) + ":" + result.User.Name}).
+	attachment = slack.Attachment{}
+	attachment.AddField(slack.Field{Title: "Title", Value: "ステータス変更"}).
+		AddField(slack.Field{Title: "申請者", Value: "System"}).
 		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(result.Group.ID)) + ":" + result.Group.Org}).
-		AddField(slack.Field{Title: "接続コード（新規発番）", Value: input.ConnectionType + fmt.Sprintf("%03d", number)}).
-		AddField(slack.Field{Title: "接続コード（補足情報）", Value: input.ConnectionComment})
+		AddField(slack.Field{Title: "現在ステータス情報", Value: "審査中"}).
+		AddField(slack.Field{Title: "ステータス履歴", Value: "1[ネットワーク情報記入段階(User)] =>2[審査中] "})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 
 	c.JSON(http.StatusOK, group.Result{})
