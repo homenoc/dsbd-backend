@@ -16,7 +16,7 @@ func replace(input, replace gatewayIP.GatewayIP) gatewayIP.GatewayIP {
 	}
 
 	// uint boolean
-	//GatewayID
+	//GatewayIPID
 	if input.GatewayID != 0 {
 		replace.GatewayID = input.GatewayID
 	}
