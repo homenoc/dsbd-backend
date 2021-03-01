@@ -11,6 +11,8 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	dbNetwork "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/v0"
 	dbGatewayIP "github.com/homenoc/dsbd-backend/pkg/api/store/noc/gatewayIP/v0"
+	dbRouter "github.com/homenoc/dsbd-backend/pkg/api/store/noc/router/v0"
+	dbNOC "github.com/homenoc/dsbd-backend/pkg/api/store/noc/v0"
 	"net/http"
 	"strconv"
 )
@@ -27,13 +29,28 @@ func Get(c *gin.Context) {
 
 	resultNetwork := dbNetwork.Get(network.Open, &network.Network{GroupID: result.Group.ID})
 	if resultNetwork.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: resultNetwork.Err.Error()})
+		return
+	}
+
+	//TODO:これより下の実装はマジでよくない
+	//DBを３つからすべて抽出しているため、無駄な処理が多く今後改善必要がある。
+
+	resultNOC := dbNOC.GetAll()
+	if resultNOC.Err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: resultNOC.Err.Error()})
+		return
+	}
+
+	resultRouter := dbRouter.GetAll()
+	if resultRouter.Err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: resultRouter.Err.Error()})
 		return
 	}
 
 	resultGatewayIP := dbGatewayIP.GetAll()
 	if resultGatewayIP.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: resultGatewayIP.Err.Error()})
 		return
 	}
 
@@ -63,8 +80,8 @@ func Get(c *gin.Context) {
 							tmpConnection.ConnectionType + fmt.Sprintf("%03d", tmpConnection.ConnectionNumber)
 
 						var serviceName string
-						var existsGatewayIP bool = false
-						var nocIP string
+						var existsData bool = false
+						var nocIP, noc string
 
 						// Todo: 良くない実装
 						// サービス名の検索(networkコンフィグから検索)
@@ -79,17 +96,33 @@ func Get(c *gin.Context) {
 						for _, tmpGatewayIP := range resultGatewayIP.GatewayIP {
 							if tmpGatewayIP.ID == *tmpConnection.GatewayIPID {
 								nocIP = tmpGatewayIP.IP
-								existsGatewayIP = true
+								existsData = true
 								break
 							}
 						}
+						// Todo: 読みにくい上に処理的にも問題あり
+						if existsData {
+							existsData = false
+							// NOCの検索(router=>nocの順番に検索)
+							for _, tmpRouter := range resultRouter.Router {
+								if tmpRouter.ID == *tmpConnection.RouterID {
+									for _, tmpNOC := range resultNOC.NOC {
+										if tmpNOC.ID == tmpRouter.NOC {
+											noc = tmpNOC.Name
+											existsData = true
+											break
+										}
+									}
+								}
+							}
+						}
 
-						if existsGatewayIP {
+						if existsData {
 							information = append(information, info.Info{
 								ServiceID:  serviceID,
 								Service:    serviceName,
 								UserID:     tmpConnection.UserID,
-								NOC:        tmpConnection.NOC,
+								NOC:        noc,
 								V4:         v4,
 								V6:         v6,
 								ASN:        asn,
