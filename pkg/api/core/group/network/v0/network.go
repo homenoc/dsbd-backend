@@ -84,7 +84,7 @@ func Add(c *gin.Context) {
 		}
 	}
 
-	resultNetwork := dbNetwork.Get(network.SearchNumber, &network.Network{GroupID: result.Group.ID})
+	resultNetwork := dbNetwork.Get(network.SearchNewNumber, &network.Network{GroupID: result.Group.ID})
 	if resultNetwork.Err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: resultNetwork.Err.Error()})
 		return

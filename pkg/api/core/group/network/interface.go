@@ -8,18 +8,18 @@ import (
 )
 
 const (
-	ID           = 0
-	GID          = 1
-	Org          = 2
-	Open         = 3
-	SearchNumber = 4
-	UpdateName   = 100
-	UpdateDate   = 102
-	UpdateRoute  = 103
-	UpdatePlan   = 104
-	UpdateGID    = 104
-	UpdateData   = 105
-	UpdateAll    = 110
+	ID              = 0
+	GID             = 1
+	Org             = 2
+	Open            = 3
+	SearchNewNumber = 4
+	UpdateName      = 100
+	UpdateDate      = 102
+	UpdateRoute     = 103
+	UpdatePlan      = 104
+	UpdateGID       = 104
+	UpdateData      = 105
+	UpdateAll       = 110
 )
 
 type Network struct {
