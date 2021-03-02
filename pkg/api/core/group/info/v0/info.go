@@ -92,14 +92,21 @@ func Get(c *gin.Context) {
 							}
 						}
 
-						// 当団体側の終端アドレスの検索(gatewayIPから検索)
-						for _, tmpGatewayIP := range resultGatewayIP.GatewayIP {
-							if tmpGatewayIP.ID == *tmpConnection.GatewayIPID {
-								nocIP = tmpGatewayIP.IP
-								existsData = true
-								break
+						// CC0　構内接続の場合を除く
+						if tmpConnection.ConnectionType != "CC0" {
+							// 当団体側の終端アドレスの検索(gatewayIPから検索)
+							for _, tmpGatewayIP := range resultGatewayIP.GatewayIP {
+								if tmpGatewayIP.ID == *tmpConnection.GatewayIPID {
+									nocIP = tmpGatewayIP.IP
+									existsData = true
+									break
+								}
 							}
+						} else {
+							nocIP = "構内接続のため必要なし"
+							existsData = true
 						}
+
 						// Todo: 読みにくい上に処理的にも問題あり
 						if existsData {
 							existsData = false
