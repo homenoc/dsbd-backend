@@ -44,37 +44,49 @@
   ],
   "network": [
     {
-      "id": "20",
+      "id": "2000",
       "hidden": false,
       "name": "L2",
       "comment": "L2接続"
     },
     {
-      "id": "3S",
+      "id": "3S00",
       "hidden": false,
       "name": "L3 Static",
       "comment": "Staticにて接続"
     },
     {
-      "id": "3B",
+      "id": "3B00",
       "hidden": false,
       "name": "L3 BGP",
       "comment": "BGPにて接続"
     },
     {
-      "id": "IP",
+      "id": "IP3B",
       "hidden": false,
       "name": "トランジット提供",
-      "comment": "グローバルAS＋PIアドレス持ち込みのユーザに対するトランジット提供"
+      "comment": "グローバルASのユーザに対するトランジット提供(L3 BGP)"
     },
     {
-      "id": "CL",
+      "id": "CL20",
       "hidden": true,
       "name": "CoLocation",
-      "comment": "団体所有のラックにおけるコロケーションサービス"
+      "comment": "団体所有のラックにおけるコロケーションサービス(L2)"
     },
     {
-      "id": "ET",
+      "id": "CL3S",
+      "hidden": true,
+      "name": "CoLocation",
+      "comment": "団体所有のラックにおけるコロケーションサービス(L3 Static)"
+    },
+    {
+      "id": "CL3B",
+      "hidden": true,
+      "name": "CoLocation",
+      "comment": "団体所有のラックにおけるコロケーションサービス(L3 BGP)"
+    },
+    {
+      "id": "ET00",
       "hidden": true,
       "name": "その他",
       "comment": "その他"
@@ -91,7 +103,7 @@
       "id": "IPT",
       "hidden": false,
       "name": "IPトンネル",
-      "comment": "IP-IPトンネル上で/30のP2P接続を行う"
+      "comment": "IP-IP又はGREトンネル上で/30のP2P接続を行う"
     },
     {
       "id": "CC0",
@@ -101,7 +113,7 @@
     },
     {
       "id": "ETC",
-      "hidden": true,
+      "hidden": false,
       "name": "その他",
       "comment": "その他の接続方式"
     }
