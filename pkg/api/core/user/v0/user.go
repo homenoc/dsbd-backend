@@ -335,48 +335,48 @@ func GetGroup(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	authResult := auth.GroupAuthentication(0, token.Token{UserToken: userToken, AccessToken: accessToken})
-	result := dbUser.Get(user.GID, &user.User{GroupID: authResult.Group.ID})
-	if result.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
+	authUserResult := auth.UserAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	if authUserResult.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: authUserResult.Err.Error()})
 		return
 	}
 
 	var data user.Result
 
-	if authResult.User.Level > 1 {
+	// User権限がLevel=2の時、又はユーザのGroupIDが0の時（グループ未登録時）
+	if authUserResult.User.Level > 1 || authUserResult.User.GroupID == 0 {
 		data.User = append(data.User, user.ResultOne{
-			ID:          authResult.User.ID,
-			GroupID:     authResult.User.GroupID,
-			Tech:        authResult.User.Tech,
-			GroupHandle: authResult.User.GroupHandle,
-			Name:        authResult.User.Name,
-			NameEn:      authResult.User.NameEn,
-			Email:       authResult.User.Email,
-			Status:      authResult.User.Status,
-			Level:       authResult.User.Level,
-			MailVerify:  authResult.User.MailVerify,
-			Org:         authResult.User.Org,
-			OrgEn:       authResult.User.OrgEn,
-			PostCode:    authResult.User.PostCode,
-			Address:     authResult.User.Address,
-			AddressEn:   authResult.User.AddressEn,
-			Dept:        authResult.User.Dept,
-			DeptEn:      authResult.User.DeptEn,
-			Pos:         authResult.User.Pos,
-			PosEn:       authResult.User.PosEn,
-			Tel:         authResult.User.Tel,
-			Fax:         authResult.User.Fax,
-			Country:     authResult.User.Country,
+			ID:          authUserResult.User.ID,
+			GroupID:     authUserResult.User.GroupID,
+			Tech:        authUserResult.User.Tech,
+			GroupHandle: authUserResult.User.GroupHandle,
+			Name:        authUserResult.User.Name,
+			NameEn:      authUserResult.User.NameEn,
+			Email:       authUserResult.User.Email,
+			Status:      authUserResult.User.Status,
+			Level:       authUserResult.User.Level,
+			MailVerify:  authUserResult.User.MailVerify,
+			Org:         authUserResult.User.Org,
+			OrgEn:       authUserResult.User.OrgEn,
+			PostCode:    authUserResult.User.PostCode,
+			Address:     authUserResult.User.Address,
+			AddressEn:   authUserResult.User.AddressEn,
+			Dept:        authUserResult.User.Dept,
+			DeptEn:      authUserResult.User.DeptEn,
+			Pos:         authUserResult.User.Pos,
+			PosEn:       authUserResult.User.PosEn,
+			Tel:         authUserResult.User.Tel,
+			Fax:         authUserResult.User.Fax,
+			Country:     authUserResult.User.Country,
 		})
-	} else if authResult.Group.ID != 0 || authResult.User.GroupID != 0 {
-		resultUser := dbUser.Get(user.GID, &user.User{GroupID: authResult.Group.ID})
-		if result.Err != nil {
-			c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
+	} else if authUserResult.User.GroupID != 0 {
+		resultGroupUser := dbUser.Get(user.GID, &user.User{GroupID: authUserResult.User.GroupID})
+		if resultGroupUser.Err != nil {
+			c.JSON(http.StatusInternalServerError, common.Error{Error: resultGroupUser.Err.Error()})
 			return
 		}
 
-		for _, grp := range resultUser.User {
+		for _, grp := range resultGroupUser.User {
 			data.User = append(data.User, user.ResultOne{
 				ID:          grp.ID,
 				GroupID:     grp.GroupID,

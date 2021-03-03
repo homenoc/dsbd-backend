@@ -12,7 +12,6 @@ import (
 )
 
 func replaceUser(serverData, input user.User) (user.User, error) {
-	updateInfo := 0
 	//Name
 	if input.Name != "" {
 		serverData.Name = input.Name
@@ -64,73 +63,74 @@ func replaceUser(serverData, input user.User) (user.User, error) {
 	//Org
 	if input.Org != "" {
 		serverData.Org = input.Org
-		updateInfo++
+	} else if serverData.Status == 0 {
+		return serverData, fmt.Errorf("組織名が入力されていません。")
 	}
 
 	//Org (English)
 	if input.OrgEn != "" {
 		serverData.OrgEn = input.OrgEn
-		updateInfo++
+	} else if serverData.Status == 0 {
+		return serverData, fmt.Errorf("組織名(english)が入力されていません。")
 	}
 
 	//PostCode
 	if input.PostCode != "" {
 		serverData.PostCode = input.PostCode
-		updateInfo++
+	} else if serverData.Status == 0 {
+		return serverData, fmt.Errorf("郵便番号が入力されていません。")
 	}
-
 	//Address
 	if input.Address != "" {
 		serverData.Address = input.Address
-		updateInfo++
+	} else if serverData.Status == 0 {
+		return serverData, fmt.Errorf("住所が入力されていません。")
 	}
 
 	//Address(English)
 	if input.AddressEn != "" {
 		serverData.AddressEn = input.AddressEn
-		updateInfo++
+	} else if serverData.Status == 0 {
+		return serverData, fmt.Errorf("住所(English)が入力されていません。")
 	}
 
 	//Dept
 	if input.Dept != "" {
 		serverData.Dept = input.Dept
-		updateInfo++
 	}
 
 	//Dept(English)
 	if input.DeptEn != "" {
 		serverData.DeptEn = input.DeptEn
-		updateInfo++
 	}
 
 	//Pos
 	if input.Pos != "" {
 		serverData.Pos = input.Pos
-		updateInfo++
 	}
 
 	//Pos(English)
 	if input.PosEn != "" {
 		serverData.PosEn = input.PosEn
-		updateInfo++
 	}
 
 	//Tel
 	if input.Tel != "" {
 		serverData.Tel = input.Tel
-		updateInfo++
+	} else if serverData.Status == 0 {
+		return serverData, fmt.Errorf("電話番号が入力されていません。")
 	}
 
 	//Fax
 	if input.Fax != "" {
 		serverData.Fax = input.Fax
-		updateInfo++
 	}
 
 	//Country
 	if input.Country != "" {
 		serverData.Country = input.Country
-		updateInfo++
+	} else if serverData.Status == 0 {
+		return serverData, fmt.Errorf("国が入力されていません。")
 	}
 
 	//Tech
@@ -138,7 +138,7 @@ func replaceUser(serverData, input user.User) (user.User, error) {
 		serverData.Tech = input.Tech
 	}
 
-	if serverData.Status == 0 && updateInfo == 12 {
+	if serverData.Status == 0 && *serverData.MailVerify {
 		serverData.Status = 1
 	}
 
