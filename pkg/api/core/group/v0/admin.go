@@ -1,12 +1,14 @@
 package v0
 
 import (
+	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/gin-gonic/gin"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	groupConnection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
 	groupNetwork "github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbConnection "github.com/homenoc/dsbd-backend/pkg/api/store/group/connection/v0"
 	dbNetwork "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/v0"
@@ -81,6 +83,28 @@ func UpdateAdmin(c *gin.Context) {
 	if tmp.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: tmp.Err.Error()})
 		return
+	}
+
+	// 審査ステータスのSlack通知
+	if *tmp.Group[0].Pass != *input.Pass {
+		attachment := slack.Attachment{}
+		if *input.Pass {
+			attachment.AddField(slack.Field{Title: "Title", Value: "ステータス変更"}).
+				AddField(slack.Field{Title: "申請者", Value: "管理者"}).
+				AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(tmp.Group[0].ID)) + ":" + tmp.Group[0].Org}).
+				AddField(slack.Field{Title: "現在ステータス情報", Value: "審査中"}).
+				AddField(slack.Field{Title: "ステータス履歴", Value: "[審査合格] =>[審査中] "})
+			notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+
+		} else if !(*input.Pass) {
+			attachment.AddField(slack.Field{Title: "Title", Value: "ステータス変更"}).
+				AddField(slack.Field{Title: "申請者", Value: "管理者"}).
+				AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(tmp.Group[0].ID)) + ":" + tmp.Group[0].Org}).
+				AddField(slack.Field{Title: "現在ステータス情報", Value: "審査合格処理終了"}).
+				AddField(slack.Field{Title: "ステータス履歴", Value: "[審査中] =>[審査合格処理]"})
+			notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+
+		}
 	}
 
 	replace, err := updateAdminGroup(input, tmp.Group[0])
