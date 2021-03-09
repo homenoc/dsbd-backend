@@ -22,11 +22,12 @@ import (
 	"github.com/jinzhu/gorm"
 	"log"
 	"net/http"
+	"time"
 )
 
 //参照関連のエラーが出る可能性あるかもしれない
 func Add(c *gin.Context) {
-	var input group.Group
+	var input group.Input
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
@@ -59,14 +60,22 @@ func Add(c *gin.Context) {
 		return
 	}
 
+	var studentExpired *time.Time = nil
+	if *input.Student {
+		tmpStudentExpired, _ := time.Parse("2006-01-02", *input.StudentExpired)
+		studentExpired = &tmpStudentExpired
+	}
+
 	result, err := dbGroup.Create(&group.Group{
-		Agree:     &[]bool{true}[0],
-		Question:  input.Question,
-		Org:       input.Org,
-		Status:    &[]uint{1}[0],
-		Bandwidth: input.Bandwidth,
-		Comment:   input.Comment,
-		Contract:  input.Contract,
+		Agree:          &[]bool{*input.Agree}[0],
+		Question:       input.Question,
+		Org:            input.Org,
+		Status:         &[]uint{1}[0],
+		ExpiredStatus:  &[]uint{0}[0],
+		Contract:       input.Contract,
+		Student:        input.Student,
+		StudentExpired: studentExpired,
+		Lock:           &[]bool{true}[0],
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
@@ -75,7 +84,6 @@ func Add(c *gin.Context) {
 	attachment := slack.Attachment{}
 	attachment.AddField(slack.Field{Title: "Title", Value: "グループ登録"}).
 		AddField(slack.Field{Title: "Question", Value: input.Question}).
-		AddField(slack.Field{Title: "Bandwidth", Value: input.Bandwidth}).
 		AddField(slack.Field{Title: "Contract", Value: input.Contract})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 
@@ -119,10 +127,6 @@ func Update(c *gin.Context) {
 
 	if data.Org != input.Org {
 		data.Org = input.Org
-	}
-
-	if data.Bandwidth != input.Bandwidth {
-		data.Bandwidth = input.Bandwidth
 	}
 
 	if err := dbGroup.Update(group.UpdateInfo, data); err != nil {
@@ -174,7 +178,6 @@ func Get(c *gin.Context) {
 		Question:      resultGroup.Group[0].Question,
 		Org:           resultGroup.Group[0].Org,
 		Status:        *resultGroup.Group[0].Status,
-		Bandwidth:     resultGroup.Group[0].Bandwidth,
 		Contract:      resultGroup.Group[0].Contract,
 		Student:       resultGroup.Group[0].Student,
 		Pass:          resultGroup.Group[0].Pass,
@@ -248,14 +251,13 @@ func GetAll(c *gin.Context) {
 
 	c.JSON(http.StatusOK, group.ResultAll{
 		Group: group.ResultOne{
-			ID:        result.Group.ID,
-			Agree:     result.Group.Agree,
-			Question:  result.Group.Question,
-			Org:       result.Group.Org,
-			Status:    *result.Group.Status,
-			Bandwidth: result.Group.Bandwidth,
-			Contract:  result.Group.Contract,
-			Student:   result.Group.Student,
+			ID:       result.Group.ID,
+			Agree:    result.Group.Agree,
+			Question: result.Group.Question,
+			Org:      result.Group.Org,
+			Status:   *result.Group.Status,
+			Contract: result.Group.Contract,
+			Student:  result.Group.Student,
 		},
 		Network:    resultNetwork.Network,
 		Admin:      resultAdmin,
