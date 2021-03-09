@@ -5,8 +5,8 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/admin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/tech"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	"github.com/jinzhu/gorm"
+	"time"
 )
 
 const (
@@ -24,18 +24,27 @@ const (
 
 type Group struct {
 	gorm.Model
-	Agree         *bool  `json:"agree"`
-	Question      string `json:"question"`
-	Org           string `json:"org"`
-	Status        *uint  `json:"status"`
-	Bandwidth     string `json:"bandwidth"`
-	Contract      string `json:"contract"`
-	Student       *bool  `json:"student"`
-	Fee           *uint  `json:"fee"`
-	Comment       string `json:"comment"`
-	Pass          *bool  `json:"pass"`
-	Lock          *bool  `json:"lock"`
-	ExpiredStatus *uint  `json:"expired_status"`
+	Agree          *bool      `json:"agree"`
+	Question       string     `json:"question"`
+	Org            string     `json:"org"`
+	Status         *uint      `json:"status"`
+	Contract       string     `json:"contract"`
+	Student        *bool      `json:"student"`
+	StudentExpired *time.Time `json:"student_expired"`
+	Fee            *uint      `json:"fee"`
+	Comment        string     `json:"comment"`
+	Pass           *bool      `json:"pass"`
+	Lock           *bool      `json:"lock"`
+	ExpiredStatus  *uint      `json:"expired_status"`
+}
+
+type Input struct {
+	Agree          *bool   `json:"agree"`
+	Question       string  `json:"question"`
+	Org            string  `json:"org"`
+	Contract       string  `json:"contract"`
+	Student        *bool   `json:"student"`
+	StudentExpired *string `json:"student_expired"`
 }
 
 type Result struct {
@@ -45,7 +54,7 @@ type Result struct {
 }
 
 type AdminResult struct {
-	User       []user.User             `json:"user"`
+	//User       []user.User             `json:"user"`
 	Group      []Group                 `json:"group"`
 	Network    []network.Network       `json:"network"`
 	Connection []connection.Connection `json:"connection"`
