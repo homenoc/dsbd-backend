@@ -167,15 +167,13 @@ func GetAllAdmin(c *gin.Context) {
 		tmpGroupResult := dbGroup.Get(group.ID, &group.Group{Model: gorm.Model{ID: tmp.GroupID}})
 
 		ticketResponse = append(ticketResponse, ticket.AdminResult{
-			Model:       tmp.Model,
-			GroupID:     tmp.GroupID,
-			GroupName:   tmpGroupResult.Group[0].Org,
-			UserID:      tmp.UserID,
-			UserName:    tmpUserResult.User[0].Name,
-			ChatIDStart: tmp.ChatIDStart,
-			ChatIDEnd:   tmp.ChatIDEnd,
-			Solved:      tmp.Solved,
-			Title:       tmp.Title,
+			Model:     tmp.Model,
+			GroupID:   tmp.GroupID,
+			GroupName: tmpGroupResult.Group[0].Org,
+			UserID:    tmp.UserID,
+			UserName:  tmpUserResult.User[0].Name,
+			Solved:    tmp.Solved,
+			Title:     tmp.Title,
 		})
 	}
 

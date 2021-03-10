@@ -18,13 +18,11 @@ const (
 //#4 Issue(解決済み）
 type Ticket struct {
 	gorm.Model
-	GroupID     uint   `json:"group_id"`
-	UserID      uint   `json:"user_id"`
-	Chat        []Chat `json:"chat"`
-	ChatIDStart uint   `json:"chat_id_start"`
-	ChatIDEnd   uint   `json:"chat_id_end"`
-	Solved      *bool  `json:"solved"`
-	Title       string `json:"title"`
+	GroupID uint   `json:"group_id"`
+	UserID  uint   `json:"user_id"`
+	Chat    []Chat `json:"chat"`
+	Solved  *bool  `json:"solved"`
+	Title   string `json:"title"`
 }
 
 type Chat struct {
