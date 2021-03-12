@@ -2,11 +2,11 @@ package v0
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/noc/gateway"
-	router "github.com/homenoc/dsbd-backend/pkg/api/core/noc/router"
-	dbGateway "github.com/homenoc/dsbd-backend/pkg/api/store/noc/gateway/v0"
+	router "github.com/homenoc/dsbd-backend/pkg/api/core/noc/bgpRouter"
+	dbBGPRouter "github.com/homenoc/dsbd-backend/pkg/api/store/noc/bgpRouter/v0"
 	"github.com/jinzhu/gorm"
 	"log"
 	"net/http"
@@ -14,7 +14,7 @@ import (
 )
 
 func AddAdmin(c *gin.Context) {
-	var input gateway.Gateway
+	var input core.BGPRouter
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
@@ -28,7 +28,7 @@ func AddAdmin(c *gin.Context) {
 		return
 	}
 
-	if _, err = dbGateway.Create(&input); err != nil {
+	if _, err = dbBGPRouter.Create(&input); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
@@ -48,7 +48,7 @@ func DeleteAdmin(c *gin.Context) {
 		return
 	}
 
-	if err = dbGateway.Delete(&gateway.Gateway{Model: gorm.Model{ID: uint(id)}}); err != nil {
+	if err = dbBGPRouter.Delete(&core.BGPRouter{Model: gorm.Model{ID: uint(id)}}); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
@@ -56,7 +56,7 @@ func DeleteAdmin(c *gin.Context) {
 }
 
 func UpdateAdmin(c *gin.Context) {
-	var input gateway.Gateway
+	var input core.BGPRouter
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
@@ -77,13 +77,13 @@ func UpdateAdmin(c *gin.Context) {
 		return
 	}
 
-	tmp := dbGateway.Get(router.ID, &gateway.Gateway{Model: gorm.Model{ID: uint(id)}})
+	tmp := dbBGPRouter.Get(router.ID, &core.BGPRouter{Model: gorm.Model{ID: uint(id)}})
 	if tmp.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: tmp.Err.Error()})
 		return
 	}
 
-	if err = dbGateway.Update(router.UpdateAll, replace(input, tmp.Gateway[0])); err != nil {
+	if err = dbBGPRouter.Update(router.UpdateAll, replace(input, tmp.BGPRouter[0])); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
@@ -102,13 +102,13 @@ func GetAdmin(c *gin.Context) {
 		return
 	}
 
-	result := dbGateway.Get(router.ID, &gateway.Gateway{Model: gorm.Model{ID: uint(id)}})
+	result := dbBGPRouter.Get(router.ID, &core.BGPRouter{Model: gorm.Model{ID: uint(id)}})
 	if result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gateway.Result{Gateway: result.Gateway})
+	c.JSON(http.StatusOK, router.Result{BGPRouter: result.BGPRouter})
 }
 
 func GetAllAdmin(c *gin.Context) {
@@ -118,9 +118,9 @@ func GetAllAdmin(c *gin.Context) {
 		return
 	}
 
-	if result := dbGateway.GetAll(); result.Err != nil {
+	if result := dbBGPRouter.GetAll(); result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 	} else {
-		c.JSON(http.StatusOK, gateway.Result{Gateway: result.Gateway})
+		c.JSON(http.StatusOK, router.Result{BGPRouter: result.BGPRouter})
 	}
 }

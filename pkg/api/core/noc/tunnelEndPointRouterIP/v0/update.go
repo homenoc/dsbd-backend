@@ -1,10 +1,8 @@
 package v0
 
-import (
-	"github.com/homenoc/dsbd-backend/pkg/api/core/noc/gatewayIP"
-)
+import "github.com/homenoc/dsbd-backend/pkg/api/core"
 
-func replace(input, replace gatewayIP.GatewayIP) gatewayIP.GatewayIP {
+func replace(input, replace core.TunnelEndPointRouterIP) core.TunnelEndPointRouterIP {
 
 	//IP
 	if input.IP != "" {
@@ -16,10 +14,6 @@ func replace(input, replace gatewayIP.GatewayIP) gatewayIP.GatewayIP {
 	}
 
 	// uint boolean
-	//GatewayIPID
-	if input.GatewayID != 0 {
-		replace.GatewayID = input.GatewayID
-	}
 	//Enable
 	if input.Enable != replace.Enable {
 		replace.Enable = input.Enable
