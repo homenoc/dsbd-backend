@@ -3,12 +3,11 @@ package v0
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/support/chat"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support/ticket"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	dbChat "github.com/homenoc/dsbd-backend/pkg/api/store/support/chat/v0"
 	dbTicket "github.com/homenoc/dsbd-backend/pkg/api/store/support/ticket/v0"
 	"github.com/jinzhu/gorm"
@@ -36,14 +35,14 @@ func Add(c *gin.Context) {
 	}
 
 	// Group authentication
-	result := auth.GroupAuthentication(0, token.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthentication(0, core.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
 	}
 
 	// input check
-	if err := check(input); err != nil {
+	if err = check(input); err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 		return
 	}
@@ -53,7 +52,7 @@ func Add(c *gin.Context) {
 	}
 
 	// IDからDBからチケットを検索
-	resultTicket := dbTicket.Get(ticket.ID, &ticket.Ticket{Model: gorm.Model{ID: uint(id)}})
+	resultTicket := dbTicket.Get(ticket.ID, &core.Ticket{Model: gorm.Model{ID: uint(id)}})
 	if resultTicket.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: resultTicket.Err.Error()})
 		return
@@ -70,7 +69,12 @@ func Add(c *gin.Context) {
 	}
 
 	// Chat DBに登録
-	resultChat, err := dbChat.Create(&chat.Chat{TicketID: resultTicket.Ticket[0].ID, UserID: result.User.ID, Admin: false, Data: input.Data})
+	resultChat, err := dbChat.Create(&core.Chat{
+		TicketID: resultTicket.Ticket[0].ID,
+		UserID:   result.User.ID,
+		Admin:    false,
+		Data:     input.Data,
+	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
