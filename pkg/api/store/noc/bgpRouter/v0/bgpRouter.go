@@ -2,15 +2,15 @@ package v0
 
 import (
 	"fmt"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/noc/gateway"
-	router "github.com/homenoc/dsbd-backend/pkg/api/core/noc/router"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
+	router "github.com/homenoc/dsbd-backend/pkg/api/core/noc/bgpRouter"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
 	"github.com/jinzhu/gorm"
 	"log"
 	"time"
 )
 
-func Create(router *gateway.Gateway) (*gateway.Gateway, error) {
+func Create(router *core.BGPRouter) (*core.BGPRouter, error) {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -22,7 +22,7 @@ func Create(router *gateway.Gateway) (*gateway.Gateway, error) {
 	return router, err
 }
 
-func Delete(router *gateway.Gateway) error {
+func Delete(router *core.BGPRouter) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -33,7 +33,7 @@ func Delete(router *gateway.Gateway) error {
 	return db.Delete(router).Error
 }
 
-func Update(base int, data gateway.Gateway) error {
+func Update(base int, data core.BGPRouter) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -44,11 +44,9 @@ func Update(base int, data gateway.Gateway) error {
 	var result *gorm.DB
 
 	if router.UpdateAll == base {
-		result = db.Model(&gateway.Gateway{Model: gorm.Model{ID: data.ID}}).Update(gateway.Gateway{
-			NOCID:    data.NOCID,
+		result = db.Model(&core.BGPRouter{Model: gorm.Model{ID: data.ID}}).Update(core.BGPRouter{
 			HostName: data.HostName,
-			Capacity: data.Capacity,
-			Comment:  data.Comment,
+			Address:  data.Address,
 			Enable:   data.Enable,
 		})
 	} else {
@@ -58,36 +56,38 @@ func Update(base int, data gateway.Gateway) error {
 	return result.Error
 }
 
-func Get(base int, data *gateway.Gateway) gateway.ResultDatabase {
+func Get(base int, data *core.BGPRouter) router.ResultDatabase {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
-		return gateway.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+		return router.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
 	defer db.Close()
 
-	var routerStruct []gateway.Gateway
+	var routerStruct []core.BGPRouter
 
 	if base == router.ID { //ID
 		err = db.First(&routerStruct, data.ID).Error
+	} else if base == router.Address { //Address
+		err = db.Where("address = ?", data.Address).Find(&routerStruct).Error
 	} else if base == router.Enable { //GroupID
 		err = db.Where("enable = ?", data.Enable).Find(&routerStruct).Error
 	} else {
 		log.Println("base select error")
-		return gateway.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
+		return router.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
 	}
-	return gateway.ResultDatabase{Gateway: routerStruct, Err: err}
+	return router.ResultDatabase{BGPRouter: routerStruct, Err: err}
 }
 
-func GetAll() gateway.ResultDatabase {
+func GetAll() router.ResultDatabase {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
-		return gateway.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+		return router.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
 	defer db.Close()
 
-	var routers []gateway.Gateway
+	var routers []core.BGPRouter
 	err = db.Find(&routers).Error
-	return gateway.ResultDatabase{Gateway: routers, Err: err}
+	return router.ResultDatabase{BGPRouter: routers, Err: err}
 }
