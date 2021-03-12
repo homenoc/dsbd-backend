@@ -7,17 +7,17 @@ import (
 
 type User struct {
 	gorm.Model
-	Tokens     []*Token  `json:"tokens"`
-	Notice     []*Notice `json:"notice"`
-	GroupID    uint      `json:"group_id"`
-	Name       string    `json:"name"`
-	NameEn     string    `json:"name_en"`
-	Email      string    `json:"email"`
-	Pass       string    `json:"pass"`
-	Status     uint      `json:"status"`
-	Level      uint      `json:"level"`
-	MailVerify *bool     `json:"mail_verify"`
-	MailToken  string    `json:"mail_token"`
+	Tokens        []*Token  `json:"tokens"`
+	Notice        []*Notice `json:"notice"`
+	GroupID       uint      `json:"group_id"`
+	Name          string    `json:"name"`
+	NameEn        string    `json:"name_en"`
+	Email         string    `json:"email"`
+	Pass          string    `json:"pass"`
+	ExpiredStatus *uint     `json:"expired_status"`
+	Level         uint      `json:"level"`
+	MailVerify    *bool     `json:"mail_verify"`
+	MailToken     string    `json:"mail_token"`
 }
 
 type Group struct {
@@ -50,57 +50,60 @@ type Group struct {
 
 type Service struct {
 	gorm.Model
-	GroupID         uint            `json:"group_id"`
-	ServiceType     uint            `json:"service_type"`
-	ServiceTemplate ServiceTemplate `gorm:"foreignKey:CompanyRefer" json:"service_type"`
-	ServiceComment  string          `json:"service_comment"`
-	ServiceNumber   uint            `json:"service_number"`
-	Org             string          `json:"org"`
-	OrgEn           string          `json:"org_en"`
-	Postcode        string          `json:"postcode"`
-	Address         string          `json:"address"`
-	AddressEn       string          `json:"address_en"`
-	ASN             string          `json:"asn"`
-	RouteV4         string          `json:"route_v4"`
-	RouteV6         string          `json:"route_v6"`
-	V4Name          string          `json:"v4_name"`
-	V6Name          string          `json:"v6_name"`
-	AveUpstream     uint            `json:"avg_upstream"`
-	MaxUpstream     uint            `json:"max_upstream"`
-	AveDownstream   uint            `json:"avg_downstream"`
-	MaxDownstream   uint            `json:"max_downstream"`
-	MaxBandWidthAS  uint            `json:"max_bandwidth_as"`
-	IP              []IP            `json:"ip"`
-	Connections     []Connection    `json:"connections"`
-	JPNICAdminID    uint            `json:"jpnic_admin_id"`
-	JPNICAdmin      JPNICAdmin      `json:"jpnic_admin"`
-	JPNICTech       []JPNICTech     `json:"jpnic_tech" gorm:"many2many:service_jpnic_tech;"`
-	Open            *bool           `json:"open"`
-	Lock            *bool           `json:"lock"`
+	GroupID           uint             `json:"group_id"`
+	ServiceTemplateID *uint            `json:"service_template_id"`
+	ServiceTemplate   *ServiceTemplate `json:"service_template"`
+	ServiceComment    string           `json:"service_comment"`
+	ServiceNumber     uint             `json:"service_number"`
+	Org               string           `json:"org"`
+	OrgEn             string           `json:"org_en"`
+	Postcode          string           `json:"postcode"`
+	Address           string           `json:"address"`
+	AddressEn         string           `json:"address_en"`
+	ASN               string           `json:"asn"`
+	RouteV4           string           `json:"route_v4"`
+	RouteV6           string           `json:"route_v6"`
+	V4Name            string           `json:"v4_name"`
+	V6Name            string           `json:"v6_name"`
+	AveUpstream       uint             `json:"avg_upstream"`
+	MaxUpstream       uint             `json:"max_upstream"`
+	AveDownstream     uint             `json:"avg_downstream"`
+	MaxDownstream     uint             `json:"max_downstream"`
+	MaxBandWidthAS    uint             `json:"max_bandwidth_as"`
+	IP                []IP             `json:"ip"`
+	Connections       []Connection     `json:"connections"`
+	JPNICAdminID      uint             `json:"jpnic_admin_id"`
+	JPNICAdmin        JPNICAdmin       `json:"jpnic_admin"`
+	JPNICTech         []JPNICTech      `json:"jpnic_tech" gorm:"many2many:service_jpnic_tech;"`
+	Open              *bool            `json:"open"`
+	Lock              *bool            `json:"lock"`
 }
 
 type Connection struct {
 	gorm.Model
-	ServiceID          uint               `json:"service_id"`
-	BGPRouterID        *uint              `json:"bgp_router_id"`       //使用RouterのID
-	TunnelRouterIPID   *uint              `json:"tunnel_router_ip_id"` //使用エンドポイントルータのID
-	ConnectionType     string             `json:"connection_type"`
-	ConnectionTemplate ConnectionTemplate `gorm:"foreignKey:CompanyRefer" json:"connection_type"`
-	ConnectionComment  string             `json:"connection_comment"` // ServiceがETCの時や補足説明で必要
-	ConnectionNumber   uint               `json:"connection_number"`
-	NTT                string             `json:"ntt"`
-	NOC                string             `json:"noc"`
-	TermIP             string             `json:"term_ip"`
-	Monitor            *bool              `json:"monitor"`
-	Prefectures        uint               `json:"prefectures"` //JIS X 0401
-	LinkV4Our          string             `json:"link_v4_our"`
-	LinkV4Your         string             `json:"link_v4_your"`
-	LinkV6Our          string             `json:"link_v6_our"`
-	LinkV6Your         string             `json:"link_v6_your"`
-	Fee                string             `json:"fee"`
-	Open               *bool              `json:"open"`
-	Lock               *bool              `json:"lock"`
-	Comment            string             `json:"comment"`
+	ServiceID            uint                `json:"service_id"`
+	BGPRouterID          *uint               `json:"bgp_router_id"`       //使用RouterのID
+	TunnelRouterIPID     *uint               `json:"tunnel_router_ip_id"` //使用エンドポイントルータのID
+	ConnectionTemplateID *uint               `json:"connection_template_id"`
+	ConnectionTemplate   *ConnectionTemplate `json:"connection_template"`
+	ConnectionComment    string              `json:"connection_comment"` // ServiceがETCの時や補足説明で必要
+	ConnectionNumber     uint                `json:"connection_number"`
+	NTTTemplateID        *uint               `json:"ntt_template_id"`
+	NOCID                *uint               `json:"noc_id"`
+	TermIP               string              `json:"term_ip"`
+	Monitor              *bool               `json:"monitor"`
+	Prefectures          uint                `json:"prefectures"` //JIS X 0401
+	LinkV4Our            string              `json:"link_v4_our"`
+	LinkV4Your           string              `json:"link_v4_your"`
+	LinkV6Our            string              `json:"link_v6_our"`
+	LinkV6Your           string              `json:"link_v6_your"`
+	Fee                  string              `json:"fee"`
+	Open                 *bool               `json:"open"`
+	Lock                 *bool               `json:"lock"`
+	Comment              string              `json:"comment"`
+	NTT                  *NTTTemplate        `json:"ntt_template"`
+	NOC                  *NOC                `json:"noc"`
+	BGPRouter            BGPRouter           `json:"bgp_router"`
 }
 
 type NOC struct {
@@ -209,6 +212,13 @@ type ServiceTemplate struct {
 }
 
 type ConnectionTemplate struct {
+	gorm.Model
+	Hidden  bool   `json:"hidden"`
+	Name    string `json:"name"`
+	Comment string `json:"comment"`
+}
+
+type NTTTemplate struct {
 	gorm.Model
 	Hidden  bool   `json:"hidden"`
 	Name    string `json:"name"`
