@@ -108,15 +108,14 @@ type Connection struct {
 
 type NOC struct {
 	gorm.Model
-	Notice       []*Notice `json:"notice"`
-	BGPRouter    BGPRouter `json:"bgp_router"`
-	TunnelRouter BGPRouter `json:"tunnel_router"`
-	Name         string    `json:"name"`
-	Location     string    `json:"location"`
-	Bandwidth    string    `json:"bandwidth"`
-	New          *bool     `json:"new"`
-	Enable       *bool     `json:"enable"`
-	Comment      string    `json:"comment"`
+	Notice               []*Notice               `json:"notice"`
+	BGPRouter            []*BGPRouter            `json:"bgp_router"`
+	TunnelEndPointRouter []*TunnelEndPointRouter `json:"tunnel_endpoint_router"`
+	Name                 string                  `json:"name"`
+	Location             string                  `json:"location"`
+	Bandwidth            string                  `json:"bandwidth"`
+	Enable               *bool                   `json:"enable"`
+	Comment              string                  `json:"comment"`
 }
 
 type BGPRouter struct {
@@ -126,24 +125,25 @@ type BGPRouter struct {
 	Address      string                  `json:"address"`
 	TunnelRouter []*TunnelEndPointRouter `json:"tunnel_endpoint_router"`
 	Enable       *bool                   `json:"enable"`
+	Comment      string                  `json:"comment"`
 }
 
 type TunnelEndPointRouter struct {
 	gorm.Model
-	NOCID          uint                      `json:"noc_id"`
-	TunnelRouterIP []*TunnelEndPointRouterIP `json:"tunnel_endpoint_router_ip"`
-	HostName       string                    `json:"hostname"`
-	Capacity       uint                      `json:"capacity"`
-	Comment        string                    `json:"comment"`
-	Enable         *bool                     `json:"enable"`
+	NOCID                  uint                      `json:"noc_id"`
+	TunnelEndPointRouterIP []*TunnelEndPointRouterIP `json:"tunnel_endpoint_router_ip"`
+	HostName               string                    `json:"hostname"`
+	Capacity               uint                      `json:"capacity"`
+	Enable                 *bool                     `json:"enable"`
+	Comment                string                    `json:"comment"`
 }
 
 type TunnelEndPointRouterIP struct {
 	gorm.Model
 	TunnelRouterID uint   `json:"tunnel_router_id"`
 	IP             string `json:"ip"`
-	Comment        string `json:"comment"`
 	Enable         *bool  `json:"enable"`
+	Comment        string `json:"comment"`
 }
 
 type IP struct {
@@ -171,7 +171,6 @@ type Plan struct {
 
 type JPNICAdmin struct {
 	gorm.Model
-	ServiceID uint      `json:"service_id"`
 	Service   []Service `gorm:"foreignkey:JPNICAdminID"`
 	Org       string    `json:"org"`
 	OrgEn     string    `json:"org_en"`
@@ -208,6 +207,7 @@ type ServiceTemplate struct {
 	gorm.Model
 	Hidden  bool   `json:"hidden"`
 	Name    string `json:"name"`
+	Type    string `json:"type"`
 	Comment string `json:"comment"`
 }
 
@@ -215,6 +215,7 @@ type ConnectionTemplate struct {
 	gorm.Model
 	Hidden  bool   `json:"hidden"`
 	Name    string `json:"name"`
+	Type    string `json:"type"`
 	Comment string `json:"comment"`
 }
 
