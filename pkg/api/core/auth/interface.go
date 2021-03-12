@@ -1,18 +1,17 @@
 package auth
 
 import (
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 )
 
 type UserResult struct {
-	User user.User
+	User core.User
 	Err  error
 }
 
 type GroupResult struct {
-	Group group.Group
-	User  user.User
+	Group core.Group
+	User  core.User
 	Err   error
 }
 

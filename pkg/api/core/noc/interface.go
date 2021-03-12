@@ -1,25 +1,15 @@
 package noc
 
 import (
-	"github.com/jinzhu/gorm"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 )
 
 const (
 	ID        = 0
 	Name      = 1
 	Enable    = 2
-	UpdateAll = 110
+	UpdateAll = 150
 )
-
-type NOC struct {
-	gorm.Model
-	Name      string `json:"name"`
-	Location  string `json:"location"`
-	Bandwidth string `json:"bandwidth"`
-	New       *bool  `json:"new"`
-	Enable    *bool  `json:"enable"`
-	Comment   string `json:"comment"`
-}
 
 type ResultOneUser struct {
 	Name     string `json:"name"`
@@ -32,10 +22,10 @@ type ResultAllUser struct {
 }
 
 type Result struct {
-	NOC []NOC `json:"noc"`
+	NOC []core.NOC `json:"noc"`
 }
 
 type ResultDatabase struct {
 	Err error
-	NOC []NOC
+	NOC []core.NOC
 }
