@@ -3,6 +3,7 @@ package v0
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/hash"
@@ -14,6 +15,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -23,13 +25,19 @@ func GenerateInit(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	log.Println("userToken: " + userToken)
 	tmpToken, _ := toolToken.Generate(2)
-	err := dbToken.Create(&token.Token{ExpiredAt: time.Now().Add(30 * time.Minute), UserID: 0, Status: 0,
-		UserToken: userToken, TmpToken: tmpToken, Debug: ip, Admin: &[]bool{false}[0]})
+	err := dbToken.Create(&core.Token{
+		ExpiredAt: time.Now().Add(30 * time.Minute),
+		UserID:    0,
+		Status:    0,
+		UserToken: userToken,
+		TmpToken:  tmpToken,
+		Debug:     ip,
+		Admin:     &[]bool{false}[0],
+	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 	} else {
-		log.Println("Time: " + time.Now().String() + " IP: " + c.ClientIP())
-		logging.WriteLog("IP: " + c.ClientIP())
+		logging.WriteLog(time.Now().Format("2006-01-02 15:04:05") + " |Generate Init Token: ")
 		c.JSON(http.StatusOK, &token.ResultTmpToken{Token: tmpToken})
 	}
 }
@@ -38,12 +46,13 @@ func Generate(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	hashPass := c.Request.Header.Get("HASH_PASS")
 	mail := c.Request.Header.Get("Email")
-	tokenResult := dbToken.Get(token.UserToken, &token.Token{UserToken: userToken})
+	tokenResult := dbToken.Get(token.UserToken, &core.Token{UserToken: userToken})
 	if tokenResult.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: tokenResult.Err.Error()})
 		return
 	}
-	userResult := dbUser.Get(user.Email, &user.User{Email: mail})
+
+	userResult := dbUser.Get(user.Email, &core.User{Email: mail})
 	if userResult.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: userResult.Err.Error()})
 		return
@@ -59,7 +68,7 @@ func Generate(c *gin.Context) {
 		return
 	}
 
-	if userResult.User[0].Status >= 100 {
+	if *userResult.User[0].ExpiredStatus >= 1 {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: fmt.Sprintf("status error")})
 		return
 	}
@@ -72,13 +81,21 @@ func Generate(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: "not match"})
 		return
 	}
+
 	accessToken, _ := toolToken.Generate(2)
-	err := dbToken.Update(token.AddToken, &token.Token{Model: gorm.Model{ID: tokenResult.Token[0].Model.ID},
-		ExpiredAt: time.Now().Add(30 * time.Minute), UserID: userResult.User[0].ID, Status: 1, AccessToken: accessToken})
+	err := dbToken.Update(token.AddToken, &core.Token{Model: gorm.Model{ID: tokenResult.Token[0].Model.ID},
+		ExpiredAt:   time.Now().Add(30 * time.Minute),
+		UserID:      userResult.User[0].ID,
+		Status:      1,
+		AccessToken: accessToken,
+	})
 	if err != nil {
+		logging.WriteLog(time.Now().Format("2006-01-02 15:04:05") + " |(Err)Generate Token: ")
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 	} else {
-		tmp := []token.Token{{AccessToken: accessToken}}
+		logging.WriteLog(time.Now().Format("2006-01-02 15:04:05") + " |Generate Token: (UID:" +
+			strconv.Itoa(int(userResult.User[0].ID)) + " AccessToken: " + accessToken + ")")
+		tmp := []core.Token{{AccessToken: accessToken}}
 		c.JSON(http.StatusOK, &token.Result{Token: tmp})
 	}
 }
@@ -87,12 +104,12 @@ func Delete(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	result := dbToken.Get(token.UserTokenAndAccessToken, &token.Token{UserToken: userToken, AccessToken: accessToken})
+	result := dbToken.Get(token.UserTokenAndAccessToken, &core.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
 	}
-	if err := dbToken.Delete(&token.Token{Model: gorm.Model{ID: result.Token[0].ID}}); err != nil {
+	if err := dbToken.Delete(&core.Token{Model: gorm.Model{ID: result.Token[0].ID}}); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
