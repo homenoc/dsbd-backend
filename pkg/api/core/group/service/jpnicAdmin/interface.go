@@ -6,7 +6,7 @@ import (
 
 const (
 	ID               = 0
-	NetworkId        = 1
+	GroupID          = 1
 	UserId           = 2
 	NetworkAndUserId = 3
 	UpdateLock       = 100

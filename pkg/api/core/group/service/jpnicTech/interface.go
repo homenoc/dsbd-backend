@@ -5,12 +5,10 @@ import (
 )
 
 const (
-	ID               = 0
-	NetworkID        = 1
-	UserId           = 2
-	NetworkAndUserId = 3
-	UpdateLock       = 100
-	UpdateAll        = 150
+	ID         = 0
+	GroupID    = 1
+	UpdateLock = 100
+	UpdateAll  = 150
 )
 
 type Result struct {
