@@ -3,20 +3,14 @@ package v0
 import (
 	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/gin-gonic/gin"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/admin"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/tech"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
-	dbConnection "github.com/homenoc/dsbd-backend/pkg/api/store/group/connection/v0"
-	dbAdmin "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/admin/v0"
-	dbTech "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/tech/v0"
-	dbNetwork "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/v0"
+	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"github.com/jinzhu/gorm"
@@ -38,7 +32,7 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	userResult := auth.UserAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	userResult := auth.UserAuthentication(core.Token{UserToken: userToken, AccessToken: accessToken})
 	if userResult.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: userResult.Err.Error()})
 		return
@@ -66,7 +60,7 @@ func Add(c *gin.Context) {
 		studentExpired = &tmpStudentExpired
 	}
 
-	result, err := dbGroup.Create(&group.Group{
+	result, err := dbGroup.Create(&core.Group{
 		Agree:          &[]bool{*input.Agree}[0],
 		Question:       input.Question,
 		Org:            input.Org,
@@ -87,8 +81,8 @@ func Add(c *gin.Context) {
 		AddField(slack.Field{Title: "Contract", Value: input.Contract})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 
-	if err = dbUser.Update(user.UpdateGID, &user.User{Model: gorm.Model{ID: userResult.User.ID}, GroupID: result.Model.ID}); err != nil {
-		log.Println(dbGroup.Delete(&group.Group{Model: gorm.Model{ID: result.ID}}))
+	if err = dbUser.Update(user.UpdateGID, &core.User{Model: gorm.Model{ID: userResult.User.ID}, GroupID: result.Model.ID}); err != nil {
+		log.Println(dbGroup.Delete(&core.Group{Model: gorm.Model{ID: result.ID}}))
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 	} else {
 		c.JSON(http.StatusOK, common.Result{})
@@ -96,7 +90,7 @@ func Add(c *gin.Context) {
 }
 
 func Update(c *gin.Context) {
-	var input group.Group
+	var input core.Group
 
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
@@ -108,7 +102,7 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	authResult := auth.GroupAuthentication(0, token.Token{UserToken: userToken, AccessToken: accessToken})
+	authResult := auth.GroupAuthentication(0, core.Token{UserToken: userToken, AccessToken: accessToken})
 	if authResult.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: authResult.Err.Error()})
 		return
@@ -129,7 +123,7 @@ func Update(c *gin.Context) {
 		data.Org = input.Org
 	}
 
-	if err := dbGroup.Update(group.UpdateInfo, data); err != nil {
+	if err = dbGroup.Update(group.UpdateInfo, data); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: authResult.Err.Error()})
 		return
 	}
@@ -141,7 +135,7 @@ func Get(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	result := auth.GroupAuthentication(1, token.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthentication(1, core.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
@@ -154,21 +148,21 @@ func Get(c *gin.Context) {
 		}
 	}
 
-	resultGroup := dbGroup.Get(group.ID, &group.Group{Model: gorm.Model{ID: result.Group.ID}})
+	resultGroup := dbGroup.Get(group.ID, &core.Group{Model: gorm.Model{ID: result.Group.ID}})
 	if resultGroup.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
 	}
 
 	// Network情報にて開通しているものを抜き出す
-	resultNetwork := dbNetwork.Get(network.Open, &network.Network{GroupID: result.Group.ID})
-	if resultNetwork.Err != nil {
+	resultService := dbService.Get(service.Open, &core.Service{GroupID: result.Group.ID})
+	if resultService.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
 	}
 
 	open := false
-	if len(resultNetwork.Network) > 0 {
+	if len(resultService.Service) > 0 {
 		open = true
 	}
 
@@ -191,7 +185,7 @@ func GetAll(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	result := auth.GroupAuthentication(0, token.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthentication(0, core.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
@@ -204,64 +198,66 @@ func GetAll(c *gin.Context) {
 		}
 	}
 
-	resultNetwork := dbNetwork.Get(network.GID, &network.Network{GroupID: result.Group.ID})
-	if resultNetwork.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
-		return
-	}
-	if len(resultNetwork.Network) == 0 {
-		resultNetwork.Network = nil
-	}
+	//resultService := dbService.Get(service.GID, &core.Service{GroupID: result.Group.ID})
+	//if resultService.Err != nil {
+	//	c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
+	//	return
+	//}
+	//if len(resultService.Service) == 0 {
+	//	resultService.Service = nil
+	//}
+	//
+	//resultConnection := dbConnection.Get(connection.ServiceID, &core.Connection{GroupID: result.Group.ID})
+	//if resultConnection.Err != nil {
+	//	c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
+	//	return
+	//}
+	//if len(resultConnection.Connection) == 0 {
+	//	resultConnection.Connection = nil
+	//}
+	//
+	//var resultTech []core.JPNICTech = nil
+	//var resultAdmin []core.JPNICAdmin = nil
+	//
+	//for _, data := range resultService.Service {
+	//	tmpAdmin := dbAdmin.Get(admin.NetworkId, &admin.Admin{NetworkID: data.ID})
+	//	if tmpAdmin.Err != nil {
+	//		c.JSON(http.StatusInternalServerError, common.Error{Error: tmpAdmin.Err.Error()})
+	//		return
+	//	}
+	//	if len(tmpAdmin.Admins) == 0 {
+	//		break
+	//	}
+	//	resultAdmin = append(resultAdmin, tmpAdmin.Admins[0])
+	//
+	//	tmpTech := dbTech.Get(admin.NetworkId, &tech.Tech{NetworkID: data.ID})
+	//	if tmpAdmin.Err != nil {
+	//		c.JSON(http.StatusInternalServerError, common.Error{Error: tmpAdmin.Err.Error()})
+	//		return
+	//	}
+	//	if len(tmpTech.Tech) == 0 {
+	//		break
+	//	}
+	//	for _, tmpTechDetail := range tmpTech.Tech {
+	//		resultTech = append(resultTech, tmpTechDetail)
+	//	}
+	//}
 
-	resultConnection := dbConnection.Get(connection.GID, &connection.Connection{GroupID: result.Group.ID})
-	if resultConnection.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
-		return
-	}
-	if len(resultConnection.Connection) == 0 {
-		resultConnection.Connection = nil
-	}
+	c.JSON(http.StatusOK, group.Result{Group: result.Group})
 
-	var resultTech []tech.Tech = nil
-	var resultAdmin []admin.Admin = nil
-
-	for _, data := range resultNetwork.Network {
-		tmpAdmin := dbAdmin.Get(admin.NetworkId, &admin.Admin{NetworkID: data.ID})
-		if tmpAdmin.Err != nil {
-			c.JSON(http.StatusInternalServerError, common.Error{Error: tmpAdmin.Err.Error()})
-			return
-		}
-		if len(tmpAdmin.Admins) == 0 {
-			break
-		}
-		resultAdmin = append(resultAdmin, tmpAdmin.Admins[0])
-
-		tmpTech := dbTech.Get(admin.NetworkId, &tech.Tech{NetworkID: data.ID})
-		if tmpAdmin.Err != nil {
-			c.JSON(http.StatusInternalServerError, common.Error{Error: tmpAdmin.Err.Error()})
-			return
-		}
-		if len(tmpTech.Tech) == 0 {
-			break
-		}
-		for _, tmpTechDetail := range tmpTech.Tech {
-			resultTech = append(resultTech, tmpTechDetail)
-		}
-	}
-
-	c.JSON(http.StatusOK, group.ResultAll{
-		Group: group.ResultOne{
-			ID:       result.Group.ID,
-			Agree:    result.Group.Agree,
-			Question: result.Group.Question,
-			Org:      result.Group.Org,
-			Status:   *result.Group.Status,
-			Contract: result.Group.Contract,
-			Student:  result.Group.Student,
-		},
-		Network:    resultNetwork.Network,
-		Admin:      resultAdmin,
-		Tech:       resultTech,
-		Connection: resultConnection.Connection,
-	})
+	//c.JSON(http.StatusOK, group.ResultAll{
+	//	Group: group.ResultOne{
+	//		ID:       result.Group.ID,
+	//		Agree:    result.Group.Agree,
+	//		Question: result.Group.Question,
+	//		Org:      result.Group.Org,
+	//		Status:   *result.Group.Status,
+	//		Contract: result.Group.Contract,
+	//		Student:  result.Group.Student,
+	//	},
+	//	Network:    resultService.Service,
+	//	Admin:      resultAdmin,
+	//	Tech:       resultTech,
+	//	Connection: resultcore.Connection,
+	//})
 }

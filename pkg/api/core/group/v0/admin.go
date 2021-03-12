@@ -3,17 +3,12 @@ package v0
 import (
 	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/gin-gonic/gin"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
-	groupConnection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
-	groupNetwork "github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
-	dbConnection "github.com/homenoc/dsbd-backend/pkg/api/store/group/connection/v0"
-	dbNetwork "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/v0"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
-	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"github.com/jinzhu/gorm"
 	"log"
 	"net/http"
@@ -21,7 +16,7 @@ import (
 )
 
 func AddAdmin(c *gin.Context) {
-	var input group.Group
+	var input core.Group
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
@@ -56,7 +51,7 @@ func DeleteAdmin(c *gin.Context) {
 		return
 	}
 
-	if err := dbGroup.Delete(&group.Group{Model: gorm.Model{ID: uint(id)}}); err != nil {
+	if err := dbGroup.Delete(&core.Group{Model: gorm.Model{ID: uint(id)}}); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
@@ -64,7 +59,7 @@ func DeleteAdmin(c *gin.Context) {
 }
 
 func UpdateAdmin(c *gin.Context) {
-	var input group.Group
+	var input core.Group
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
@@ -79,7 +74,7 @@ func UpdateAdmin(c *gin.Context) {
 		return
 	}
 
-	tmp := dbGroup.Get(group.ID, &group.Group{Model: gorm.Model{ID: input.ID}})
+	tmp := dbGroup.Get(group.ID, &core.Group{Model: gorm.Model{ID: input.ID}})
 	if tmp.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: tmp.Err.Error()})
 		return
@@ -132,32 +127,15 @@ func GetAdmin(c *gin.Context) {
 		return
 	}
 
-	result := dbGroup.Get(group.ID, &group.Group{Model: gorm.Model{ID: uint(id)}})
+	result := dbGroup.Get(group.ID, &core.Group{Model: gorm.Model{ID: uint(id)}})
 	if result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
 	}
 
-	resultUser := dbUser.Get(user.GID, &user.User{GroupID: uint(id)})
-	if resultUser.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
-		return
-	}
-
-	resultNetwork := dbNetwork.Get(groupNetwork.GID, &groupNetwork.Network{GroupID: uint(id)})
-	if resultNetwork.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
-		return
-	}
-
-	resultConnection := dbConnection.Get(groupConnection.GID, &groupConnection.Connection{GroupID: uint(id)})
-	if resultConnection.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, group.AdminResult{User: resultUser.User, Group: result.Group,
-		Network: resultNetwork.Network, Connection: resultConnection.Connection})
+	c.JSON(http.StatusOK, group.Result{
+		Group: result.Group[0],
+	})
 }
 
 func GetAllAdmin(c *gin.Context) {
@@ -170,6 +148,6 @@ func GetAllAdmin(c *gin.Context) {
 	if result := dbGroup.GetAll(); result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 	} else {
-		c.JSON(http.StatusOK, group.Result{Group: result.Group})
+		c.JSON(http.StatusOK, group.ResultAll{Group: result.Group})
 	}
 }
