@@ -1,10 +1,10 @@
 package v0
 
 import (
-	"github.com/homenoc/dsbd-backend/pkg/api/core/noc"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 )
 
-func replace(input, replace noc.NOC) noc.NOC {
+func replace(input, replace core.NOC) core.NOC {
 
 	//Name
 	if input.Name != "" {

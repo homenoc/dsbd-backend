@@ -4,9 +4,7 @@ import "github.com/homenoc/dsbd-backend/pkg/api/core"
 
 const (
 	ID        = 0
-	NOC       = 1
-	Address   = 2
-	Enable    = 3
+	Enable    = 1
 	UpdateAll = 150
 )
 

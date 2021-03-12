@@ -2,10 +2,10 @@ package v0
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/noc"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	dbNOC "github.com/homenoc/dsbd-backend/pkg/api/store/noc/v0"
 	"net/http"
 )
@@ -14,7 +14,7 @@ func GetAll(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	userResult := auth.UserAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	userResult := auth.UserAuthentication(core.Token{UserToken: userToken, AccessToken: accessToken})
 	if userResult.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: userResult.Err.Error()})
 		return

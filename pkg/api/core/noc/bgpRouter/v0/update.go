@@ -1,10 +1,10 @@
 package v0
 
 import (
-	router "github.com/homenoc/dsbd-backend/pkg/api/core/noc/router"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 )
 
-func replace(input, replace router.Router) router.Router {
+func replace(input, replace core.BGPRouter) core.BGPRouter {
 
 	//HostName
 	if input.HostName != "" {
@@ -16,9 +16,9 @@ func replace(input, replace router.Router) router.Router {
 	}
 
 	// uint boolean
-	//HostName
-	if input.NOC != 0 {
-		replace.NOC = input.NOC
+	//NOC
+	if input.NOCID != 0 {
+		replace.NOCID = input.NOCID
 	}
 	//Enable
 	if input.Enable != replace.Enable {

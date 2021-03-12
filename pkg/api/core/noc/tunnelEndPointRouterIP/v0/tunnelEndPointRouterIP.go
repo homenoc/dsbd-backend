@@ -5,8 +5,8 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/noc"
-	dbNOC "github.com/homenoc/dsbd-backend/pkg/api/store/noc/v0"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/noc/tunnelEndPointRouterIP"
+	dbTunnelEndPointRouterIP "github.com/homenoc/dsbd-backend/pkg/api/store/noc/tunnelEndPointRouterIP/v0"
 	"github.com/jinzhu/gorm"
 	"log"
 	"net/http"
@@ -14,7 +14,7 @@ import (
 )
 
 func AddAdmin(c *gin.Context) {
-	var input core.NOC
+	var input core.TunnelEndPointRouterIP
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
@@ -28,11 +28,11 @@ func AddAdmin(c *gin.Context) {
 		return
 	}
 
-	if _, err = dbNOC.Create(&input); err != nil {
+	if _, err = dbTunnelEndPointRouterIP.Create(&input); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, noc.Result{})
+	c.JSON(http.StatusOK, common.Result{})
 }
 
 func DeleteAdmin(c *gin.Context) {
@@ -48,15 +48,15 @@ func DeleteAdmin(c *gin.Context) {
 		return
 	}
 
-	if err := dbNOC.Delete(&core.NOC{Model: gorm.Model{ID: uint(id)}}); err != nil {
+	if err = dbTunnelEndPointRouterIP.Delete(&core.TunnelEndPointRouterIP{Model: gorm.Model{ID: uint(id)}}); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, noc.Result{})
+	c.JSON(http.StatusOK, common.Result{})
 }
 
 func UpdateAdmin(c *gin.Context) {
-	var input core.NOC
+	var input core.TunnelEndPointRouterIP
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
@@ -77,17 +77,17 @@ func UpdateAdmin(c *gin.Context) {
 		return
 	}
 
-	tmp := dbNOC.Get(noc.ID, &core.NOC{Model: gorm.Model{ID: uint(id)}})
+	tmp := dbTunnelEndPointRouterIP.Get(tunnelEndPointRouterIP.ID, &core.TunnelEndPointRouterIP{Model: gorm.Model{ID: uint(id)}})
 	if tmp.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: tmp.Err.Error()})
 		return
 	}
 
-	if err = dbNOC.Update(noc.UpdateAll, replace(input, tmp.NOC[0])); err != nil {
+	if err = dbTunnelEndPointRouterIP.Update(tunnelEndPointRouterIP.UpdateAll, replace(input, tmp.TunnelEndPointRouterIP[0])); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, noc.Result{})
+	c.JSON(http.StatusOK, common.Result{})
 }
 
 func GetAdmin(c *gin.Context) {
@@ -102,13 +102,13 @@ func GetAdmin(c *gin.Context) {
 		return
 	}
 
-	result := dbNOC.Get(noc.ID, &core.NOC{Model: gorm.Model{ID: uint(id)}})
+	result := dbTunnelEndPointRouterIP.Get(tunnelEndPointRouterIP.ID, &core.TunnelEndPointRouterIP{Model: gorm.Model{ID: uint(id)}})
 	if result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, noc.Result{NOC: result.NOC})
+	c.JSON(http.StatusOK, tunnelEndPointRouterIP.Result{TunnelEndPointRouterIP: result.TunnelEndPointRouterIP})
 }
 
 func GetAllAdmin(c *gin.Context) {
@@ -118,9 +118,9 @@ func GetAllAdmin(c *gin.Context) {
 		return
 	}
 
-	if result := dbNOC.GetAll(); result.Err != nil {
+	if result := dbTunnelEndPointRouterIP.GetAll(); result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 	} else {
-		c.JSON(http.StatusOK, noc.Result{NOC: result.NOC})
+		c.JSON(http.StatusOK, tunnelEndPointRouterIP.Result{TunnelEndPointRouterIP: result.TunnelEndPointRouterIP})
 	}
 }

@@ -1,10 +1,10 @@
 package v0
 
 import (
-	"github.com/homenoc/dsbd-backend/pkg/api/core/noc/gateway"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 )
 
-func replace(input, replace gateway.Gateway) gateway.Gateway {
+func replace(input, replace core.TunnelEndPointRouter) core.TunnelEndPointRouter {
 
 	//HostName
 	if input.HostName != "" {
