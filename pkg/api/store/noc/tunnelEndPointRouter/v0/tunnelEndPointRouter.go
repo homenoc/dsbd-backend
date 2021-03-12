@@ -2,15 +2,16 @@ package v0
 
 import (
 	"fmt"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/noc/gatewayIP"
-	router "github.com/homenoc/dsbd-backend/pkg/api/core/noc/router"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/noc/tunnelEndPointRouter"
+	router "github.com/homenoc/dsbd-backend/pkg/api/core/noc/tunnelEndPointRouterIP"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
 	"github.com/jinzhu/gorm"
 	"log"
 	"time"
 )
 
-func Create(router *gatewayIP.GatewayIP) (*gatewayIP.GatewayIP, error) {
+func Create(router *core.TunnelEndPointRouter) (*core.TunnelEndPointRouter, error) {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -22,7 +23,7 @@ func Create(router *gatewayIP.GatewayIP) (*gatewayIP.GatewayIP, error) {
 	return router, err
 }
 
-func Delete(router *gatewayIP.GatewayIP) error {
+func Delete(router *core.TunnelEndPointRouter) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -33,7 +34,7 @@ func Delete(router *gatewayIP.GatewayIP) error {
 	return db.Delete(router).Error
 }
 
-func Update(base int, data gatewayIP.GatewayIP) error {
+func Update(base int, data core.TunnelEndPointRouter) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -44,11 +45,12 @@ func Update(base int, data gatewayIP.GatewayIP) error {
 	var result *gorm.DB
 
 	if router.UpdateAll == base {
-		result = db.Model(&gatewayIP.GatewayIP{Model: gorm.Model{ID: data.ID}}).Update(gatewayIP.GatewayIP{
-			GatewayID: data.GatewayID,
-			IP:        data.IP,
-			Comment:   data.Comment,
-			Enable:    data.Enable,
+		result = db.Model(&core.TunnelEndPointRouter{Model: gorm.Model{ID: data.ID}}).Update(core.TunnelEndPointRouter{
+			NOCID:    data.NOCID,
+			HostName: data.HostName,
+			Capacity: data.Capacity,
+			Comment:  data.Comment,
+			Enable:   data.Enable,
 		})
 	} else {
 		log.Println("base select error")
@@ -57,15 +59,15 @@ func Update(base int, data gatewayIP.GatewayIP) error {
 	return result.Error
 }
 
-func Get(base int, data *gatewayIP.GatewayIP) gatewayIP.ResultDatabase {
+func Get(base int, data *core.TunnelEndPointRouter) tunnelEndPointRouter.ResultDatabase {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
-		return gatewayIP.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+		return tunnelEndPointRouter.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
 	defer db.Close()
 
-	var routerStruct []gatewayIP.GatewayIP
+	var routerStruct []core.TunnelEndPointRouter
 
 	if base == router.ID { //ID
 		err = db.First(&routerStruct, data.ID).Error
@@ -73,20 +75,20 @@ func Get(base int, data *gatewayIP.GatewayIP) gatewayIP.ResultDatabase {
 		err = db.Where("enable = ?", data.Enable).Find(&routerStruct).Error
 	} else {
 		log.Println("base select error")
-		return gatewayIP.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
+		return tunnelEndPointRouter.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
 	}
-	return gatewayIP.ResultDatabase{GatewayIP: routerStruct, Err: err}
+	return tunnelEndPointRouter.ResultDatabase{TunnelEndPointRouter: routerStruct, Err: err}
 }
 
-func GetAll() gatewayIP.ResultDatabase {
+func GetAll() tunnelEndPointRouter.ResultDatabase {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
-		return gatewayIP.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+		return tunnelEndPointRouter.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
 	defer db.Close()
 
-	var routers []gatewayIP.GatewayIP
+	var routers []core.TunnelEndPointRouter
 	err = db.Find(&routers).Error
-	return gatewayIP.ResultDatabase{GatewayIP: routers, Err: err}
+	return tunnelEndPointRouter.ResultDatabase{TunnelEndPointRouter: routers, Err: err}
 }

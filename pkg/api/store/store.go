@@ -1,21 +1,8 @@
 package store
 
 import (
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
-	connection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
-	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/admin"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/tech"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/noc"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/noc/gateway"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/noc/gatewayIP"
-	nocRouter "github.com/homenoc/dsbd-backend/pkg/api/core/noc/router"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/notice"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/support/chat"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/support/ticket"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"log"
@@ -38,23 +25,25 @@ func ConnectDB() (*gorm.DB, error) {
 func InitDB() {
 	db, _ := ConnectDB()
 	result := db.AutoMigrate(
-		&user.User{},
-		&group.Group{},
-		&token.Token{},
-		&network.Network{},
-		&network.IP{},
-		&network.Admin{},
-		&network.Tech{},
-		&connection.Connection{},
-		&admin.Admin{},
-		&tech.Tech{},
-		&notice.Notice{},
-		&ticket.Ticket{},
-		&chat.Chat{},
-		&noc.NOC{},
-		&gateway.Gateway{},
-		&gatewayIP.GatewayIP{},
-		&nocRouter.Router{},
+		&core.User{},
+		&core.Group{},
+		&core.Service{},
+		&core.Connection{},
+		&core.NOC{},
+		&core.BGPRouter{},
+		&core.TunnelEndPointRouter{},
+		&core.TunnelEndPointRouterIP{},
+		&core.IP{},
+		&core.Plan{},
+		&core.JPNICAdmin{},
+		&core.JPNICTech{},
+		&core.ServiceTemplate{},
+		&core.ConnectionTemplate{},
+		&core.NTTTemplate{},
+		&core.Ticket{},
+		&core.Chat{},
+		&core.Token{},
+		&core.Notice{},
 	)
 	log.Println(result.Error)
 }

@@ -2,6 +2,7 @@ package v0
 
 import (
 	"fmt"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support/ticket"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
 	"github.com/jinzhu/gorm"
@@ -9,7 +10,7 @@ import (
 	"time"
 )
 
-func Create(support *ticket.Ticket) (*ticket.Ticket, error) {
+func Create(support *core.Ticket) (*core.Ticket, error) {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -21,7 +22,7 @@ func Create(support *ticket.Ticket) (*ticket.Ticket, error) {
 	return support, err
 }
 
-func Delete(support *ticket.Ticket) error {
+func Delete(support *core.Ticket) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -32,7 +33,7 @@ func Delete(support *ticket.Ticket) error {
 	return db.Delete(support).Error
 }
 
-func Update(base int, t ticket.Ticket) error {
+func Update(base int, t core.Ticket) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -44,7 +45,7 @@ func Update(base int, t ticket.Ticket) error {
 
 	//#4 Issue(解決済み）
 	if ticket.UpdateAll == base {
-		result = db.Model(&ticket.Ticket{Model: gorm.Model{ID: t.ID}}).Update(&ticket.Ticket{Title: t.Title,
+		result = db.Model(&core.Ticket{Model: gorm.Model{ID: t.ID}}).Update(&core.Ticket{Title: t.Title,
 			GroupID: t.GroupID,
 			UserID:  t.UserID,
 			Solved:  t.Solved,
@@ -56,7 +57,7 @@ func Update(base int, t ticket.Ticket) error {
 	return result.Error
 }
 
-func Get(base int, data *ticket.Ticket) ticket.ResultDatabase {
+func Get(base int, data *core.Ticket) ticket.ResultDatabase {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -64,7 +65,7 @@ func Get(base int, data *ticket.Ticket) ticket.ResultDatabase {
 	}
 	defer db.Close()
 
-	var ticketStruct []ticket.Ticket
+	var ticketStruct []core.Ticket
 
 	if base == ticket.ID { //ID
 		err = db.First(&ticketStruct, data.ID).Error
@@ -87,7 +88,7 @@ func GetAll() ticket.ResultDatabase {
 	}
 	defer db.Close()
 
-	var tickets []ticket.Ticket
+	var tickets []core.Ticket
 	err = db.Find(&tickets).Error
 	return ticket.ResultDatabase{Ticket: tickets, Err: err}
 }
