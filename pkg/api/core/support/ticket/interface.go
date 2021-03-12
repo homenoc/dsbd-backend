@@ -2,6 +2,7 @@ package ticket
 
 import (
 	"github.com/gorilla/websocket"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/jinzhu/gorm"
 	"net/http"
 )
@@ -10,28 +11,10 @@ const (
 	ID        = 0
 	GID       = 1
 	UID       = 2
-	CIDStart  = 3
-	CIDEnd    = 4
-	UpdateAll = 110
+	UpdateAll = 150
 )
 
 //#4 Issue(解決済み）
-type Ticket struct {
-	gorm.Model
-	GroupID uint   `json:"group_id"`
-	UserID  uint   `json:"user_id"`
-	Chat    []Chat `json:"chat"`
-	Solved  *bool  `json:"solved"`
-	Title   string `json:"title"`
-}
-
-type Chat struct {
-	gorm.Model
-	TicketID uint   `json:"ticket_id"`
-	UserID   uint   `json:"user_id"`
-	Admin    bool   `json:"admin"`
-	Data     string `json:"data" gorm:"size:65535"`
-}
 
 type AdminAllResult struct {
 	Ticket []AdminResult `json:"ticket"`
@@ -53,7 +36,7 @@ type AdminResult struct {
 
 type ResultDatabase struct {
 	Err    error
-	Ticket []Ticket
+	Ticket []core.Ticket
 }
 
 var WsUpgrader = websocket.Upgrader{

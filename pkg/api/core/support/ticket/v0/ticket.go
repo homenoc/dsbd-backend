@@ -5,6 +5,7 @@ import (
 	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	controllerInterface "github.com/homenoc/dsbd-backend/pkg/api/core/controller"
@@ -12,7 +13,6 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support/chat"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support/ticket"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	dbChat "github.com/homenoc/dsbd-backend/pkg/api/store/support/chat/v0"
 	dbTicket "github.com/homenoc/dsbd-backend/pkg/api/store/support/ticket/v0"
@@ -36,7 +36,7 @@ func Create(c *gin.Context) {
 	}
 
 	// Group authentication
-	result := auth.GroupAuthentication(0, token.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthentication(0, core.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
@@ -49,16 +49,24 @@ func Create(c *gin.Context) {
 	}
 
 	// Ticket DBに登録
-	ticketResult, err := dbTicket.Create(&ticket.Ticket{GroupID: result.Group.ID, UserID: result.User.ID,
-		Solved: &[]bool{false}[0], Title: input.Title})
+	ticketResult, err := dbTicket.Create(&core.Ticket{
+		GroupID: result.Group.ID,
+		UserID:  result.User.ID,
+		Solved:  &[]bool{false}[0],
+		Title:   input.Title,
+	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
 
 	// Chat DBに登録
-	chatResult, err := dbChat.Create(&chat.Chat{UserID: result.User.ID, Admin: false, Data: input.Data,
-		TicketID: ticketResult.ID})
+	chatResult, err := dbChat.Create(&core.Chat{
+		UserID:   result.User.ID,
+		Admin:    false,
+		Data:     input.Data,
+		TicketID: ticketResult.ID,
+	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
@@ -73,7 +81,7 @@ func Create(c *gin.Context) {
 		AddField(slack.Field{Title: "Message", Value: input.Data})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 
-	c.JSON(http.StatusOK, support.Result{Ticket: []ticket.Ticket{*ticketResult}, Chat: []chat.Chat{*chatResult}})
+	c.JSON(http.StatusOK, support.Result{Ticket: []core.Ticket{*ticketResult}, Chat: []core.Chat{*chatResult}})
 }
 
 func Get(c *gin.Context) {
@@ -87,14 +95,14 @@ func Get(c *gin.Context) {
 	}
 
 	// Group authentication
-	result := auth.GroupAuthentication(0, token.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthentication(0, core.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
 	}
 
 	// IDからDBからチケットを検索
-	resultTicket := dbTicket.Get(ticket.ID, &ticket.Ticket{Model: gorm.Model{ID: uint(id)}})
+	resultTicket := dbTicket.Get(ticket.ID, &core.Ticket{Model: gorm.Model{ID: uint(id)}})
 	if resultTicket.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: resultTicket.Err.Error()})
 		return
@@ -108,7 +116,7 @@ func Get(c *gin.Context) {
 
 	// Ticket DBからTicket IDのTicketデータを抽出
 	// このとき、データはIDの昇順で出力
-	resultChat := dbChat.Get(chat.TicketID, &chat.Chat{TicketID: resultTicket.Ticket[0].ID})
+	resultChat := dbChat.Get(chat.TicketID, &core.Chat{TicketID: resultTicket.Ticket[0].ID})
 	if resultChat.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: resultTicket.Err.Error()})
 		return
@@ -120,14 +128,14 @@ func GetTitle(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	result := auth.GroupAuthentication(0, token.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthentication(0, core.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
 	}
 
 	// Ticket DBからGroup IDのTicketデータを抽出
-	resultTicket := dbTicket.Get(ticket.GID, &ticket.Ticket{GroupID: result.Group.ID})
+	resultTicket := dbTicket.Get(ticket.GID, &core.Ticket{GroupID: result.Group.ID})
 	if resultTicket.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: resultTicket.Err.Error()})
 		return
@@ -160,14 +168,14 @@ func GetWebSocket(c *gin.Context) {
 
 	defer conn.Close()
 
-	result := auth.GroupAuthentication(0, token.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthentication(0, core.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		log.Println("ws:// support error:Auth error")
 		conn.WriteMessage(websocket.TextMessage, []byte("error: auth error"))
 		return
 	}
 
-	ticketResult := dbTicket.Get(ticket.ID, &ticket.Ticket{Model: gorm.Model{ID: uint(id)}})
+	ticketResult := dbTicket.Get(ticket.ID, &core.Ticket{Model: gorm.Model{ID: uint(id)}})
 	if ticketResult.Err != nil {
 		log.Println("ws:// support error: db error")
 		conn.WriteMessage(websocket.TextMessage, []byte("error: db error"))
@@ -193,14 +201,18 @@ func GetWebSocket(c *gin.Context) {
 			break
 		}
 		// 入力されたデータをTokenにて認証
-		resultGroup := auth.GroupAuthentication(0, token.Token{UserToken: msg.UserToken, AccessToken: msg.AccessToken})
+		resultGroup := auth.GroupAuthentication(0, core.Token{UserToken: msg.UserToken, AccessToken: msg.AccessToken})
 		if resultGroup.Err != nil {
 			log.Println(resultGroup.Err)
 			return
 		}
 
-		_, err = dbChat.Create(&chat.Chat{TicketID: ticketResult.Ticket[0].ID, UserID: result.User.ID, Admin: false,
-			Data: msg.Message})
+		_, err = dbChat.Create(&core.Chat{
+			TicketID: ticketResult.Ticket[0].ID,
+			UserID:   result.User.ID,
+			Admin:    false,
+			Data:     msg.Message,
+		})
 		if err != nil {
 			conn.WriteJSON(&support.WebSocketResult{Err: "db write error"})
 		} else {

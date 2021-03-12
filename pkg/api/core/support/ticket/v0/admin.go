@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	controllerInterface "github.com/homenoc/dsbd-backend/pkg/api/core/controller"
@@ -49,26 +50,37 @@ func CreateAdmin(c *gin.Context) {
 	}
 
 	// Ticket DBに登録
-	ticketResult, err := dbTicket.Create(&ticket.Ticket{GroupID: input.GroupID, UserID: 0,
-		Solved: &[]bool{false}[0], Title: input.Title})
+	ticketResult, err := dbTicket.Create(&core.Ticket{
+		GroupID: input.GroupID,
+		UserID:  0,
+		Solved:  &[]bool{false}[0],
+		Title:   input.Title,
+	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
 
 	// Chat DBに登録
-	chatResult, err := dbChat.Create(&chat.Chat{UserID: 0, Admin: true, Data: input.Data, TicketID: ticketResult.ID})
+	chatResult, err := dbChat.Create(&core.Chat{
+		UserID:   0,
+		Admin:    true,
+		Data:     input.Data,
+		TicketID: ticketResult.ID,
+	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, support.Result{Ticket: []ticket.Ticket{*ticketResult},
-		Chat: []chat.Chat{*chatResult}})
+	c.JSON(http.StatusOK, support.Result{
+		Ticket: []core.Ticket{*ticketResult},
+		Chat:   []core.Chat{*chatResult},
+	})
 }
 
 func UpdateAdmin(c *gin.Context) {
-	var input ticket.Ticket
+	var input core.Ticket
 	// Admin authentication
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
@@ -90,7 +102,7 @@ func UpdateAdmin(c *gin.Context) {
 	}
 
 	// Ticket DBからデータを取得
-	ticketResult := dbTicket.Get(ticket.ID, &ticket.Ticket{Model: gorm.Model{ID: uint(id)}})
+	ticketResult := dbTicket.Get(ticket.ID, &core.Ticket{Model: gorm.Model{ID: uint(id)}})
 	if ticketResult.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: ticketResult.Err.Error()})
 		return
@@ -127,7 +139,7 @@ func GetAdmin(c *gin.Context) {
 	}
 
 	// IDからDBからチケットを検索
-	resultTicket := dbTicket.Get(ticket.ID, &ticket.Ticket{Model: gorm.Model{ID: uint(id)}})
+	resultTicket := dbTicket.Get(ticket.ID, &core.Ticket{Model: gorm.Model{ID: uint(id)}})
 	if resultTicket.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: resultTicket.Err.Error()})
 		return
@@ -135,7 +147,7 @@ func GetAdmin(c *gin.Context) {
 
 	// Ticket DBからTicket IDのTicketデータを抽出
 	// このとき、データはIDの昇順で出力
-	resultChat := dbChat.Get(chat.TicketID, &chat.Chat{TicketID: resultTicket.Ticket[0].ID})
+	resultChat := dbChat.Get(chat.TicketID, &core.Chat{TicketID: resultTicket.Ticket[0].ID})
 	if resultChat.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: resultTicket.Err.Error()})
 		return
@@ -162,9 +174,9 @@ func GetAllAdmin(c *gin.Context) {
 
 	for _, tmp := range resultTicket.Ticket {
 		//user名検索
-		tmpUserResult := dbUser.Get(user.ID, &user.User{Model: gorm.Model{ID: tmp.UserID}})
+		tmpUserResult := dbUser.Get(user.ID, &core.User{Model: gorm.Model{ID: tmp.UserID}})
 		//group名検索
-		tmpGroupResult := dbGroup.Get(group.ID, &group.Group{Model: gorm.Model{ID: tmp.GroupID}})
+		tmpGroupResult := dbGroup.Get(group.ID, &core.Group{Model: gorm.Model{ID: tmp.GroupID}})
 
 		ticketResponse = append(ticketResponse, ticket.AdminResult{
 			Model:     tmp.Model,
@@ -208,7 +220,7 @@ func GetAdminWebSocket(c *gin.Context) {
 		return
 	}
 
-	ticketResult := dbTicket.Get(ticket.ID, &ticket.Ticket{Model: gorm.Model{ID: uint(id)}})
+	ticketResult := dbTicket.Get(ticket.ID, &core.Ticket{Model: gorm.Model{ID: uint(id)}})
 	if ticketResult.Err != nil {
 		log.Println("ws:// support error: db error")
 		conn.WriteMessage(websocket.TextMessage, []byte("error: db error"))
@@ -230,8 +242,12 @@ func GetAdminWebSocket(c *gin.Context) {
 			break
 		}
 
-		_, err = dbChat.Create(&chat.Chat{TicketID: ticketResult.Ticket[0].ID, UserID: resultAdmin.AdminID, Admin: true,
-			Data: msg.Message})
+		_, err = dbChat.Create(&core.Chat{
+			TicketID: ticketResult.Ticket[0].ID,
+			UserID:   resultAdmin.AdminID,
+			Admin:    true,
+			Data:     msg.Message,
+		})
 		if err != nil {
 			conn.WriteJSON(&support.WebSocketResult{Err: "db write error"})
 		} else {
@@ -243,15 +259,20 @@ func GetAdminWebSocket(c *gin.Context) {
 			msg.UserToken = ""
 
 			//Admin側に送信
-			controller.SendChatAdmin(controllerInterface.Chat{CreatedAt: msg.CreatedAt, Admin: msg.Admin,
-				UserID: resultAdmin.AdminID, GroupID: ticketResult.Ticket[0].GroupID, Message: msg.Message})
+			controller.SendChatAdmin(controllerInterface.Chat{
+				CreatedAt: msg.CreatedAt,
+				Admin:     msg.Admin,
+				UserID:    resultAdmin.AdminID,
+				GroupID:   ticketResult.Ticket[0].GroupID,
+				Message:   msg.Message,
+			})
 
-			resultTicket := dbTicket.Get(ticket.ID, &ticket.Ticket{Model: gorm.Model{ID: ticketResult.Ticket[0].ID}})
+			resultTicket := dbTicket.Get(ticket.ID, &core.Ticket{Model: gorm.Model{ID: ticketResult.Ticket[0].ID}})
 			if resultTicket.Err != nil {
 				log.Println(resultTicket.Err)
 			}
 			if len(resultTicket.Ticket) != 0 {
-				resultUser := dbUser.Get(user.GIDAndLevel, &user.User{GroupID: resultTicket.Ticket[0].GroupID, Level: 1})
+				resultUser := dbUser.Get(user.GIDAndLevel, &core.User{GroupID: resultTicket.Ticket[0].GroupID, Level: 1})
 				if resultUser.Err != nil {
 					log.Println(resultUser.Err)
 				}
