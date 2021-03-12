@@ -1,12 +1,7 @@
 package group
 
 import (
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/admin"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/network/tech"
-	"github.com/jinzhu/gorm"
-	"time"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 )
 
 const (
@@ -19,24 +14,8 @@ const (
 	UpdateStatus = 102
 	UpdateTechID = 103
 	UpdateInfo   = 104
-	UpdateAll    = 110
+	UpdateAll    = 150
 )
-
-type Group struct {
-	gorm.Model
-	Agree          *bool      `json:"agree"`
-	Question       string     `json:"question"`
-	Org            string     `json:"org"`
-	Status         *uint      `json:"status"`
-	Contract       string     `json:"contract"`
-	Student        *bool      `json:"student"`
-	StudentExpired *time.Time `json:"student_expired"`
-	Fee            *uint      `json:"fee"`
-	Comment        string     `json:"comment"`
-	Pass           *bool      `json:"pass"`
-	Lock           *bool      `json:"lock"`
-	ExpiredStatus  *uint      `json:"expired_status"`
-}
 
 type Input struct {
 	Agree          *bool   `json:"agree"`
@@ -48,16 +27,16 @@ type Input struct {
 }
 
 type Result struct {
-	Status bool    `json:"status"`
-	Error  string  `json:"error"`
-	Group  []Group `json:"group"`
+	Status bool         `json:"status"`
+	Error  string       `json:"error"`
+	Group  []core.Group `json:"group"`
 }
 
 type AdminResult struct {
-	//User       []user.User             `json:"user"`
-	Group      []Group                 `json:"group"`
-	Network    []network.Network       `json:"network"`
-	Connection []connection.Connection `json:"connection"`
+	//User       []core.User             `json:"user"`
+	Group      []core.Group      `json:"group"`
+	Network    []core.Service    `json:"network"`
+	Connection []core.Connection `json:"connection"`
 }
 
 type ResultOne struct {
@@ -65,6 +44,12 @@ type ResultOne struct {
 	Agree         *bool  `json:"agree"`
 	Question      string `json:"question"`
 	Org           string `json:"org"`
+	OrgEn         string `json:"org_en"`
+	PostCode      string `json:"postcode"`
+	Address       string `json:"address"`
+	AddressEn     string `json:"address_en"`
+	Tel           string `json:"tel"`
+	Country       string `json:"country"`
 	Status        uint   `json:"status"`
 	Bandwidth     string `json:"bandwidth"`
 	Contract      string `json:"contract"`
@@ -76,14 +61,14 @@ type ResultOne struct {
 }
 
 type ResultAll struct {
-	Group      ResultOne               `json:"group"`
-	Network    []network.Network       `json:"network"`
-	Admin      []admin.Admin           `json:"admin"`
-	Tech       []tech.Tech             `json:"tech"`
-	Connection []connection.Connection `json:"connection"`
+	Group   ResultOne      `json:"group"`
+	Network []core.Service `json:"network"`
+	//Admin      []core.Admin      `json:"admin"`
+	//Tech       []core.Tech       `json:"tech"`
+	Connection []core.Connection `json:"connection"`
 }
 
 type ResultDatabase struct {
 	Err   error
-	Group []Group
+	Group []core.Group
 }

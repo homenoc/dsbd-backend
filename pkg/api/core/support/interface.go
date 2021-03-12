@@ -2,8 +2,7 @@ package support
 
 import (
 	"github.com/gorilla/websocket"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/support/chat"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/support/ticket"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/jinzhu/gorm"
 	"time"
 )
@@ -50,6 +49,6 @@ type FirstInput struct {
 }
 
 type Result struct {
-	Ticket []ticket.Ticket `json:"support_ticket"`
-	Chat   []chat.Chat     `json:"support_chat"`
+	Ticket []core.Ticket `json:"support_ticket"`
+	Chat   []core.Chat   `json:"support_chat"`
 }

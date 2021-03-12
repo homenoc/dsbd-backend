@@ -1,7 +1,7 @@
 package notice
 
 import (
-	"github.com/jinzhu/gorm"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 )
 
 const (
@@ -15,28 +15,14 @@ const (
 	Important        = 10
 	Fault            = 11
 	Info             = 12
-	UpdateAll        = 110
+	UpdateAll        = 150
 )
 
-type Notice struct {
-	gorm.Model
-	UserID     uint   `json:"user_id"`
-	GroupID    uint   `json:"group_id"`
-	Everyone   *bool  `json:"everyone"`
-	StartTime  uint   `json:"start_time"`
-	EndingTime uint   `json:"ending_time"`
-	Important  *bool  `json:"important"`
-	Fault      *bool  `json:"fault"`
-	Info       *bool  `json:"info"`
-	Title      string `json:"title"`
-	Data       string `json:"data"`
-}
-
 type Result struct {
-	Notice []Notice `json:"notice"`
+	Notice []core.Notice `json:"notice"`
 }
 
 type ResultDatabase struct {
 	Err    error
-	Notice []Notice
+	Notice []core.Notice
 }
