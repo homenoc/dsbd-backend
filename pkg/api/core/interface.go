@@ -60,7 +60,7 @@ type Service struct {
 	Postcode          string           `json:"postcode"`
 	Address           string           `json:"address"`
 	AddressEn         string           `json:"address_en"`
-	ASN               string           `json:"asn"`
+	ASN               uint             `json:"asn"`
 	RouteV4           string           `json:"route_v4"`
 	RouteV6           string           `json:"route_v6"`
 	V4Name            string           `json:"v4_name"`
@@ -184,6 +184,7 @@ type JPNICAdmin struct {
 	Tel       string    `json:"tel"`
 	Fax       string    `json:"fax"`
 	Country   string    `json:"country"`
+	Lock      *bool     `json:"lock"`
 }
 
 type JPNICTech struct {
@@ -201,14 +202,19 @@ type JPNICTech struct {
 	Tel       string    `json:"tel"`
 	Fax       string    `json:"fax"`
 	Country   string    `json:"country"`
+	Lock      *bool     `json:"lock"`
 }
 
 type ServiceTemplate struct {
 	gorm.Model
-	Hidden  bool   `json:"hidden"`
-	Name    string `json:"name"`
-	Type    string `json:"type"`
-	Comment string `json:"comment"`
+	Hidden       *bool  `json:"hidden"`
+	Name         string `json:"name"`
+	Type         string `json:"type"`
+	Comment      string `json:"comment"`
+	NeedJPNIC    *bool  `json:"need_jpnic"`
+	NeedGlobalAS *bool  `json:"need_global_as"`
+	NeedComment  *bool  `json:"need_comment"`
+	NeedRoute    *bool  `json:"need_route"`
 }
 
 type ConnectionTemplate struct {
