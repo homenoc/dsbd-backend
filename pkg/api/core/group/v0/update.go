@@ -1,10 +1,10 @@
 package v0
 
 import (
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 )
 
-func updateAdminGroup(input, replace group.Group) (group.Group, error) {
+func updateAdminGroup(input, replace core.Group) (core.Group, error) {
 
 	//Org
 	if input.Org != "" {

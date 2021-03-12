@@ -27,16 +27,11 @@ type Input struct {
 }
 
 type Result struct {
-	Status bool         `json:"status"`
-	Error  string       `json:"error"`
-	Group  []core.Group `json:"group"`
+	Group core.Group `json:"group"`
 }
 
-type AdminResult struct {
-	//User       []core.User             `json:"user"`
-	Group      []core.Group      `json:"group"`
-	Network    []core.Service    `json:"network"`
-	Connection []core.Connection `json:"connection"`
+type ResultAll struct {
+	Group []core.Group `json:"group"`
 }
 
 type ResultOne struct {
@@ -60,13 +55,13 @@ type ResultOne struct {
 	Open          *bool  `json:"open"`
 }
 
-type ResultAll struct {
-	Group   ResultOne      `json:"group"`
-	Network []core.Service `json:"network"`
-	//Admin      []core.Admin      `json:"admin"`
-	//Tech       []core.Tech       `json:"tech"`
-	Connection []core.Connection `json:"connection"`
-}
+//type ResultAll struct {
+//	Group   ResultOne      `json:"group"`
+//	Network []core.Service `json:"network"`
+//	//Admin      []core.Admin      `json:"admin"`
+//	//Tech       []core.Tech       `json:"tech"`
+//	Connection []core.Connection `json:"connection"`
+//}
 
 type ResultDatabase struct {
 	Err   error
