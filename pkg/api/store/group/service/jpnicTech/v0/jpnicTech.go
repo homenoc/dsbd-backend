@@ -73,15 +73,15 @@ func Get(base int, data *core.JPNICTech) jpnicTech.ResultDatabase {
 	}
 	defer db.Close()
 
-	var networkStruct []core.JPNICTech
+	var jpnicTechStruct []core.JPNICTech
 
 	if base == jpnicTech.ID { //ID
-		err = db.First(&networkStruct, data.ID).Error
+		err = db.First(&jpnicTechStruct, data.ID).Error
 	} else {
 		log.Println("base select error")
 		return jpnicTech.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
 	}
-	return jpnicTech.ResultDatabase{Tech: networkStruct, Err: err}
+	return jpnicTech.ResultDatabase{Tech: jpnicTechStruct, Err: err}
 }
 
 func GetAll() jpnicTech.ResultDatabase {

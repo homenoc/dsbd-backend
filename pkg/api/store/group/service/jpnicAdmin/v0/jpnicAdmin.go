@@ -73,15 +73,15 @@ func Get(base int, data *core.JPNICAdmin) jpnicAdmin.ResultDatabase {
 	}
 	defer db.Close()
 
-	var networkStruct []core.JPNICAdmin
+	var jpnicAdminStruct []core.JPNICAdmin
 
 	if base == jpnicAdmin.ID { //ID
-		err = db.First(&networkStruct, data.ID).Error
+		err = db.First(&jpnicAdminStruct, data.ID).Error
 	} else {
 		log.Println("base select error")
 		return jpnicAdmin.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
 	}
-	return jpnicAdmin.ResultDatabase{Admins: networkStruct, Err: err}
+	return jpnicAdmin.ResultDatabase{Admins: jpnicAdminStruct, Err: err}
 }
 
 func GetAll() jpnicAdmin.ResultDatabase {
