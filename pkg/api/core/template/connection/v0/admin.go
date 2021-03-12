@@ -2,10 +2,12 @@ package v0
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
-	router "github.com/homenoc/dsbd-backend/pkg/api/core/noc/router"
-	dbRouter "github.com/homenoc/dsbd-backend/pkg/api/store/noc/router/v0"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/notice"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/template/connection"
+	dbConnectionTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/connection/v0"
 	"github.com/jinzhu/gorm"
 	"log"
 	"net/http"
@@ -13,7 +15,7 @@ import (
 )
 
 func AddAdmin(c *gin.Context) {
-	var input router.Router
+	var input core.ConnectionTemplate
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
@@ -27,11 +29,16 @@ func AddAdmin(c *gin.Context) {
 		return
 	}
 
-	if _, err = dbRouter.Create(&input); err != nil {
+	if err = check(input); err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	if _, err = dbConnectionTemplate.Create(&input); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, router.Result{})
+	c.JSON(http.StatusOK, notice.Result{})
 }
 
 func DeleteAdmin(c *gin.Context) {
@@ -47,46 +54,35 @@ func DeleteAdmin(c *gin.Context) {
 		return
 	}
 
-	if err = dbRouter.Delete(&router.Router{Model: gorm.Model{ID: uint(id)}}); err != nil {
+	if err = dbConnectionTemplate.Delete(&core.ConnectionTemplate{Model: gorm.Model{ID: uint(id)}}); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, router.Result{})
+	c.JSON(http.StatusOK, notice.Result{})
 }
 
 func UpdateAdmin(c *gin.Context) {
-	var input router.Router
+	var input core.ConnectionTemplate
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
 		return
 	}
+	err := c.BindJSON(&input)
+	log.Println(err)
 
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	err = c.BindJSON(&input)
-	if err != nil {
-		log.Println(err)
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	tmp := dbRouter.Get(router.ID, &router.Router{Model: gorm.Model{ID: uint(id)}})
+	tmp := dbConnectionTemplate.Get(notice.ID, &core.ConnectionTemplate{Model: gorm.Model{ID: input.ID}})
 	if tmp.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: tmp.Err.Error()})
 		return
 	}
 
-	if err = dbRouter.Update(router.UpdateAll, replace(input, tmp.Router[0])); err != nil {
+	if err = dbConnectionTemplate.Update(connection.UpdateAll, update(input, tmp.Connections[0])); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, router.Result{})
+	c.JSON(http.StatusOK, notice.Result{})
 }
 
 func GetAdmin(c *gin.Context) {
@@ -101,13 +97,12 @@ func GetAdmin(c *gin.Context) {
 		return
 	}
 
-	result := dbRouter.Get(router.ID, &router.Router{Model: gorm.Model{ID: uint(id)}})
+	result := dbConnectionTemplate.Get(notice.ID, &core.ConnectionTemplate{Model: gorm.Model{ID: uint(id)}})
 	if result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
 	}
-
-	c.JSON(http.StatusOK, router.Result{Router: result.Router})
+	c.JSON(http.StatusOK, connection.Result{Connections: result.Connections})
 }
 
 func GetAllAdmin(c *gin.Context) {
@@ -117,9 +112,9 @@ func GetAllAdmin(c *gin.Context) {
 		return
 	}
 
-	if result := dbRouter.GetAll(); result.Err != nil {
+	if result := dbConnectionTemplate.GetAll(); result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 	} else {
-		c.JSON(http.StatusOK, router.Result{Router: result.Router})
+		c.JSON(http.StatusOK, connection.Result{Connections: result.Connections})
 	}
 }
