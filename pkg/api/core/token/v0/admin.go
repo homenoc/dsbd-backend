@@ -2,6 +2,7 @@ package v0
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	authInterface "github.com/homenoc/dsbd-backend/pkg/api/core/auth"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
@@ -24,16 +25,21 @@ func GenerateAdmin(c *gin.Context) {
 	}
 	accessToken, _ := toolToken.Generate(2)
 
-	if err := dbToken.Create(&token.Token{AdminID: resultAuth.AdminID, UserID: 0, ExpiredAt: time.Now().Add(60 * time.Minute),
-		Admin: &[]bool{true}[0], AccessToken: accessToken, Debug: "User: " + c.Request.Header.Get("USER")}); err != nil {
+	if err := dbToken.Create(&core.Token{
+		UserID:      0,
+		ExpiredAt:   time.Now().Add(60 * time.Minute),
+		Admin:       &[]bool{true}[0],
+		AccessToken: accessToken,
+		Debug:       "User: " + c.Request.Header.Get("USER"),
+	}); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, token.Result{Token: []token.Token{{AccessToken: accessToken}}})
+	c.JSON(http.StatusOK, token.Result{Token: []core.Token{{AccessToken: accessToken}}})
 }
 
 func AddAdmin(c *gin.Context) {
-	var input token.Token
+	var input core.Token
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
@@ -50,8 +56,11 @@ func AddAdmin(c *gin.Context) {
 
 	accessToken, _ := toolToken.Generate(2)
 
-	if err := dbToken.Create(&token.Token{
-		Admin: &[]bool{true}[0], AccessToken: accessToken, Debug: "User: " + c.Request.Header.Get("USER")}); err != nil {
+	if err = dbToken.Create(&core.Token{
+		Admin:       &[]bool{true}[0],
+		AccessToken: accessToken,
+		Debug:       "User: " + c.Request.Header.Get("USER"),
+	}); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
@@ -71,7 +80,7 @@ func DeleteAdmin(c *gin.Context) {
 		return
 	}
 
-	if err := dbToken.Delete(&token.Token{Model: gorm.Model{ID: uint(id)}}); err != nil {
+	if err = dbToken.Delete(&core.Token{Model: gorm.Model{ID: uint(id)}}); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
@@ -93,7 +102,7 @@ func DeleteAllAdmin(c *gin.Context) {
 }
 
 func UpdateAdmin(c *gin.Context) {
-	var input token.Token
+	var input core.Token
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
@@ -127,7 +136,7 @@ func GetAdmin(c *gin.Context) {
 		return
 	}
 
-	result := dbToken.Get(token.ID, &token.Token{Model: gorm.Model{ID: uint(id)}})
+	result := dbToken.Get(token.ID, &core.Token{Model: gorm.Model{ID: uint(id)}})
 	if result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
