@@ -20,37 +20,36 @@ const (
 )
 
 type Input struct {
-	AdminID        uint      `json:"admin_id"`
-	TechID         []uint    `json:"tech_id"`
-	GroupID        uint      `json:"group_id"`
-	ServiceType    string    `json:"network_type"`
-	ServiceComment string    `json:"network_comment"`
-	Org            string    `json:"org"`
-	OrgEn          string    `json:"org_en"`
-	Postcode       string    `json:"postcode"`
-	Address        string    `json:"address"`
-	AddressEn      string    `json:"address_en"`
-	RouteV4        string    `json:"route_v4"`
-	RouteV6        string    `json:"route_v6"`
-	AveUpstream    uint      `json:"avg_upstream"`
-	MaxUpstream    uint      `json:"max_upstream"`
-	AveDownstream  uint      `json:"avg_downstream"`
-	MaxDownstream  uint      `json:"max_downstream"`
-	MaxBandWidthAS uint      `json:"max_bandwidth_as"`
-	PI             bool      `json:"pi"` //廃止予定
-	ASN            string    `json:"asn"`
-	IP             []IPInput `json:"ip"`
-	Lock           bool      `json:"lock"`
+	JPNICAdmin        core.JPNICAdmin  `json:"jpnic_admin"`
+	JPNICTech         []core.JPNICTech `json:"jpnic_tech"`
+	ServiceTemplateID uint             `json:"service_template_id"`
+	ServiceComment    string           `json:"network_comment"`
+	Org               string           `json:"org"`
+	OrgEn             string           `json:"org_en"`
+	Postcode          string           `json:"postcode"`
+	Address           string           `json:"address"`
+	AddressEn         string           `json:"address_en"`
+	RouteV4           string           `json:"route_v4"`
+	RouteV6           string           `json:"route_v6"`
+	AveUpstream       uint             `json:"avg_upstream"`
+	MaxUpstream       uint             `json:"max_upstream"`
+	AveDownstream     uint             `json:"avg_downstream"`
+	MaxDownstream     uint             `json:"max_downstream"`
+	MaxBandWidthAS    uint             `json:"max_bandwidth_as"`
+	PI                bool             `json:"pi"` //廃止予定
+	ASN               uint             `json:"asn"`
+	IP                []IPInput        `json:"ip"`
+	Lock              bool             `json:"lock"`
 }
 
 type IPInput struct {
-	Version   uint    `json:"version"`
-	Name      string  `json:"name"`
-	IP        string  `json:"ip"`
-	Plan      *string `json:"plan"`
-	StartDate string  `json:"start_date"`
-	EndDate   *string `json:"end_date"`
-	UseCase   string  `json:"use_case"`
+	Version   uint         `json:"version"`
+	Name      string       `json:"name"`
+	IP        string       `json:"ip"`
+	Plan      []*core.Plan `json:"plan"`
+	StartDate string       `json:"start_date"`
+	EndDate   *string      `json:"end_date"`
+	UseCase   string       `json:"use_case"`
 }
 
 type Confirm struct {

@@ -1,10 +1,10 @@
 package v0
 
 import (
-	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 )
 
-func replaceNetwork(replace, input network.Network) network.Network {
+func replaceService(replace, input core.Service) core.Service {
 	//Org
 	if input.Org != "" {
 		replace.Org = input.Org
@@ -45,11 +45,6 @@ func replaceNetwork(replace, input network.Network) network.Network {
 		replace.Lock = input.Lock
 	}
 
-	//ASN
-	if input.ASN != "" {
-		replace.ASN = input.ASN
-	}
-
 	////V4
 	//if input.V4 != "" {
 	//	replace.V4 = input.V4
@@ -77,7 +72,7 @@ func replaceNetwork(replace, input network.Network) network.Network {
 	return replace
 }
 
-func replaceAdminNetwork(replace, input network.Network) network.Network {
+func replaceAdminService(replace, input core.Service) core.Service {
 	//Org
 	if input.Org != "" {
 		replace.Org = input.Org
@@ -111,11 +106,6 @@ func replaceAdminNetwork(replace, input network.Network) network.Network {
 	//Route(V4)
 	if input.RouteV6 != "" {
 		replace.RouteV6 = input.RouteV6
-	}
-
-	//ASN
-	if input.ASN != "" {
-		replace.ASN = input.ASN
 	}
 
 	////V4
