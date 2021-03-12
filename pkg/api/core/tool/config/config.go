@@ -106,17 +106,3 @@ func GetConfig(inputConfPath string) error {
 	Conf = data
 	return nil
 }
-
-//func GetConfig(inputConfPath string) (Config, error) {
-//	configPath := "./data.json"
-//	if inputConfPath != "" {
-//		configPath = inputConfPath
-//	}
-//	file, err := ioutil.ReadFile(configPath)
-//	if err != nil {
-//		return Config{}, err
-//	}
-//	var data Config
-//	json.Unmarshal(file, &data)
-//	return data, nil
-//}
