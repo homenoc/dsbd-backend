@@ -14,6 +14,24 @@ func check(input group.Input) error {
 	if input.Org == "" {
 		return fmt.Errorf("no data: org")
 	}
+	if input.OrgEn == "" {
+		return fmt.Errorf("no data: org(english)")
+	}
+	if input.PostCode == "" {
+		return fmt.Errorf("no data: postcode")
+	}
+	if input.Address == "" {
+		return fmt.Errorf("no data: address")
+	}
+	if input.AddressEn == "" {
+		return fmt.Errorf("no data: address(english)")
+	}
+	if input.Tel == "" {
+		return fmt.Errorf("no data: tel")
+	}
+	if input.Country == "" {
+		return fmt.Errorf("no data: country")
+	}
 	if input.Contract == "" {
 		return fmt.Errorf("no data: contract")
 	}
