@@ -16,6 +16,7 @@ type Input struct {
 type Result struct {
 	Services    []core.ServiceTemplate    `json:"services"`
 	Connections []core.ConnectionTemplate `json:"connections"`
+	NTTs        []core.NTTTemplate        `json:"ntts"`
 }
 
 type ResultDatabase struct {
