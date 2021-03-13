@@ -7,10 +7,8 @@ import (
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
-	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"github.com/jinzhu/gorm"
@@ -71,11 +69,12 @@ func Add(c *gin.Context) {
 		AddressEn:      input.AddressEn,
 		Tel:            input.Tel,
 		Country:        input.Country,
-		Status:         &[]uint{1}[0],
+		Status:         &[]uint{2}[0],
 		ExpiredStatus:  &[]uint{0}[0],
 		Contract:       input.Contract,
 		Student:        input.Student,
 		StudentExpired: studentExpired,
+		Pass:           &[]bool{false}[0],
 		Lock:           &[]bool{true}[0],
 	})
 	if err != nil {
@@ -148,47 +147,21 @@ func Get(c *gin.Context) {
 
 	result := auth.GroupAuthentication(1, core.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
+		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
-	}
-
-	if result.User.Level >= 10 {
-		if result.User.Level > 1 {
-			c.JSON(http.StatusInternalServerError, common.Error{Error: "You don't have authority this operation"})
-			return
-		}
-	}
-
-	resultGroup := dbGroup.Get(group.ID, &core.Group{Model: gorm.Model{ID: result.Group.ID}})
-	if resultGroup.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
-		return
-	}
-
-	// Network情報にて開通しているものを抜き出す
-	resultService := dbService.Get(service.Open, &core.Service{GroupID: result.Group.ID})
-	if resultService.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
-		return
-	}
-
-	open := false
-	if len(resultService.Service) > 0 {
-		open = true
 	}
 
 	c.JSON(http.StatusOK, group.ResultOne{
-		ID:            resultGroup.Group[0].ID,
-		Agree:         resultGroup.Group[0].Agree,
-		Question:      resultGroup.Group[0].Question,
-		Org:           resultGroup.Group[0].Org,
-		Status:        *resultGroup.Group[0].Status,
-		Contract:      resultGroup.Group[0].Contract,
-		Student:       resultGroup.Group[0].Student,
-		Pass:          resultGroup.Group[0].Pass,
-		Lock:          resultGroup.Group[0].Lock,
-		ExpiredStatus: *resultGroup.Group[0].ExpiredStatus,
-		Open:          &open,
+		ID:            result.Group.ID,
+		Agree:         result.Group.Agree,
+		Question:      result.Group.Question,
+		Org:           result.Group.Org,
+		Status:        *result.Group.Status,
+		Contract:      result.Group.Contract,
+		Student:       result.Group.Student,
+		Pass:          result.Group.Pass,
+		Lock:          result.Group.Lock,
+		ExpiredStatus: *result.Group.ExpiredStatus,
 	})
 }
 
