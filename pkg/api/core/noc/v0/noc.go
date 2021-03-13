@@ -29,11 +29,10 @@ func GetAll(c *gin.Context) {
 	var nocTmp noc.ResultAllUser
 
 	for _, tmp := range result.NOC {
-		if (*tmp.Enable) && (*tmp.New) {
+		if *tmp.Enable {
 			nocTmp.NOC = append(nocTmp.NOC, noc.ResultOneUser{
 				Name:     tmp.Name,
 				Location: tmp.Location,
-				New:      tmp.New,
 			})
 		}
 	}

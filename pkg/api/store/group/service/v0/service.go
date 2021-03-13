@@ -138,6 +138,7 @@ func Get(base int, data *core.Service) service.ResultDatabase {
 			Preload("Connection", "open = ?", true).
 			Preload("Admin").
 			Preload("Tech").
+			Preload("NOC").
 			Find(&serviceStruct).Error
 	} else {
 		log.Println("base select error")

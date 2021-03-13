@@ -45,26 +45,28 @@ func Update(base int, c core.Connection) error {
 
 	if connection.UpdateInfo == base {
 		result = db.Model(&core.Connection{Model: gorm.Model{ID: c.ID}}).Update(core.Connection{
-			NTT:     c.NTT,
-			NOC:     c.NOC,
-			TermIP:  c.TermIP,
-			Monitor: c.Monitor,
+			NTTTemplateID: c.NTTTemplateID,
+			NOC:           c.NOC,
+			TermIP:        c.TermIP,
+			Monitor:       c.Monitor,
 		})
 	} else if connection.UpdateServiceID == base {
 		result = db.Model(&core.Connection{Model: gorm.Model{ID: c.ID}}).Update(core.Connection{ServiceID: c.ServiceID})
 	} else if base == connection.UpdateAll {
 		result = db.Model(&core.Connection{Model: gorm.Model{ID: c.ID}}).Update(core.Connection{
-			ServiceID:  c.ServiceID,
-			NTT:        c.NTT,
-			NOC:        c.NOC,
-			TermIP:     c.TermIP,
-			Monitor:    c.Monitor,
-			LinkV4Our:  c.LinkV4Our,
-			LinkV4Your: c.LinkV4Your,
-			LinkV6Our:  c.LinkV6Our,
-			LinkV6Your: c.LinkV6Your,
-			Fee:        c.Fee,
-			Open:       c.Open,
+			ServiceID:                c.ServiceID,
+			BGPRouterID:              c.BGPRouterID,
+			TunnelEndPointRouterIPID: c.TunnelEndPointRouterIPID,
+			NTTTemplateID:            c.NTTTemplateID,
+			NOC:                      c.NOC,
+			TermIP:                   c.TermIP,
+			Monitor:                  c.Monitor,
+			LinkV4Our:                c.LinkV4Our,
+			LinkV4Your:               c.LinkV4Your,
+			LinkV6Our:                c.LinkV6Our,
+			LinkV6Your:               c.LinkV6Your,
+			Open:                     c.Open,
+			Lock:                     c.Lock,
 		})
 	} else {
 		log.Println("base select error")

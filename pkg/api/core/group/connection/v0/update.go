@@ -27,11 +27,6 @@ func updateAdminConnection(input, replace core.Connection) core.Connection {
 		replace.LinkV6Your = input.LinkV6Your
 	}
 
-	//Fee
-	if input.Fee != "" {
-		replace.Fee = input.Fee
-	}
-
 	// uint boolean
 	replace.ConnectionNumber = input.ConnectionNumber
 
