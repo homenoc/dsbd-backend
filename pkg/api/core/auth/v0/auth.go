@@ -2,6 +2,7 @@ package v0
 
 import (
 	"fmt"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/auth"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
@@ -14,7 +15,7 @@ import (
 	"time"
 )
 
-func UserAuthentication(data token.Token) auth.UserResult {
+func UserAuthentication(data core.Token) auth.UserResult {
 	resultToken := dbToken.Get(token.UserTokenAndAccessToken, &data)
 	if len(resultToken.Token) == 0 {
 		return auth.UserResult{Err: fmt.Errorf("auth failed")}
@@ -22,11 +23,11 @@ func UserAuthentication(data token.Token) auth.UserResult {
 	if resultToken.Err != nil {
 		return auth.UserResult{Err: fmt.Errorf("db error")}
 	}
-	resultUser := dbUser.Get(user.ID, &user.User{Model: gorm.Model{ID: resultToken.Token[0].UserID}})
+	resultUser := dbUser.Get(user.ID, &core.User{Model: gorm.Model{ID: resultToken.Token[0].UserID}})
 	if resultUser.Err != nil {
 		return auth.UserResult{Err: fmt.Errorf("db error")}
 	}
-	if 100 <= resultUser.User[0].Status {
+	if 0 < *resultUser.User[0].ExpiredStatus {
 		return auth.UserResult{Err: fmt.Errorf("deleted this user")}
 	}
 
@@ -36,7 +37,7 @@ func UserAuthentication(data token.Token) auth.UserResult {
 }
 
 // errorType 0: 未審査の場合でもエラーを返す　1: 未審査の場合エラーを返さない
-func GroupAuthentication(errorType uint, data token.Token) auth.GroupResult {
+func GroupAuthentication(errorType uint, data core.Token) auth.GroupResult {
 	resultToken := dbToken.Get(token.UserTokenAndAccessToken, &data)
 	if len(resultToken.Token) == 0 {
 		return auth.GroupResult{Err: fmt.Errorf("auth failed")}
@@ -44,17 +45,17 @@ func GroupAuthentication(errorType uint, data token.Token) auth.GroupResult {
 	if resultToken.Err != nil {
 		return auth.GroupResult{Err: fmt.Errorf("error: no token")}
 	}
-	resultUser := dbUser.Get(user.ID, &user.User{Model: gorm.Model{ID: resultToken.Token[0].UserID}})
+	resultUser := dbUser.Get(user.ID, &core.User{Model: gorm.Model{ID: resultToken.Token[0].UserID}})
 	if resultUser.Err != nil {
 		return auth.GroupResult{Err: fmt.Errorf("db error")}
 	}
-	if resultUser.User[0].Status == 0 || 100 <= resultUser.User[0].Status {
+	if 0 < *resultUser.User[0].ExpiredStatus {
 		return auth.GroupResult{Err: fmt.Errorf("user status error")}
 	}
 	if resultUser.User[0].GroupID == 0 {
 		return auth.GroupResult{Err: fmt.Errorf("no group")}
 	}
-	resultGroup := dbGroup.Get(group.ID, &group.Group{Model: gorm.Model{ID: resultUser.User[0].GroupID}})
+	resultGroup := dbGroup.Get(group.ID, &core.Group{Model: gorm.Model{ID: resultUser.User[0].GroupID}})
 	if resultGroup.Err != nil {
 		return auth.GroupResult{Err: fmt.Errorf("db error")}
 	}
@@ -78,9 +79,9 @@ func GroupAuthentication(errorType uint, data token.Token) auth.GroupResult {
 	return auth.GroupResult{User: resultUser.User[0], Group: resultGroup.Group[0], Err: nil}
 }
 
-func renewProcess(t token.Token) {
+func renewProcess(t core.Token) {
 	if t.ExpiredAt.UTC().Unix() < time.Now().Add(10*time.Minute).UTC().Unix() {
-		result := dbToken.Update(token.UpdateToken, &token.Token{
+		result := dbToken.Update(token.UpdateToken, &core.Token{
 			Model:     gorm.Model{ID: t.ID},
 			ExpiredAt: t.ExpiredAt.Add(10 * time.Minute),
 		})
