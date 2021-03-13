@@ -7,8 +7,8 @@ import (
 
 func check(input connection.Input) error {
 
-	if input.Prefectures > 48 {
-		return fmt.Errorf("error: prefectures is invalid...")
+	if input.Address == "" {
+		return fmt.Errorf("error: address is invalid")
 	}
 
 	return nil
