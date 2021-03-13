@@ -146,6 +146,18 @@ func MailVerify(c *gin.Context) {
 	}
 
 	if *result.User[0].MailVerify {
+		c.Writer.WriteString(`<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>dsysメール確認システム</title>
+</head>
+<body>
+<h1>すでにメールアドレスの確認はできています。</h1>
+<br>
+<p>This email has already been checked</p>
+</body>
+</html>`)
 		c.JSON(http.StatusBadRequest, common.Error{Error: fmt.Sprintf("This email has already been checked")})
 		return
 	}
@@ -158,11 +170,30 @@ func MailVerify(c *gin.Context) {
 		Model:      gorm.Model{ID: result.User[0].ID},
 		MailVerify: &[]bool{true}[0],
 	}); err != nil {
-		c.HTML(200, "ng.html", gin.H{})
-		//c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		c.Writer.WriteString(`<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>dsysメール確認システム</title>
+</head>
+<body>
+<h1>メールの確認ができませんでした。</h1>
+<br>
+<p>` + err.Error() +
+			`</p>
+</body>
+</html>`)
 	} else {
-		c.HTML(200, "ok.html", gin.H{})
-		//c.JSON(http.StatusOK, &common.Result{Result: "OK"})
+		c.Writer.WriteString(`<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>dsysメール確認システム</title>
+</head>
+<body>
+<h1>メールの確認ができました。</h1>
+</body>
+</html>`)
 	}
 }
 
