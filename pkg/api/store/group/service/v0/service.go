@@ -151,9 +151,13 @@ func Get(base int, data *core.Service) service.ResultDatabase {
 		err = db.Where("group_id = ?", data.GroupID).Find(&serviceStruct).Error
 	} else if base == service.Open {
 		err = db.Where("group_id = ? AND open = ?", data.GroupID, true).
-			Preload("ServiceTemplate").
 			Preload("IP", "open = ?", true).
 			Preload("Connection", "open = ?", true).
+			Preload("Connection.ConnectionTemplate").
+			Preload("Connection.NOC").
+			Preload("Connection.BGPRouter").
+			Preload("Connection.TunnelEndPointRouterIP").
+			Preload("ServiceTemplate").
 			Preload("JPNICAdmin").
 			Preload("JPNICTech").
 			Find(&serviceStruct).Error
