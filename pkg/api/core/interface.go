@@ -71,11 +71,11 @@ type Service struct {
 	MaxDownstream     uint             `json:"max_downstream"`
 	MaxBandWidthAS    uint             `json:"max_bandwidth_as"`
 	Fee               *uint            `json:"fee"`
-	IP                []IP             `json:"ip"`
-	Connections       []Connection     `json:"connections"`
+	IP                *[]IP            `json:"ip"`
+	Connections       *[]Connection    `json:"connections"`
 	JPNICAdminID      uint             `json:"jpnic_admin_id"`
-	JPNICAdmin        JPNICAdmin       `json:"jpnic_admin"`
-	JPNICTech         []JPNICTech      `json:"jpnic_tech" gorm:"many2many:service_jpnic_tech;"`
+	JPNICAdmin        *JPNICAdmin      `json:"jpnic_admin"`
+	JPNICTech         *[]JPNICTech     `json:"jpnic_tech" gorm:"many2many:service_jpnic_tech;"`
 	Open              *bool            `json:"open"`
 	Lock              *bool            `json:"lock"`
 	AddAllow          *bool            `json:"add_allow"`

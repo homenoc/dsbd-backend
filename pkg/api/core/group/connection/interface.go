@@ -21,7 +21,6 @@ const (
 )
 
 type Input struct {
-	TunnelRouterIPID     *uint  `json:"tunnel_router_ip_id"` //使用エンドポイントルータのID
 	ConnectionTemplateID *uint  `json:"connection_template_id"`
 	ConnectionComment    string `json:"connection_comment"` // ServiceがETCの時や補足説明で必要
 	NTTTemplateID        *uint  `json:"ntt_template_id"`

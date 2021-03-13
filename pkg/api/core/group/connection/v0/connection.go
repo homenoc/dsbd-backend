@@ -85,10 +85,12 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	resultNTT := dbNTTTemplate.Get(ntt.ID, &core.NTTTemplate{Model: gorm.Model{ID: *input.NOCID}})
-	if resultNTT.Err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: resultNTT.Err.Error()})
-		return
+	if *resultConnectionTemplate.Connections[0].NeedInternet {
+		resultNTT := dbNTTTemplate.Get(ntt.ID, &core.NTTTemplate{Model: gorm.Model{ID: *input.NTTTemplateID}})
+		if resultNTT.Err != nil {
+			c.JSON(http.StatusBadRequest, common.Error{Error: resultNTT.Err.Error()})
+			return
+		}
 	}
 
 	// NOCIDが0の時、「どこでも収容」という意味
@@ -100,7 +102,7 @@ func Add(c *gin.Context) {
 		}
 	}
 
-	resultService := dbService.Get(service.ID, &core.Service{Model: gorm.Model{ID: uint(id)}})
+	resultService := dbService.Get(service.IDOnlySingle, &core.Service{Model: gorm.Model{ID: uint(id)}})
 	if resultService.Err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: resultService.Err.Error()})
 		return
@@ -157,7 +159,7 @@ func Add(c *gin.Context) {
 		AddField(slack.Field{Title: "申請者", Value: strconv.Itoa(int(result.User.ID)) + ":" + result.User.Name}).
 		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(result.Group.ID)) + ":" + result.Group.Org}).
 		AddField(slack.Field{Title: "サービスコード", Value: resultService.Service[0].ServiceTemplate.Type +
-			strconv.Itoa(int(resultService.Service[0].ServiceNumber))}).
+			fmt.Sprintf("%03d", resultService.Service[0].ServiceNumber)}).
 		AddField(slack.Field{Title: "接続コード（新規発番）", Value: resultConnectionTemplate.Connections[0].Type +
 			fmt.Sprintf("%03d", number)}).
 		AddField(slack.Field{Title: "接続コード（補足情報）", Value: input.ConnectionComment})
@@ -166,6 +168,14 @@ func Add(c *gin.Context) {
 	if err = dbGroup.Update(group.UpdateStatus, core.Group{
 		Model:  gorm.Model{ID: result.Group.ID},
 		Status: &[]uint{4}[0],
+	}); err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		return
+	}
+
+	if err = dbService.Update(service.UpdateStatus, core.Service{
+		Model:    gorm.Model{ID: resultService.Service[0].ID},
+		AddAllow: &[]bool{false}[0],
 	}); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
