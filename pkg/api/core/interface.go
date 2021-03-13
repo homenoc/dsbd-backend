@@ -173,38 +173,42 @@ type Plan struct {
 
 type JPNICAdmin struct {
 	gorm.Model
-	Service   []Service `gorm:"foreignkey:JPNICAdminID"`
-	Org       string    `json:"org"`
-	OrgEn     string    `json:"org_en"`
-	PostCode  string    `json:"postcode"`
-	Address   string    `json:"address"`
-	AddressEn string    `json:"address_en"`
-	Dept      string    `json:"dept"`
-	DeptEn    string    `json:"dept_en"`
-	Pos       string    `json:"pos"`
-	PosEn     string    `json:"pos_en"`
-	Tel       string    `json:"tel"`
-	Fax       string    `json:"fax"`
-	Country   string    `json:"country"`
-	Lock      *bool     `json:"lock"`
+	Service     []Service `gorm:"foreignkey:JPNICAdminID"`
+	GroupName   string    `json:"group_name"`
+	GroupNameEn string    `json:"group_name_en"`
+	Org         string    `json:"org"`
+	OrgEn       string    `json:"org_en"`
+	PostCode    string    `json:"postcode"`
+	Address     string    `json:"address"`
+	AddressEn   string    `json:"address_en"`
+	Dept        string    `json:"dept"`
+	DeptEn      string    `json:"dept_en"`
+	Pos         string    `json:"pos"`
+	PosEn       string    `json:"pos_en"`
+	Tel         string    `json:"tel"`
+	Fax         string    `json:"fax"`
+	Country     string    `json:"country"`
+	Lock        *bool     `json:"lock"`
 }
 
 type JPNICTech struct {
 	gorm.Model
-	Service   []Service `json:"service" gorm:"many2many:service_jpnic_tech;"`
-	Org       string    `json:"org"`
-	OrgEn     string    `json:"org_en"`
-	PostCode  string    `json:"postcode"`
-	Address   string    `json:"address"`
-	AddressEn string    `json:"address_en"`
-	Dept      string    `json:"dept"`
-	DeptEn    string    `json:"dept_en"`
-	Pos       string    `json:"pos"`
-	PosEn     string    `json:"pos_en"`
-	Tel       string    `json:"tel"`
-	Fax       string    `json:"fax"`
-	Country   string    `json:"country"`
-	Lock      *bool     `json:"lock"`
+	Service     []Service `json:"service" gorm:"many2many:service_jpnic_tech;"`
+	GroupName   string    `json:"group_name"`
+	GroupNameEn string    `json:"group_name_en"`
+	Org         string    `json:"org"`
+	OrgEn       string    `json:"org_en"`
+	PostCode    string    `json:"postcode"`
+	Address     string    `json:"address"`
+	AddressEn   string    `json:"address_en"`
+	Dept        string    `json:"dept"`
+	DeptEn      string    `json:"dept_en"`
+	Pos         string    `json:"pos"`
+	PosEn       string    `json:"pos_en"`
+	Tel         string    `json:"tel"`
+	Fax         string    `json:"fax"`
+	Country     string    `json:"country"`
+	Lock        *bool     `json:"lock"`
 }
 
 type ServiceTemplate struct {
