@@ -118,9 +118,6 @@ func AdminRestAPI() {
 			v1.GET("/gateway_ip/:id", tunnelEndPointRouterIP.GetAdmin)
 			v1.PUT("/gateway_ip/:id", tunnelEndPointRouterIP.UpdateAdmin)
 
-			// Service
-			v1.GET("/service", service.GetAdmin)
-
 			//
 			// Support
 			//
@@ -144,7 +141,7 @@ func AdminRestAPI() {
 			//
 			// Service
 			//
-			v1.POST("/service/:id/service", service.AddAdmin)
+			v1.POST("/service/:id", service.AddAdmin)
 			// Service Delete
 			v1.DELETE("/service/:id", service.DeleteAdmin)
 			// Service Update
@@ -154,15 +151,15 @@ func AdminRestAPI() {
 			////
 			//// JPNIC Admin
 			////
-			v1.POST("/group/network/jpnic", jpnicAdmin.AddAdmin)
-			v1.DELETE("/group/network/jpnic", jpnicAdmin.DeleteAdmin)
-			v1.GET("/group/network/jpnic", jpnicAdmin.GetAdmin)
+			//v1.POST("/group/network/jpnic", jpnicAdmin.AddAdmin)
+			//v1.DELETE("/group/network/jpnic", jpnicAdmin.DeleteAdmin)
+			//v1.GET("/group/network/jpnic", jpnicAdmin.GetAdmin)
 			////
 			//// JPNIC Admin
 			////
-			v1.POST("/group/network/jpnic", jpnicTech.AddAdmin)
-			v1.DELETE("/group/network/jpnic", jpnicTech.DeleteAdmin)
-			v1.GET("/group/network/jpnic", jpnicTech.GetAdmin)
+			//v1.POST("/group/network/jpnic", jpnicTech.AddAdmin)
+			//v1.DELETE("/group/network/jpnic", jpnicTech.DeleteAdmin)
+			//v1.GET("/group/network/jpnic", jpnicTech.GetAdmin)
 		}
 	}
 	ws := router.Group("/ws")
@@ -256,12 +253,12 @@ func UserRestAPI() {
 			// 現在検討中
 
 			// Service JPNIC Admin
-			v1.POST("/group/network/jpnic/admin", jpnicAdmin.Add)
-			v1.DELETE("/group/network/jpnic/admin", jpnicAdmin.Delete)
+			v1.POST("/group/jpnic/admin", jpnicAdmin.Add)
+			v1.DELETE("/group/jpnic/admin", jpnicAdmin.Delete)
 			//v1.GET("/group/network/jpnic/admin", jpnicAdmin.GetAll)
 			// Service JPNIC Tech
-			v1.POST("/group/service/jpnic/tech", jpnicTech.Add)
-			v1.DELETE("/group/service/jpnic/tech", jpnicTech.Delete)
+			v1.POST("/group/jpnic/tech", jpnicTech.Add)
+			v1.DELETE("/group/jpnic/tech", jpnicTech.Delete)
 			//v1.GET("/group/service/jpnic/tech", jpnicTech.GetAll)
 		}
 	}
