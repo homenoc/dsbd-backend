@@ -1,10 +1,8 @@
 package v0
 
-import (
-	"github.com/homenoc/dsbd-backend/pkg/api/core/notice"
-)
+import "github.com/homenoc/dsbd-backend/pkg/api/core"
 
-func updateAdminUser(input, replace notice.Notice) notice.Notice {
+func updateAdminUser(input, replace core.Notice) core.Notice {
 
 	//Title
 	if input.Title != "" {

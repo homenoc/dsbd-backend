@@ -2,6 +2,7 @@ package v0
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/notice"
@@ -13,7 +14,7 @@ import (
 )
 
 func AddAdmin(c *gin.Context) {
-	var input notice.Notice
+	var input core.Notice
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
@@ -52,7 +53,7 @@ func DeleteAdmin(c *gin.Context) {
 		return
 	}
 
-	if err := dbNotice.Delete(&notice.Notice{Model: gorm.Model{ID: uint(id)}}); err != nil {
+	if err := dbNotice.Delete(&core.Notice{Model: gorm.Model{ID: uint(id)}}); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
@@ -60,7 +61,7 @@ func DeleteAdmin(c *gin.Context) {
 }
 
 func UpdateAdmin(c *gin.Context) {
-	var input notice.Notice
+	var input core.Notice
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
@@ -70,7 +71,7 @@ func UpdateAdmin(c *gin.Context) {
 	err := c.BindJSON(&input)
 	log.Println(err)
 
-	tmp := dbNotice.Get(notice.ID, &notice.Notice{Model: gorm.Model{ID: input.ID}})
+	tmp := dbNotice.Get(notice.ID, &core.Notice{Model: gorm.Model{ID: input.ID}})
 	if tmp.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: tmp.Err.Error()})
 		return
@@ -95,7 +96,7 @@ func GetAdmin(c *gin.Context) {
 		return
 	}
 
-	result := dbNotice.Get(notice.ID, &notice.Notice{Model: gorm.Model{ID: uint(id)}})
+	result := dbNotice.Get(notice.ID, &core.Notice{Model: gorm.Model{ID: uint(id)}})
 	if result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
