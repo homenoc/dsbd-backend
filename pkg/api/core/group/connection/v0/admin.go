@@ -114,7 +114,6 @@ func AddAdmin(c *gin.Context) {
 		TermIP:               input.TermIP,
 		Prefectures:          input.Prefectures,
 		Monitor:              input.Monitor,
-		Fee:                  "Free",
 		Open:                 &[]bool{false}[0],
 		Lock:                 &[]bool{true}[0],
 	})

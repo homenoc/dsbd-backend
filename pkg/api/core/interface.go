@@ -70,6 +70,7 @@ type Service struct {
 	AveDownstream     uint             `json:"avg_downstream"`
 	MaxDownstream     uint             `json:"max_downstream"`
 	MaxBandWidthAS    uint             `json:"max_bandwidth_as"`
+	Fee               *uint            `json:"fee"`
 	IP                []IP             `json:"ip"`
 	Connections       []Connection     `json:"connections"`
 	JPNICAdminID      uint             `json:"jpnic_admin_id"`
@@ -77,6 +78,7 @@ type Service struct {
 	JPNICTech         []JPNICTech      `json:"jpnic_tech" gorm:"many2many:service_jpnic_tech;"`
 	Open              *bool            `json:"open"`
 	Lock              *bool            `json:"lock"`
+	AddAllow          *bool            `json:"add_allow"`
 }
 
 type Connection struct {
@@ -97,11 +99,10 @@ type Connection struct {
 	LinkV4Your           string              `json:"link_v4_your"`
 	LinkV6Our            string              `json:"link_v6_our"`
 	LinkV6Your           string              `json:"link_v6_your"`
-	Fee                  string              `json:"fee"`
 	Open                 *bool               `json:"open"`
 	Lock                 *bool               `json:"lock"`
 	Comment              string              `json:"comment"`
-	NTT                  *NTTTemplate        `json:"ntt_template"`
+	NTTTemplate          *NTTTemplate        `json:"ntt_template"`
 	NOC                  *NOC                `json:"noc"`
 	BGPRouter            BGPRouter           `json:"bgp_router"`
 }
