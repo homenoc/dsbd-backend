@@ -74,6 +74,7 @@ func Add(c *gin.Context) {
 		Contract:       input.Contract,
 		Student:        input.Student,
 		StudentExpired: studentExpired,
+		Open:           &[]bool{false}[0],
 		Pass:           &[]bool{false}[0],
 		Lock:           &[]bool{true}[0],
 	})
@@ -159,6 +160,7 @@ func Get(c *gin.Context) {
 		Status:        *result.Group.Status,
 		Contract:      result.Group.Contract,
 		Student:       result.Group.Student,
+		Open:          result.Group.Open,
 		Pass:          result.Group.Pass,
 		Lock:          result.Group.Lock,
 		ExpiredStatus: *result.Group.ExpiredStatus,
