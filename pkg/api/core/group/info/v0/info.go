@@ -40,7 +40,7 @@ func Get(c *gin.Context) {
 
 	for _, tmpService := range resultService.Service {
 		if *tmpService.Open {
-			for _, tmpConnection := range tmpService.Connections {
+			for _, tmpConnection := range *tmpService.Connections {
 				var fee string
 				var v4, v6 []string
 				if *tmpService.Fee == 0 {
@@ -50,7 +50,7 @@ func Get(c *gin.Context) {
 					strconv.Itoa(int(tmpService.ServiceNumber)) + "-" + tmpConnection.ConnectionTemplate.Type +
 					strconv.Itoa(int(tmpConnection.ConnectionNumber))
 
-				for _, tmpIP := range tmpService.IP {
+				for _, tmpIP := range *tmpService.IP {
 					if tmpIP.Version == 4 {
 						v4 = append(v4)
 					} else if tmpIP.Version == 6 {

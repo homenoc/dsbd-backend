@@ -151,9 +151,9 @@ func AddAdmin(c *gin.Context) {
 		MaxDownstream:     input.MaxDownstream,
 		ASN:               input.ASN,
 		Fee:               &[]uint{0}[0],
-		IP:                grpIP,
-		JPNICAdmin:        input.JPNICAdmin,
-		JPNICTech:         input.JPNICTech,
+		IP:                &grpIP,
+		JPNICAdmin:        &input.JPNICAdmin,
+		JPNICTech:         &input.JPNICTech,
 		Open:              &[]bool{false}[0],
 		Lock:              &[]bool{true}[0],
 	})

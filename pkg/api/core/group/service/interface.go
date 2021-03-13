@@ -11,10 +11,11 @@ const (
 	Open            = 3
 	SearchNewNumber = 4
 	GIDAndAddAllow  = 5
+	IDOnlySingle    = 20
 	UpdateName      = 100
 	UpdateDate      = 102
 	UpdateRoute     = 103
-	UpdatePlan      = 104
+	UpdateStatus    = 104
 	UpdateGID       = 104
 	UpdateData      = 105
 	UpdateAll       = 150

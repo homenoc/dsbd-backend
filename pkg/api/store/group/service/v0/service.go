@@ -59,6 +59,8 @@ func Update(base int, c core.Service) error {
 			RouteV4: c.RouteV4, RouteV6: c.RouteV6})
 	} else if service.UpdateGID == base {
 		result = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Update(core.Service{GroupID: c.GroupID})
+	} else if service.UpdateStatus == base {
+		result = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Update(core.Service{AddAllow: c.AddAllow})
 	} else if service.UpdateAll == base {
 		result = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Update(core.Service{
 			GroupID:   c.GroupID,
@@ -133,6 +135,8 @@ func Get(base int, data *core.Service) service.ResultDatabase {
 	} else if base == service.GIDAndAddAllow {
 		err = db.Preload("ServiceTemplate").
 			Where("group_id = ? AND add_allow = ?", data.GroupID, true).Find(&serviceStruct).Error
+	} else if base == service.IDOnlySingle {
+		err = db.Preload("ServiceTemplate").First(&serviceStruct, data.ID).Error
 	} else if base == service.SearchNewNumber {
 		err = db.Where("group_id = ?", data.GroupID).Find(&serviceStruct).Error
 	} else if base == service.Open {
