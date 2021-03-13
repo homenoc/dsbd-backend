@@ -1,25 +1,10 @@
 package v0
 
 import (
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 )
 
-func updateAdminConnection(input, replace connection.Connection) connection.Connection {
-	//ServiceType
-	if input.ConnectionType != "" {
-		replace.ConnectionType = input.ConnectionType
-	}
-
-	//NTT
-	if input.NTT != "" {
-		replace.NTT = input.NTT
-	}
-
-	//NOC
-	if input.NOC != "" {
-		replace.NOC = input.NOC
-	}
-
+func updateAdminConnection(input, replace core.Connection) core.Connection {
 	//Term IP
 	if input.TermIP != "" {
 		replace.TermIP = input.TermIP
@@ -48,11 +33,6 @@ func updateAdminConnection(input, replace connection.Connection) connection.Conn
 	}
 
 	// uint boolean
-	replace.NetworkID = input.NetworkID
-	replace.GroupID = input.GroupID
-	replace.UserID = input.UserID
-	replace.GatewayIPID = input.GatewayIPID
-	replace.RouterID = input.RouterID
 	replace.ConnectionNumber = input.ConnectionNumber
 
 	// Open
@@ -60,6 +40,15 @@ func updateAdminConnection(input, replace connection.Connection) connection.Conn
 
 	// Monitor
 	replace.Monitor = input.Monitor
+
+	//ServiceType
+	replace.ConnectionTemplateID = input.ConnectionTemplateID
+
+	//NTT
+	replace.NTTTemplateID = input.NTTTemplateID
+
+	//NOC
+	replace.NOCID = input.NOCID
 
 	return replace
 }

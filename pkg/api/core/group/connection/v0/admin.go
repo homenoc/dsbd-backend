@@ -4,11 +4,19 @@ import (
 	"fmt"
 	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/gin-gonic/gin"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/noc"
+	connectionTemplate "github.com/homenoc/dsbd-backend/pkg/api/core/template/connection"
+	ntt "github.com/homenoc/dsbd-backend/pkg/api/core/template/ntt"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	dbConnection "github.com/homenoc/dsbd-backend/pkg/api/store/group/connection/v0"
+	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
+	dbNOC "github.com/homenoc/dsbd-backend/pkg/api/store/noc/v0"
+	dbConnectionTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/connection/v0"
+	dbNTTTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ntt/v0"
 	"github.com/jinzhu/gorm"
 	"log"
 	"net/http"
@@ -29,7 +37,7 @@ func AddAdmin(c *gin.Context) {
 		return
 	}
 
-	var input connection.Connection
+	var input connection.Input
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
@@ -43,12 +51,42 @@ func AddAdmin(c *gin.Context) {
 		return
 	}
 
-	if err = check(uint(id), input); err != nil {
+	if err = check(input); err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 		return
 	}
 
-	resultConnection := dbConnection.Get(connection.GID, &connection.Connection{GroupID: uint(id)})
+	resultConnectionTemplate := dbConnectionTemplate.Get(connectionTemplate.ID,
+		&core.ConnectionTemplate{Model: gorm.Model{ID: *input.ConnectionTemplateID}})
+	if resultConnectionTemplate.Err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: resultConnectionTemplate.Err.Error()})
+		return
+	}
+
+	resultNTT := dbNTTTemplate.Get(ntt.ID, &core.NTTTemplate{Model: gorm.Model{ID: *input.NOCID}})
+	if resultNTT.Err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: resultNTT.Err.Error()})
+		return
+	}
+
+	resultNOC := dbNOC.Get(noc.ID, &core.NOC{Model: gorm.Model{ID: *input.NOCID}})
+	if resultNOC.Err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: resultNOC.Err.Error()})
+		return
+	}
+
+	resultService := dbService.Get(connection.ID, &core.Service{Model: gorm.Model{ID: uint(id)}})
+	if resultService.Err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: resultService.Err.Error()})
+		return
+	}
+
+	if !(*resultService.Service[0].AddAllow) {
+		c.JSON(http.StatusBadRequest, common.Error{Error: "error: You are not allowed to add any connection information."})
+		return
+	}
+
+	resultConnection := dbConnection.Get(connection.ServiceID, &core.Connection{ServiceID: uint(id)})
 	if resultConnection.Err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: resultConnection.Err.Error()})
 		return
@@ -66,17 +104,19 @@ func AddAdmin(c *gin.Context) {
 		return
 	}
 
-	_, err = dbConnection.Create(&connection.Connection{
-		GroupID:          uint(id),
-		UserID:           input.UserID,
-		ConnectionType:   input.ConnectionType,
-		ConnectionNumber: number,
-		NTT:              input.NTT,
-		NOC:              input.NOC,
-		TermIP:           input.TermIP,
-		Monitor:          input.Monitor,
-		Open:             &[]bool{false}[0],
-		Lock:             &[]bool{true}[0],
+	_, err = dbConnection.Create(&core.Connection{
+		ServiceID:            resultService.Service[0].ID,
+		ConnectionTemplateID: input.ConnectionTemplateID,
+		ConnectionComment:    input.ConnectionComment,
+		ConnectionNumber:     number,
+		NTTTemplateID:        input.NTTTemplateID,
+		NOCID:                input.NOCID,
+		TermIP:               input.TermIP,
+		Prefectures:          input.Prefectures,
+		Monitor:              input.Monitor,
+		Fee:                  "Free",
+		Open:                 &[]bool{false}[0],
+		Lock:                 &[]bool{true}[0],
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
@@ -87,7 +127,10 @@ func AddAdmin(c *gin.Context) {
 	attachment.AddField(slack.Field{Title: "Title", Value: "接続情報登録"}).
 		AddField(slack.Field{Title: "申請者", Value: "管理者"}).
 		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(id)}).
-		AddField(slack.Field{Title: "接続コード（新規発番）", Value: input.ConnectionType + fmt.Sprintf("%03d", number)}).
+		AddField(slack.Field{Title: "サービスコード", Value: resultService.Service[0].ServiceTemplate.Type +
+			strconv.Itoa(int(resultService.Service[0].ServiceNumber))}).
+		AddField(slack.Field{Title: "接続コード（新規発番）", Value: resultConnectionTemplate.Connections[0].Type +
+			fmt.Sprintf("%03d", number)}).
 		AddField(slack.Field{Title: "接続コード（補足情報）", Value: input.ConnectionComment})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 
@@ -107,7 +150,7 @@ func DeleteAdmin(c *gin.Context) {
 		return
 	}
 
-	if err = dbConnection.Delete(&connection.Connection{Model: gorm.Model{ID: uint(id)}}); err != nil {
+	if err = dbConnection.Delete(&core.Connection{Model: gorm.Model{ID: uint(id)}}); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
@@ -115,7 +158,7 @@ func DeleteAdmin(c *gin.Context) {
 }
 
 func UpdateAdmin(c *gin.Context) {
-	var input connection.Connection
+	var input core.Connection
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -136,7 +179,7 @@ func UpdateAdmin(c *gin.Context) {
 		return
 	}
 
-	resultConnection := dbConnection.Get(connection.ID, &connection.Connection{Model: gorm.Model{ID: uint(id)}})
+	resultConnection := dbConnection.Get(connection.ID, &core.Connection{Model: gorm.Model{ID: uint(id)}})
 	if resultConnection.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: resultConnection.Err.Error()})
 		return
@@ -161,7 +204,7 @@ func GetAdmin(c *gin.Context) {
 		return
 	}
 
-	result := dbConnection.Get(connection.ID, &connection.Connection{Model: gorm.Model{ID: uint(id)}})
+	result := dbConnection.Get(connection.ID, &core.Connection{Model: gorm.Model{ID: uint(id)}})
 	if result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
