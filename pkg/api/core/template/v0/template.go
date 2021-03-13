@@ -7,6 +7,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	template "github.com/homenoc/dsbd-backend/pkg/api/core/template"
 	dbConnectionTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/connection/v0"
+	dbNTTTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ntt/v0"
 	dbServiceTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/service/v0"
 	"net/http"
 )
@@ -31,9 +32,15 @@ func Get(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: resultConnection.Err.Error()})
 		return
 	}
+	resultNTT := dbNTTTemplate.GetAll()
+	if resultNTT.Err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: resultNTT.Err.Error()})
+		return
+	}
 
 	c.JSON(http.StatusOK, template.Result{
 		Services:    resultService.Services,
 		Connections: resultConnection.Connections,
+		NTTs:        resultNTT.NTTs,
 	})
 }
