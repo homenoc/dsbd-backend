@@ -23,7 +23,7 @@ type Input struct {
 	JPNICAdmin        core.JPNICAdmin  `json:"jpnic_admin"`
 	JPNICTech         []core.JPNICTech `json:"jpnic_tech"`
 	ServiceTemplateID uint             `json:"service_template_id"`
-	ServiceComment    string           `json:"network_comment"`
+	ServiceComment    string           `json:"service_comment"`
 	Org               string           `json:"org"`
 	OrgEn             string           `json:"org_en"`
 	Postcode          string           `json:"postcode"`
@@ -36,7 +36,6 @@ type Input struct {
 	AveDownstream     uint             `json:"avg_downstream"`
 	MaxDownstream     uint             `json:"max_downstream"`
 	MaxBandWidthAS    uint             `json:"max_bandwidth_as"`
-	PI                bool             `json:"pi"` //廃止予定
 	ASN               uint             `json:"asn"`
 	IP                []IPInput        `json:"ip"`
 	Lock              bool             `json:"lock"`
