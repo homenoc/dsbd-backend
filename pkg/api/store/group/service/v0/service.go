@@ -124,28 +124,38 @@ func Get(base int, data *core.Service) service.ResultDatabase {
 	var serviceStruct []core.Service
 
 	if base == service.ID { //ID
-		err = db.Preload("IP").Preload("Connection").Preload("Admin").Preload("Tech").
+		err = db.Preload("ServiceTemplate").
+			Preload("IP").
+			Preload("Connection").
+			Preload("JPNICAdmin").
+			Preload("JPNICTech").
 			First(&serviceStruct, data.ID).Error
 	} else if base == service.Org { //Mail
-		err = db.Preload("IP").Preload("Connection").Preload("Admin").Preload("Tech").
+		err = db.Preload("ServiceTemplate").
+			Preload("IP").
+			Preload("Connection").
+			Preload("JPNICAdmin").
+			Preload("JPNICTech").
 			Where("org = ?", data.Org).Find(&serviceStruct).Error
 	} else if base == service.GID {
-		err = db.Preload("IP").Preload("Connection").Preload("Admin").Preload("Tech").
+		err = db.Preload("ServiceTemplate").
+			Preload("IP").
+			Preload("Connection").
+			Preload("JPNICAdmin").
+			Preload("JPNICTech").
 			Where("group_id = ?", data.GroupID).Find(&serviceStruct).Error
 	} else if base == service.GIDAndAddAllow {
 		err = db.Preload("ServiceTemplate").
 			Where("group_id = ? AND add_allow = ?", data.GroupID, true).Find(&serviceStruct).Error
-	} else if base == service.IDOnlySingle {
-		err = db.Preload("ServiceTemplate").First(&serviceStruct, data.ID).Error
 	} else if base == service.SearchNewNumber {
 		err = db.Where("group_id = ?", data.GroupID).Find(&serviceStruct).Error
 	} else if base == service.Open {
 		err = db.Where("group_id = ? AND open = ?", data.GroupID, true).
+			Preload("ServiceTemplate").
 			Preload("IP", "open = ?", true).
 			Preload("Connection", "open = ?", true).
-			Preload("Admin").
-			Preload("Tech").
-			Preload("NOC").
+			Preload("JPNICAdmin").
+			Preload("JPNICTech").
 			Find(&serviceStruct).Error
 	} else {
 		log.Println("base select error")

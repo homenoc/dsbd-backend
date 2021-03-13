@@ -102,7 +102,7 @@ func Add(c *gin.Context) {
 		}
 	}
 
-	resultService := dbService.Get(service.IDOnlySingle, &core.Service{Model: gorm.Model{ID: uint(id)}})
+	resultService := dbService.Get(service.ID, &core.Service{Model: gorm.Model{ID: uint(id)}})
 	if resultService.Err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: resultService.Err.Error()})
 		return

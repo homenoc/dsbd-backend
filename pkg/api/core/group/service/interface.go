@@ -11,7 +11,6 @@ const (
 	Open            = 3
 	SearchNewNumber = 4
 	GIDAndAddAllow  = 5
-	IDOnlySingle    = 20
 	UpdateName      = 100
 	UpdateDate      = 102
 	UpdateRoute     = 103

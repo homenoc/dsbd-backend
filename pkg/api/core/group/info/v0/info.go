@@ -28,11 +28,8 @@ func Get(c *gin.Context) {
 		return
 	}
 
-	//TODO:これより下の実装はマジでよくない
-	//DBを３つからすべて抽出しているため、無駄な処理が多く今後改善必要がある。
-
 	if len(resultService.Service) == 0 {
-		c.JSON(http.StatusNoContent, common.Error{Error: "error: No service information available."})
+		c.JSON(http.StatusForbidden, common.Error{Error: "error: No service information available."})
 		return
 	}
 
@@ -40,7 +37,7 @@ func Get(c *gin.Context) {
 
 	for _, tmpService := range resultService.Service {
 		if *tmpService.Open {
-			for _, tmpConnection := range *tmpService.Connections {
+			for _, tmpConnection := range *tmpService.Connection {
 				var fee string
 				var v4, v6 []string
 				if *tmpService.Fee == 0 {
