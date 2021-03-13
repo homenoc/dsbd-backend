@@ -1,6 +1,7 @@
 package v0
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
@@ -37,17 +38,17 @@ func Get(c *gin.Context) {
 
 	for _, tmpService := range resultService.Service {
 		if *tmpService.Open {
-			for _, tmpConnection := range *tmpService.Connection {
+			for _, tmpConnection := range tmpService.Connection {
 				var fee string
 				var v4, v6 []string
 				if *tmpService.Fee == 0 {
 					fee = "Free"
 				}
 				serviceID := strconv.Itoa(int(tmpService.GroupID)) + "-" + tmpService.ServiceTemplate.Type +
-					strconv.Itoa(int(tmpService.ServiceNumber)) + "-" + tmpConnection.ConnectionTemplate.Type +
-					strconv.Itoa(int(tmpConnection.ConnectionNumber))
+					fmt.Sprintf("%03d", tmpService.ServiceNumber) + "-" + tmpConnection.ConnectionTemplate.Type +
+					fmt.Sprintf("%03d", tmpConnection.ConnectionNumber)
 
-				for _, tmpIP := range *tmpService.IP {
+				for _, tmpIP := range tmpService.IP {
 					if tmpIP.Version == 4 {
 						v4 = append(v4)
 					} else if tmpIP.Version == 6 {
