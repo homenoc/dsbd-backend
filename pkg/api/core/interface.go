@@ -94,7 +94,7 @@ type Connection struct {
 	NOCID                    *uint                  `json:"noc_id"`
 	TermIP                   string                 `json:"term_ip"`
 	Monitor                  *bool                  `json:"monitor"`
-	Prefectures              uint                   `json:"prefectures"` //JIS X 0401
+	Address                  string                 `json:"address"` //都道府県　市町村
 	LinkV4Our                string                 `json:"link_v4_our"`
 	LinkV4Your               string                 `json:"link_v4_your"`
 	LinkV6Our                string                 `json:"link_v6_our"`
@@ -225,10 +225,13 @@ type ServiceTemplate struct {
 
 type ConnectionTemplate struct {
 	gorm.Model
-	Hidden  bool   `json:"hidden"`
-	Name    string `json:"name"`
-	Type    string `json:"type"`
-	Comment string `json:"comment"`
+	Hidden           bool   `json:"hidden"`
+	Name             string `json:"name"`
+	Type             string `json:"type"`
+	Comment          string `json:"comment"`
+	NeedInternet     *bool  `json:"need_internet"`
+	NeedComment      *bool  `json:"need_comment"`
+	NeedCrossConnect *bool  `json:"need_cross_connect"`
 }
 
 type NTTTemplate struct {

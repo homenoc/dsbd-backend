@@ -142,7 +142,7 @@ func Add(c *gin.Context) {
 		NTTTemplateID:        input.NTTTemplateID,
 		NOCID:                input.NOCID,
 		TermIP:               input.TermIP,
-		Prefectures:          input.Prefectures,
+		Address:              input.Address,
 		Monitor:              input.Monitor,
 		Open:                 &[]bool{false}[0],
 		Lock:                 &[]bool{true}[0],
