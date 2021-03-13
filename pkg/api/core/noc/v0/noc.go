@@ -31,6 +31,7 @@ func GetAll(c *gin.Context) {
 	for _, tmp := range result.NOC {
 		if *tmp.Enable {
 			nocTmp.NOC = append(nocTmp.NOC, noc.ResultOneUser{
+				ID:       tmp.ID,
 				Name:     tmp.Name,
 				Location: tmp.Location,
 			})

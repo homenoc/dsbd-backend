@@ -12,6 +12,7 @@ const (
 )
 
 type ResultOneUser struct {
+	ID       uint   `json:"ID"`
 	Name     string `json:"name"`
 	Location string `json:"location"`
 	New      *bool  `json:"new"`

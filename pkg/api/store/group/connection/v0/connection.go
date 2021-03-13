@@ -88,7 +88,7 @@ func Get(base int, data *core.Connection) connection.ResultDatabase {
 	if base == connection.ID { //ID
 		err = db.First(&connectionStruct, data.ID).Error
 	} else if base == connection.ServiceID {
-		err = db.Where("group_id = ?", data.ServiceID).Find(&connectionStruct).Error
+		err = db.Where("service_id = ?", data.ServiceID).Find(&connectionStruct).Error
 	} else {
 		log.Println("base select error")
 		return connection.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
