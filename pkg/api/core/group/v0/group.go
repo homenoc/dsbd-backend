@@ -16,6 +16,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -84,7 +85,11 @@ func Add(c *gin.Context) {
 	attachment := slack.Attachment{}
 	attachment.AddField(slack.Field{Title: "Title", Value: "グループ登録"}).
 		AddField(slack.Field{Title: "Question", Value: input.Question}).
+		AddField(slack.Field{Title: "Org", Value: input.Org + "(" + input.OrgEn + ")"}).
+		AddField(slack.Field{Title: "Country", Value: input.Country}).
+		AddField(slack.Field{Title: "Student", Value: strconv.FormatBool(*input.Student)}).
 		AddField(slack.Field{Title: "Contract", Value: input.Contract})
+
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 
 	if err = dbUser.Update(user.UpdateGID, &core.User{Model: gorm.Model{ID: userResult.User.ID}, GroupID: result.Model.ID}); err != nil {
