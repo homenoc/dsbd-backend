@@ -83,28 +83,29 @@ type Service struct {
 
 type Connection struct {
 	gorm.Model
-	ServiceID            uint                `json:"service_id"`
-	BGPRouterID          *uint               `json:"bgp_router_id"`       //使用RouterのID
-	TunnelRouterIPID     *uint               `json:"tunnel_router_ip_id"` //使用エンドポイントルータのID
-	ConnectionTemplateID *uint               `json:"connection_template_id"`
-	ConnectionTemplate   *ConnectionTemplate `json:"connection_template"`
-	ConnectionComment    string              `json:"connection_comment"` // ServiceがETCの時や補足説明で必要
-	ConnectionNumber     uint                `json:"connection_number"`
-	NTTTemplateID        *uint               `json:"ntt_template_id"`
-	NOCID                *uint               `json:"noc_id"`
-	TermIP               string              `json:"term_ip"`
-	Monitor              *bool               `json:"monitor"`
-	Prefectures          uint                `json:"prefectures"` //JIS X 0401
-	LinkV4Our            string              `json:"link_v4_our"`
-	LinkV4Your           string              `json:"link_v4_your"`
-	LinkV6Our            string              `json:"link_v6_our"`
-	LinkV6Your           string              `json:"link_v6_your"`
-	Open                 *bool               `json:"open"`
-	Lock                 *bool               `json:"lock"`
-	Comment              string              `json:"comment"`
-	NTTTemplate          *NTTTemplate        `json:"ntt_template"`
-	NOC                  *NOC                `json:"noc"`
-	BGPRouter            BGPRouter           `json:"bgp_router"`
+	ServiceID                uint                   `json:"service_id"`
+	BGPRouterID              *uint                  `json:"bgp_router_id"`                //使用RouterのID
+	TunnelEndPointRouterIPID *uint                  `json:"tunnel_endpoint_router_ip_id"` //使用エンドポイントルータのID
+	ConnectionTemplateID     *uint                  `json:"connection_template_id"`
+	ConnectionTemplate       *ConnectionTemplate    `json:"connection_template"`
+	ConnectionComment        string                 `json:"connection_comment"` // ServiceがETCの時や補足説明で必要
+	ConnectionNumber         uint                   `json:"connection_number"`
+	NTTTemplateID            *uint                  `json:"ntt_template_id"`
+	NOCID                    *uint                  `json:"noc_id"`
+	TermIP                   string                 `json:"term_ip"`
+	Monitor                  *bool                  `json:"monitor"`
+	Prefectures              uint                   `json:"prefectures"` //JIS X 0401
+	LinkV4Our                string                 `json:"link_v4_our"`
+	LinkV4Your               string                 `json:"link_v4_your"`
+	LinkV6Our                string                 `json:"link_v6_our"`
+	LinkV6Your               string                 `json:"link_v6_your"`
+	Open                     *bool                  `json:"open"`
+	Lock                     *bool                  `json:"lock"`
+	Comment                  string                 `json:"comment"`
+	NTTTemplate              *NTTTemplate           `json:"ntt_template"`
+	NOC                      *NOC                   `json:"noc"`
+	BGPRouter                BGPRouter              `json:"bgp_router"`
+	TunnelEndPointRouterIP   TunnelEndPointRouterIP `json:"tunnel_endpoint_router_ip"`
 }
 
 type NOC struct {
