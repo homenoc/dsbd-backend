@@ -249,7 +249,7 @@ func GetAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, service.Result{Service: result.Service})
 }
 
-func Get(c *gin.Context) {
+func GetAllAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})

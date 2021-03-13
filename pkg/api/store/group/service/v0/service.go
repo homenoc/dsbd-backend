@@ -130,6 +130,9 @@ func Get(base int, data *core.Service) service.ResultDatabase {
 	} else if base == service.GID {
 		err = db.Preload("IP").Preload("Connection").Preload("Admin").Preload("Tech").
 			Where("group_id = ?", data.GroupID).Find(&serviceStruct).Error
+	} else if base == service.GIDAndAddAllow {
+		err = db.Preload("ServiceTemplate").
+			Where("group_id = ? AND add_allow = ?", data.GroupID, true).Find(&serviceStruct).Error
 	} else if base == service.SearchNewNumber {
 		err = db.Where("group_id = ?", data.GroupID).Find(&serviceStruct).Error
 	} else if base == service.Open {

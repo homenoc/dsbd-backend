@@ -10,6 +10,7 @@ const (
 	Org             = 2
 	Open            = 3
 	SearchNewNumber = 4
+	GIDAndAddAllow  = 5
 	UpdateName      = 100
 	UpdateDate      = 102
 	UpdateRoute     = 103

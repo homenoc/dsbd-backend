@@ -159,7 +159,7 @@ func Add(c *gin.Context) {
 		JPNICTech:         input.JPNICTech,
 		Open:              &[]bool{false}[0],
 		Lock:              &[]bool{true}[0],
-		AddAllow:          &[]bool{false}[0],
+		AddAllow:          &[]bool{true}[0],
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
@@ -246,16 +246,20 @@ func Update(c *gin.Context) {
 	c.JSON(http.StatusOK, group.Result{})
 }
 
-func GetAllAdmin(c *gin.Context) {
-	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
+func GetAddAllow(c *gin.Context) {
+	userToken := c.Request.Header.Get("USER_TOKEN")
+	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
+
+	result := auth.GroupAuthentication(0, core.Token{UserToken: userToken, AccessToken: accessToken})
+	if result.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
 	}
 
-	if result := dbService.GetAll(); result.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
+	if resultService := dbService.Get(service.GIDAndAddAllow, &core.Service{GroupID: result.Group.ID}); resultService.Err != nil {
+		log.Println(resultService.Err)
+		c.JSON(http.StatusInternalServerError, common.Error{Error: resultService.Err.Error()})
 	} else {
-		c.JSON(http.StatusOK, service.Result{Service: result.Service})
+		c.JSON(http.StatusOK, service.Result{Service: resultService.Service})
 	}
 }
