@@ -43,6 +43,7 @@ type Group struct {
 	StudentExpired *time.Time    `json:"student_expired"`
 	Fee            *uint         `json:"fee"`
 	Comment        string        `json:"comment"`
+	Open           *bool         `json:"open"`
 	Pass           *bool         `json:"pass"`
 	Lock           *bool         `json:"lock"`
 	ExpiredStatus  *uint         `json:"expired_status"`
