@@ -226,7 +226,7 @@ func UserRestAPI() {
 			// Group Delete
 			//v1.DELETE("/group", group.Delete)
 			// Connection Create
-			v1.POST("/group/connection", connection.Add)
+			v1.POST("/group/service/:id/connection", connection.Add)
 			// Service add
 			v1.POST("/group/service", service.Add)
 			//v1.PUT("/group/network", network.Update)
