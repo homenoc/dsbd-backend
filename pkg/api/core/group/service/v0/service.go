@@ -153,11 +153,13 @@ func Add(c *gin.Context) {
 		AveDownstream:     input.AveDownstream,
 		MaxDownstream:     input.MaxDownstream,
 		ASN:               input.ASN,
+		Fee:               &[]uint{0}[0],
 		IP:                grpIP,
 		JPNICAdmin:        input.JPNICAdmin,
 		JPNICTech:         input.JPNICTech,
 		Open:              &[]bool{false}[0],
 		Lock:              &[]bool{true}[0],
+		AddAllow:          &[]bool{false}[1],
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
