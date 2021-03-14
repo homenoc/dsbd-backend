@@ -126,7 +126,13 @@ func Get(base int, data *core.Service) service.ResultDatabase {
 	if base == service.ID { //ID
 		err = db.Preload("ServiceTemplate").
 			Preload("IP").
+			Preload("IP.Plan").
 			Preload("Connection").
+			Preload("Connection.ConnectionTemplate").
+			Preload("Connection.NOC").
+			Preload("Connection.BGPRouter").
+			Preload("Connection.TunnelEndPointRouterIP").
+			Preload("ServiceTemplate").
 			Preload("JPNICAdmin").
 			Preload("JPNICTech").
 			First(&serviceStruct, data.ID).Error
