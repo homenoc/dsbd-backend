@@ -69,7 +69,7 @@ func Add(c *gin.Context) {
 		AddressEn:      input.AddressEn,
 		Tel:            input.Tel,
 		Country:        input.Country,
-		Status:         &[]uint{2}[0],
+		Status:         &[]uint{1}[0],
 		ExpiredStatus:  &[]uint{0}[0],
 		Contract:       input.Contract,
 		Student:        input.Student,
