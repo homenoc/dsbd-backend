@@ -215,13 +215,9 @@ func UpdateAdmin(c *gin.Context) {
 		return
 	}
 
-	result := dbService.Get(service.ID, &core.Service{Model: gorm.Model{ID: uint(id)}})
-	if result.Err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
+	input.ID = uint(id)
 
-	if err = dbService.Update(service.UpdateAll, replaceAdminService(result.Service[0], input)); err != nil {
+	if err = dbService.Update(service.UpdateAll, input); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
