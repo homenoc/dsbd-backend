@@ -93,7 +93,19 @@ func Get(base int, data *core.Group) group.ResultDatabase {
 	var groupStruct []core.Group
 
 	if base == group.ID { //ID
-		err = db.First(&groupStruct, data.ID).Error
+		err = db.Preload("Users").
+			Preload("Services").
+			Preload("Tickets").
+			Preload("Services.IP").
+			Preload("Services.Connection").
+			Preload("Services.Connection.ConnectionTemplate").
+			Preload("Services.Connection.NOC").
+			Preload("Services.Connection.BGPRouter").
+			Preload("Services.Connection.TunnelEndPointRouterIP").
+			Preload("Services.ServiceTemplate").
+			Preload("Services.JPNICAdmin").
+			Preload("Services.JPNICTech").
+			First(&groupStruct, data.ID).Error
 	} else if base == group.Org { //Org
 		err = db.Where("org = ?", data.Org).Find(&groupStruct).Error
 	} else {
