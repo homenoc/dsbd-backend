@@ -143,10 +143,10 @@ type TunnelEndPointRouter struct {
 
 type TunnelEndPointRouterIP struct {
 	gorm.Model
-	TunnelRouterID uint   `json:"tunnel_router_id"`
-	IP             string `json:"ip"`
-	Enable         *bool  `json:"enable"`
-	Comment        string `json:"comment"`
+	TunnelEndPointRouterID uint   `json:"tunnel_endpoint_router_id"`
+	IP                     string `json:"ip"`
+	Enable                 *bool  `json:"enable"`
+	Comment                string `json:"comment"`
 }
 
 type IP struct {
