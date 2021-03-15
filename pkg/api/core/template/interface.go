@@ -17,6 +17,7 @@ type Result struct {
 	Services    []core.ServiceTemplate    `json:"services"`
 	Connections []core.ConnectionTemplate `json:"connections"`
 	NTTs        []core.NTTTemplate        `json:"ntts"`
+	NOC         []core.NOC                `json:"nocs"`
 }
 
 type ResultDatabase struct {

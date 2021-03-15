@@ -90,6 +90,9 @@ func GetAll() noc.ResultDatabase {
 	defer db.Close()
 
 	var nocs []core.NOC
-	err = db.Find(&nocs).Error
+	err = db.Preload("BGPRouter").
+		Preload("TunnelEndPointRouter").
+		Preload("TunnelEndPointRouter.TunnelEndPointRouterIP").
+		Find(&nocs).Error
 	return noc.ResultDatabase{NOC: nocs, Err: err}
 }
