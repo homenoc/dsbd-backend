@@ -215,6 +215,14 @@ func UpdateAdmin(c *gin.Context) {
 		return
 	}
 
+	resultService := dbService.Get(service.ID, &core.Service{Model: gorm.Model{ID: uint(id)}})
+	if resultService.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: resultService.Err.Error()})
+		return
+	}
+
+	noticeSlackAdmin(resultService.Service[0], input)
+
 	input.ID = uint(id)
 
 	if err = dbService.Update(service.UpdateAll, input); err != nil {
