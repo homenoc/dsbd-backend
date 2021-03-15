@@ -107,6 +107,7 @@ type Connection struct {
 	NOC                      *NOC                   `json:"noc"`
 	BGPRouter                BGPRouter              `json:"bgp_router"`
 	TunnelEndPointRouterIP   TunnelEndPointRouterIP `json:"tunnel_endpoint_router_ip"`
+	Service                  Service                `json:"service"`
 }
 
 type NOC struct {

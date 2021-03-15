@@ -86,7 +86,14 @@ func Get(base int, data *core.Connection) connection.ResultDatabase {
 	var connectionStruct []core.Connection
 
 	if base == connection.ID { //ID
-		err = db.First(&connectionStruct, data.ID).Error
+		err = db.Preload("ConnectionTemplate").
+			Preload("NOC").
+			Preload("BGPRouter").
+			Preload("TunnelEndPointRouterIP").
+			Preload("NTTTemplate").
+			Preload("Service").
+			Preload("Service.ServiceTemplate").
+			First(&connectionStruct, data.ID).Error
 	} else if base == connection.ServiceID {
 		err = db.Where("service_id = ?", data.ServiceID).Find(&connectionStruct).Error
 	} else {
@@ -105,7 +112,12 @@ func GetAll() connection.ResultDatabase {
 	defer db.Close()
 
 	var connections []core.Connection
-	err = db.Find(&connections).Error
+	err = db.Preload("ConnectionTemplate").
+		Preload("NTTTemplate").
+		Preload("NOC").
+		Preload("BGPRouter").
+		Preload("TunnelEndPointRouterIP").
+		Find(&connections).Error
 	return connection.ResultDatabase{Connection: connections, Err: err}
 
 }
