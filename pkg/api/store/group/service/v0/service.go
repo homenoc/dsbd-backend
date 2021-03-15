@@ -47,7 +47,7 @@ func Update(base int, c core.Service) error {
 		result = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Update(core.Service{
 			Org:       c.Org,
 			OrgEn:     c.OrgEn,
-			Postcode:  c.Postcode,
+			PostCode:  c.PostCode,
 			Address:   c.Address,
 			AddressEn: c.AddressEn,
 			RouteV4:   c.RouteV4,
@@ -65,7 +65,7 @@ func Update(base int, c core.Service) error {
 			GroupID:   c.GroupID,
 			Org:       c.Org,
 			OrgEn:     c.Org,
-			Postcode:  c.Postcode,
+			PostCode:  c.PostCode,
 			Address:   c.Address,
 			AddressEn: c.AddressEn,
 			ASN:       c.ASN,

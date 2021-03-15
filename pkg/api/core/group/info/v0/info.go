@@ -60,7 +60,7 @@ func Get(c *gin.Context) {
 					infoInterface = append(infoInterface, info.Info{
 						ServiceID:  serviceID,
 						Service:    tmpService.ServiceTemplate.Name,
-						ASN:        tmpService.ASN,
+						ASN:        *tmpService.ASN,
 						V4:         v4,
 						V6:         v6,
 						NOC:        tmpConnection.NOC.Name,

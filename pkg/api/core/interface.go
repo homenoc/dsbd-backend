@@ -58,10 +58,10 @@ type Service struct {
 	ServiceNumber     uint             `json:"service_number"`
 	Org               string           `json:"org"`
 	OrgEn             string           `json:"org_en"`
-	Postcode          string           `json:"postcode"`
+	PostCode          string           `json:"postcode"`
 	Address           string           `json:"address"`
 	AddressEn         string           `json:"address_en"`
-	ASN               uint             `json:"asn"`
+	ASN               *uint            `json:"asn"`
 	RouteV4           string           `json:"route_v4"`
 	RouteV6           string           `json:"route_v6"`
 	V4Name            string           `json:"v4_name"`

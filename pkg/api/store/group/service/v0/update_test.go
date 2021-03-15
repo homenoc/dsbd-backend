@@ -42,7 +42,7 @@ func TestAddJPNICTech(t *testing.T) {
 		ServiceNumber:     0,
 		Org:               "HomeNOC",
 		OrgEn:             "",
-		Postcode:          "",
+		PostCode:          "",
 		Address:           "",
 		AddressEn:         "",
 		ASN:               0,
