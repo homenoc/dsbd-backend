@@ -41,7 +41,7 @@ func Update(base int, c core.Service) error {
 	}
 	defer db.Close()
 
-	var result *gorm.DB
+	var result error
 
 	if service.UpdateData == base {
 		result = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Update(core.Service{
@@ -53,14 +53,13 @@ func Update(base int, c core.Service) error {
 			RouteV4:   c.RouteV4,
 			RouteV6:   c.RouteV6,
 			ASN:       c.ASN,
-		})
+		}).Error
 	} else if service.UpdateRoute == base {
 		result = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Update(core.Service{
-			RouteV4: c.RouteV4, RouteV6: c.RouteV6})
+			RouteV4: c.RouteV4, RouteV6: c.RouteV6}).Error
 	} else if service.UpdateGID == base {
-		result = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Update(core.Service{GroupID: c.GroupID})
+		result = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Update(core.Service{GroupID: c.GroupID}).Error
 	} else if service.UpdateStatus == base {
-		result = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Update(core.Service{AddAllow: c.AddAllow})
 	} else if service.UpdateAll == base {
 		result = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Update(core.Service{
 			GroupID:   c.GroupID,
@@ -77,12 +76,31 @@ func Update(base int, c core.Service) error {
 			IP:        c.IP,
 			Open:      c.Open,
 			Lock:      c.Lock,
-		})
+		}).Error
+	} else if service.ReplaceIP == base {
+		result = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Association("IP").Replace(c.IP[0]).Error
+	} else if service.AppendIP == base {
+		result = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Association("IP").Replace(c.IP[0]).Error
+	} else if service.AppendJPNICAdmin == base {
+		result = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Association("JPNICAdmin").Append(c.JPNICAdmin).Error
+	} else if service.AppendJPNICTech == base {
+		result = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Association("JPNICTech").Append(c.JPNICTech[0]).Error
+	} else if service.AppendConnection == base {
+		result = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Association("Connections").Replace(c.Connection[0]).Error
+	} else if service.DeleteIP == base {
+		result = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Association("IP").Replace(c.IP[0]).Error
+	} else if service.DeleteJPNICAdmin == base {
+		result = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Association("JPNICAdmin").Delete(c.JPNICAdmin).Error
+	} else if service.DeleteJPNICTech == base {
+		result = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Association("JPNICTech").Delete(c.JPNICTech[0]).Error
+	} else if service.DeleteConnection == base {
+		result = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Association("Connections").Delete(c.Connection[0]).Error
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
 	}
-	return result.Error
+	result = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Update(core.Service{AddAllow: c.AddAllow}).Error
+	return result
 }
 
 func JoinJPNICTech(serviceID, jpnicTechID uint) error {
@@ -183,12 +201,6 @@ func GetAll() service.ResultDatabase {
 	defer db.Close()
 
 	var services []core.Service
-	err = db.
-		Preload("ServiceTemplate").
-		Preload("IP").
-		Preload("Connection").
-		Preload("JPNICAdmin").
-		Preload("JPNICTech").
-		Find(&services).Error
+	err = db.Find(&services).Error
 	return service.ResultDatabase{Err: err, Service: services}
 }
