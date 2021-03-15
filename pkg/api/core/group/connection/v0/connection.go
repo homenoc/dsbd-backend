@@ -137,17 +137,19 @@ func Add(c *gin.Context) {
 	}
 
 	_, err = dbConnection.Create(&core.Connection{
-		ServiceID:            resultService.Service[0].ID,
-		ConnectionTemplateID: input.ConnectionTemplateID,
-		ConnectionComment:    input.ConnectionComment,
-		ConnectionNumber:     number,
-		NTTTemplateID:        input.NTTTemplateID,
-		NOCID:                input.NOCID,
-		TermIP:               input.TermIP,
-		Address:              input.Address,
-		Monitor:              input.Monitor,
-		Open:                 &[]bool{false}[0],
-		Lock:                 &[]bool{true}[0],
+		ServiceID:                resultService.Service[0].ID,
+		ConnectionTemplateID:     input.ConnectionTemplateID,
+		ConnectionComment:        input.ConnectionComment,
+		ConnectionNumber:         number,
+		NTTTemplateID:            input.NTTTemplateID,
+		NOCID:                    input.NOCID,
+		BGPRouterID:              &[]uint{0}[0],
+		TunnelEndPointRouterIPID: &[]uint{0}[0],
+		TermIP:                   input.TermIP,
+		Address:                  input.Address,
+		Monitor:                  input.Monitor,
+		Open:                     &[]bool{false}[0],
+		Lock:                     &[]bool{true}[0],
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
