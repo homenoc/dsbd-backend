@@ -53,21 +53,7 @@ func Update(base int, c core.Connection) error {
 	} else if connection.UpdateServiceID == base {
 		result = db.Model(&core.Connection{Model: gorm.Model{ID: c.ID}}).Update(core.Connection{ServiceID: c.ServiceID})
 	} else if base == connection.UpdateAll {
-		result = db.Model(&core.Connection{Model: gorm.Model{ID: c.ID}}).Update(core.Connection{
-			ServiceID:                c.ServiceID,
-			BGPRouterID:              c.BGPRouterID,
-			TunnelEndPointRouterIPID: c.TunnelEndPointRouterIPID,
-			NTTTemplateID:            c.NTTTemplateID,
-			NOC:                      c.NOC,
-			TermIP:                   c.TermIP,
-			Monitor:                  c.Monitor,
-			LinkV4Our:                c.LinkV4Our,
-			LinkV4Your:               c.LinkV4Your,
-			LinkV6Our:                c.LinkV6Our,
-			LinkV6Your:               c.LinkV6Your,
-			Open:                     c.Open,
-			Lock:                     c.Lock,
-		})
+		result = db.Model(&core.Connection{Model: gorm.Model{ID: c.ID}}).Update(c)
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
@@ -93,6 +79,7 @@ func Get(base int, data *core.Connection) connection.ResultDatabase {
 			Preload("NTTTemplate").
 			Preload("Service").
 			Preload("Service.ServiceTemplate").
+			Preload("Service.Group").
 			First(&connectionStruct, data.ID).Error
 	} else if base == connection.ServiceID {
 		err = db.Where("service_id = ?", data.ServiceID).Find(&connectionStruct).Error
