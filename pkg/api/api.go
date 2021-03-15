@@ -5,6 +5,7 @@ import (
 	controller "github.com/homenoc/dsbd-backend/pkg/api/core/controller/v0"
 	connection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection/v0"
 	info "github.com/homenoc/dsbd-backend/pkg/api/core/group/info/v0"
+	ip "github.com/homenoc/dsbd-backend/pkg/api/core/group/service/ip/v0"
 	jpnicAdmin "github.com/homenoc/dsbd-backend/pkg/api/core/group/service/jpnicAdmin/v0"
 	jpnicTech "github.com/homenoc/dsbd-backend/pkg/api/core/group/service/jpnicTech/v0"
 	service "github.com/homenoc/dsbd-backend/pkg/api/core/group/service/v0"
@@ -148,6 +149,13 @@ func AdminRestAPI() {
 			v1.PUT("/service/:id", service.UpdateAdmin)
 			v1.GET("/service", service.GetAllAdmin)
 			v1.GET("/service/:id", service.GetAdmin)
+			v1.PUT("/service/:id/ip/:ip_id", service.UpdateIP)
+
+			//
+			// IP
+			//
+			v1.PUT("/ip/:id", ip.UpdateAdmin)
+
 			////
 			//// JPNIC Admin
 			////
