@@ -26,7 +26,7 @@ func AddAdmin(c *gin.Context) {
 		return
 	}
 
-	// networkIDが0の時エラー処理
+	// serviceIDが0の時エラー処理
 	if id == 0 {
 		c.JSON(http.StatusBadRequest, common.Error{Error: fmt.Sprintf("This id is wrong... ")})
 		return
@@ -222,6 +222,54 @@ func UpdateAdmin(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, service.Result{})
+}
+
+func UpdateIP(c *gin.Context) {
+	var input core.Service
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	ipID, err := strconv.Atoi(c.Param("ip_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	err = c.BindJSON(&input)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	if resultAdmin.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
+		return
+	}
+
+	input.ID = uint(id)
+	input.IP[0].ID = uint(ipID)
+
+	log.Println(input)
+
+	if err = dbService.Update(service.ReplaceIP, input); err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, service.Result{})
+}
+
+func AppendJPNICTech(c *gin.Context) {
+
+}
+
+func DeleteJPNICTech(c *gin.Context) {
+
 }
 
 func GetAdmin(c *gin.Context) {

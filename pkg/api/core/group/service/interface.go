@@ -5,19 +5,31 @@ import (
 )
 
 const (
-	ID              = 0
-	GID             = 1
-	Org             = 2
-	Open            = 3
-	SearchNewNumber = 4
-	GIDAndAddAllow  = 5
-	UpdateName      = 100
-	UpdateDate      = 102
-	UpdateRoute     = 103
-	UpdateStatus    = 104
-	UpdateGID       = 104
-	UpdateData      = 105
-	UpdateAll       = 150
+	ID                = 0
+	GID               = 1
+	Org               = 2
+	Open              = 3
+	SearchNewNumber   = 4
+	GIDAndAddAllow    = 5
+	UpdateName        = 100
+	UpdateDate        = 102
+	UpdateRoute       = 103
+	UpdateStatus      = 104
+	UpdateGID         = 104
+	UpdateData        = 105
+	ReplaceJPNICAdmin = 120
+	ReplaceJPNICTech  = 121
+	ReplaceConnection = 122
+	ReplaceIP         = 123
+	UpdateAll         = 199
+	AppendJPNICAdmin  = 200
+	AppendJPNICTech   = 201
+	AppendConnection  = 202
+	AppendIP          = 203
+	DeleteJPNICAdmin  = 300
+	DeleteJPNICTech   = 301
+	DeleteConnection  = 302
+	DeleteIP          = 303
 )
 
 type Input struct {
