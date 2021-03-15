@@ -5,7 +5,9 @@ import (
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	template "github.com/homenoc/dsbd-backend/pkg/api/core/template"
+	dbNOC "github.com/homenoc/dsbd-backend/pkg/api/store/noc/v0"
 	dbConnectionTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/connection/v0"
+	dbNTTTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ntt/v0"
 	dbServiceTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/service/v0"
 	"net/http"
 )
@@ -28,8 +30,22 @@ func GetAdmin(c *gin.Context) {
 		return
 	}
 
+	resultNTT := dbNTTTemplate.GetAll()
+	if resultNTT.Err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: resultNTT.Err.Error()})
+		return
+	}
+
+	resultNOC := dbNOC.GetAll()
+	if resultNOC.Err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: resultNOC.Err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusOK, template.Result{
 		Services:    resultService.Services,
 		Connections: resultConnection.Connections,
+		NTTs:        resultNTT.NTTs,
+		NOC:         resultNOC.NOC,
 	})
 }

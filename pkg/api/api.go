@@ -83,6 +83,9 @@ func AdminRestAPI() {
 			v1.GET("/group", group.GetAllAdmin)
 			v1.GET("/group/:id", group.GetAdmin)
 
+			// Template
+			v1.GET("/template", template.GetAdmin)
+
 			//
 			// NOC
 			//
@@ -142,7 +145,7 @@ func AdminRestAPI() {
 			//
 			// Service
 			//
-			v1.POST("/service/:id", service.AddAdmin)
+			v1.POST("/group/:id/service", service.AddAdmin)
 			// Service Delete
 			v1.DELETE("/service/:id", service.DeleteAdmin)
 			// Service Update
