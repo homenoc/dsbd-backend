@@ -80,6 +80,7 @@ type Service struct {
 	Open              *bool            `json:"open"`
 	Lock              *bool            `json:"lock"`
 	AddAllow          *bool            `json:"add_allow"`
+	Group             Group            `json:"group"`
 }
 
 type Connection struct {
@@ -144,10 +145,11 @@ type TunnelEndPointRouter struct {
 
 type TunnelEndPointRouterIP struct {
 	gorm.Model
-	TunnelEndPointRouterID uint   `json:"tunnel_endpoint_router_id"`
-	IP                     string `json:"ip"`
-	Enable                 *bool  `json:"enable"`
-	Comment                string `json:"comment"`
+	TunnelEndPointRouter   TunnelEndPointRouter `json:"tunnel_endpoint_router"`
+	TunnelEndPointRouterID uint                 `json:"tunnel_endpoint_router_id"`
+	IP                     string               `json:"ip"`
+	Enable                 *bool                `json:"enable"`
+	Comment                string               `json:"comment"`
 }
 
 type IP struct {

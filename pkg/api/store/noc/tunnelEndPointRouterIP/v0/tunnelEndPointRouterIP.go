@@ -67,7 +67,8 @@ func Get(base int, data *core.TunnelEndPointRouterIP) tunnelEndPointRouterIP.Res
 	var routerStruct []core.TunnelEndPointRouterIP
 
 	if base == tunnelEndPointRouterIP.ID { //ID
-		err = db.First(&routerStruct, data.ID).Error
+		err = db.Preload("TunnelEndPointRouter").
+			First(&routerStruct, data.ID).Error
 	} else if base == tunnelEndPointRouterIP.Enable { //GroupID
 		err = db.Where("enable = ?", data.Enable).Find(&routerStruct).Error
 	} else {

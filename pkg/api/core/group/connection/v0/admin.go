@@ -178,6 +178,14 @@ func UpdateAdmin(c *gin.Context) {
 		return
 	}
 
+	tmp := dbConnection.Get(connection.ID, &core.Connection{Model: gorm.Model{ID: uint(id)}})
+	if tmp.Err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: tmp.Err.Error()})
+		return
+	}
+
+	noticeSlackAdmin(tmp.Connection[0], input)
+
 	input.ID = uint(id)
 
 	if err = dbConnection.Update(connection.UpdateAll, input); err != nil {
