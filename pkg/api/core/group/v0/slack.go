@@ -45,7 +45,7 @@ func changeText(before, after core.Group) string {
 	}
 
 	if after.Lock != nil {
-		if *before.Lock != *after.Lock {
+		if !*before.Lock != *after.Lock {
 			if *after.Lock {
 				data += "ユーザ変更: 禁止 => 許可\n"
 			} else {
