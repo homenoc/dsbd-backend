@@ -45,8 +45,12 @@ func Update(base int, data core.NOC) error {
 
 	if noc.UpdateAll == base {
 		result = db.Model(&core.NOC{Model: gorm.Model{ID: data.ID}}).Update(core.NOC{
-			Name: data.Name, Location: data.Location, Bandwidth: data.Bandwidth,
-			Enable: data.Enable, Comment: data.Comment})
+			Name:      data.Name,
+			Location:  data.Location,
+			Bandwidth: data.Bandwidth,
+			Enable:    data.Enable,
+			Comment:   data.Comment,
+		})
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
