@@ -201,6 +201,15 @@ func GetAll() service.ResultDatabase {
 	defer db.Close()
 
 	var services []core.Service
-	err = db.Find(&services).Error
+	err = db.Preload("IP").
+		Preload("Connection").
+		Preload("Connection.ConnectionTemplate").
+		Preload("Connection.NOC").
+		Preload("Connection.BGPRouter").
+		Preload("Connection.TunnelEndPointRouterIP").
+		Preload("ServiceTemplate").
+		Preload("JPNICAdmin").
+		Preload("JPNICTech").
+		Find(&services).Error
 	return service.ResultDatabase{Err: err, Service: services}
 }
