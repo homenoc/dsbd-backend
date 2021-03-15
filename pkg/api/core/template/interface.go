@@ -14,10 +14,13 @@ type Input struct {
 }
 
 type Result struct {
-	Services    []core.ServiceTemplate    `json:"services"`
-	Connections []core.ConnectionTemplate `json:"connections"`
-	NTTs        []core.NTTTemplate        `json:"ntts"`
-	NOC         []core.NOC                `json:"nocs"`
+	Services               []core.ServiceTemplate        `json:"services"`
+	Connections            []core.ConnectionTemplate     `json:"connections"`
+	NTTs                   []core.NTTTemplate            `json:"ntts"`
+	NOC                    []core.NOC                    `json:"nocs"`
+	BGPRouter              []core.BGPRouter              `json:"bgp_router"`
+	TunnelEndPointRouter   []core.TunnelEndPointRouter   `json:"tunnel_endpoint_router"`
+	TunnelEndPointRouterIP []core.TunnelEndPointRouterIP `json:"tunnel_endpoint_router_ip"`
 }
 
 type ResultDatabase struct {
