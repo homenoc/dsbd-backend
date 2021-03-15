@@ -5,6 +5,8 @@ import (
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	template "github.com/homenoc/dsbd-backend/pkg/api/core/template"
+	dbBGPRouter "github.com/homenoc/dsbd-backend/pkg/api/store/noc/bgpRouter/v0"
+	dbTunnelEndPointRouterIP "github.com/homenoc/dsbd-backend/pkg/api/store/noc/tunnelEndPointRouterIP/v0"
 	dbNOC "github.com/homenoc/dsbd-backend/pkg/api/store/noc/v0"
 	dbConnectionTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/connection/v0"
 	dbNTTTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ntt/v0"
@@ -42,10 +44,24 @@ func GetAdmin(c *gin.Context) {
 		return
 	}
 
+	resultBGPRouter := dbBGPRouter.GetAll()
+	if resultBGPRouter.Err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: resultBGPRouter.Err.Error()})
+		return
+	}
+
+	resultTunnelEndPointRouterIP := dbTunnelEndPointRouterIP.GetAll()
+	if resultTunnelEndPointRouterIP.Err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: resultTunnelEndPointRouterIP.Err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusOK, template.Result{
-		Services:    resultService.Services,
-		Connections: resultConnection.Connections,
-		NTTs:        resultNTT.NTTs,
-		NOC:         resultNOC.NOC,
+		Services:               resultService.Services,
+		Connections:            resultConnection.Connections,
+		NTTs:                   resultNTT.NTTs,
+		NOC:                    resultNOC.NOC,
+		BGPRouter:              resultBGPRouter.BGPRouter,
+		TunnelEndPointRouterIP: resultTunnelEndPointRouterIP.TunnelEndPointRouterIP,
 	})
 }
