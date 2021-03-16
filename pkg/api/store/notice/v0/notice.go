@@ -45,15 +45,15 @@ func Update(base int, data core.Notice) error {
 
 	if notice.UpdateAll == base {
 		result = db.Model(&core.Notice{Model: gorm.Model{ID: data.ID}}).Update(core.Notice{
-			UserID:     data.UserID,
-			GroupID:    data.GroupID,
-			StartTime:  data.StartTime,
-			EndingTime: data.EndingTime,
-			Important:  data.Important,
-			Fault:      data.Fault,
-			Info:       data.Info,
-			Title:      data.Title,
-			Data:       data.Data,
+			UserID:    data.UserID,
+			GroupID:   data.GroupID,
+			StartTime: data.StartTime,
+			EndTime:   data.EndTime,
+			Important: data.Important,
+			Fault:     data.Fault,
+			Info:      data.Info,
+			Title:     data.Title,
+			Data:      data.Data,
 		})
 	} else {
 		log.Println("base select error")
@@ -72,33 +72,61 @@ func Get(base int, data *core.Notice) notice.ResultDatabase {
 
 	var noticeStruct []core.Notice
 
-	dateTime := time.Now().Unix()
+	dateTime := time.Now()
 
 	if base == notice.ID { //ID
 		err = db.First(&noticeStruct, data.ID).Error
-	} else if base == notice.UserID { //UserID
-		err = db.Where("user_id = ?", data.UserID).Find(&noticeStruct).Error
-	} else if base == notice.GroupID { //GroupID
-		err = db.Where("group_id = ?", data.GroupID).Find(&noticeStruct).Error
-	} else if base == notice.UserIDAndGroupID { //UserID And GroupID
-		err = db.Where("user_id = ? AND group_id = ?", data.UserID, data.GroupID).Find(&noticeStruct).Error
-	} else if base == notice.GroupData { //GroupData
-		err = db.Where("everyone = ? AND start_time < ? AND ? < ending_time ", data.Everyone, dateTime, dateTime).
-			Or("user_id = ? AND group_id = ? AND start_time < ? AND ? < ending_time", data.UserID, data.GroupID, dateTime, dateTime).
-			Or("group_id = ? AND start_time < ? AND ? < ending_time", data.GroupID, dateTime, dateTime).
+	} else if base == notice.UIDOrAll { //UserID Or All
+		err = db.Where("user_id = ? AND start_time < ? AND ? < end_time", data.UserID, dateTime, dateTime).
+			Or("everyone = ? AND start_time < ? AND ? < end_time", true, dateTime, dateTime).
 			Order("id asc").Find(&noticeStruct).Error
-	} else if base == notice.UserData { //UserData
-		err = db.Where("everyone = ? AND start_time < ? AND ? < ending_time ", data.Everyone, dateTime, dateTime).
-			Or("user_id = ? AND start_time < ? AND ? < ending_time", data.UserID, dateTime, dateTime).
+	} else if base == notice.UIDOrGIDOrAll { //UserID Or GroupID Or All
+		err = db.Where("user_id = ? AND start_time < ? AND ? < end_time", data.UserID, dateTime, dateTime).
+			Or("group_id = ? AND start_time < ? AND ? < end_time", data.GroupID, dateTime, dateTime).
+			Or("everyone = ? AND start_time < ? AND ? < end_time", true, dateTime, dateTime).
 			Order("id asc").Find(&noticeStruct).Error
-	} else if base == notice.Everyone { //Everyone
-		err = db.Where("everyone = ?", data.Everyone).Find(&noticeStruct).Error
+	} else if base == notice.UIDOrGIDOrNOCAllOrAll { //UserID Or GroupID Or NOCAll Or All
+		err = db.Where("user_id = ? AND start_time < ? AND ? < end_time", data.UserID, dateTime, dateTime).
+			Or("group_id = ? AND start_time < ? AND ? < end_time", data.GroupID, dateTime, dateTime).
+			Or("everyone = ? AND start_time < ? AND ? < end_time", true, dateTime, dateTime).
+			Or("noc_id != ? AND start_time < ? AND ? < end_time", 0, dateTime, dateTime).
+			Order("id asc").Find(&noticeStruct).Error
+	} else if base == notice.NOCAll { //UserID Or GroupID Or NOCAll Or All
+		err = db.Where("user_id = ? AND user_id = ? AND noc_id != ? AND start_time < ? AND ? < end_time ",
+			0, 0, 0, dateTime, dateTime).
+			Order("id asc").Find(&noticeStruct).Error
 	} else if base == notice.Important { //Important
 		err = db.Where("important = ?", data.Important).Find(&noticeStruct).Error
 	} else if base == notice.Fault { //Fault
 		err = db.Where("fault = ?", data.Fault).Find(&noticeStruct).Error
 	} else if base == notice.Info { //Info
 		err = db.Where("info = ?", data.Info).Find(&noticeStruct).Error
+	} else {
+		log.Println("base select error")
+		return notice.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
+	}
+	return notice.ResultDatabase{Notice: noticeStruct, Err: err}
+}
+
+func GetArray(base int, data *core.Notice, array []string) notice.ResultDatabase {
+	db, err := store.ConnectDB()
+	if err != nil {
+		log.Println("database connection error")
+		return notice.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+	}
+	defer db.Close()
+
+	var noticeStruct []core.Notice
+
+	dateTime := time.Now()
+
+	if base == notice.UIDOrGIDOrNOCAllOrAll { //UserID Or GroupID Or NOCAll Or All
+		err = db.Where("user_id = ? AND start_time < ? AND ? < end_time ", data.UserID, dateTime, dateTime).
+			Or("group_id = ? AND start_time < ? AND ? < end_time", data.GroupID, dateTime, dateTime).
+			Or("everyone = ? AND start_time < ? AND ? < end_time", true, dateTime, dateTime).
+			Or("noc_id IN (?) AND start_time < ? AND ? < end_time", array, dateTime, dateTime).
+			Order("id asc").
+			Find(&noticeStruct).Error
 	} else {
 		log.Println("base select error")
 		return notice.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}

@@ -127,6 +127,7 @@ type BGPRouter struct {
 	gorm.Model
 	NOCID        uint                    `json:"noc_id"`
 	NOC          NOC                     `json:"noc"`
+	Connection   []Connection            `json:"connection"`
 	HostName     string                  `json:"hostname"`
 	Address      string                  `json:"address"`
 	TunnelRouter []*TunnelEndPointRouter `json:"tunnel_endpoint_router"`
@@ -275,14 +276,15 @@ type Token struct {
 
 type Notice struct {
 	gorm.Model
-	UserID     uint      `json:"user_id"`
-	GroupID    uint      `json:"group_id"`
-	Everyone   *bool     `json:"everyone"`
-	StartTime  time.Time `json:"start_time"`
-	EndingTime time.Time `json:"ending_time"`
-	Important  *bool     `json:"important"`
-	Fault      *bool     `json:"fault"`
-	Info       *bool     `json:"info"`
-	Title      string    `json:"title"`
-	Data       string    `json:"data"`
+	UserID    uint      `json:"user_id"`
+	GroupID   uint      `json:"group_id"`
+	NOCID     uint      `json:"noc_id"`
+	Everyone  *bool     `json:"everyone"`
+	StartTime time.Time `json:"start_time"`
+	EndTime   time.Time `json:"end_time"`
+	Important *bool     `json:"important"`
+	Fault     *bool     `json:"fault"`
+	Info      *bool     `json:"info"`
+	Title     string    `json:"title"`
+	Data      string    `json:"data" gorm:"size:65535"`
 }

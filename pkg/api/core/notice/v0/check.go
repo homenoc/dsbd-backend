@@ -2,10 +2,10 @@ package v0
 
 import (
 	"fmt"
-	"github.com/homenoc/dsbd-backend/pkg/api/core"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/notice"
 )
 
-func check(input core.Notice) error {
+func check(input notice.Input) error {
 	// check
 	if input.Title == "" {
 		return fmt.Errorf("no data: title")
