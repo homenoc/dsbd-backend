@@ -59,8 +59,6 @@ func Add(c *gin.Context) {
 		AddressEn: input.AddressEn,
 		Dept:      input.Dept,
 		DeptEn:    input.DeptEn,
-		Pos:       input.Pos,
-		PosEn:     input.PosEn,
 		Tel:       input.Tel,
 		Fax:       input.Fax,
 		Country:   input.Country,

@@ -52,8 +52,6 @@ func Update(base int, u core.JPNICTech) error {
 			AddressEn: u.AddressEn,
 			Dept:      u.Dept,
 			DeptEn:    u.DeptEn,
-			Pos:       u.Pos,
-			PosEn:     u.PosEn,
 			Tel:       u.Tel,
 			Fax:       u.Fax,
 			Country:   u.Country,
