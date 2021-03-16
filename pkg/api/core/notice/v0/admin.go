@@ -37,8 +37,8 @@ func AddAdmin(c *gin.Context) {
 	// 時間はJST基準
 	jst, _ := time.LoadLocation("Asia/Tokyo")
 
-	// 2999年12月31日 00:00:00
-	var endTime = time.Date(2999, time.December, 31, 0, 0, 0, 0, jst)
+	// 9999年12月31日 23:59:59.59
+	var endTime = time.Date(9999, time.December, 31, 23, 59, 59, 59, jst)
 
 	startTime, _ := time.ParseInLocation("2006-01-02 15:04:05", input.StartTime, jst)
 	if input.EndTime != nil {
