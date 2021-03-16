@@ -9,7 +9,6 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/notice"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
 	dbNotice "github.com/homenoc/dsbd-backend/pkg/api/store/notice/v0"
-	"log"
 	"net/http"
 	"strconv"
 )
@@ -34,7 +33,6 @@ func Get(c *gin.Context) {
 
 	h := noticeHandler{notice: responseNotice}
 
-	// Todo #issue #37 Critical
 	if result.User.GroupID != 0 {
 
 		serviceResult := dbService.Get(service.Open, &core.Service{GroupID: result.User.GroupID})
@@ -63,8 +61,6 @@ func Get(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 			return
 		}
-
-		log.Println(noticeResult.Notice)
 
 		for _, tmpNotice := range noticeResult.Notice {
 			h.appendNotice(tmpNotice)
