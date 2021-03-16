@@ -6,13 +6,12 @@ import (
 )
 
 type Config struct {
-	Controller Controller   `json:"controller"`
-	DB         DB           `json:"db"`
-	Mail       Mail         `json:"mail"`
-	Radius     Radius       `json:"radius"`
-	Slack      []Slack      `json:"slack"`
-	Network    []Network    `json:"network"`
-	Connection []Connection `json:"connection"`
+	Controller Controller `json:"controller"`
+	DB         DB         `json:"db"`
+	Mail       Mail       `json:"mail"`
+	Radius     Radius     `json:"radius"`
+	Slack      []Slack    `json:"slack"`
+	Log        Log        `json:"log"`
 }
 
 type Controller struct {
@@ -76,18 +75,8 @@ type Slack struct {
 	Name       string `json:"name"`
 }
 
-type Network struct {
-	ID      string `json:"id"`
-	Hidden  bool   `json:"hidden"`
-	Name    string `json:"name"`
-	Comment string `json:"comment"`
-}
-
-type Connection struct {
-	ID      string `json:"id"`
-	Hidden  bool   `json:"hidden"`
-	Name    string `json:"name"`
-	Comment string `json:"comment"`
+type Log struct {
+	Path string `json:"path"`
 }
 
 var Conf Config
