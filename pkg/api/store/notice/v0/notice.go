@@ -125,7 +125,7 @@ func GetArray(base int, data *core.Notice, array []string) notice.ResultDatabase
 			Or("group_id = ? AND start_time < ? AND ? < end_time", data.GroupID, dateTime, dateTime).
 			Or("everyone = ? AND start_time < ? AND ? < end_time", true, dateTime, dateTime).
 			Or("noc_id IN (?) AND start_time < ? AND ? < end_time", array, dateTime, dateTime).
-			Order("id asc").
+			Order("id desc").
 			Find(&noticeStruct).Error
 	} else {
 		log.Println("base select error")
