@@ -126,6 +126,7 @@ type NOC struct {
 type BGPRouter struct {
 	gorm.Model
 	NOCID        uint                    `json:"noc_id"`
+	NOC          NOC                     `json:"noc"`
 	HostName     string                  `json:"hostname"`
 	Address      string                  `json:"address"`
 	TunnelRouter []*TunnelEndPointRouter `json:"tunnel_endpoint_router"`

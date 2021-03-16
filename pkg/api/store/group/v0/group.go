@@ -88,6 +88,7 @@ func Get(base int, data *core.Group) group.ResultDatabase {
 			Preload("Services.Connection.ConnectionTemplate").
 			Preload("Services.Connection.NOC").
 			Preload("Services.Connection.BGPRouter").
+			Preload("Services.Connection.BGPRouter.NOC").
 			Preload("Services.Connection.TunnelEndPointRouterIP").
 			Preload("Services.ServiceTemplate").
 			Preload("Services.JPNICAdmin").
