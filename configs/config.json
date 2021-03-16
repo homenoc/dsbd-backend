@@ -41,5 +41,8 @@
       "channel": "xxxx",
       "name": "xxxxx"
     }
-  ]
+  ],
+  "log": {
+    "path": ""
+  }
 }
