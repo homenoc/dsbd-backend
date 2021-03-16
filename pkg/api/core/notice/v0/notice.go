@@ -17,7 +17,7 @@ type noticeHandler struct {
 	notice []notice.Notice
 }
 
-const layout = "2006-01-02 15:04:05"
+const layout = "2006-01-02T15:04:05"
 
 func Get(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
