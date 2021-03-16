@@ -27,8 +27,8 @@ func updateAdminUser(input, replace core.Notice) core.Notice {
 		replace.StartTime = input.StartTime
 	}
 	//EndTime
-	if input.EndingTime != replace.EndingTime {
-		replace.EndingTime = input.EndingTime
+	if input.EndTime != replace.EndTime {
+		replace.EndTime = input.EndTime
 	}
 	//Everyone
 	if input.Everyone != replace.Everyone {

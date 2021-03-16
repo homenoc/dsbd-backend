@@ -11,10 +11,11 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 func AddAdmin(c *gin.Context) {
-	var input core.Notice
+	var input notice.Input
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
@@ -33,7 +34,32 @@ func AddAdmin(c *gin.Context) {
 		return
 	}
 
-	if _, err = dbNotice.Create(&input); err != nil {
+	// 時間はJST基準
+	jst, _ := time.LoadLocation("Asia/Tokyo")
+
+	// 2999年12月31日 00:00:00
+	var endTime = time.Date(2999, time.December, 31, 0, 0, 0, 0, jst)
+
+	startTime, _ := time.ParseInLocation("2006-01-02 15:04:05", input.StartTime, jst)
+	if input.EndTime != nil {
+		endTime, _ = time.ParseInLocation("2006-01-02 15:04:05", *input.EndTime, jst)
+	}
+
+	noticeSlackAddAdmin(input)
+
+	if _, err = dbNotice.Create(&core.Notice{
+		UserID:    input.UserID,
+		GroupID:   input.GroupID,
+		NOCID:     input.NOCID,
+		Everyone:  input.Everyone,
+		StartTime: startTime,
+		EndTime:   endTime,
+		Important: input.Important,
+		Fault:     input.Fault,
+		Info:      input.Info,
+		Title:     input.Title,
+		Data:      input.Data,
+	}); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
@@ -81,7 +107,7 @@ func UpdateAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, notice.Result{})
+	c.JSON(http.StatusOK, notice.ResultAdmin{})
 }
 
 func GetAdmin(c *gin.Context) {
@@ -101,7 +127,7 @@ func GetAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, notice.Result{Notice: result.Notice})
+	c.JSON(http.StatusOK, notice.ResultAdmin{Notice: result.Notice})
 }
 
 func GetAllAdmin(c *gin.Context) {
@@ -114,6 +140,6 @@ func GetAllAdmin(c *gin.Context) {
 	if result := dbNotice.GetAll(); result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 	} else {
-		c.JSON(http.StatusOK, notice.Result{Notice: result.Notice})
+		c.JSON(http.StatusOK, notice.ResultAdmin{Notice: result.Notice})
 	}
 }
