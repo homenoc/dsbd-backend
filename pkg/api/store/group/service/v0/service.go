@@ -61,22 +61,7 @@ func Update(base int, c core.Service) error {
 		result = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Update(core.Service{GroupID: c.GroupID}).Error
 	} else if service.UpdateStatus == base {
 	} else if service.UpdateAll == base {
-		result = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Update(core.Service{
-			GroupID:   c.GroupID,
-			Org:       c.Org,
-			OrgEn:     c.Org,
-			PostCode:  c.PostCode,
-			Address:   c.Address,
-			AddressEn: c.AddressEn,
-			ASN:       c.ASN,
-			V4Name:    c.V4Name,
-			V6Name:    c.V6Name,
-			RouteV4:   c.RouteV4,
-			RouteV6:   c.RouteV6,
-			IP:        c.IP,
-			Open:      c.Open,
-			Lock:      c.Lock,
-		}).Error
+		result = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Update(c).Error
 	} else if service.ReplaceIP == base {
 		result = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Association("IP").Replace(c.IP[0]).Error
 	} else if service.AppendIP == base {
@@ -153,6 +138,7 @@ func Get(base int, data *core.Service) service.ResultDatabase {
 			Preload("ServiceTemplate").
 			Preload("JPNICAdmin").
 			Preload("JPNICTech").
+			Preload("Group").
 			First(&serviceStruct, data.ID).Error
 	} else if base == service.Org { //Mail
 		err = db.Preload("ServiceTemplate").
