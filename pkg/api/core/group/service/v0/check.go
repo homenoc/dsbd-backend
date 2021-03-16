@@ -130,12 +130,12 @@ func ipCheck(restrict bool, ip service.IPInput) error {
 			//	tmp.
 			//}
 		}
-	}
-
-	if ip.Version == 6 {
+	} else if ip.Version == 6 {
 		if ip.IP == "" {
 			return fmt.Errorf("invalid ipv6 address")
 		}
+	} else {
+		return fmt.Errorf("invalid ip version")
 	}
 
 	return nil
