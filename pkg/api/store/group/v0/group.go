@@ -112,6 +112,7 @@ func GetAll() group.ResultDatabase {
 	defer db.Close()
 
 	var groups []core.Group
-	err = db.Find(&groups).Error
+	err = db.Preload("Users").
+		Find(&groups).Error
 	return group.ResultDatabase{Group: groups, Err: err}
 }
