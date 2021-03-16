@@ -43,6 +43,8 @@ func Get(c *gin.Context) {
 				var v4, v6 []string
 				if *tmpService.Fee == 0 {
 					fee = "Free"
+				} else {
+					fee = strconv.Itoa(int(*tmpService.Fee)) + "円"
 				}
 				serviceID := strconv.Itoa(int(tmpService.GroupID)) + "-" + tmpService.ServiceTemplate.Type +
 					fmt.Sprintf("%03d", tmpService.ServiceNumber) + "-" + tmpConnection.ConnectionTemplate.Type +
@@ -50,9 +52,9 @@ func Get(c *gin.Context) {
 
 				for _, tmpIP := range tmpService.IP {
 					if tmpIP.Version == 4 {
-						v4 = append(v4)
+						v4 = append(v4, tmpIP.IP)
 					} else if tmpIP.Version == 6 {
-						v6 = append(v6)
+						v6 = append(v6, tmpIP.IP)
 					}
 				}
 
@@ -60,6 +62,7 @@ func Get(c *gin.Context) {
 					infoInterface = append(infoInterface, info.Info{
 						ServiceID:  serviceID,
 						Service:    tmpService.ServiceTemplate.Name,
+						Assign:     *tmpService.ServiceTemplate.NeedJPNIC,
 						ASN:        *tmpService.ASN,
 						V4:         v4,
 						V6:         v6,

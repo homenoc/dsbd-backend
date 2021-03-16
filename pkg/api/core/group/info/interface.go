@@ -3,6 +3,7 @@ package info
 type Info struct {
 	ServiceID  string   `json:"service_id"`
 	Service    string   `json:"service"`
+	Assign     bool     `json:"assign"`
 	ASN        uint     `json:"asn"`
 	V4         []string `json:"v4"`
 	V6         []string `json:"v6"`
