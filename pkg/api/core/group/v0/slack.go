@@ -67,31 +67,31 @@ func changeText(before, after core.Group) string {
 		}
 	}
 
-	if after.Org != "" {
+	if after.Org != "" && after.Org != before.Org {
 		data += "Org: " + before.Org + "=>" + after.Org + "\n"
 	}
 
-	if after.OrgEn != "" {
+	if after.OrgEn != "" && after.OrgEn != before.OrgEn {
 		data += "Org(En): " + before.OrgEn + "=>" + after.OrgEn + "\n"
 	}
 
-	if after.PostCode != "" {
+	if after.PostCode != "" && after.PostCode != before.PostCode {
 		data += "PostCode: " + before.PostCode + "=>" + after.PostCode + "\n"
 	}
 
-	if after.Address != "" {
+	if after.Address != "" && after.Address != before.Address {
 		data += "Address: " + before.Address + "=>" + after.Address + "\n"
 	}
 
-	if after.AddressEn != "" {
+	if after.AddressEn != "" && after.AddressEn != before.AddressEn {
 		data += "Address(En): " + before.AddressEn + "=>" + after.AddressEn + "\n"
 	}
 
-	if after.Tel != "" {
+	if after.Tel != "" && after.Tel != before.Tel {
 		data += "Tel: " + before.Tel + "=>" + after.Tel + "\n"
 	}
 
-	if after.Country != "" {
+	if after.Country != "" && after.Country != before.Country {
 		data += "Country: " + before.Country + "=>" + after.Country + "\n"
 	}
 
