@@ -17,6 +17,8 @@ type noticeHandler struct {
 	notice []notice.Notice
 }
 
+const layout = "2006-01-02 15:04:05"
+
 func Get(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
@@ -63,7 +65,7 @@ func Get(c *gin.Context) {
 		}
 
 		for _, tmpNotice := range noticeResult.Notice {
-			h.appendNotice(tmpNotice)
+			h.appendNotice(tmpNotice, tmpNotice.StartTime.Format(layout), tmpNotice.EndTime.Format(layout))
 		}
 
 	} else {
@@ -75,7 +77,7 @@ func Get(c *gin.Context) {
 			return
 		}
 		for _, tmpNotice := range noticeResult.Notice {
-			h.appendNotice(tmpNotice)
+			h.appendNotice(tmpNotice, tmpNotice.StartTime.Format(layout), tmpNotice.EndTime.Format(layout))
 		}
 	}
 
@@ -91,15 +93,15 @@ func arrayContains(arr []string, str string) bool {
 	return false
 }
 
-func (h *noticeHandler) appendNotice(data core.Notice) {
+func (h *noticeHandler) appendNotice(data core.Notice, startTime, endTime string) {
 	h.notice = append(h.notice, notice.Notice{
 		ID:        data.ID,
 		UserID:    data.UserID,
 		GroupID:   data.GroupID,
 		NOCID:     data.NOCID,
 		Everyone:  *data.Everyone,
-		StartTime: data.StartTime,
-		EndTime:   data.EndTime,
+		StartTime: startTime,
+		EndTime:   endTime,
 		Important: *data.Important,
 		Fault:     *data.Fault,
 		Info:      *data.Info,
