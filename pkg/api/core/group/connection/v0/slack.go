@@ -84,23 +84,23 @@ func changeText(before, after core.Connection) string {
 		}
 	}
 
-	if after.TermIP != "" {
+	if after.TermIP != "" && after.TermIP != before.TermIP {
 		data += "終端アドレス: " + before.TermIP + "=>" + after.TermIP + "\n"
 	}
 
-	if after.LinkV4Our != "" {
+	if after.LinkV4Our != "" && after.LinkV4Our != before.LinkV4Our {
 		data += "v4(HomeNOC側): " + before.LinkV4Our + "=>" + after.LinkV4Our + "\n"
 	}
 
-	if after.LinkV4Your != "" {
+	if after.LinkV4Your != "" && after.LinkV4Your != before.LinkV4Your {
 		data += "v4(相手団体側): " + before.LinkV4Your + "=>" + after.LinkV4Your + "\n"
 	}
 
-	if after.LinkV6Our != "" {
+	if after.LinkV6Our != "" && after.LinkV6Our != before.LinkV6Our {
 		data += "v6(HomeNOC側): " + before.LinkV6Our + "=>" + after.LinkV6Our + "\n"
 	}
 
-	if after.LinkV6Your != "" {
+	if after.LinkV6Your != "" && after.LinkV6Your != before.LinkV6Your {
 		data += "v6(相手団体側): " + before.LinkV6Your + "=>" + after.LinkV6Your + "\n"
 	}
 

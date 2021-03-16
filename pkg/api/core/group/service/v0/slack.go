@@ -66,22 +66,22 @@ func changeText(before, after core.Service) string {
 		}
 	}
 
-	if before.AveDownstream != after.AveDownstream {
+	if before.AveDownstream != after.AveDownstream && after.AveDownstream != 0 {
 		data += "平均ダウンロード帯域: " + strconv.Itoa(int(before.AveDownstream)) + "Kbps => " +
 			strconv.Itoa(int(after.AveDownstream)) + "Kbps\n"
 	}
 
-	if before.MaxDownstream != after.MaxDownstream {
+	if before.MaxDownstream != after.MaxDownstream && after.MaxDownstream != 0 {
 		data += "最大ダウンロード帯域: " + strconv.Itoa(int(before.MaxDownstream)) + "Kbps => " +
 			strconv.Itoa(int(after.MaxDownstream)) + "Kbps\n"
 	}
 
-	if before.AveUpstream != after.AveUpstream {
+	if before.AveUpstream != after.AveUpstream && after.AveUpstream != 0 {
 		data += "平均アップロード帯域: " + strconv.Itoa(int(before.AveUpstream)) + "Kbps => " +
 			strconv.Itoa(int(after.AveUpstream)) + "Kbps\n"
 	}
 
-	if before.MaxUpstream != after.MaxUpstream {
+	if before.MaxUpstream != after.MaxUpstream && after.MaxUpstream != 0 {
 		data += "最大アップロード帯域: " + strconv.Itoa(int(before.MaxUpstream)) + "Kbps => " +
 			strconv.Itoa(int(after.MaxUpstream)) + "Kbps\n"
 	}
@@ -92,39 +92,39 @@ func changeText(before, after core.Service) string {
 		}
 	}
 
-	if after.RouteV4 != "" {
+	if after.RouteV4 != "" && after.RouteV4 != before.RouteV4 {
 		data += "広報方法(v4): " + before.RouteV4 + "=>" + after.RouteV4 + "\n"
 	}
 
-	if after.RouteV6 != "" {
+	if after.RouteV6 != "" && after.RouteV6 != before.RouteV6 {
 		data += "広報方法(v6): " + before.RouteV6 + "=>" + after.RouteV6 + "\n"
 	}
 
-	if after.V4Name != "" {
+	if after.V4Name != "" && after.V4Name != before.V4Name {
 		data += "ネットワーク名(v4): " + before.V4Name + "=>" + after.V4Name + "\n"
 	}
 
-	if after.V6Name != "" {
+	if after.V6Name != "" && after.V6Name != before.V6Name {
 		data += "ネットワーク名(v6): " + before.V6Name + "=>" + after.V6Name + "\n"
 	}
 
-	if after.Org != "" {
+	if after.Org != "" && after.Org != before.Org {
 		data += "Org: " + before.Org + "=>" + after.Org + "\n"
 	}
 
-	if after.OrgEn != "" {
+	if after.OrgEn != "" && after.OrgEn != before.OrgEn {
 		data += "Org(En): " + before.OrgEn + "=>" + after.OrgEn + "\n"
 	}
 
-	if after.PostCode != "" {
+	if after.PostCode != "" && after.PostCode != before.PostCode {
 		data += "PostCode: " + before.PostCode + "=>" + after.PostCode + "\n"
 	}
 
-	if after.Address != "" {
+	if after.Address != "" && after.Address != before.Address {
 		data += "Address: " + before.Address + "=>" + after.Address + "\n"
 	}
 
-	if after.AddressEn != "" {
+	if after.AddressEn != "" && after.AddressEn != before.AddressEn {
 		data += "Address(En): " + before.AddressEn + "=>" + after.AddressEn + "\n"
 	}
 
