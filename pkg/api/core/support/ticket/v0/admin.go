@@ -228,8 +228,12 @@ func GetAdminWebSocket(c *gin.Context) {
 	}
 
 	// WebSocket送信
-	support.Clients[&support.WebSocket{TicketID: uint(id), UserID: resultAdmin.AdminID,
-		GroupID: ticketResult.Ticket[0].GroupID, Socket: conn}] = true
+	support.Clients[&support.WebSocket{
+		TicketID: uint(id),
+		UserID:   resultAdmin.AdminID,
+		GroupID:  ticketResult.Ticket[0].GroupID,
+		Socket:   conn,
+	}] = true
 
 	//WebSocket受信
 	for {
@@ -237,8 +241,12 @@ func GetAdminWebSocket(c *gin.Context) {
 		err = conn.ReadJSON(&msg)
 		if err != nil {
 			log.Printf("error: %v", err)
-			delete(support.Clients, &support.WebSocket{TicketID: uint(id), UserID: resultAdmin.AdminID,
-				GroupID: ticketResult.Ticket[0].GroupID, Socket: conn})
+			delete(support.Clients, &support.WebSocket{
+				TicketID: uint(id),
+				UserID:   resultAdmin.AdminID,
+				GroupID:  ticketResult.Ticket[0].GroupID,
+				Socket:   conn,
+			})
 			break
 		}
 
@@ -272,7 +280,10 @@ func GetAdminWebSocket(c *gin.Context) {
 				log.Println(resultTicket.Err)
 			}
 			if len(resultTicket.Ticket) != 0 {
-				resultUser := dbUser.Get(user.GIDAndLevel, &core.User{GroupID: resultTicket.Ticket[0].GroupID, Level: 1})
+				resultUser := dbUser.Get(user.GIDAndLevel, &core.User{
+					GroupID: resultTicket.Ticket[0].GroupID,
+					Level:   1,
+				})
 				if resultUser.Err != nil {
 					log.Println(resultUser.Err)
 				}

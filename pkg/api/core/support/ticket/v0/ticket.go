@@ -187,8 +187,13 @@ func GetWebSocket(c *gin.Context) {
 	}
 
 	// WebSocket送信
-	support.Clients[&support.WebSocket{TicketID: uint(id), Admin: false,
-		UserID: result.User.ID, GroupID: result.Group.ID, Socket: conn}] = true
+	support.Clients[&support.WebSocket{
+		TicketID: uint(id),
+		Admin:    false,
+		UserID:   result.User.ID,
+		GroupID:  result.Group.ID,
+		Socket:   conn,
+	}] = true
 
 	//WebSocket受信
 	for {
@@ -196,12 +201,20 @@ func GetWebSocket(c *gin.Context) {
 		err = conn.ReadJSON(&msg)
 		if err != nil {
 			log.Printf("error: %v", err)
-			delete(support.Clients, &support.WebSocket{TicketID: uint(id), Admin: false, UserID: result.User.ID,
-				GroupID: result.Group.ID, Socket: conn})
+			delete(support.Clients, &support.WebSocket{
+				TicketID: uint(id),
+				Admin:    false,
+				UserID:   result.User.ID,
+				GroupID:  result.Group.ID,
+				Socket:   conn,
+			})
 			break
 		}
 		// 入力されたデータをTokenにて認証
-		resultGroup := auth.GroupAuthentication(0, core.Token{UserToken: msg.UserToken, AccessToken: msg.AccessToken})
+		resultGroup := auth.GroupAuthentication(0, core.Token{
+			UserToken:   msg.UserToken,
+			AccessToken: msg.AccessToken,
+		})
 		if resultGroup.Err != nil {
 			log.Println(resultGroup.Err)
 			return
@@ -225,8 +238,13 @@ func GetWebSocket(c *gin.Context) {
 			msg.UserToken = ""
 
 			//ユーザ側に送信
-			controller.SendChatUser(controllerInterface.Chat{CreatedAt: msg.CreatedAt,
-				UserID: result.User.ID, GroupID: resultGroup.Group.ID, Admin: msg.Admin, Message: msg.Message})
+			controller.SendChatUser(controllerInterface.Chat{
+				CreatedAt: msg.CreatedAt,
+				UserID:    result.User.ID,
+				GroupID:   resultGroup.Group.ID,
+				Admin:     msg.Admin,
+				Message:   msg.Message,
+			})
 
 			userName := "不明"
 
