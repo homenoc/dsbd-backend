@@ -228,10 +228,18 @@ func GetWebSocket(c *gin.Context) {
 			controller.SendChatUser(controllerInterface.Chat{CreatedAt: msg.CreatedAt,
 				UserID: result.User.ID, GroupID: resultGroup.Group.ID, Admin: msg.Admin, Message: msg.Message})
 
+			userName := "不明"
+
+			for _, tmp := range resultGroup.Group.Users {
+				if tmp.GroupID == result.User.ID {
+					userName = tmp.Name
+				}
+			}
+
 			//Slackに送信
 			attachment := slack.Attachment{}
 			attachment.AddField(slack.Field{Title: "Title", Value: "Support(新規メッセージ)"}).
-				AddField(slack.Field{Title: "発行者", Value: strconv.Itoa(int(result.User.ID))}).
+				AddField(slack.Field{Title: "発行者", Value: strconv.Itoa(int(result.User.ID)) + "-" + userName}).
 				AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(result.Group.ID)) + "-" + result.Group.Org}).
 				AddField(slack.Field{Title: "Title", Value: ticketResult.Ticket[0].Title}).
 				AddField(slack.Field{Title: "Message", Value: msg.Message})
