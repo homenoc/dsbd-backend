@@ -48,18 +48,18 @@ func Generate(c *gin.Context) {
 	mail := c.Request.Header.Get("Email")
 	tokenResult := dbToken.Get(token.UserToken, &core.Token{UserToken: userToken})
 	if tokenResult.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: tokenResult.Err.Error()})
+		c.JSON(http.StatusUnauthorized, common.Error{Error: tokenResult.Err.Error()})
 		return
 	}
 
 	userResult := dbUser.Get(user.Email, &core.User{Email: mail})
 	if userResult.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: userResult.Err.Error()})
+		c.JSON(http.StatusUnauthorized, common.Error{Error: userResult.Err.Error()})
 		return
 	}
 
 	if len(userResult.User) == 0 {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: "This account or password is not found... "})
+		c.JSON(http.StatusUnauthorized, common.Error{Error: "This account or password is not found... "})
 		return
 	}
 
