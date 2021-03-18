@@ -93,6 +93,16 @@ func Add(c *gin.Context) {
 	}
 
 	//check exist for database
+	result := dbUser.Get(user.Email, &core.User{Email: input.Email})
+	if result.Err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
+		return
+	}
+	if len(result.User) != 0 {
+		c.JSON(http.StatusBadRequest, common.Error{Error: "this email is already registered: \" + u.Email"})
+		return
+	}
+
 	err = dbUser.Create(&data)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})

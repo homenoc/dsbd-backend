@@ -11,15 +11,6 @@ import (
 )
 
 func Create(u *core.User) error {
-	result := Get(user.Email, &core.User{Email: u.Email})
-	if result.Err != nil {
-		return result.Err
-	}
-	if len(result.User) != 0 {
-		log.Println("error: this email is already registered: " + u.Email)
-		return fmt.Errorf("error: this email is already registered")
-	}
-
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
