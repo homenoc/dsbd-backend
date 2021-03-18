@@ -177,73 +177,10 @@ func GetAll(c *gin.Context) {
 		return
 	}
 
-	if result.User.Level >= 10 {
-		if result.User.Level > 1 {
-			c.JSON(http.StatusUnauthorized, common.Error{Error: "You don't have authority this operation"})
-			return
-		}
+	if result.User.Level > 2 {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: "You don't have authority this operation"})
+		return
 	}
 
-	//resultService := dbService.Get(service.GID, &core.Service{GroupID: result.Group.ID})
-	//if resultService.Err != nil {
-	//	c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
-	//	return
-	//}
-	//if len(resultService.Service) == 0 {
-	//	resultService.Service = nil
-	//}
-	//
-	//resultConnection := dbConnection.Get(connection.ServiceID, &core.Connection{GroupID: result.Group.ID})
-	//if resultConnection.Err != nil {
-	//	c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
-	//	return
-	//}
-	//if len(resultConnection.Connection) == 0 {
-	//	resultConnection.Connection = nil
-	//}
-	//
-	//var resultTech []core.JPNICTech = nil
-	//var resultAdmin []core.JPNICAdmin = nil
-	//
-	//for _, data := range resultService.Service {
-	//	tmpAdmin := dbAdmin.Get(admin.NetworkId, &admin.Admin{NetworkID: data.ID})
-	//	if tmpAdmin.Err != nil {
-	//		c.JSON(http.StatusInternalServerError, common.Error{Error: tmpAdmin.Err.Error()})
-	//		return
-	//	}
-	//	if len(tmpAdmin.Admins) == 0 {
-	//		break
-	//	}
-	//	resultAdmin = append(resultAdmin, tmpAdmin.Admins[0])
-	//
-	//	tmpTech := dbTech.Get(admin.NetworkId, &tech.Tech{NetworkID: data.ID})
-	//	if tmpAdmin.Err != nil {
-	//		c.JSON(http.StatusInternalServerError, common.Error{Error: tmpAdmin.Err.Error()})
-	//		return
-	//	}
-	//	if len(tmpTech.Tech) == 0 {
-	//		break
-	//	}
-	//	for _, tmpTechDetail := range tmpTech.Tech {
-	//		resultTech = append(resultTech, tmpTechDetail)
-	//	}
-	//}
-
 	c.JSON(http.StatusOK, group.Result{Group: result.Group})
-
-	//c.JSON(http.StatusOK, group.ResultAll{
-	//	Group: group.ResultOne{
-	//		ID:       result.Group.ID,
-	//		Agree:    result.Group.Agree,
-	//		Question: result.Group.Question,
-	//		Org:      result.Group.Org,
-	//		Status:   *result.Group.Status,
-	//		Contract: result.Group.Contract,
-	//		Student:  result.Group.Student,
-	//	},
-	//	Network:    resultService.Service,
-	//	Admin:      resultAdmin,
-	//	Tech:       resultTech,
-	//	Connection: resultcore.Connection,
-	//})
 }
