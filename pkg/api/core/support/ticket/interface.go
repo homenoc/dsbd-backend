@@ -3,7 +3,6 @@ package ticket
 import (
 	"github.com/gorilla/websocket"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
-	"github.com/jinzhu/gorm"
 	"net/http"
 )
 
@@ -16,27 +15,45 @@ const (
 
 //#4 Issue(解決済み）
 
-type AdminAllResult struct {
-	Ticket []AdminResult `json:"ticket"`
+type Ticket struct {
+	ID       uint   `json:"id"`
+	Time     string `json:"time"`
+	GroupID  uint   `json:"group_id"`
+	UserID   uint   `json:"user_id"`
+	Chat     []Chat `json:"chat"`
+	Solved   *bool  `json:"solved"`
+	Title    string `json:"title"`
+	UserName string `json:"username"`
 }
 
-type AdminResult struct {
-	gorm.Model
-	Status      bool   `json:"status"`
-	Error       string `json:"error"`
-	GroupID     uint   `json:"group_id"`
-	GroupName   string `json:"group_name"`
-	UserID      uint   `json:"user_id"`
-	UserName    string `json:"user_name"`
-	ChatIDStart uint   `json:"chat_id_start"`
-	ChatIDEnd   uint   `json:"chat_id_end"`
-	Solved      *bool  `json:"solved"`
-	Title       string `json:"title"`
+type Chat struct {
+	Time     string `json:"time"`
+	TicketID uint   `json:"ticket_id"`
+	UserID   uint   `json:"user_id"`
+	UserName string `json:"username"`
+	Admin    bool   `json:"admin"`
+	Data     string `json:"data"`
+}
+
+type Result struct {
+	Ticket Ticket `json:"tickets"`
+}
+
+type ResultAll struct {
+	Tickets []Ticket `json:"tickets"`
+}
+
+type ResultTicketAll struct {
+	Tickets []Ticket `json:"tickets"`
+}
+
+type ResultAdminAll struct {
+	Tickets []core.Ticket `json:"tickets"`
 }
 
 type ResultDatabase struct {
-	Err    error
-	Ticket []core.Ticket
+	Err     error
+	Tickets []core.Ticket
 }
 
 var WsUpgrader = websocket.Upgrader{
