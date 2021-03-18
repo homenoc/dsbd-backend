@@ -58,19 +58,19 @@ func Add(c *gin.Context) {
 		return
 	}
 	// 問題解決時はここでエラーを返す
-	if *resultTicket.Ticket[0].Solved {
+	if *resultTicket.Tickets[0].Solved {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: "This problem is closed..."})
 		return
 	}
 	// GroupIDが一致しない場合はここでエラーを返す
-	if resultTicket.Ticket[0].GroupID != result.Group.ID {
+	if resultTicket.Tickets[0].GroupID != result.Group.ID {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: "Auth Error: group id failed..."})
 		return
 	}
 
 	// Chat DBに登録
 	resultChat, err := dbChat.Create(&core.Chat{
-		TicketID: resultTicket.Ticket[0].ID,
+		TicketID: resultTicket.Tickets[0].ID,
 		UserID:   result.User.ID,
 		Admin:    false,
 		Data:     input.Data,

@@ -11,7 +11,6 @@ import (
 	controllerInterface "github.com/homenoc/dsbd-backend/pkg/api/core/controller"
 	controller "github.com/homenoc/dsbd-backend/pkg/api/core/controller/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/support/chat"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support/ticket"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	dbChat "github.com/homenoc/dsbd-backend/pkg/api/store/support/chat/v0"
@@ -22,6 +21,8 @@ import (
 	"strconv"
 	"time"
 )
+
+const timeLayout = "2006-01-02 15:04:05 JST"
 
 func Create(c *gin.Context) {
 	var input support.FirstInput
@@ -48,7 +49,7 @@ func Create(c *gin.Context) {
 		return
 	}
 
-	// Ticket DBに登録
+	// Tickets DBに登録
 	ticketResult, err := dbTicket.Create(&core.Ticket{
 		GroupID: result.Group.ID,
 		UserID:  result.User.ID,
@@ -61,7 +62,7 @@ func Create(c *gin.Context) {
 	}
 
 	// Chat DBに登録
-	chatResult, err := dbChat.Create(&core.Chat{
+	_, err = dbChat.Create(&core.Chat{
 		UserID:   result.User.ID,
 		Admin:    false,
 		Data:     input.Data,
@@ -81,7 +82,7 @@ func Create(c *gin.Context) {
 		AddField(slack.Field{Title: "Message", Value: input.Data})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 
-	c.JSON(http.StatusOK, support.Result{Ticket: []core.Ticket{*ticketResult}, Chat: []core.Chat{*chatResult}})
+	c.JSON(http.StatusOK, common.Result{})
 }
 
 func Get(c *gin.Context) {
@@ -109,22 +110,39 @@ func Get(c *gin.Context) {
 	}
 
 	// GroupIDが一致しない場合はここでエラーを返す
-	if resultTicket.Ticket[0].GroupID != result.Group.ID {
+	if resultTicket.Tickets[0].GroupID != result.Group.ID {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: "Auth Error: group id failed..."})
 		return
 	}
 
-	// Ticket DBからTicket IDのTicketデータを抽出
-	// このとき、データはIDの昇順で出力
-	resultChat := dbChat.Get(chat.TicketID, &core.Chat{TicketID: resultTicket.Ticket[0].ID})
-	if resultChat.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: resultTicket.Err.Error()})
-		return
+	var response ticket.Ticket
+
+	var resultChat []ticket.Chat
+	for _, tmpChat := range resultTicket.Tickets[0].Chat {
+		resultChat = append(resultChat, ticket.Chat{
+			Time:     tmpChat.CreatedAt.Add(9 * time.Hour).Format(timeLayout),
+			UserID:   tmpChat.UserID,
+			UserName: tmpChat.User.Name,
+			Admin:    tmpChat.Admin,
+			Data:     tmpChat.Data,
+		})
 	}
-	c.JSON(http.StatusOK, support.Result{Ticket: resultTicket.Ticket, Chat: resultChat.Chat})
+
+	response = ticket.Ticket{
+		ID:       resultTicket.Tickets[0].ID,
+		Time:     resultTicket.Tickets[0].CreatedAt.Add(9 * time.Hour).Format(timeLayout),
+		GroupID:  resultTicket.Tickets[0].GroupID,
+		UserID:   resultTicket.Tickets[0].UserID,
+		Solved:   resultTicket.Tickets[0].Solved,
+		Chat:     resultChat,
+		Title:    resultTicket.Tickets[0].Title,
+		UserName: resultTicket.Tickets[0].User.Name,
+	}
+
+	c.JSON(http.StatusOK, ticket.Result{Ticket: response})
 }
 
-func GetTitle(c *gin.Context) {
+func GetAll(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
@@ -134,16 +152,40 @@ func GetTitle(c *gin.Context) {
 		return
 	}
 
-	// Ticket DBからGroup IDのTicketデータを抽出
+	// Tickets DBからGroup IDのTicketデータを抽出
 	resultTicket := dbTicket.Get(ticket.GID, &core.Ticket{GroupID: result.Group.ID})
 	if resultTicket.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: resultTicket.Err.Error()})
 		return
 	}
 
-	log.Println(resultTicket)
+	var response []ticket.Ticket
 
-	c.JSON(http.StatusOK, support.Result{Ticket: resultTicket.Ticket})
+	for _, tmp := range resultTicket.Tickets {
+		var resultChat []ticket.Chat
+		for _, tmpChat := range tmp.Chat {
+			resultChat = append(resultChat, ticket.Chat{
+				Time:     tmpChat.CreatedAt.Add(9 * time.Hour).Format(timeLayout),
+				UserID:   tmpChat.UserID,
+				UserName: tmpChat.User.Name,
+				Admin:    tmpChat.Admin,
+				Data:     tmpChat.Data,
+			})
+		}
+
+		response = append(response, ticket.Ticket{
+			ID:       resultTicket.Tickets[0].ID,
+			Time:     resultTicket.Tickets[0].CreatedAt.Add(9 * time.Hour).Format(timeLayout),
+			GroupID:  tmp.GroupID,
+			UserID:   tmp.UserID,
+			Solved:   tmp.Solved,
+			Chat:     resultChat,
+			Title:    tmp.Title,
+			UserName: tmp.User.Name,
+		})
+	}
+
+	c.JSON(http.StatusOK, ticket.ResultAll{Tickets: response})
 }
 
 func GetWebSocket(c *gin.Context) {
@@ -182,7 +224,7 @@ func GetWebSocket(c *gin.Context) {
 		return
 	}
 
-	if ticketResult.Ticket[0].ID != uint(id) {
+	if ticketResult.Tickets[0].ID != uint(id) {
 		log.Println("ticketID not match.")
 	}
 
@@ -191,6 +233,7 @@ func GetWebSocket(c *gin.Context) {
 		TicketID: uint(id),
 		Admin:    false,
 		UserID:   result.User.ID,
+		UserName: result.User.Name,
 		GroupID:  result.Group.ID,
 		Socket:   conn,
 	}] = true
@@ -205,6 +248,7 @@ func GetWebSocket(c *gin.Context) {
 				TicketID: uint(id),
 				Admin:    false,
 				UserID:   result.User.ID,
+				UserName: result.User.Name,
 				GroupID:  result.Group.ID,
 				Socket:   conn,
 			})
@@ -221,7 +265,7 @@ func GetWebSocket(c *gin.Context) {
 		}
 
 		_, err = dbChat.Create(&core.Chat{
-			TicketID: ticketResult.Ticket[0].ID,
+			TicketID: ticketResult.Tickets[0].ID,
 			UserID:   result.User.ID,
 			Admin:    false,
 			Data:     msg.Message,
@@ -233,6 +277,7 @@ func GetWebSocket(c *gin.Context) {
 			msg.UserID = result.User.ID
 			msg.GroupID = resultGroup.Group.ID
 			msg.Admin = false
+			msg.UserName = result.User.Name
 			// Token関連の初期化
 			msg.AccessToken = ""
 			msg.UserToken = ""
@@ -241,25 +286,18 @@ func GetWebSocket(c *gin.Context) {
 			controller.SendChatUser(controllerInterface.Chat{
 				CreatedAt: msg.CreatedAt,
 				UserID:    result.User.ID,
+				UserName:  result.User.Name,
 				GroupID:   resultGroup.Group.ID,
 				Admin:     msg.Admin,
 				Message:   msg.Message,
 			})
 
-			userName := "不明"
-
-			for _, tmp := range resultGroup.Group.Users {
-				if tmp.GroupID == result.User.ID {
-					userName = tmp.Name
-				}
-			}
-
 			//Slackに送信
 			attachment := slack.Attachment{}
 			attachment.AddField(slack.Field{Title: "Title", Value: "Support(新規メッセージ)"}).
-				AddField(slack.Field{Title: "発行者", Value: strconv.Itoa(int(result.User.ID)) + "-" + userName}).
+				AddField(slack.Field{Title: "発行者", Value: strconv.Itoa(int(result.User.ID)) + "-" + result.User.Name}).
 				AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(result.Group.ID)) + "-" + result.Group.Org}).
-				AddField(slack.Field{Title: "Title", Value: ticketResult.Ticket[0].Title}).
+				AddField(slack.Field{Title: "Title", Value: ticketResult.Tickets[0].Title}).
 				AddField(slack.Field{Title: "Message", Value: msg.Message})
 			notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 
@@ -279,11 +317,12 @@ func HandleMessages() {
 				return
 			} else if client.GroupID == msg.GroupID {
 				err := client.Socket.WriteJSON(support.WebSocketChatResponse{
-					CreatedAt: time.Now(),
-					UserID:    msg.UserID,
-					GroupID:   msg.GroupID,
-					Admin:     msg.Admin,
-					Message:   msg.Message,
+					Time:     time.Now().UTC().Add(9 * time.Hour).Format(timeLayout),
+					UserID:   msg.UserID,
+					UserName: msg.UserName,
+					GroupID:  msg.GroupID,
+					Admin:    msg.Admin,
+					Message:  msg.Message,
 				})
 				if err != nil {
 					log.Printf("error: %v", err)

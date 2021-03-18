@@ -24,6 +24,7 @@ func SendChatAdmin(data controller.Chat) {
 		Err:       data.Err,
 		CreatedAt: data.CreatedAt,
 		UserID:    data.UserID,
+		UserName:  data.UserName,
 		GroupID:   data.GroupID,
 		Admin:     data.Admin,
 		Message:   data.Message,

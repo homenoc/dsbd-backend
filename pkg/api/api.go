@@ -256,7 +256,7 @@ func UserRestAPI() {
 			// Support
 			//
 			v1.POST("/support", ticket.Create)
-			v1.GET("/support", ticket.GetTitle)
+			v1.GET("/support", ticket.GetAll)
 			v1.POST("/support/:id", chat.Add)
 			v1.GET("/support/:id", ticket.Get)
 			//

@@ -252,6 +252,8 @@ type Ticket struct {
 	Chat    []Chat `json:"chat"`
 	Solved  *bool  `json:"solved"`
 	Title   string `json:"title"`
+	Group   Group  `json:"group"`
+	User    User   `json:"user"`
 }
 
 type Chat struct {
@@ -260,6 +262,7 @@ type Chat struct {
 	UserID   uint   `json:"user_id"`
 	Admin    bool   `json:"admin"`
 	Data     string `json:"data" gorm:"size:65535"`
+	User     User   `json:"user"`
 }
 
 type Token struct {

@@ -19,23 +19,26 @@ type WebSocketResult struct {
 	UserToken   string    `json:"user_token"`
 	AccessToken string    `json:"access_token"`
 	UserID      uint      `json:"user_id"`
+	UserName    string    `json:"user_name"`
 	GroupID     uint      `json:"group_id"`
 	Admin       bool      `json:"admin"`
 	Message     string    `json:"message"`
 }
 
 type WebSocketChatResponse struct {
-	CreatedAt time.Time `json:"created_at"`
-	UserID    uint      `json:"user_id"`
-	GroupID   uint      `json:"group_id"`
-	Admin     bool      `json:"admin"`
-	Message   string    `json:"message"`
+	Time     string `json:"time"`
+	UserID   uint   `json:"user_id"`
+	UserName string `json:"username"`
+	GroupID  uint   `json:"group_id"`
+	Admin    bool   `json:"admin"`
+	Message  string `json:"message"`
 }
 
 type WebSocket struct {
 	TicketID uint
 	GroupID  uint
 	UserID   uint
+	UserName string
 	Admin    bool
 	Socket   *websocket.Conn
 }
@@ -49,6 +52,6 @@ type FirstInput struct {
 }
 
 type Result struct {
-	Ticket []core.Ticket `json:"support_ticket"`
-	Chat   []core.Chat   `json:"support_chat"`
+	Ticket []core.Ticket `json:"ticket"`
+	Chat   []core.Chat   `json:"chat"`
 }

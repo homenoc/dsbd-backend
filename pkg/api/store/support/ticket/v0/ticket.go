@@ -68,16 +68,25 @@ func Get(base int, data *core.Ticket) ticket.ResultDatabase {
 	var ticketStruct []core.Ticket
 
 	if base == ticket.ID { //ID
-		err = db.First(&ticketStruct, data.ID).Error
+		err = db.Preload("User").
+			Preload("Group").
+			Preload("Chat").
+			Preload("Chat.User").
+			First(&ticketStruct, data.ID).Error
 	} else if base == ticket.GID { //GroupID
-		err = db.Where("group_id = ?", data.GroupID).Find(&ticketStruct).Error
+		err = db.Where("group_id = ?", data.GroupID).
+			Preload("User").
+			Preload("Group").
+			Preload("Chat").
+			Preload("Chat.User").
+			Find(&ticketStruct).Error
 	} else if base == ticket.UID { //UserID
 		err = db.Where("user_id = ?", data.UserID).Find(&ticketStruct).Error
 	} else {
 		log.Println("base select error")
 		return ticket.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
 	}
-	return ticket.ResultDatabase{Ticket: ticketStruct, Err: err}
+	return ticket.ResultDatabase{Tickets: ticketStruct, Err: err}
 }
 
 func GetAll() ticket.ResultDatabase {
@@ -89,6 +98,10 @@ func GetAll() ticket.ResultDatabase {
 	defer db.Close()
 
 	var tickets []core.Ticket
-	err = db.Find(&tickets).Error
-	return ticket.ResultDatabase{Ticket: tickets, Err: err}
+	err = db.Preload("User").
+		Preload("Group").
+		Preload("Chat").
+		Preload("Chat.User").
+		Find(&tickets).Error
+	return ticket.ResultDatabase{Tickets: tickets, Err: err}
 }

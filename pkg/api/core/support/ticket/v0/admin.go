@@ -9,13 +9,10 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	controllerInterface "github.com/homenoc/dsbd-backend/pkg/api/core/controller"
 	controller "github.com/homenoc/dsbd-backend/pkg/api/core/controller/v0"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/support/chat"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support/ticket"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/mail"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
-	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	dbChat "github.com/homenoc/dsbd-backend/pkg/api/store/support/chat/v0"
 	dbTicket "github.com/homenoc/dsbd-backend/pkg/api/store/support/ticket/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
@@ -49,7 +46,7 @@ func CreateAdmin(c *gin.Context) {
 		return
 	}
 
-	// Ticket DBに登録
+	// Tickets DBに登録
 	ticketResult, err := dbTicket.Create(&core.Ticket{
 		GroupID: input.GroupID,
 		UserID:  0,
@@ -101,7 +98,7 @@ func UpdateAdmin(c *gin.Context) {
 		return
 	}
 
-	// Ticket DBからデータを取得
+	// Tickets DBからデータを取得
 	ticketResult := dbTicket.Get(ticket.ID, &core.Ticket{Model: gorm.Model{ID: uint(id)}})
 	if ticketResult.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: ticketResult.Err.Error()})
@@ -109,7 +106,7 @@ func UpdateAdmin(c *gin.Context) {
 	}
 
 	// input check
-	replace, err := updateAdminTicket(input, ticketResult.Ticket[0])
+	replace, err := updateAdminTicket(input, ticketResult.Tickets[0])
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
@@ -144,15 +141,7 @@ func GetAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: resultTicket.Err.Error()})
 		return
 	}
-
-	// Ticket DBからTicket IDのTicketデータを抽出
-	// このとき、データはIDの昇順で出力
-	resultChat := dbChat.Get(chat.TicketID, &core.Chat{TicketID: resultTicket.Ticket[0].ID})
-	if resultChat.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: resultTicket.Err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, support.Result{Ticket: resultTicket.Ticket, Chat: resultChat.Chat})
+	c.JSON(http.StatusOK, support.Result{Ticket: resultTicket.Tickets})
 }
 
 func GetAllAdmin(c *gin.Context) {
@@ -163,33 +152,14 @@ func GetAllAdmin(c *gin.Context) {
 		return
 	}
 
-	// Ticket DBからGroup IDのTicketデータを抽出
+	// Tickets DBからGroup IDのTicketデータを抽出
 	resultTicket := dbTicket.GetAll()
 	if resultTicket.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: resultTicket.Err.Error()})
 		return
 	}
 
-	var ticketResponse []ticket.AdminResult
-
-	for _, tmp := range resultTicket.Ticket {
-		//user名検索
-		tmpUserResult := dbUser.Get(user.ID, &core.User{Model: gorm.Model{ID: tmp.UserID}})
-		//group名検索
-		tmpGroupResult := dbGroup.Get(group.ID, &core.Group{Model: gorm.Model{ID: tmp.GroupID}})
-
-		ticketResponse = append(ticketResponse, ticket.AdminResult{
-			Model:     tmp.Model,
-			GroupID:   tmp.GroupID,
-			GroupName: tmpGroupResult.Group[0].Org,
-			UserID:    tmp.UserID,
-			UserName:  tmpUserResult.User[0].Name,
-			Solved:    tmp.Solved,
-			Title:     tmp.Title,
-		})
-	}
-
-	c.JSON(http.StatusOK, ticket.AdminAllResult{Ticket: ticketResponse})
+	c.JSON(http.StatusOK, ticket.ResultAdminAll{Tickets: resultTicket.Tickets})
 }
 
 func GetAdminWebSocket(c *gin.Context) {
@@ -231,7 +201,8 @@ func GetAdminWebSocket(c *gin.Context) {
 	support.Clients[&support.WebSocket{
 		TicketID: uint(id),
 		UserID:   resultAdmin.AdminID,
-		GroupID:  ticketResult.Ticket[0].GroupID,
+		UserName: "HomeNOC",
+		GroupID:  ticketResult.Tickets[0].GroupID,
 		Socket:   conn,
 	}] = true
 
@@ -244,14 +215,15 @@ func GetAdminWebSocket(c *gin.Context) {
 			delete(support.Clients, &support.WebSocket{
 				TicketID: uint(id),
 				UserID:   resultAdmin.AdminID,
-				GroupID:  ticketResult.Ticket[0].GroupID,
+				UserName: "HomeNOC(運営)",
+				GroupID:  ticketResult.Tickets[0].GroupID,
 				Socket:   conn,
 			})
 			break
 		}
 
 		_, err = dbChat.Create(&core.Chat{
-			TicketID: ticketResult.Ticket[0].ID,
+			TicketID: ticketResult.Tickets[0].ID,
 			UserID:   resultAdmin.AdminID,
 			Admin:    true,
 			Data:     msg.Message,
@@ -260,7 +232,8 @@ func GetAdminWebSocket(c *gin.Context) {
 			conn.WriteJSON(&support.WebSocketResult{Err: "db write error"})
 		} else {
 			msg.UserID = resultAdmin.AdminID
-			msg.GroupID = ticketResult.Ticket[0].GroupID
+			msg.GroupID = ticketResult.Tickets[0].GroupID
+			msg.UserName = "HomeNOC(運営)"
 			msg.Admin = true
 			// Token関連の初期化
 			msg.AccessToken = ""
@@ -271,17 +244,18 @@ func GetAdminWebSocket(c *gin.Context) {
 				CreatedAt: msg.CreatedAt,
 				Admin:     msg.Admin,
 				UserID:    resultAdmin.AdminID,
-				GroupID:   ticketResult.Ticket[0].GroupID,
+				UserName:  msg.UserName,
+				GroupID:   ticketResult.Tickets[0].GroupID,
 				Message:   msg.Message,
 			})
 
-			resultTicket := dbTicket.Get(ticket.ID, &core.Ticket{Model: gorm.Model{ID: ticketResult.Ticket[0].ID}})
+			resultTicket := dbTicket.Get(ticket.ID, &core.Ticket{Model: gorm.Model{ID: ticketResult.Tickets[0].ID}})
 			if resultTicket.Err != nil {
 				log.Println(resultTicket.Err)
 			}
-			if len(resultTicket.Ticket) != 0 {
+			if len(resultTicket.Tickets) != 0 {
 				resultUser := dbUser.Get(user.GIDAndLevel, &core.User{
-					GroupID: resultTicket.Ticket[0].GroupID,
+					GroupID: resultTicket.Tickets[0].GroupID,
 					Level:   1,
 				})
 				if resultUser.Err != nil {
@@ -315,11 +289,12 @@ func HandleMessagesAdmin() {
 				return
 			} else if client.GroupID == msg.GroupID {
 				err := client.Socket.WriteJSON(support.WebSocketChatResponse{
-					CreatedAt: time.Now(),
-					UserID:    msg.UserID,
-					GroupID:   msg.GroupID,
-					Admin:     msg.Admin,
-					Message:   msg.Message,
+					Time:     time.Now().UTC().Add(9 * time.Hour).Format(timeLayout),
+					UserID:   msg.UserID,
+					UserName: msg.UserName,
+					GroupID:  msg.GroupID,
+					Admin:    msg.Admin,
+					Message:  msg.Message,
 				})
 				if err != nil {
 					log.Printf("error: %v", err)
