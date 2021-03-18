@@ -344,6 +344,20 @@ func GetOwn(c *gin.Context) {
 	authResult := auth.UserAuthentication(core.Token{UserToken: userToken, AccessToken: accessToken})
 	authResult.User.Pass = ""
 	authResult.User.MailToken = ""
+
+	var simpleGroup *user.SimpleGroup = nil
+
+	if authResult.User.Group != nil {
+		simpleGroup = &user.SimpleGroup{
+			ID:            authResult.User.Group.ID,
+			Student:       authResult.User.Group.Student,
+			Pass:          authResult.User.Group.Pass,
+			Lock:          authResult.User.Group.Lock,
+			ExpiredStatus: authResult.User.Group.ExpiredStatus,
+			Status:        authResult.User.Group.Status,
+		}
+	}
+
 	if authResult.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: authResult.Err.Error()})
 	} else {
@@ -355,6 +369,7 @@ func GetOwn(c *gin.Context) {
 			Email:      authResult.User.Email,
 			Level:      authResult.User.Level,
 			MailVerify: authResult.User.MailVerify,
+			Group:      simpleGroup,
 		})
 	}
 }

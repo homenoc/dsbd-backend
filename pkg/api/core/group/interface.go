@@ -2,6 +2,8 @@ package group
 
 import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 )
 
 const (
@@ -32,42 +34,40 @@ type Input struct {
 	StudentExpired *string `json:"student_expired"`
 }
 
-type Result struct {
+type ResultAdmin struct {
 	Group core.Group `json:"group"`
 }
 
-type ResultAll struct {
+type ResultAdminAll struct {
 	Group []core.Group `json:"group"`
 }
 
-type ResultOne struct {
-	ID            uint   `json:"id"`
-	Agree         *bool  `json:"agree"`
-	Question      string `json:"question"`
-	Org           string `json:"org"`
-	OrgEn         string `json:"org_en"`
-	PostCode      string `json:"postcode"`
-	Address       string `json:"address"`
-	AddressEn     string `json:"address_en"`
-	Tel           string `json:"tel"`
-	Country       string `json:"country"`
-	Status        uint   `json:"status"`
-	Bandwidth     string `json:"bandwidth"`
-	Contract      string `json:"contract"`
-	Student       *bool  `json:"student"`
-	Pass          *bool  `json:"pass"`
-	Lock          *bool  `json:"lock"`
-	ExpiredStatus uint   `json:"expired_status"`
-	Open          *bool  `json:"open"`
+type Group struct {
+	ID            uint               `json:"id"`
+	Agree         *bool              `json:"agree"`
+	Question      string             `json:"question"`
+	Org           string             `json:"org"`
+	OrgEn         string             `json:"org_en"`
+	PostCode      string             `json:"postcode"`
+	Address       string             `json:"address"`
+	AddressEn     string             `json:"address_en"`
+	Tel           string             `json:"tel"`
+	Country       string             `json:"country"`
+	Status        uint               `json:"status"`
+	Bandwidth     string             `json:"bandwidth"`
+	Contract      string             `json:"contract"`
+	Student       *bool              `json:"student"`
+	Pass          *bool              `json:"pass"`
+	Lock          *bool              `json:"lock"`
+	ExpiredStatus uint               `json:"expired_status"`
+	Open          *bool              `json:"open"`
+	Service       *[]service.Service `json:"service"`
+	User          []user.User        `json:"user"`
 }
 
-//type ResultAll struct {
-//	Group   ResultOne      `json:"group"`
-//	Network []core.Service `json:"network"`
-//	//Admin      []core.Admin      `json:"admin"`
-//	//Tech       []core.Tech       `json:"tech"`
-//	Connection []core.Connection `json:"connection"`
-//}
+type Result struct {
+	Group Group `json:"group"`
+}
 
 type ResultDatabase struct {
 	Err   error

@@ -100,6 +100,11 @@ func Get(base int, u *core.User) user.ResultDatabase {
 		err = db.Where("mail_token = ?", u.MailToken).Find(&userStruct).Error
 	} else if base == user.GIDAndLevel { //GroupID and Level
 		err = db.Where("group_id = ? AND level = ?", u.GroupID, u.Level).Find(&userStruct).Error
+	} else if base == user.IDGetGroup { //GroupID and Level
+		err = db.First(&userStruct, u.ID).
+			Preload("Group").
+			Find(&userStruct).Error
+
 	} else {
 		log.Println("base select error")
 		return user.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
