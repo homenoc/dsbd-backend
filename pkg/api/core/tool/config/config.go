@@ -7,6 +7,7 @@ import (
 
 type Config struct {
 	Controller Controller `json:"controller"`
+	Web        Web        `json:"web"`
 	DB         DB         `json:"db"`
 	Mail       Mail       `json:"mail"`
 	Radius     Radius     `json:"radius"`
@@ -30,6 +31,10 @@ type Admin struct {
 	IP        string    `json:"ip"`
 	Port      int       `json:"port"`
 	AdminAuth AdminAuth `json:"auth"`
+}
+
+type Web struct {
+	URL string `json:"url"`
 }
 
 type AdminAuth struct {
