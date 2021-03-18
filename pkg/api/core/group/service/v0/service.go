@@ -243,7 +243,7 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, group.Result{})
+	c.JSON(http.StatusOK, common.Result{})
 }
 
 func GetAddAllow(c *gin.Context) {
