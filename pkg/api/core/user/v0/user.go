@@ -161,7 +161,7 @@ func MailVerify(c *gin.Context) {
 <head>
     <meta charset="UTF-8">
     <title>dsysメール確認システム</title>
-    <meta http-equiv="refresh" content="5"; URL="` + config.Conf.Controller.User.Url + `">
+    <meta http-equiv="refresh" content="5; URL=` + config.Conf.Controller.User.Url + `">
 </head>
 <body>
 <h1>すでにメールアドレスの確認はできています。</h1>
@@ -187,7 +187,7 @@ func MailVerify(c *gin.Context) {
 <head>
     <meta charset="UTF-8">
     <title>dsysメール確認システム</title>
-    <meta http-equiv="refresh" content="30"; URL="` + config.Conf.Controller.User.Url + `">
+    <meta http-equiv="refresh" content="30; URL=` + config.Conf.Controller.User.Url + `">
 </head>
 <body>
 <h1>メールの確認ができませんでした。</h1>
@@ -202,7 +202,7 @@ func MailVerify(c *gin.Context) {
 <head>
     <meta charset="UTF-8">
     <title>dsysメール確認システム</title>
-    <meta http-equiv="refresh" content="5"; URL="` + config.Conf.Controller.User.Url + `">
+    <meta http-equiv="refresh" content="5; URL=` + config.Conf.Controller.User.Url + `">
 </head>
 <body>
 <h1>メールの確認ができました。</h1>
