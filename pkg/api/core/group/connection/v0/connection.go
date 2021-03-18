@@ -191,5 +191,5 @@ func Add(c *gin.Context) {
 		AddField(slack.Field{Title: "ステータス履歴", Value: "3[接続情報記入段階(User)] =>4[開通作業中] "})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 
-	c.JSON(http.StatusOK, group.Result{})
+	c.JSON(http.StatusOK, common.Result{})
 }
