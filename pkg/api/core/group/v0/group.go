@@ -7,6 +7,8 @@ import (
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
@@ -152,7 +154,36 @@ func Get(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, group.ResultOne{
+	var responseUser []user.User
+	if result.User.Level == 1 || result.User.Level == 2 {
+		for _, tmpUser := range result.Group.Users {
+			responseUser = append(responseUser, user.User{
+				ID:            tmpUser.ID,
+				Name:          tmpUser.Name,
+				NameEn:        tmpUser.NameEn,
+				Email:         tmpUser.Email,
+				Level:         tmpUser.Level,
+				ExpiredStatus: *tmpUser.ExpiredStatus,
+				MailVerify:    tmpUser.MailVerify,
+			})
+		}
+	} else {
+		responseUser = []user.User{
+			{
+				ID:            result.User.ID,
+				Name:          result.User.Name,
+				NameEn:        result.User.NameEn,
+				Email:         result.User.Email,
+				Level:         result.User.Level,
+				ExpiredStatus: *result.User.ExpiredStatus,
+				MailVerify:    result.User.MailVerify,
+			},
+		}
+	}
+
+	log.Println(result.Group.Users)
+
+	c.JSON(http.StatusOK, group.Result{Group: group.Group{
 		ID:            result.Group.ID,
 		Agree:         result.Group.Agree,
 		Question:      result.Group.Question,
@@ -164,7 +195,8 @@ func Get(c *gin.Context) {
 		Pass:          result.Group.Pass,
 		Lock:          result.Group.Lock,
 		ExpiredStatus: *result.Group.ExpiredStatus,
-	})
+		//User:          users,
+	}})
 }
 
 func GetAll(c *gin.Context) {
@@ -182,5 +214,142 @@ func GetAll(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, group.Result{Group: result.Group})
+	var users []user.User
+	var services []service.Service
+
+	for _, tmpUser := range result.Group.Users {
+		users = append(users, user.User{
+			ID:            tmpUser.ID,
+			Name:          tmpUser.Name,
+			NameEn:        tmpUser.NameEn,
+			Email:         tmpUser.Email,
+			Level:         tmpUser.Level,
+			ExpiredStatus: *tmpUser.ExpiredStatus,
+			MailVerify:    tmpUser.MailVerify,
+		})
+	}
+
+	for _, tmpService := range result.Group.Services {
+		var tmpConnections *[]connection.Connection = nil
+		var tmpJPNICAdmin *service.JPNIC = nil
+		var tmpJPNICTech *[]service.JPNIC = nil
+
+		if tmpService.JPNICAdmin.ID == 0 {
+			tmpJPNICAdmin = &service.JPNIC{
+				ID:          tmpService.JPNICAdmin.ID,
+				JPNICHandle: tmpService.JPNICAdmin.JPNICHandle,
+				Name:        tmpService.JPNICAdmin.Name,
+				NameEn:      tmpService.JPNICAdmin.NameEn,
+				Org:         tmpService.JPNICAdmin.Org,
+				OrgEn:       tmpService.JPNICAdmin.OrgEn,
+				PostCode:    tmpService.JPNICAdmin.PostCode,
+				Address:     tmpService.JPNICAdmin.Address,
+				AddressEn:   tmpService.JPNICAdmin.AddressEn,
+				Dept:        tmpService.JPNICAdmin.Dept,
+				DeptEn:      tmpService.JPNICAdmin.DeptEn,
+				Tel:         tmpService.JPNICAdmin.Tel,
+				Fax:         tmpService.JPNICAdmin.Fax,
+				Country:     tmpService.JPNICAdmin.Country,
+			}
+		}
+
+		if tmpService.JPNICTech != nil || len(tmpService.JPNICTech) != 0 {
+			for _, tmpServiceJPNICTech := range tmpService.JPNICTech {
+				*tmpJPNICTech = append(*tmpJPNICTech, service.JPNIC{
+					ID:          tmpServiceJPNICTech.ID,
+					JPNICHandle: tmpServiceJPNICTech.JPNICHandle,
+					Name:        tmpServiceJPNICTech.Name,
+					NameEn:      tmpServiceJPNICTech.NameEn,
+					Org:         tmpServiceJPNICTech.Org,
+					OrgEn:       tmpServiceJPNICTech.OrgEn,
+					PostCode:    tmpServiceJPNICTech.PostCode,
+					Address:     tmpServiceJPNICTech.Address,
+					AddressEn:   tmpServiceJPNICTech.AddressEn,
+					Dept:        tmpServiceJPNICTech.Dept,
+					DeptEn:      tmpServiceJPNICTech.DeptEn,
+					Tel:         tmpServiceJPNICTech.Tel,
+					Fax:         tmpServiceJPNICTech.Fax,
+					Country:     tmpServiceJPNICTech.Country,
+				})
+			}
+		}
+
+		if tmpConnections != nil {
+			for _, tmpConnection := range tmpService.Connection {
+				*tmpConnections = append(*tmpConnections, connection.Connection{
+					ID:                           tmpConnection.ID,
+					BGPRouterID:                  tmpConnection.BGPRouterID,
+					BGPRouterName:                tmpConnection.BGPRouter.HostName,
+					TunnelEndPointRouterIPID:     tmpConnection.TunnelEndPointRouterIPID,
+					TunnelEndPointRouterIPIDName: tmpConnection.TunnelEndPointRouterIP.TunnelEndPointRouter.HostName,
+					ConnectionTemplateID:         tmpConnection.ConnectionTemplateID,
+					ConnectionTemplateName:       tmpConnection.ConnectionTemplate.Name,
+					ConnectionComment:            tmpConnection.ConnectionComment,
+					ConnectionNumber:             tmpConnection.ConnectionNumber,
+					NTTTemplateID:                tmpConnection.NTTTemplateID,
+					NTTTemplateName:              tmpConnection.NTTTemplate.Name,
+					NOCID:                        tmpConnection.NOCID,
+					NOCName:                      tmpConnection.NOC.Name,
+					TermIP:                       tmpConnection.TermIP,
+					Monitor:                      tmpConnection.Monitor,
+					Address:                      tmpConnection.Address,
+					LinkV4Our:                    tmpConnection.LinkV4Our,
+					LinkV4Your:                   tmpConnection.LinkV4Your,
+					LinkV6Our:                    tmpConnection.LinkV6Our,
+					LinkV6Your:                   tmpConnection.LinkV6Your,
+					Open:                         tmpConnection.Open,
+					Lock:                         tmpConnection.Lock,
+				})
+			}
+		}
+
+		services = append(services, service.Service{
+			ID:                  tmpService.ID,
+			GroupID:             tmpService.ID,
+			ServiceTemplateID:   tmpService.ServiceTemplateID,
+			ServiceTemplateName: tmpService.ServiceTemplate.Name,
+			ServiceComment:      tmpService.ServiceComment,
+			ServiceNumber:       tmpService.ServiceNumber,
+			Org:                 tmpService.Org,
+			OrgEn:               tmpService.OrgEn,
+			PostCode:            tmpService.PostCode,
+			Address:             tmpService.Address,
+			AddressEn:           tmpService.AddressEn,
+			ASN:                 tmpService.ASN,
+			RouteV4:             tmpService.RouteV4,
+			RouteV6:             tmpService.RouteV6,
+			V4Name:              tmpService.V4Name,
+			V6Name:              tmpService.V6Name,
+			AveUpstream:         tmpService.AveUpstream,
+			MaxUpstream:         tmpService.MaxUpstream,
+			AveDownstream:       tmpService.AveDownstream,
+			MaxDownstream:       tmpService.MaxDownstream,
+			MaxBandWidthAS:      tmpService.MaxBandWidthAS,
+			Fee:                 tmpService.Fee,
+			IP:                  tmpService.IP,
+			Connections:         tmpConnections,
+			JPNICAdminID:        tmpService.JPNICAdminID,
+			JPNICAdmin:          tmpJPNICAdmin,
+			JPNICTech:           tmpJPNICTech,
+			Open:                tmpService.Open,
+			AddAllow:            tmpService.AddAllow,
+			Lock:                tmpService.Lock,
+		})
+	}
+
+	c.JSON(http.StatusOK, group.Result{Group: group.Group{
+		ID:            result.Group.ID,
+		Agree:         result.Group.Agree,
+		Question:      result.Group.Question,
+		Org:           result.Group.Org,
+		Status:        *result.Group.Status,
+		Contract:      result.Group.Contract,
+		Student:       result.Group.Student,
+		Open:          result.Group.Open,
+		Pass:          result.Group.Pass,
+		Lock:          result.Group.Lock,
+		ExpiredStatus: *result.Group.ExpiredStatus,
+		User:          users,
+		Service:       &services,
+	}})
 }

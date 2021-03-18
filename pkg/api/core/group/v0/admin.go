@@ -34,7 +34,7 @@ func AddAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, group.Result{})
+	c.JSON(http.StatusOK, group.ResultAdmin{})
 }
 
 func DeleteAdmin(c *gin.Context) {
@@ -54,7 +54,7 @@ func DeleteAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, group.Result{})
+	c.JSON(http.StatusOK, group.ResultAdmin{})
 }
 
 func UpdateAdmin(c *gin.Context) {
@@ -100,7 +100,7 @@ func UpdateAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, group.Result{})
+	c.JSON(http.StatusOK, group.ResultAdmin{})
 }
 
 func GetAdmin(c *gin.Context) {
@@ -121,7 +121,7 @@ func GetAdmin(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, group.Result{
+	c.JSON(http.StatusOK, group.ResultAdmin{
 		Group: result.Group[0],
 	})
 }
@@ -136,6 +136,6 @@ func GetAllAdmin(c *gin.Context) {
 	if result := dbGroup.GetAll(); result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 	} else {
-		c.JSON(http.StatusOK, group.ResultAll{Group: result.Group})
+		c.JSON(http.StatusOK, group.ResultAdminAll{Group: result.Group})
 	}
 }
