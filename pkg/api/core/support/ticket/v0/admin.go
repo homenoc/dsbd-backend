@@ -29,7 +29,7 @@ func CreateAdmin(c *gin.Context) {
 	// Admin authentication
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: resultAdmin.Err.Error()})
+		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
 		return
 	}
 
@@ -81,7 +81,7 @@ func UpdateAdmin(c *gin.Context) {
 	// Admin authentication
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: resultAdmin.Err.Error()})
+		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
 		return
 	}
 
@@ -125,7 +125,7 @@ func GetAdmin(c *gin.Context) {
 	// Admin authentication
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: resultAdmin.Err.Error()})
+		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
 		return
 	}
 
@@ -186,7 +186,7 @@ func GetAdminWebSocket(c *gin.Context) {
 	// Admin authentication
 	resultAdmin := auth.AdminAuthentication(accessToken)
 	if resultAdmin.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: resultAdmin.Err.Error()})
+		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
 		return
 	}
 
