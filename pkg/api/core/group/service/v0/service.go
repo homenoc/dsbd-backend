@@ -52,7 +52,7 @@ func Add(c *gin.Context) {
 	}
 
 	// status check for group
-	if !(*result.Group.Status == 1 && *result.Group.ExpiredStatus == 0 && *result.Group.Pass) {
+	if !(*result.User.Group.Status == 1 && *result.User.Group.ExpiredStatus == 0 && *result.User.Group.Pass) {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: "error: failed group status"})
 		return
 	}
@@ -118,7 +118,7 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	resultNetwork := dbService.Get(service.SearchNewNumber, &core.Service{GroupID: result.Group.ID})
+	resultNetwork := dbService.Get(service.SearchNewNumber, &core.Service{GroupID: result.User.Group.ID})
 	if resultNetwork.Err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: resultNetwork.Err.Error()})
 		return
@@ -137,7 +137,7 @@ func Add(c *gin.Context) {
 
 	// db create for network
 	net, err := dbService.Create(&core.Service{
-		GroupID:           result.Group.ID,
+		GroupID:           result.User.Group.ID,
 		ServiceTemplateID: &input.ServiceTemplateID,
 		ServiceComment:    input.ServiceComment,
 		ServiceNumber:     number,
@@ -169,14 +169,14 @@ func Add(c *gin.Context) {
 	attachment := slack.Attachment{}
 	attachment.AddField(slack.Field{Title: "Title", Value: "ネットワーク情報登録"}).
 		AddField(slack.Field{Title: "申請者", Value: strconv.Itoa(int(result.User.ID)) + ":" + result.User.Name}).
-		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(result.Group.ID)) + ":" + result.Group.Org}).
+		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(result.User.Group.ID)) + ":" + result.User.Group.Org}).
 		AddField(slack.Field{Title: "サービスコード（新規発番）", Value: resultServiceTemplate.Services[0].Type + fmt.Sprintf("%03d", number)}).
 		AddField(slack.Field{Title: "サービスコード（補足情報）", Value: input.ServiceComment})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 
 	// ---------ここまで処理が通っている場合、DBへの書き込みにすべて成功している
 	// GroupのStatusをAfterStatusにする
-	if err = dbGroup.Update(group.UpdateStatus, core.Group{Model: gorm.Model{ID: result.Group.ID},
+	if err = dbGroup.Update(group.UpdateStatus, core.Group{Model: gorm.Model{ID: result.User.Group.ID},
 		Status: &[]uint{2}[0]}); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
@@ -185,7 +185,7 @@ func Add(c *gin.Context) {
 	attachment = slack.Attachment{}
 	attachment.AddField(slack.Field{Title: "Title", Value: "ステータス変更"}).
 		AddField(slack.Field{Title: "申請者", Value: "System"}).
-		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(result.Group.ID)) + ":" + result.Group.Org}).
+		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(result.User.Group.ID)) + ":" + result.User.Group.Org}).
 		AddField(slack.Field{Title: "現在ステータス情報", Value: "審査中"}).
 		AddField(slack.Field{Title: "ステータス履歴", Value: "1[ネットワーク情報記入段階(User)] =>2[審査中] "})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
@@ -227,7 +227,7 @@ func Update(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: "failed Service ID"})
 		return
 	}
-	if resultNetwork.Service[0].GroupID != result.Group.ID {
+	if resultNetwork.Service[0].GroupID != result.User.Group.ID {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: "Authentication failure"})
 		return
 	}
@@ -256,7 +256,7 @@ func GetAddAllow(c *gin.Context) {
 		return
 	}
 
-	if resultService := dbService.Get(service.GIDAndAddAllow, &core.Service{GroupID: result.Group.ID}); resultService.Err != nil {
+	if resultService := dbService.Get(service.GIDAndAddAllow, &core.Service{GroupID: result.User.Group.ID}); resultService.Err != nil {
 		log.Println(resultService.Err)
 		c.JSON(http.StatusInternalServerError, common.Error{Error: resultService.Err.Error()})
 	} else {

@@ -63,7 +63,7 @@ func Add(c *gin.Context) {
 		return
 	}
 	// GroupIDが一致しない場合はここでエラーを返す
-	if resultTicket.Tickets[0].GroupID != result.Group.ID {
+	if resultTicket.Tickets[0].GroupID != result.User.GroupID {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: "Auth Error: group id failed..."})
 		return
 	}

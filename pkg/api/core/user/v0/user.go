@@ -80,7 +80,7 @@ func Add(c *gin.Context) {
 		pass = gen.GenerateUUID()
 
 		data = core.User{
-			GroupID:       authResult.Group.ID,
+			GroupID:       authResult.User.Group.ID,
 			Name:          input.Name,
 			NameEn:        input.NameEn,
 			Email:         input.Email,
@@ -119,7 +119,7 @@ func Add(c *gin.Context) {
 	} else {
 		attachment.AddField(slack.Field{Title: "Title", Value: "グループ内ユーザ登録"}).
 			AddField(slack.Field{Title: "メールアドレス", Value: input.Email}).
-			AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(data.GroupID)) + ":" + authResult.Group.Org}).
+			AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(data.GroupID)) + ":" + authResult.User.Group.Org}).
 			AddField(slack.Field{Title: "Name", Value: input.Name}).
 			AddField(slack.Field{Title: "Name(English)", Value: input.NameEn})
 	}

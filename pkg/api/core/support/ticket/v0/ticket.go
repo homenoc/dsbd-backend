@@ -51,7 +51,7 @@ func Create(c *gin.Context) {
 
 	// Tickets DBに登録
 	ticketResult, err := dbTicket.Create(&core.Ticket{
-		GroupID: result.Group.ID,
+		GroupID: result.User.GroupID,
 		UserID:  result.User.ID,
 		Solved:  &[]bool{false}[0],
 		Title:   input.Title,
@@ -77,7 +77,7 @@ func Create(c *gin.Context) {
 	attachment := slack.Attachment{}
 	attachment.AddField(slack.Field{Title: "Title", Value: "新規チケット作成"}).
 		AddField(slack.Field{Title: "発行者", Value: strconv.Itoa(int(result.User.ID))}).
-		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(result.Group.ID)) + "-" + result.Group.Org}).
+		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(result.User.GroupID)) + "-" + result.User.Group.Org}).
 		AddField(slack.Field{Title: "Title", Value: input.Title}).
 		AddField(slack.Field{Title: "Message", Value: input.Data})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
@@ -110,7 +110,7 @@ func Get(c *gin.Context) {
 	}
 
 	// GroupIDが一致しない場合はここでエラーを返す
-	if resultTicket.Tickets[0].GroupID != result.Group.ID {
+	if resultTicket.Tickets[0].GroupID != result.User.GroupID {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: "Auth Error: group id failed..."})
 		return
 	}
@@ -153,7 +153,7 @@ func GetAll(c *gin.Context) {
 	}
 
 	// Tickets DBからGroup IDのTicketデータを抽出
-	resultTicket := dbTicket.Get(ticket.GID, &core.Ticket{GroupID: result.Group.ID})
+	resultTicket := dbTicket.Get(ticket.GID, &core.Ticket{GroupID: result.User.GroupID})
 	if resultTicket.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: resultTicket.Err.Error()})
 		return
@@ -234,7 +234,7 @@ func GetWebSocket(c *gin.Context) {
 		Admin:    false,
 		UserID:   result.User.ID,
 		UserName: result.User.Name,
-		GroupID:  result.Group.ID,
+		GroupID:  result.User.GroupID,
 		Socket:   conn,
 	}] = true
 
@@ -249,7 +249,7 @@ func GetWebSocket(c *gin.Context) {
 				Admin:    false,
 				UserID:   result.User.ID,
 				UserName: result.User.Name,
-				GroupID:  result.Group.ID,
+				GroupID:  result.User.GroupID,
 				Socket:   conn,
 			})
 			break
@@ -275,7 +275,7 @@ func GetWebSocket(c *gin.Context) {
 		} else {
 
 			msg.UserID = result.User.ID
-			msg.GroupID = resultGroup.Group.ID
+			msg.GroupID = resultGroup.User.GroupID
 			msg.Admin = false
 			msg.UserName = result.User.Name
 			// Token関連の初期化
@@ -287,7 +287,7 @@ func GetWebSocket(c *gin.Context) {
 				CreatedAt: msg.CreatedAt,
 				UserID:    result.User.ID,
 				UserName:  result.User.Name,
-				GroupID:   resultGroup.Group.ID,
+				GroupID:   resultGroup.User.GroupID,
 				Admin:     msg.Admin,
 				Message:   msg.Message,
 			})
@@ -296,7 +296,7 @@ func GetWebSocket(c *gin.Context) {
 			attachment := slack.Attachment{}
 			attachment.AddField(slack.Field{Title: "Title", Value: "Support(新規メッセージ)"}).
 				AddField(slack.Field{Title: "発行者", Value: strconv.Itoa(int(result.User.ID)) + "-" + result.User.Name}).
-				AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(result.Group.ID)) + "-" + result.Group.Org}).
+				AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(result.User.GroupID)) + "-" + result.User.Group.Org}).
 				AddField(slack.Field{Title: "Title", Value: ticketResult.Tickets[0].Title}).
 				AddField(slack.Field{Title: "Message", Value: msg.Message})
 			notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})

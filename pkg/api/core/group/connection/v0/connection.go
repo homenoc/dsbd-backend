@@ -63,12 +63,12 @@ func Add(c *gin.Context) {
 	}
 
 	// status check for group
-	if !*result.Group.Pass {
+	if !*result.User.Group.Pass {
 		c.JSON(http.StatusForbidden, common.Error{Error: "error: Your group has not yet been reviewed."})
 		return
 	}
 
-	if !(*result.Group.Status == 3 && *result.Group.ExpiredStatus == 0) {
+	if !(*result.User.Group.Status == 3 && *result.User.Group.ExpiredStatus == 0) {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: "error: failed group status"})
 		return
 	}
@@ -114,7 +114,7 @@ func Add(c *gin.Context) {
 	}
 
 	// GroupIDが一致しない場合はエラーを返す
-	if resultService.Service[0].GroupID != result.Group.ID {
+	if resultService.Service[0].GroupID != result.User.Group.ID {
 		c.JSON(http.StatusBadRequest, common.Error{Error: "error: GroupID does not match."})
 		return
 	}
@@ -159,7 +159,7 @@ func Add(c *gin.Context) {
 	attachment := slack.Attachment{}
 	attachment.AddField(slack.Field{Title: "Title", Value: "接続情報登録"}).
 		AddField(slack.Field{Title: "申請者", Value: strconv.Itoa(int(result.User.ID)) + ":" + result.User.Name}).
-		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(result.Group.ID)) + ":" + result.Group.Org}).
+		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(result.User.Group.ID)) + ":" + result.User.Group.Org}).
 		AddField(slack.Field{Title: "サービスコード", Value: resultService.Service[0].ServiceTemplate.Type +
 			fmt.Sprintf("%03d", resultService.Service[0].ServiceNumber)}).
 		AddField(slack.Field{Title: "接続コード（新規発番）", Value: resultConnectionTemplate.Connections[0].Type +
@@ -168,7 +168,7 @@ func Add(c *gin.Context) {
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 
 	if err = dbGroup.Update(group.UpdateStatus, core.Group{
-		Model:  gorm.Model{ID: result.Group.ID},
+		Model:  gorm.Model{ID: result.User.Group.ID},
 		Status: &[]uint{4}[0],
 	}); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
@@ -186,7 +186,7 @@ func Add(c *gin.Context) {
 	attachment = slack.Attachment{}
 	attachment.AddField(slack.Field{Title: "Title", Value: "ステータス変更"}).
 		AddField(slack.Field{Title: "申請者", Value: "System"}).
-		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(result.Group.ID)) + ":" + result.Group.Org}).
+		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(result.User.Group.ID)) + ":" + result.User.Group.Org}).
 		AddField(slack.Field{Title: "現在ステータス情報", Value: "開通作業中"}).
 		AddField(slack.Field{Title: "ステータス履歴", Value: "3[接続情報記入段階(User)] =>4[開通作業中] "})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
