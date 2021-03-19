@@ -202,6 +202,8 @@ func UserRestAPI() {
 			//
 			// User Create
 			v1.POST("/user", user.Add)
+			// User Create(Group)
+			v1.POST("/user/:id", user.AddGroup)
 			// User Delete
 			//router.DELETE("/user", user.Delete)
 			// User Get

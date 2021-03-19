@@ -5,9 +5,9 @@ import (
 	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/gin-gonic/gin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
-	authInterface "github.com/homenoc/dsbd-backend/pkg/api/core/auth"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/gen"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/hash"
@@ -15,6 +15,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	toolToken "github.com/homenoc/dsbd-backend/pkg/api/core/tool/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
+	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"github.com/jinzhu/gorm"
 	"log"
@@ -26,8 +27,6 @@ import (
 func Add(c *gin.Context) {
 	var input user.Input
 	var data core.User
-	userToken := c.Request.Header.Get("USER_TOKEN")
-	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
 	err := c.BindJSON(&input)
 	if err != nil {
@@ -43,53 +42,22 @@ func Add(c *gin.Context) {
 
 	mailToken, _ := toolToken.Generate(4)
 
-	pass := ""
-	var authResult authInterface.GroupResult
-
 	// 新規ユーザ
-	if userToken == "" && accessToken == "" {
-		if input.Pass == "" {
-			c.JSON(http.StatusBadRequest, common.Error{Error: fmt.Sprintf("wrong pass")})
-			return
-		}
+	if input.Pass == "" {
+		c.JSON(http.StatusBadRequest, common.Error{Error: fmt.Sprintf("wrong pass")})
+		return
+	}
 
-		data = core.User{
-			GroupID:       0,
-			Name:          input.Name,
-			NameEn:        input.NameEn,
-			Email:         input.Email,
-			Pass:          input.Pass,
-			ExpiredStatus: &[]uint{0}[0],
-			Level:         1,
-			MailVerify:    &[]bool{false}[0],
-			MailToken:     mailToken,
-		}
-	} else {
-		// グループ所属ユーザの登録
-		resultAuth := auth.GroupAuthentication(0, core.Token{UserToken: userToken, AccessToken: accessToken})
-		if resultAuth.Err != nil {
-			c.JSON(http.StatusUnauthorized, common.Error{Error: resultAuth.Err.Error()})
-			return
-		}
-
-		if input.Level > 2 {
-			c.JSON(http.StatusForbidden, common.Error{Error: "error: access is not permitted"})
-			return
-		}
-
-		pass = gen.GenerateUUID()
-
-		data = core.User{
-			GroupID:       authResult.User.Group.ID,
-			Name:          input.Name,
-			NameEn:        input.NameEn,
-			Email:         input.Email,
-			Pass:          strings.ToLower(hash.Generate(pass)),
-			ExpiredStatus: &[]uint{0}[0],
-			Level:         4,
-			MailVerify:    &[]bool{false}[0],
-			MailToken:     mailToken,
-		}
+	data = core.User{
+		GroupID:       0,
+		Name:          input.Name,
+		NameEn:        input.NameEn,
+		Email:         input.Email,
+		Pass:          input.Pass,
+		ExpiredStatus: &[]uint{0}[0],
+		Level:         1,
+		MailVerify:    &[]bool{false}[0],
+		MailToken:     mailToken,
 	}
 
 	//check exist for database
@@ -98,6 +66,7 @@ func Add(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
 	}
+
 	if len(result.User) != 0 {
 		c.JSON(http.StatusBadRequest, common.Error{Error: "this email is already registered: \" + u.Email"})
 		return
@@ -110,38 +79,131 @@ func Add(c *gin.Context) {
 	}
 
 	attachment := slack.Attachment{}
-
-	if data.GroupID == 0 {
-		attachment.AddField(slack.Field{Title: "Title", Value: "新規ユーザ登録"}).
-			AddField(slack.Field{Title: "メールアドレス", Value: input.Email}).
-			AddField(slack.Field{Title: "Name", Value: input.Name}).
-			AddField(slack.Field{Title: "Name(English)", Value: input.NameEn})
-	} else {
-		attachment.AddField(slack.Field{Title: "Title", Value: "グループ内ユーザ登録"}).
-			AddField(slack.Field{Title: "メールアドレス", Value: input.Email}).
-			AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(data.GroupID)) + ":" + authResult.User.Group.Org}).
-			AddField(slack.Field{Title: "Name", Value: input.Name}).
-			AddField(slack.Field{Title: "Name(English)", Value: input.NameEn})
-	}
+	attachment.AddField(slack.Field{Title: "Title", Value: "新規ユーザ登録"}).
+		AddField(slack.Field{Title: "メールアドレス", Value: input.Email}).
+		AddField(slack.Field{Title: "Name", Value: input.Name}).
+		AddField(slack.Field{Title: "Name(English)", Value: input.NameEn})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 
-	if pass == "" {
-		mail.SendMail(mail.Mail{
-			ToMail:  data.Email,
-			Subject: "本人確認のメールにつきまして",
-			Content: " " + input.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
-				config.Conf.Controller.User.Url + "/api/v1/verify/" + mailToken + "\n" +
-				"本人確認が完了次第、ログイン可能になります。\n",
-		})
-	} else {
-		mail.SendMail(mail.Mail{
-			ToMail:  data.Email,
-			Subject: "本人確認メールにつきまして",
-			Content: " " + input.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
-				config.Conf.Controller.User.Url + "/api/v1/verify/" + mailToken + "\n" +
-				"本人確認が完了次第、ログイン可能になります。\n" + "仮パスワード: " + pass,
-		})
+	mail.SendMail(mail.Mail{
+		ToMail:  data.Email,
+		Subject: "本人確認のメールにつきまして",
+		Content: " " + input.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
+			config.Conf.Controller.User.Url + "/api/v1/verify/" + mailToken + "\n" +
+			"本人確認が完了次第、ログイン可能になります。\n",
+	})
+
+	c.JSON(http.StatusOK, user.Result{})
+}
+
+func AddGroup(c *gin.Context) {
+	var input user.Input
+	var data core.User
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: fmt.Sprintf("id error")})
+		return
 	}
+
+	if id == 0 {
+		c.JSON(http.StatusBadRequest, common.Error{Error: "error: This GroupID is bad request (0)"})
+		return
+	}
+
+	userToken := c.Request.Header.Get("USER_TOKEN")
+	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
+
+	err = c.BindJSON(&input)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, common.Error{Error: fmt.Sprintf("wrong email address")})
+		return
+	}
+
+	if err = check(input); err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	mailToken, _ := toolToken.Generate(4)
+	pass := ""
+
+	// グループ所属ユーザの登録
+	resultAuth := auth.GroupAuthentication(0, core.Token{UserToken: userToken, AccessToken: accessToken})
+	if resultAuth.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAuth.Err.Error()})
+		return
+	}
+
+	if input.Level > 2 {
+		c.JSON(http.StatusForbidden, common.Error{Error: "error: access is not permitted"})
+		return
+	}
+
+	resultGroup := dbGroup.Get(group.ID, &core.Group{Model: gorm.Model{ID: uint(id)}})
+	if resultGroup.Err != nil {
+		c.JSON(http.StatusForbidden, common.Error{Error: "error: access is not permitted"})
+		return
+	}
+
+	if resultAuth.User.GroupID != uint(id) {
+		c.JSON(http.StatusBadRequest, common.Error{Error: "error: group id is invalid"})
+		return
+	}
+
+	if 1 < resultAuth.User.Level && resultAuth.User.Level < 5 {
+		c.JSON(http.StatusBadRequest, common.Error{Error: "error: user level is invalid"})
+		return
+	}
+
+	pass = gen.GenerateUUID()
+
+	data = core.User{
+		GroupID:       resultAuth.User.GroupID,
+		Name:          input.Name,
+		NameEn:        input.NameEn,
+		Email:         input.Email,
+		Pass:          strings.ToLower(hash.Generate(pass)),
+		ExpiredStatus: &[]uint{0}[0],
+		Level:         resultAuth.User.Level,
+		MailVerify:    &[]bool{false}[0],
+		MailToken:     mailToken,
+	}
+
+	//check exist for database
+	result := dbUser.Get(user.Email, &core.User{Email: input.Email})
+	if result.Err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
+		return
+	}
+
+	if len(result.User) != 0 {
+		c.JSON(http.StatusBadRequest, common.Error{Error: "this email is already registered: \" + u.Email"})
+		return
+	}
+
+	err = dbUser.Create(&data)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		return
+	}
+
+	attachment := slack.Attachment{}
+	attachment.AddField(slack.Field{Title: "Title", Value: "新規ユーザ登録"}).
+		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(id) + "-" + resultAuth.User.Group.Org}).
+		AddField(slack.Field{Title: "メールアドレス", Value: input.Email}).
+		AddField(slack.Field{Title: "Name", Value: input.Name}).
+		AddField(slack.Field{Title: "Name(English)", Value: input.NameEn})
+	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+
+	mail.SendMail(mail.Mail{
+		ToMail:  data.Email,
+		Subject: "本人確認メールにつきまして",
+		Content: " " + input.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
+			config.Conf.Controller.User.Url + "/api/v1/verify/" + mailToken + "\n" +
+			"本人確認が完了次第、ログイン可能になります。\n" + "仮パスワード: " + pass,
+	})
 
 	c.JSON(http.StatusOK, user.Result{})
 }
