@@ -44,8 +44,8 @@ func encodeSubject(subject string) string {
 }
 
 func SendMail(d Mail) string {
-	from := mail.Address{Name: "From", Address: config.Conf.Mail.From}
-	to := mail.Address{Name: "to", Address: d.ToMail}
+	from := mail.Address{Name: "Home NOC Operators' Group Support", Address: config.Conf.Mail.From}
+	to := mail.Address{Address: d.ToMail}
 	receivers := []string{to.Address}
 
 	msg := "" +
