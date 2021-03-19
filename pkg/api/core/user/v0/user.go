@@ -136,7 +136,7 @@ func AddGroup(c *gin.Context) {
 		return
 	}
 
-	if input.Level > 2 {
+	if resultAuth.User.Level > 2 {
 		c.JSON(http.StatusForbidden, common.Error{Error: "error: access is not permitted"})
 		return
 	}
@@ -152,7 +152,7 @@ func AddGroup(c *gin.Context) {
 		return
 	}
 
-	if 1 < resultAuth.User.Level && resultAuth.User.Level < 5 {
+	if !(1 < input.Level && input.Level < 5) {
 		c.JSON(http.StatusBadRequest, common.Error{Error: "error: user level is invalid"})
 		return
 	}
@@ -166,7 +166,7 @@ func AddGroup(c *gin.Context) {
 		Email:         input.Email,
 		Pass:          strings.ToLower(hash.Generate(pass)),
 		ExpiredStatus: &[]uint{0}[0],
-		Level:         resultAuth.User.Level,
+		Level:         input.Level,
 		MailVerify:    &[]bool{false}[0],
 		MailToken:     mailToken,
 	}
@@ -275,7 +275,7 @@ func MailVerify(c *gin.Context) {
 }
 
 func Update(c *gin.Context) {
-	var input core.User
+	var input user.Input
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -301,11 +301,6 @@ func Update(c *gin.Context) {
 	authResult := auth.UserAuthentication(core.Token{UserToken: userToken, AccessToken: accessToken})
 	if authResult.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: authResult.Err.Error()})
-		return
-	}
-
-	if !*authResult.User.MailVerify {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: "not verify for user mail"})
 		return
 	}
 
@@ -340,6 +335,8 @@ func Update(c *gin.Context) {
 		return
 	}
 
+	noticeSlack(serverData, input)
+
 	if err = dbUser.Update(user.UpdateAll, &u); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 	} else {
@@ -370,7 +367,7 @@ func Get(c *gin.Context) {
 	if authResult.User.ID == uint(id) {
 		tmpUser = authResult.User
 	} else if authResult.User.GroupID != 0 {
-		if authResult.User.Level >= 2 {
+		if authResult.User.Level >= 3 {
 			c.JSON(http.StatusForbidden, common.Error{Error: "You don't have the authority."})
 			return
 		}
@@ -448,18 +445,7 @@ func GetGroup(c *gin.Context) {
 
 	var data user.Result
 
-	// User権限がLevel=2の時、又はユーザのGroupIDが0の時（グループ未登録時）
-	if authUserResult.User.Level > 1 || authUserResult.User.GroupID == 0 {
-		data.User = append(data.User, user.ResultOne{
-			ID:         authUserResult.User.ID,
-			GroupID:    authUserResult.User.GroupID,
-			Name:       authUserResult.User.Name,
-			NameEn:     authUserResult.User.NameEn,
-			Email:      authUserResult.User.Email,
-			Level:      authUserResult.User.Level,
-			MailVerify: authUserResult.User.MailVerify,
-		})
-	} else if authUserResult.User.GroupID != 0 {
+	if authUserResult.User.GroupID != 0 && authUserResult.User.Level < 3 {
 		resultGroupUser := dbUser.Get(user.GID, &core.User{GroupID: authUserResult.User.GroupID})
 		if resultGroupUser.Err != nil {
 			c.JSON(http.StatusInternalServerError, common.Error{Error: resultGroupUser.Err.Error()})
@@ -477,6 +463,17 @@ func GetGroup(c *gin.Context) {
 				MailVerify: grp.MailVerify,
 			})
 		}
+	} else {
+		// User権限がLevel=2の時、又はユーザのGroupIDが0の時（グループ未登録時）
+		data.User = append(data.User, user.ResultOne{
+			ID:         authUserResult.User.ID,
+			GroupID:    authUserResult.User.GroupID,
+			Name:       authUserResult.User.Name,
+			NameEn:     authUserResult.User.NameEn,
+			Email:      authUserResult.User.Email,
+			Level:      authUserResult.User.Level,
+			MailVerify: authUserResult.User.MailVerify,
+		})
 	}
 
 	c.JSON(http.StatusOK, data)
