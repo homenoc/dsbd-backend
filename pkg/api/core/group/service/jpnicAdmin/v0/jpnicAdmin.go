@@ -46,7 +46,7 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	networkResult := dbService.Get(service.GID, &core.Service{GroupID: result.Group.ID})
+	networkResult := dbService.Get(service.GID, &core.Service{GroupID: result.User.GroupID})
 	if networkResult.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: networkResult.Err.Error()})
 		return

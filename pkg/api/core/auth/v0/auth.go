@@ -4,12 +4,8 @@ import (
 	"fmt"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/auth"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
-	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	dbToken "github.com/homenoc/dsbd-backend/pkg/api/store/token/v0"
-	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"github.com/jinzhu/gorm"
 	"log"
 	"time"
@@ -23,17 +19,14 @@ func UserAuthentication(data core.Token) auth.UserResult {
 	if resultToken.Err != nil {
 		return auth.UserResult{Err: fmt.Errorf("db error")}
 	}
-	resultUser := dbUser.Get(user.ID, &core.User{Model: gorm.Model{ID: resultToken.Token[0].UserID}})
-	if resultUser.Err != nil {
-		return auth.UserResult{Err: fmt.Errorf("db error")}
-	}
-	if 0 < *resultUser.User[0].ExpiredStatus {
+
+	if 0 < *resultToken.Token[0].User.ExpiredStatus {
 		return auth.UserResult{Err: fmt.Errorf("deleted this user")}
 	}
 
-	renewProcess(resultToken.Token[0])
+	go renewProcess(resultToken.Token[0])
 
-	return auth.UserResult{User: resultUser.User[0], Err: nil}
+	return auth.UserResult{User: resultToken.Token[0].User, Err: nil}
 }
 
 // errorType 0: 未審査の場合でもエラーを返す　1: 未審査の場合エラーを返さない
@@ -45,38 +38,33 @@ func GroupAuthentication(errorType uint, data core.Token) auth.GroupResult {
 	if resultToken.Err != nil {
 		return auth.GroupResult{Err: fmt.Errorf("error: no token")}
 	}
-	resultUser := dbUser.Get(user.ID, &core.User{Model: gorm.Model{ID: resultToken.Token[0].UserID}})
-	if resultUser.Err != nil {
-		return auth.GroupResult{Err: fmt.Errorf("db error")}
+
+	if 0 < *resultToken.Token[0].User.ExpiredStatus {
+		return auth.GroupResult{Err: fmt.Errorf("deleted this user")}
 	}
-	if 0 < *resultUser.User[0].ExpiredStatus {
-		return auth.GroupResult{Err: fmt.Errorf("user status error")}
-	}
-	if resultUser.User[0].GroupID == 0 {
+
+	if resultToken.Token[0].User.GroupID == 0 {
 		return auth.GroupResult{Err: fmt.Errorf("no group")}
 	}
-	resultGroup := dbGroup.Get(group.ID, &core.Group{Model: gorm.Model{ID: resultUser.User[0].GroupID}})
-	if resultGroup.Err != nil {
-		return auth.GroupResult{Err: fmt.Errorf("db error")}
-	}
+
 	// 未審査＋errorType = 0の場合
-	if !*resultGroup.Group[0].Pass && errorType == 0 {
+	if !*resultToken.Token[0].User.Group.Pass && errorType == 0 {
 		return auth.GroupResult{Err: fmt.Errorf("error: unexamined")}
 	}
 	// アカウント失効時の動作
-	if *resultGroup.Group[0].ExpiredStatus == 1 {
+	if *resultToken.Token[0].User.Group.ExpiredStatus == 1 {
 		return auth.GroupResult{Err: fmt.Errorf("error: discontinued by Master Account")}
 	}
-	if *resultGroup.Group[0].ExpiredStatus == 2 {
+	if *resultToken.Token[0].User.Group.ExpiredStatus == 2 {
 		return auth.GroupResult{Err: fmt.Errorf("error: discontinuation by the steering committee")}
 	}
-	if *resultGroup.Group[0].ExpiredStatus == 3 {
+	if *resultToken.Token[0].User.Group.ExpiredStatus == 3 {
 		return auth.GroupResult{Err: fmt.Errorf("error: discontinuation due to failed review")}
 	}
 
-	renewProcess(resultToken.Token[0])
+	go renewProcess(resultToken.Token[0])
 
-	return auth.GroupResult{User: resultUser.User[0], Group: resultGroup.Group[0], Err: nil}
+	return auth.GroupResult{User: resultToken.Token[0].User, Err: nil}
 }
 
 func renewProcess(t core.Token) {

@@ -23,7 +23,7 @@ func Get(c *gin.Context) {
 		return
 	}
 
-	resultService := dbService.Get(service.Open, &core.Service{GroupID: result.Group.ID})
+	resultService := dbService.Get(service.Open, &core.Service{GroupID: result.User.GroupID})
 	if resultService.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: resultService.Err.Error()})
 		return

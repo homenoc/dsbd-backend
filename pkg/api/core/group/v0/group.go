@@ -125,21 +125,21 @@ func Update(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: "error: failed user level"})
 		return
 	}
-	if *authResult.Group.Lock {
+	if *authResult.User.Group.Lock {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: "error: This group is locked"})
 		return
 	}
 
-	data := authResult.Group
+	data := authResult.User.Group
 
 	if data.Org != input.Org {
 		data.Org = input.Org
 	}
 
-	if err = dbGroup.Update(group.UpdateInfo, data); err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: authResult.Err.Error()})
-		return
-	}
+	//if err = dbGroup.Update(group.UpdateInfo, data); err != nil {
+	//	c.JSON(http.StatusInternalServerError, common.Error{Error: authResult.Err.Error()})
+	//	return
+	//}
 	c.JSON(http.StatusOK, common.Result{})
 
 }
@@ -154,9 +154,15 @@ func Get(c *gin.Context) {
 		return
 	}
 
+	resultUser := dbUser.Get(user.ID, &core.User{Model: gorm.Model{ID: result.User.ID}})
+	if resultUser.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: resultUser.Err.Error()})
+		return
+	}
+
 	var responseUser []user.User
 	if result.User.Level == 1 || result.User.Level == 2 {
-		for _, tmpUser := range result.Group.Users {
+		for _, tmpUser := range resultUser.User {
 			responseUser = append(responseUser, user.User{
 				ID:            tmpUser.ID,
 				Name:          tmpUser.Name,
@@ -181,20 +187,20 @@ func Get(c *gin.Context) {
 		}
 	}
 
-	log.Println(result.Group.Users)
+	log.Println(result.User)
 
 	c.JSON(http.StatusOK, group.Result{Group: group.Group{
-		ID:            result.Group.ID,
-		Agree:         result.Group.Agree,
-		Question:      result.Group.Question,
-		Org:           result.Group.Org,
-		Status:        *result.Group.Status,
-		Contract:      result.Group.Contract,
-		Student:       result.Group.Student,
-		Open:          result.Group.Open,
-		Pass:          result.Group.Pass,
-		Lock:          result.Group.Lock,
-		ExpiredStatus: *result.Group.ExpiredStatus,
+		ID:            result.User.Group.ID,
+		Agree:         result.User.Group.Agree,
+		Question:      result.User.Group.Question,
+		Org:           result.User.Group.Org,
+		Status:        *result.User.Group.Status,
+		Contract:      result.User.Group.Contract,
+		Student:       result.User.Group.Student,
+		Open:          result.User.Group.Open,
+		Pass:          result.User.Group.Pass,
+		Lock:          result.User.Group.Lock,
+		ExpiredStatus: *result.User.Group.ExpiredStatus,
 		//User:          users,
 	}})
 }
@@ -214,10 +220,16 @@ func GetAll(c *gin.Context) {
 		return
 	}
 
+	resultGroup := dbGroup.Get(group.ID, &core.Group{Model: gorm.Model{ID: result.User.GroupID}})
+	if resultGroup.Err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
+		return
+	}
+
 	var users []user.User
 	var services []service.Service
 
-	for _, tmpUser := range result.Group.Users {
+	for _, tmpUser := range resultGroup.Group[0].Users {
 		users = append(users, user.User{
 			ID:            tmpUser.ID,
 			Name:          tmpUser.Name,
@@ -229,7 +241,7 @@ func GetAll(c *gin.Context) {
 		})
 	}
 
-	for _, tmpService := range result.Group.Services {
+	for _, tmpService := range resultGroup.Group[0].Services {
 		var tmpConnections *[]connection.Connection = nil
 		var tmpJPNICAdmin *service.JPNIC = nil
 		var tmpJPNICTech *[]service.JPNIC = nil
@@ -338,17 +350,17 @@ func GetAll(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, group.Result{Group: group.Group{
-		ID:            result.Group.ID,
-		Agree:         result.Group.Agree,
-		Question:      result.Group.Question,
-		Org:           result.Group.Org,
-		Status:        *result.Group.Status,
-		Contract:      result.Group.Contract,
-		Student:       result.Group.Student,
-		Open:          result.Group.Open,
-		Pass:          result.Group.Pass,
-		Lock:          result.Group.Lock,
-		ExpiredStatus: *result.Group.ExpiredStatus,
+		ID:            resultGroup.Group[0].ID,
+		Agree:         resultGroup.Group[0].Agree,
+		Question:      resultGroup.Group[0].Question,
+		Org:           resultGroup.Group[0].Org,
+		Status:        *resultGroup.Group[0].Status,
+		Contract:      resultGroup.Group[0].Contract,
+		Student:       resultGroup.Group[0].Student,
+		Open:          resultGroup.Group[0].Open,
+		Pass:          resultGroup.Group[0].Pass,
+		Lock:          resultGroup.Group[0].Lock,
+		ExpiredStatus: *resultGroup.Group[0].ExpiredStatus,
 		User:          users,
 		Service:       &services,
 	}})

@@ -9,6 +9,7 @@ type User struct {
 	gorm.Model
 	Tokens        []*Token  `json:"tokens"`
 	Notice        []*Notice `json:"notice"`
+	Group         *Group    `json:"group"`
 	GroupID       uint      `json:"group_id"`
 	Name          string    `json:"name"`
 	NameEn        string    `json:"name_en"`
@@ -269,6 +270,7 @@ type Token struct {
 	gorm.Model
 	ExpiredAt   time.Time `json:"expired_at"`
 	UserID      uint      `json:"user_id"`
+	User        User      `json:"user"`
 	Status      uint      `json:"status"` //0: initToken(30m) 1: 30m 2:6h 3: 12h 10: 30d 11:180d
 	Admin       *bool     `json:"admin"`
 	UserToken   string    `json:"user_token"`

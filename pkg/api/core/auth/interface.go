@@ -10,9 +10,8 @@ type UserResult struct {
 }
 
 type GroupResult struct {
-	Group core.Group
-	User  core.User
-	Err   error
+	User core.User
+	Err  error
 }
 
 type AdminStruct struct {
