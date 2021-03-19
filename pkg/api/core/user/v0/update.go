@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-func replaceUser(serverData, input core.User) (core.User, error) {
+func replaceUser(serverData core.User, input user.Input) (core.User, error) {
 	//Name
 	if input.Name != "" {
 		serverData.Name = input.Name
@@ -46,7 +46,7 @@ func replaceUser(serverData, input core.User) (core.User, error) {
 			ToMail:  input.Email,
 			Subject: "本人確認のメールにつきまして",
 			Content: " " + serverData.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
-				config.Conf.Controller.User.Url + "/api/v1/user/verify/" + mailToken + "\n" +
+				config.Conf.Controller.User.Url + "/api/v1/verify/" + mailToken + "\n" +
 				"本人確認が完了次第、ログイン可能になります。\n",
 		})
 	}
@@ -54,6 +54,21 @@ func replaceUser(serverData, input core.User) (core.User, error) {
 	//Pass
 	if input.Pass != "" {
 		serverData.Pass = input.Pass
+
+		mail.SendMail(mail.Mail{
+			ToMail:  serverData.Email,
+			Subject: "[通知] パスワード変更",
+			Content: " " + serverData.Name + "様\n\n" + "パスワードが変更されました。\n",
+		})
+	}
+
+	//Level
+	if input.Level != 0 {
+		if !(1 < input.Level && input.Level < 5) {
+			return core.User{}, fmt.Errorf("error: user level is invalid")
+		} else {
+			serverData.Level = input.Level
+		}
 	}
 
 	return serverData, nil
