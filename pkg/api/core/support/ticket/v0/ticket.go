@@ -111,7 +111,7 @@ func Get(c *gin.Context) {
 
 	// GroupIDが一致しない場合はここでエラーを返す
 	if resultTicket.Tickets[0].GroupID != result.User.GroupID {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: "Auth Error: group id failed..."})
+		c.JSON(http.StatusForbidden, common.Error{Error: "Auth Error: group id failed..."})
 		return
 	}
 
@@ -174,8 +174,8 @@ func GetAll(c *gin.Context) {
 		}
 
 		response = append(response, ticket.Ticket{
-			ID:       resultTicket.Tickets[0].ID,
-			Time:     resultTicket.Tickets[0].CreatedAt.Add(9 * time.Hour).Format(timeLayout),
+			ID:       tmp.ID,
+			Time:     tmp.CreatedAt.Add(9 * time.Hour).Format(timeLayout),
 			GroupID:  tmp.GroupID,
 			UserID:   tmp.UserID,
 			Solved:   tmp.Solved,
