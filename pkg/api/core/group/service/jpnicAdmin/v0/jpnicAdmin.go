@@ -41,7 +41,7 @@ func Add(c *gin.Context) {
 	}
 
 	// check authority
-	if result.User.Level > 1 {
+	if result.User.Level > 2 {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: "You don't have authority this operation"})
 		return
 	}
@@ -95,7 +95,7 @@ func Delete(c *gin.Context) {
 	}
 
 	// check authority
-	if result.User.Level > 1 {
+	if result.User.Level > 2 {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: "You don't have authority this operation"})
 		return
 	}
