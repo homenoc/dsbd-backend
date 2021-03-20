@@ -28,7 +28,7 @@ var startUserCmd = &cobra.Command{
 			log.Fatalf("error config process |%v", err)
 		}
 
-		logging.WriteLog("------Application Start(User)------")
+		logging.WriteLog("", "------Application Start(User)------")
 
 		api.UserRestAPI()
 		log.Println("end")

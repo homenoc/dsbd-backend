@@ -37,7 +37,6 @@ func GenerateInit(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 	} else {
-		logging.WriteLog(time.Now().Format("2006-01-02 15:04:05") + " |Generate Init Token: ")
 		c.JSON(http.StatusOK, &token.ResultTmpToken{Token: tmpToken})
 	}
 }
@@ -90,11 +89,12 @@ func Generate(c *gin.Context) {
 		AccessToken: accessToken,
 	})
 	if err != nil {
-		logging.WriteLog(time.Now().Format("2006-01-02 15:04:05") + " |(Err)Generate Token: ")
+		logging.WriteLog(strconv.Itoa(int(userResult.User[0].ID))+"-"+userResult.User[0].Name,
+			"Login Failed")
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 	} else {
-		logging.WriteLog(time.Now().Format("2006-01-02 15:04:05") + " |Generate Token: (UID:" +
-			strconv.Itoa(int(userResult.User[0].ID)) + " AccessToken: " + accessToken + ")")
+		logging.WriteLog(strconv.Itoa(int(userResult.User[0].ID))+"-"+userResult.User[0].Name,
+			"Login Success: (AccessToken: "+accessToken+")")
 		tmp := []core.Token{{AccessToken: accessToken}}
 		c.JSON(http.StatusOK, &token.Result{Token: tmp})
 	}
@@ -113,5 +113,7 @@ func Delete(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: err.Error()})
 		return
 	}
+
+	logging.WriteLog(strconv.Itoa(int(result.Token[0].User.ID))+"-"+result.Token[0].User.Name, "Logout")
 	c.JSON(http.StatusOK, token.Result{})
 }
