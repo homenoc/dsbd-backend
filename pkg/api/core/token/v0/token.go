@@ -109,11 +109,14 @@ func Delete(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
 	}
+
+	logging.WriteLog(strconv.Itoa(int(result.Token[0].User.ID))+"-"+result.Token[0].User.Name, "Logout")
+
 	if err := dbToken.Delete(&core.Token{Model: gorm.Model{ID: result.Token[0].ID}}); err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: err.Error()})
+		//エラー時はTokenがすでに消えている状態なので、問題なし
+		c.JSON(http.StatusOK, common.Result{})
 		return
 	}
 
-	logging.WriteLog(strconv.Itoa(int(result.Token[0].User.ID))+"-"+result.Token[0].User.Name, "Logout")
-	c.JSON(http.StatusOK, token.Result{})
+	c.JSON(http.StatusOK, common.Result{})
 }

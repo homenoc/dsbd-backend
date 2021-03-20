@@ -95,7 +95,8 @@ func DeleteAllAdmin(c *gin.Context) {
 	}
 
 	if err := dbToken.DeleteAll(); err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		//エラー時はTokenがすでに消えている状態なので、問題なし
+		c.JSON(http.StatusOK, common.Result{})
 		return
 	}
 	c.JSON(http.StatusOK, token.Result{})
