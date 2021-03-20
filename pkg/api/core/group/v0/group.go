@@ -103,7 +103,7 @@ func Add(c *gin.Context) {
 }
 
 func Update(c *gin.Context) {
-	var input core.Group
+	var input group.Input
 
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
@@ -130,16 +130,10 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	data := authResult.User.Group
-
-	if data.Org != input.Org {
-		data.Org = input.Org
+	if err = dbGroup.Update(group.UpdateAll, *replace(authResult.User.Group, input)); err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: authResult.Err.Error()})
+		return
 	}
-
-	//if err = dbGroup.Update(group.UpdateInfo, data); err != nil {
-	//	c.JSON(http.StatusInternalServerError, common.Error{Error: authResult.Err.Error()})
-	//	return
-	//}
 	c.JSON(http.StatusOK, common.Result{})
 
 }
@@ -194,6 +188,12 @@ func Get(c *gin.Context) {
 		Agree:         result.User.Group.Agree,
 		Question:      result.User.Group.Question,
 		Org:           result.User.Group.Org,
+		OrgEn:         result.User.Group.OrgEn,
+		PostCode:      result.User.Group.PostCode,
+		Address:       result.User.Group.Address,
+		AddressEn:     result.User.Group.AddressEn,
+		Tel:           result.User.Group.Tel,
+		Country:       result.User.Group.Country,
 		Status:        *result.User.Group.Status,
 		Contract:      result.User.Group.Contract,
 		Student:       result.User.Group.Student,
