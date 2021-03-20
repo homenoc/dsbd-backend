@@ -19,6 +19,10 @@ type noticeHandler struct {
 
 const layout = "2006-01-02T15:04:05"
 
+//
+// DBに入っている情報はUTCベースなので注意が必要
+//
+
 func Get(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
