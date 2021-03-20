@@ -23,6 +23,11 @@ func Get(c *gin.Context) {
 		return
 	}
 
+	if !(0 < result.User.Level && result.User.Level <= 3) {
+		c.JSON(http.StatusForbidden, common.Error{Error: "error: access is not permitted"})
+		return
+	}
+
 	resultService := dbService.Get(service.Open, &core.Service{GroupID: result.User.GroupID})
 	if resultService.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: resultService.Err.Error()})
@@ -30,7 +35,7 @@ func Get(c *gin.Context) {
 	}
 
 	if len(resultService.Service) == 0 {
-		c.JSON(http.StatusForbidden, common.Error{Error: "error: No service information available."})
+		c.JSON(http.StatusNoContent, common.Error{Error: "error: No service information available."})
 		return
 	}
 
