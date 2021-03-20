@@ -8,12 +8,12 @@ import (
 	"strconv"
 )
 
-func noticeSlack(before core.User, after user.Input) {
+func noticeSlack(loginUser, before core.User, after user.Input) {
 	// 審査ステータスのSlack通知
 	attachment := slack.Attachment{}
 
 	attachment.AddField(slack.Field{Title: "Title", Value: "Service情報の更新"}).
-		AddField(slack.Field{Title: "申請者", Value: "管理者"}).
+		AddField(slack.Field{Title: "申請者", Value: strconv.Itoa(int(loginUser.ID)) + "-" + loginUser.Name}).
 		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(before.ID)) + "-" + before.Group.Org}).
 		AddField(slack.Field{Title: "更新状況", Value: changeText(before, after)})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})

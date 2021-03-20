@@ -130,10 +130,13 @@ func Update(c *gin.Context) {
 		return
 	}
 
+	noticeSlack(authResult.User, *authResult.User.Group, input)
+
 	if err = dbGroup.Update(group.UpdateAll, *replace(authResult.User.Group, input)); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: authResult.Err.Error()})
 		return
 	}
+
 	c.JSON(http.StatusOK, common.Result{})
 
 }
@@ -180,8 +183,6 @@ func Get(c *gin.Context) {
 			},
 		}
 	}
-
-	log.Println(result.User)
 
 	c.JSON(http.StatusOK, group.Result{Group: group.Group{
 		ID:            result.User.Group.ID,
