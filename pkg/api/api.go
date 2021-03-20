@@ -6,8 +6,6 @@ import (
 	connection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection/v0"
 	info "github.com/homenoc/dsbd-backend/pkg/api/core/group/info/v0"
 	ip "github.com/homenoc/dsbd-backend/pkg/api/core/group/service/ip/v0"
-	jpnicAdmin "github.com/homenoc/dsbd-backend/pkg/api/core/group/service/jpnicAdmin/v0"
-	jpnicTech "github.com/homenoc/dsbd-backend/pkg/api/core/group/service/jpnicTech/v0"
 	service "github.com/homenoc/dsbd-backend/pkg/api/core/group/service/v0"
 	group "github.com/homenoc/dsbd-backend/pkg/api/core/group/v0"
 	bgpRouter "github.com/homenoc/dsbd-backend/pkg/api/core/noc/bgpRouter/v0"
@@ -269,12 +267,12 @@ func UserRestAPI() {
 			// 現在検討中
 
 			// Service JPNIC Admin
-			v1.POST("/group/jpnic/admin", jpnicAdmin.Add)
-			v1.DELETE("/group/jpnic/admin", jpnicAdmin.Delete)
+			//v1.POST("/group/jpnic/admin", jpnicAdmin.Add)
+			//v1.DELETE("/group/jpnic/admin", jpnicAdmin.Delete)
 			//v1.GET("/group/network/jpnic/admin", jpnicAdmin.GetAll)
 			// Service JPNIC Tech
-			v1.POST("/group/jpnic/tech", jpnicTech.Add)
-			v1.DELETE("/group/jpnic/tech", jpnicTech.Delete)
+			//v1.POST("/group/jpnic/tech", jpnicTech.Add)
+			//v1.DELETE("/group/jpnic/tech", jpnicTech.Delete)
 			//v1.GET("/group/service/jpnic/tech", jpnicTech.GetAll)
 		}
 	}
