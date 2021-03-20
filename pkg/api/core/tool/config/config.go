@@ -7,10 +7,12 @@ import (
 
 type Config struct {
 	Controller Controller `json:"controller"`
+	Web        Web        `json:"web"`
 	DB         DB         `json:"db"`
 	Mail       Mail       `json:"mail"`
 	Radius     Radius     `json:"radius"`
 	Slack      []Slack    `json:"slack"`
+	Log        Log        `json:"log"`
 }
 
 type Controller struct {
@@ -29,6 +31,10 @@ type Admin struct {
 	IP        string    `json:"ip"`
 	Port      int       `json:"port"`
 	AdminAuth AdminAuth `json:"auth"`
+}
+
+type Web struct {
+	URL string `json:"url"`
 }
 
 type AdminAuth struct {
@@ -68,9 +74,14 @@ type Radius struct {
 }
 
 type Slack struct {
+	ID         string `json:"id"`
 	WebHookUrl string `json:"url"`
 	Channel    string `json:"channel"`
 	Name       string `json:"name"`
+}
+
+type Log struct {
+	Path string `json:"path"`
 }
 
 var Conf Config
@@ -89,17 +100,3 @@ func GetConfig(inputConfPath string) error {
 	Conf = data
 	return nil
 }
-
-//func GetConfig(inputConfPath string) (Config, error) {
-//	configPath := "./data.json"
-//	if inputConfPath != "" {
-//		configPath = inputConfPath
-//	}
-//	file, err := ioutil.ReadFile(configPath)
-//	if err != nil {
-//		return Config{}, err
-//	}
-//	var data Config
-//	json.Unmarshal(file, &data)
-//	return data, nil
-//}

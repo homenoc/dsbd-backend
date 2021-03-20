@@ -1,82 +1,89 @@
 package v0
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
-	connection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/info"
-	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
-	dbConnection "github.com/homenoc/dsbd-backend/pkg/api/store/group/connection/v0"
-	dbNetwork "github.com/homenoc/dsbd-backend/pkg/api/store/group/network/v0"
-	"log"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
+	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
 	"net/http"
+	"strconv"
 )
 
 func Get(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	result := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthentication(0, core.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
-		c.JSON(http.StatusUnauthorized, info.Result{Status: false, Error: result.Err.Error()})
+		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
 	}
 
-	resultNetwork := dbNetwork.Get(network.GID, &network.Network{GroupID: result.Group.ID})
-	if resultNetwork.Err != nil {
-		c.JSON(http.StatusInternalServerError, info.Result{Status: false, Error: result.Err.Error()})
+	if !(0 < result.User.Level && result.User.Level <= 3) {
+		c.JSON(http.StatusForbidden, common.Error{Error: "error: access is not permitted"})
 		return
 	}
 
-	resultConnection := dbConnection.Get(connection.GID, &connection.Connection{GroupID: result.Group.ID})
-	if resultConnection.Err != nil {
-		c.JSON(http.StatusInternalServerError, info.Result{Status: false, Error: result.Err.Error()})
+	resultService := dbService.Get(service.Open, &core.Service{GroupID: result.User.GroupID})
+	if resultService.Err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: resultService.Err.Error()})
 		return
 	}
 
-	var information []info.Info
+	if len(resultService.Service) == 0 {
+		c.JSON(http.StatusNoContent, common.Error{Error: "error: No service information available."})
+		return
+	}
 
-	log.Println(resultConnection.Connection)
+	var infoInterface []info.Info
 
-	for _, data := range resultConnection.Connection {
-		if *data.Open {
-			information = append(information, info.Info{
-				ServiceID: data.ServiceID, Service: data.Service, UserID: data.UserID, NOC: data.NOC,
-				Assign: data.NOCIP, TermIP: data.TermIP, NOCIP: data.NOCIP, LinkV4Our: data.LinkV4Our,
-				LinkV4Your: data.LinkV4Your, LinkV6Our: data.LinkV6Our, LinkV6Your: data.LinkV6Your, Fee: data.Fee})
+	for _, tmpService := range resultService.Service {
+		if *tmpService.Open {
+			for _, tmpConnection := range tmpService.Connection {
+				var fee string
+				var v4, v6 []string
+				if *tmpService.Fee == 0 {
+					fee = "Free"
+				} else {
+					fee = strconv.Itoa(int(*tmpService.Fee)) + "円"
+				}
+				serviceID := strconv.Itoa(int(tmpService.GroupID)) + "-" + tmpService.ServiceTemplate.Type +
+					fmt.Sprintf("%03d", tmpService.ServiceNumber) + "-" + tmpConnection.ConnectionTemplate.Type +
+					fmt.Sprintf("%03d", tmpConnection.ConnectionNumber)
+
+				for _, tmpIP := range tmpService.IP {
+					if tmpIP.Version == 4 {
+						v4 = append(v4, tmpIP.IP)
+					} else if tmpIP.Version == 6 {
+						v6 = append(v6, tmpIP.IP)
+					}
+				}
+
+				if *tmpConnection.Open {
+					infoInterface = append(infoInterface, info.Info{
+						ServiceID:  serviceID,
+						Service:    tmpService.ServiceTemplate.Name,
+						Assign:     *tmpService.ServiceTemplate.NeedJPNIC,
+						ASN:        *tmpService.ASN,
+						V4:         v4,
+						V6:         v6,
+						NOC:        tmpConnection.NOC.Name,
+						NOCIP:      tmpConnection.TunnelEndPointRouterIP.IP,
+						TermIP:     tmpConnection.TermIP,
+						LinkV4Our:  tmpConnection.LinkV4Our,
+						LinkV4Your: tmpConnection.LinkV4Your,
+						LinkV6Our:  tmpConnection.LinkV6Our,
+						LinkV6Your: tmpConnection.LinkV6Your,
+						Fee:        fee,
+					})
+				}
+			}
 		}
 	}
 
-	if len(information) == 0 {
-		c.JSON(http.StatusInternalServerError, info.Result{Status: false, Error: "not opening"})
-		return
-	}
-
-	var v4 []string
-	var v6 []string
-	var asn string
-
-	for i, data := range resultNetwork.Network {
-		if *data.Open {
-			v4 = append(v4, data.V4)
-			v6 = append(v6, data.V6)
-			if i == 0 {
-				asn = data.ASN
-			}
-			// asnが同じであるかチェック
-			if asn != data.ASN {
-				c.JSON(http.StatusInternalServerError, info.Result{Status: false, Error: "data mismatch"})
-				return
-			}
-		}
-	}
-
-	for i, _ := range information {
-		information[i].ASN = asn
-		information[i].V4 = v4
-		information[i].V6 = v6
-	}
-
-	c.JSON(http.StatusOK, info.Result{Status: true, Info: information})
+	c.JSON(http.StatusOK, info.Result{Info: infoInterface})
 }

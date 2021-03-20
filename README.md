@@ -18,3 +18,6 @@
 [mysqld]
 sql_mode=''
 ```
+
+## Database
+https://drawsql.app/y-net/diagrams/dsbd-backend/embed

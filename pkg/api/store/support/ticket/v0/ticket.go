@@ -2,6 +2,7 @@ package v0
 
 import (
 	"fmt"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support/ticket"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
 	"github.com/jinzhu/gorm"
@@ -9,7 +10,7 @@ import (
 	"time"
 )
 
-func Create(support *ticket.Ticket) (*ticket.Ticket, error) {
+func Create(support *core.Ticket) (*core.Ticket, error) {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -21,7 +22,7 @@ func Create(support *ticket.Ticket) (*ticket.Ticket, error) {
 	return support, err
 }
 
-func Delete(support *ticket.Ticket) error {
+func Delete(support *core.Ticket) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -32,7 +33,7 @@ func Delete(support *ticket.Ticket) error {
 	return db.Delete(support).Error
 }
 
-func Update(base int, t ticket.Ticket) error {
+func Update(base int, t core.Ticket) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -44,8 +45,11 @@ func Update(base int, t ticket.Ticket) error {
 
 	//#4 Issue(解決済み）
 	if ticket.UpdateAll == base {
-		result = db.Model(&ticket.Ticket{Model: gorm.Model{ID: t.ID}}).Update(&ticket.Ticket{Title: t.Title,
-			GroupID: t.GroupID, UserID: t.UserID, ChatIDStart: t.ChatIDStart, ChatIDEnd: t.ChatIDEnd, Solved: t.Solved})
+		result = db.Model(&core.Ticket{Model: gorm.Model{ID: t.ID}}).Update(&core.Ticket{Title: t.Title,
+			GroupID: t.GroupID,
+			UserID:  t.UserID,
+			Solved:  t.Solved,
+		})
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
@@ -53,7 +57,7 @@ func Update(base int, t ticket.Ticket) error {
 	return result.Error
 }
 
-func Get(base int, data *ticket.Ticket) ticket.ResultDatabase {
+func Get(base int, data *core.Ticket) ticket.ResultDatabase {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -61,23 +65,28 @@ func Get(base int, data *ticket.Ticket) ticket.ResultDatabase {
 	}
 	defer db.Close()
 
-	var ticketStruct []ticket.Ticket
+	var ticketStruct []core.Ticket
 
 	if base == ticket.ID { //ID
-		err = db.First(&ticketStruct, data.ID).Error
+		err = db.Preload("User").
+			Preload("Group").
+			Preload("Chat").
+			Preload("Chat.User").
+			First(&ticketStruct, data.ID).Error
 	} else if base == ticket.GID { //GroupID
-		err = db.Where("group_id = ?", data.GroupID).Find(&ticketStruct).Error
+		err = db.Where("group_id = ?", data.GroupID).
+			Preload("User").
+			Preload("Group").
+			Preload("Chat").
+			Preload("Chat.User").
+			Find(&ticketStruct).Error
 	} else if base == ticket.UID { //UserID
 		err = db.Where("user_id = ?", data.UserID).Find(&ticketStruct).Error
-	} else if base == ticket.CIDStart { //ChatID Start
-		err = db.Where("ticket_id = ?", data.ChatIDStart).Find(&ticketStruct).Error
-	} else if base == ticket.CIDEnd { //ChatID End
-		err = db.Where("ticket_id = ?", data.ChatIDEnd).Find(&ticketStruct).Error
 	} else {
 		log.Println("base select error")
 		return ticket.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
 	}
-	return ticket.ResultDatabase{Ticket: ticketStruct, Err: err}
+	return ticket.ResultDatabase{Tickets: ticketStruct, Err: err}
 }
 
 func GetAll() ticket.ResultDatabase {
@@ -88,7 +97,11 @@ func GetAll() ticket.ResultDatabase {
 	}
 	defer db.Close()
 
-	var tickets []ticket.Ticket
-	err = db.Find(&tickets).Error
-	return ticket.ResultDatabase{Ticket: tickets, Err: err}
+	var tickets []core.Ticket
+	err = db.Preload("User").
+		Preload("Group").
+		Preload("Chat").
+		Preload("Chat.User").
+		Find(&tickets).Error
+	return ticket.ResultDatabase{Tickets: tickets, Err: err}
 }

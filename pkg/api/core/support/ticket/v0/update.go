@@ -1,10 +1,10 @@
 package v0
 
 import (
-	"github.com/homenoc/dsbd-backend/pkg/api/core/support/ticket"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 )
 
-func updateAdminTicket(input, replace ticket.Ticket) (ticket.Ticket, error) {
+func updateAdminTicket(input, replace core.Ticket) (core.Ticket, error) {
 
 	//Title
 	if input.Title != "" {

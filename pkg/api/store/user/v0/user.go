@@ -2,6 +2,7 @@ package v0
 
 import (
 	"fmt"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
 	"github.com/jinzhu/gorm"
@@ -9,16 +10,7 @@ import (
 	"time"
 )
 
-func Create(u *user.User) error {
-	result := Get(user.Email, &user.User{Email: u.Email})
-	if result.Err != nil {
-		return result.Err
-	}
-	if len(result.User) != 0 {
-		log.Println("error: this email is already registered: " + u.Email)
-		return fmt.Errorf("error: this email is already registered")
-	}
-
+func Create(u *core.User) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -30,7 +22,7 @@ func Create(u *user.User) error {
 	return db.Create(&u).Error
 }
 
-func Delete(u *user.User) error {
+func Delete(u *core.User) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -41,7 +33,7 @@ func Delete(u *user.User) error {
 	return db.Delete(u).Error
 }
 
-func Update(base int, u *user.User) error {
+func Update(base int, u *core.User) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -52,25 +44,33 @@ func Update(base int, u *user.User) error {
 	var result *gorm.DB
 
 	if user.UpdateVerifyMail == base {
-		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update(user.User{MailVerify: u.MailVerify})
+		result = db.Model(&core.User{Model: gorm.Model{ID: u.ID}}).Update(core.User{MailVerify: u.MailVerify})
 	} else if user.UpdateInfo == base {
-		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update(user.User{
-			Name: u.Name, NameEn: u.NameEn, Email: u.Email, Pass: u.Pass, Tech: u.Tech, Level: u.Level,
-			MailVerify: u.MailVerify, MailToken: u.MailToken, Org: u.Org, OrgEn: u.OrgEn, PostCode: u.PostCode,
-			Address: u.Address, AddressEn: u.AddressEn, Dept: u.Dept, DeptEn: u.DeptEn, Pos: u.Pos, PosEn: u.PosEn,
-			Tel: u.Tel, Fax: u.Fax, Country: u.Country})
-	} else if user.UpdateStatus == base {
-		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update(user.User{Status: u.Status})
+		result = db.Model(&core.User{Model: gorm.Model{ID: u.ID}}).Update(core.User{
+			Name:       u.Name,
+			NameEn:     u.NameEn,
+			Email:      u.Email,
+			Pass:       u.Pass,
+			Level:      u.Level,
+			MailVerify: u.MailVerify,
+			MailToken:  u.MailToken,
+		})
 	} else if user.UpdateGID == base {
-		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update(user.User{GroupID: u.GroupID})
+		result = db.Model(&core.User{Model: gorm.Model{ID: u.ID}}).Update(core.User{GroupID: u.GroupID})
 	} else if user.UpdateLevel == base {
-		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update("level", u.Level)
+		result = db.Model(&core.User{Model: gorm.Model{ID: u.ID}}).Update("level", u.Level)
 	} else if user.UpdateAll == base {
-		result = db.Model(&user.User{Model: gorm.Model{ID: u.ID}}).Update(user.User{
-			GroupID: u.GroupID, Name: u.Name, NameEn: u.NameEn, Email: u.Email, Pass: u.Pass, Tech: u.Tech, Level: u.Level,
-			MailVerify: u.MailVerify, MailToken: u.MailToken, Org: u.Org, OrgEn: u.OrgEn, PostCode: u.PostCode,
-			Address: u.Address, AddressEn: u.AddressEn, Dept: u.Dept, DeptEn: u.DeptEn, Pos: u.Pos, PosEn: u.PosEn,
-			Tel: u.Tel, Fax: u.Fax, Country: u.Country, Status: u.Status})
+		result = db.Model(&core.User{Model: gorm.Model{ID: u.ID}}).Update(core.User{
+			GroupID:       u.GroupID,
+			Name:          u.Name,
+			NameEn:        u.NameEn,
+			Email:         u.Email,
+			Pass:          u.Pass,
+			Level:         u.Level,
+			MailVerify:    u.MailVerify,
+			MailToken:     u.MailToken,
+			ExpiredStatus: u.ExpiredStatus,
+		})
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
@@ -80,7 +80,7 @@ func Update(base int, u *user.User) error {
 }
 
 // value of base can reference from api/core/user/interface.go
-func Get(base int, u *user.User) user.ResultDatabase {
+func Get(base int, u *core.User) user.ResultDatabase {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -88,7 +88,7 @@ func Get(base int, u *user.User) user.ResultDatabase {
 	}
 	defer db.Close()
 
-	var userStruct []user.User
+	var userStruct []core.User
 
 	if base == user.ID { //ID
 		err = db.First(&userStruct, u.ID).Error
@@ -100,6 +100,11 @@ func Get(base int, u *user.User) user.ResultDatabase {
 		err = db.Where("mail_token = ?", u.MailToken).Find(&userStruct).Error
 	} else if base == user.GIDAndLevel { //GroupID and Level
 		err = db.Where("group_id = ? AND level = ?", u.GroupID, u.Level).Find(&userStruct).Error
+	} else if base == user.IDGetGroup { //GroupID and Level
+		err = db.First(&userStruct, u.ID).
+			Preload("Group").
+			Find(&userStruct).Error
+
 	} else {
 		log.Println("base select error")
 		return user.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
@@ -116,7 +121,7 @@ func GetAll() user.ResultDatabase {
 	}
 	defer db.Close()
 
-	var users []user.User
+	var users []core.User
 	err = db.Find(&users).Error
 	return user.ResultDatabase{User: users, Err: err}
 }

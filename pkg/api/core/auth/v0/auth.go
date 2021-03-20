@@ -2,17 +2,16 @@ package v0
 
 import (
 	"fmt"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/auth"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
-	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	dbToken "github.com/homenoc/dsbd-backend/pkg/api/store/token/v0"
-	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"github.com/jinzhu/gorm"
+	"log"
+	"time"
 )
 
-func UserAuthentication(data token.Token) auth.UserResult {
+func UserAuthentication(data core.Token) auth.UserResult {
 	resultToken := dbToken.Get(token.UserTokenAndAccessToken, &data)
 	if len(resultToken.Token) == 0 {
 		return auth.UserResult{Err: fmt.Errorf("auth failed")}
@@ -20,40 +19,64 @@ func UserAuthentication(data token.Token) auth.UserResult {
 	if resultToken.Err != nil {
 		return auth.UserResult{Err: fmt.Errorf("db error")}
 	}
-	resultUser := dbUser.Get(user.ID, &user.User{Model: gorm.Model{ID: resultToken.Token[0].UserID}})
-	if resultUser.Err != nil {
-		return auth.UserResult{Err: fmt.Errorf("db error")}
-	}
-	if 100 <= resultUser.User[0].Status {
+
+	if 0 < *resultToken.Token[0].User.ExpiredStatus {
 		return auth.UserResult{Err: fmt.Errorf("deleted this user")}
 	}
-	return auth.UserResult{User: resultUser.User[0], Err: nil}
+
+	go renewProcess(resultToken.Token[0])
+
+	return auth.UserResult{User: resultToken.Token[0].User, Err: nil}
 }
 
-func GroupAuthentication(data token.Token) auth.GroupResult {
+// errorType 0: 未審査の場合でもエラーを返す　1: 未審査の場合エラーを返さない
+func GroupAuthentication(errorType uint, data core.Token) auth.GroupResult {
 	resultToken := dbToken.Get(token.UserTokenAndAccessToken, &data)
 	if len(resultToken.Token) == 0 {
 		return auth.GroupResult{Err: fmt.Errorf("auth failed")}
 	}
 	if resultToken.Err != nil {
-		return auth.GroupResult{Err: fmt.Errorf("db error")}
+		return auth.GroupResult{Err: fmt.Errorf("error: no token")}
 	}
-	resultUser := dbUser.Get(user.ID, &user.User{Model: gorm.Model{ID: resultToken.Token[0].UserID}})
-	if resultUser.Err != nil {
-		return auth.GroupResult{Err: fmt.Errorf("db error")}
+
+	if 0 < *resultToken.Token[0].User.ExpiredStatus {
+		return auth.GroupResult{Err: fmt.Errorf("deleted this user")}
 	}
-	if resultUser.User[0].Status == 0 || 100 <= resultUser.User[0].Status {
-		return auth.GroupResult{Err: fmt.Errorf("user status error")}
-	}
-	if resultUser.User[0].GroupID == 0 {
+
+	if resultToken.Token[0].User.GroupID == 0 {
 		return auth.GroupResult{Err: fmt.Errorf("no group")}
 	}
-	resultGroup := dbGroup.Get(group.ID, &group.Group{Model: gorm.Model{ID: resultUser.User[0].GroupID}})
-	if resultGroup.Err != nil {
-		return auth.GroupResult{Err: fmt.Errorf("db error")}
+
+	// 未審査＋errorType = 0の場合
+	if !*resultToken.Token[0].User.Group.Pass && errorType == 0 {
+		return auth.GroupResult{Err: fmt.Errorf("error: unexamined")}
 	}
-	if 1000 <= resultGroup.Group[0].Status {
-		return auth.GroupResult{Err: fmt.Errorf("error: group status")}
+	// アカウント失効時の動作
+	if *resultToken.Token[0].User.Group.ExpiredStatus == 1 {
+		return auth.GroupResult{Err: fmt.Errorf("error: discontinued by Master Account")}
 	}
-	return auth.GroupResult{User: resultUser.User[0], Group: resultGroup.Group[0], Err: nil}
+	if *resultToken.Token[0].User.Group.ExpiredStatus == 2 {
+		return auth.GroupResult{Err: fmt.Errorf("error: discontinuation by the steering committee")}
+	}
+	if *resultToken.Token[0].User.Group.ExpiredStatus == 3 {
+		return auth.GroupResult{Err: fmt.Errorf("error: discontinuation due to failed review")}
+	}
+
+	go renewProcess(resultToken.Token[0])
+
+	return auth.GroupResult{User: resultToken.Token[0].User, Err: nil}
+}
+
+func renewProcess(t core.Token) {
+	if t.ExpiredAt.UTC().Unix() < time.Now().Add(10*time.Minute).UTC().Unix() {
+		result := dbToken.Update(token.UpdateToken, &core.Token{
+			Model:     gorm.Model{ID: t.ID},
+			ExpiredAt: t.ExpiredAt.Add(10 * time.Minute),
+		})
+		if err := result; err != nil {
+			log.Println(err)
+		} else {
+			log.Println("Success!!")
+		}
+	}
 }

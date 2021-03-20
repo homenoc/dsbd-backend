@@ -5,13 +5,17 @@ import (
 	controller "github.com/homenoc/dsbd-backend/pkg/api/core/controller/v0"
 	connection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection/v0"
 	info "github.com/homenoc/dsbd-backend/pkg/api/core/group/info/v0"
-	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/v0"
+	ip "github.com/homenoc/dsbd-backend/pkg/api/core/group/service/ip/v0"
+	service "github.com/homenoc/dsbd-backend/pkg/api/core/group/service/v0"
 	group "github.com/homenoc/dsbd-backend/pkg/api/core/group/v0"
-	nocRouter "github.com/homenoc/dsbd-backend/pkg/api/core/noc/router/v0"
+	bgpRouter "github.com/homenoc/dsbd-backend/pkg/api/core/noc/bgpRouter/v0"
+	tunnelEndPointRouter "github.com/homenoc/dsbd-backend/pkg/api/core/noc/tunnelEndPointRouter/v0"
+	tunnelEndPointRouterIP "github.com/homenoc/dsbd-backend/pkg/api/core/noc/tunnelEndPointRouterIP/v0"
 	noc "github.com/homenoc/dsbd-backend/pkg/api/core/noc/v0"
 	notice "github.com/homenoc/dsbd-backend/pkg/api/core/notice/v0"
 	chat "github.com/homenoc/dsbd-backend/pkg/api/core/support/chat/v0"
 	ticket "github.com/homenoc/dsbd-backend/pkg/api/core/support/ticket/v0"
+	template "github.com/homenoc/dsbd-backend/pkg/api/core/template/v0"
 	token "github.com/homenoc/dsbd-backend/pkg/api/core/token/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	user "github.com/homenoc/dsbd-backend/pkg/api/core/user/v0"
@@ -77,6 +81,9 @@ func AdminRestAPI() {
 			v1.GET("/group", group.GetAllAdmin)
 			v1.GET("/group/:id", group.GetAdmin)
 
+			// Template
+			v1.GET("/template", template.GetAdmin)
+
 			//
 			// NOC
 			//
@@ -89,11 +96,29 @@ func AdminRestAPI() {
 			//
 			// NOC Router
 			//
-			v1.POST("/router", nocRouter.AddAdmin)
-			v1.GET("/router", nocRouter.GetAllAdmin)
-			v1.DELETE("/router/:id", nocRouter.DeleteAdmin)
-			v1.GET("/router/:id", nocRouter.GetAdmin)
-			v1.PUT("/router/:id", nocRouter.UpdateAdmin)
+			v1.POST("/router", bgpRouter.AddAdmin)
+			v1.GET("/router", bgpRouter.GetAllAdmin)
+			v1.DELETE("/router/:id", bgpRouter.DeleteAdmin)
+			v1.GET("/router/:id", bgpRouter.GetAdmin)
+			v1.PUT("/router/:id", bgpRouter.UpdateAdmin)
+
+			//
+			// NOC Gateway
+			//
+			v1.POST("/gateway", tunnelEndPointRouter.AddAdmin)
+			v1.GET("/gateway", tunnelEndPointRouter.GetAllAdmin)
+			v1.DELETE("/gateway/:id", tunnelEndPointRouter.DeleteAdmin)
+			v1.GET("/gateway/:id", tunnelEndPointRouter.GetAdmin)
+			v1.PUT("/gateway/:id", tunnelEndPointRouter.UpdateAdmin)
+
+			//
+			// NOC Gateway IP
+			//
+			v1.POST("/gateway_ip", tunnelEndPointRouterIP.AddAdmin)
+			v1.GET("/gateway_ip", tunnelEndPointRouterIP.GetAllAdmin)
+			v1.DELETE("/gateway_ip/:id", tunnelEndPointRouterIP.DeleteAdmin)
+			v1.GET("/gateway_ip/:id", tunnelEndPointRouterIP.GetAdmin)
+			v1.PUT("/gateway_ip/:id", tunnelEndPointRouterIP.UpdateAdmin)
 
 			//
 			// Support
@@ -116,15 +141,22 @@ func AdminRestAPI() {
 			v1.GET("/connection/:id", connection.GetAdmin)
 
 			//
-			// Network
+			// Service
 			//
-			v1.POST("/group/:id/network", network.AddAdmin)
-			// Network Delete
-			v1.DELETE("/network/:id", network.DeleteAdmin)
-			// Network Update
-			v1.PUT("/network/:id", network.UpdateAdmin)
-			v1.GET("/network", network.GetAllAdmin)
-			v1.GET("/network/:id", network.GetAdmin)
+			v1.POST("/group/:id/service", service.AddAdmin)
+			// Service Delete
+			v1.DELETE("/service/:id", service.DeleteAdmin)
+			// Service Update
+			v1.PUT("/service/:id", service.UpdateAdmin)
+			v1.GET("/service", service.GetAllAdmin)
+			v1.GET("/service/:id", service.GetAdmin)
+			v1.PUT("/service/:id/ip/:ip_id", service.UpdateIP)
+
+			//
+			// IP
+			//
+			v1.PUT("/ip/:id", ip.UpdateAdmin)
+
 			////
 			//// JPNIC Admin
 			////
@@ -168,17 +200,20 @@ func UserRestAPI() {
 			//
 			// User Create
 			v1.POST("/user", user.Add)
+			// User Create(Group)
+			v1.POST("/user/:id", user.AddGroup)
 			// User Delete
 			//router.DELETE("/user", user.Delete)
 			// User Get
-			v1.GET("/user", user.Get)
-			v1.GET("/user/all", user.GetGroup)
+			v1.GET("/login", user.GetOwn)
+			v1.GET("/user/:id", user.Get)
+			v1.GET("/user", user.GetGroup)
 			// User ID Get
-			// v1.GET("/user/:id",user.GetId)
 			// User Update
 			v1.PUT("/user/:id", user.Update)
+
 			// User Mail MailVerify
-			v1.GET("/user/verify/:token", user.MailVerify)
+			v1.GET("/verify/:token", user.MailVerify)
 			//
 			// Token
 			//
@@ -198,21 +233,30 @@ func UserRestAPI() {
 			v1.GET("/group/all", group.GetAll)
 			// Group Delete
 			//v1.DELETE("/group", group.Delete)
-			// Connection Create
-			v1.POST("/group/connection", connection.Add)
-			// Network add
-			v1.POST("/group/network", network.Add)
+			// Service add
+			v1.POST("/group/service", service.Add)
+			v1.GET("/group/service/add_allow", service.GetAddAllow)
 			//v1.PUT("/group/network", network.Update)
+
+			// Connection Create
+			v1.POST("/group/service/:id/connection", connection.Add)
+
 			//
 			// Info
 			//
 			v1.GET("/group/info", info.Get)
 
+			// Template
+			v1.GET("/template", template.Get)
+
+			// NOC
+			v1.GET("/noc", noc.GetAll)
+
 			//
 			// Support
 			//
 			v1.POST("/support", ticket.Create)
-			v1.GET("/support", ticket.GetTitle)
+			v1.GET("/support", ticket.GetAll)
 			v1.POST("/support/:id", chat.Add)
 			v1.GET("/support/:id", ticket.Get)
 			//
@@ -222,14 +266,14 @@ func UserRestAPI() {
 
 			// 現在検討中
 
-			// Network JPNIC Admin
-			//v1.POST("/group/network/jpnic/admin", jpnicAdmin.Add)
-			//v1.DELETE("/group/network/jpnic/admin", jpnicAdmin.Delete)
-			//v1.GET("/group/network/jpnic/admin", jpnicAdmin.Get)
-			// Network JPNIC Tech
-			//v1.POST("/group/network/jpnic/tech", jpnicTech.Add)
-			//v1.DELETE("/group/network/jpnic/tech", jpnicTech.Delete)
-			//v1.GET("/group/network/jpnic/tech", jpnicTech.Get)
+			// Service JPNIC Admin
+			//v1.POST("/group/jpnic/admin", jpnicAdmin.Add)
+			//v1.DELETE("/group/jpnic/admin", jpnicAdmin.Delete)
+			//v1.GET("/group/network/jpnic/admin", jpnicAdmin.GetAll)
+			// Service JPNIC Tech
+			//v1.POST("/group/jpnic/tech", jpnicTech.Add)
+			//v1.DELETE("/group/jpnic/tech", jpnicTech.Delete)
+			//v1.GET("/group/service/jpnic/tech", jpnicTech.GetAll)
 		}
 	}
 

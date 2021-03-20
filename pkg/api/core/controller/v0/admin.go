@@ -20,8 +20,15 @@ func SendChatAdmin(data controller.Chat) {
 	client := &http.Client{}
 	client.Timeout = time.Second * 5
 
-	body, _ := json.Marshal(controller.Chat{Err: data.Err, CreatedAt: data.CreatedAt, UserID: data.UserID,
-		GroupID: data.GroupID, Admin: data.Admin, Message: data.Message})
+	body, _ := json.Marshal(controller.Chat{
+		Err:       data.Err,
+		CreatedAt: data.CreatedAt,
+		UserID:    data.UserID,
+		UserName:  data.UserName,
+		GroupID:   data.GroupID,
+		Admin:     data.Admin,
+		Message:   data.Message,
+	})
 
 	//Header部分
 	header := http.Header{}
@@ -64,6 +71,11 @@ func ReceiveChatAdmin(c *gin.Context) {
 	var input controller.Chat
 	log.Println(c.BindJSON(&input))
 
-	support.Broadcast <- support.WebSocketResult{CreatedAt: time.Now(),
-		UserID: input.UserID, GroupID: input.GroupID, Admin: input.Admin, Message: input.Message}
+	support.Broadcast <- support.WebSocketResult{
+		CreatedAt: time.Now(),
+		UserID:    input.UserID,
+		GroupID:   input.GroupID,
+		Admin:     input.Admin,
+		Message:   input.Message,
+	}
 }

@@ -1,0 +1,48 @@
+{
+  "controller": {
+    "user": {
+      "ip": "127.0.0.1",
+      "url": "http://localhost:8080",
+      "port": 8080
+    },
+    "admin": {
+      "ip": "127.0.0.1",
+      "port": 81,
+      "auth": {
+        "user": "test",
+        "pass": "test"
+      }
+    },
+    "auth": {
+      "token1": "token1",
+      "token2": "token2",
+      "token3": "token3"
+    }
+  },
+  "db": {
+    "ip": "127.0.0.1",
+    "port": 3306,
+    "user": "root",
+    "pass": "test",
+    "dbName": "test"
+  },
+  "mail": {
+    "Host": "mail.example",
+    "Port": 587,
+    "From": "mail.example",
+    "User": "user",
+    "Pass": "pass",
+    "Contract": "contract"
+  },
+  "slack": [
+    {
+      "id": "main",
+      "url": "https://hooks.slack.com/services/xxxxxxx",
+      "channel": "xxxx",
+      "name": "xxxxx"
+    }
+  ],
+  "log": {
+    "path": ""
+  }
+}

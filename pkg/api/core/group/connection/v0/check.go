@@ -2,25 +2,14 @@ package v0
 
 import (
 	"fmt"
-	connection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
 )
 
-func check(input connection.Connection) error {
-	// check
-	if input.NTT == "" {
-		return fmt.Errorf("no data: NTT")
+func check(input connection.Input) error {
+
+	if input.Address == "" {
+		return fmt.Errorf("error: address is invalid")
 	}
-	if input.Service == "" {
-		return fmt.Errorf("no data: service")
-	}
-	if input.NOC == "" {
-		return fmt.Errorf("no data: noc")
-	}
-	if input.TermIP == "" {
-		return fmt.Errorf("no data: term ip")
-	}
-	if input.UserID == 0 {
-		return fmt.Errorf("no data: userID")
-	}
+
 	return nil
 }

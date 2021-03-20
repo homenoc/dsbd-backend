@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/gin-gonic/gin"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/gen"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/hash"
@@ -13,6 +15,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	toolToken "github.com/homenoc/dsbd-backend/pkg/api/core/tool/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
+	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"github.com/jinzhu/gorm"
 	"log"
@@ -22,192 +25,322 @@ import (
 )
 
 func Add(c *gin.Context) {
-	var input, data user.User
-	userToken := c.Request.Header.Get("USER_TOKEN")
-	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
+	var input user.Input
+	var data core.User
 
 	err := c.BindJSON(&input)
 	if err != nil {
 		log.Println(err)
-		c.JSON(http.StatusBadRequest, user.Result{Status: false, Error: fmt.Sprintf("wrong email address")})
+		c.JSON(http.StatusBadRequest, common.Error{Error: fmt.Sprintf("wrong email address")})
 		return
 	}
 
-	if !strings.Contains(input.Email, "@") {
-		c.JSON(http.StatusBadRequest, user.Result{Status: false, Error: fmt.Sprintf("wrong email address")})
-		return
-	}
-	if input.Name == "" || input.NameEn == "" {
-		c.JSON(http.StatusBadRequest, user.Result{Status: false, Error: fmt.Sprintf("wrong name")})
-		return
-	}
-
-	if err := check(input); err != nil {
-		c.JSON(http.StatusBadRequest, user.Result{Status: false, Error: err.Error()})
+	if err = check(input); err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 		return
 	}
 
 	mailToken, _ := toolToken.Generate(4)
 
-	pass := ""
-
 	// 新規ユーザ
-	if input.GroupID == 0 { //new user
-		if input.Pass == "" {
-			c.JSON(http.StatusBadRequest, user.Result{Status: false, Error: fmt.Sprintf("wrong pass")})
-			return
-		}
-		data = user.User{GroupID: 0, Name: input.Name, NameEn: input.NameEn, Email: input.Email, Pass: input.Pass,
-			Status: 0, Level: 1, MailVerify: &[]bool{false}[0], MailToken: mailToken, GroupHandle: &[]bool{false}[0]}
-		// グループ所属ユーザの登録
-	} else {
-		if input.Level == 0 || input.Level > 5 {
-			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: fmt.Sprintf("wrong user level")})
-			return
-		}
-		authResult := auth.UserAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
-		if authResult.Err != nil {
-			c.JSON(http.StatusForbidden, user.Result{Status: false, Error: authResult.Err.Error()})
-			return
-		}
-		if authResult.User.GroupID != input.GroupID && authResult.User.GroupID > 0 {
-			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: "gid mismatch"})
-			return
-		}
+	if input.Pass == "" {
+		c.JSON(http.StatusBadRequest, common.Error{Error: fmt.Sprintf("wrong pass")})
+		return
+	}
 
-		pass = gen.GenerateUUID()
-		log.Println("Email: " + input.Email)
-		log.Println("tmp_Pass: " + pass)
-
-		data = user.User{GroupID: input.GroupID, Name: input.Name, NameEn: input.NameEn,
-			Email: input.Email, Pass: strings.ToLower(hash.Generate(pass)), GroupHandle: input.GroupHandle,
-			Status: 0, Tech: input.Tech, Level: input.Level, MailVerify: &[]bool{false}[0], MailToken: mailToken}
+	data = core.User{
+		GroupID:       0,
+		Name:          input.Name,
+		NameEn:        input.NameEn,
+		Email:         input.Email,
+		Pass:          input.Pass,
+		ExpiredStatus: &[]uint{0}[0],
+		Level:         1,
+		MailVerify:    &[]bool{false}[0],
+		MailToken:     mailToken,
 	}
 
 	//check exist for database
+	result := dbUser.Get(user.Email, &core.User{Email: input.Email})
+	if result.Err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
+		return
+	}
+
+	if len(result.User) != 0 {
+		c.JSON(http.StatusBadRequest, common.Error{Error: "this email is already registered: \" + u.Email"})
+		return
+	}
+
 	err = dbUser.Create(&data)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		return
 	}
+
 	attachment := slack.Attachment{}
-	attachment.AddField(slack.Field{Title: "Title", Value: "ユーザ登録"}).
-		AddField(slack.Field{Title: "E-Mail", Value: input.Email}).
-		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(input.GroupID))}).
+	attachment.AddField(slack.Field{Title: "Title", Value: "新規ユーザ登録"}).
+		AddField(slack.Field{Title: "メールアドレス", Value: input.Email}).
 		AddField(slack.Field{Title: "Name", Value: input.Name}).
 		AddField(slack.Field{Title: "Name(English)", Value: input.NameEn})
+	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 
-	notification.SendSlack(notification.Slack{Attachment: attachment, Channel: "user", Status: true})
+	mail.SendMail(mail.Mail{
+		ToMail:  data.Email,
+		Subject: "本人確認のメールにつきまして",
+		Content: " " + input.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
+			config.Conf.Controller.User.Url + "/api/v1/verify/" + mailToken + "\n" +
+			"本人確認が完了次第、ログイン可能になります。\n",
+	})
 
-	if pass == "" {
-		mail.SendMail(mail.Mail{
-			ToMail:  data.Email,
-			Subject: "本人確認のメールにつきまして",
-			Content: " " + input.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
-				config.Conf.Controller.User.Url + "/api/v1/user/verify/" + mailToken + "\n" +
-				"本人確認が完了次第、ログイン可能になります。\n",
-		})
-	} else {
-		mail.SendMail(mail.Mail{
-			ToMail:  data.Email,
-			Subject: "本人確認メールにつきまして",
-			Content: " " + input.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
-				config.Conf.Controller.User.Url + "/api/v1/user/verify/" + mailToken + "\n" +
-				"本人確認が完了次第、ログイン可能になります。\n" + "仮パスワード: " + pass,
-		})
+	c.JSON(http.StatusOK, user.Result{})
+}
+
+func AddGroup(c *gin.Context) {
+	var input user.Input
+	var data core.User
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: fmt.Sprintf("id error")})
+		return
 	}
 
-	c.JSON(http.StatusOK, user.Result{Status: true})
+	if id == 0 {
+		c.JSON(http.StatusBadRequest, common.Error{Error: "error: This GroupID is bad request (0)"})
+		return
+	}
+
+	userToken := c.Request.Header.Get("USER_TOKEN")
+	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
+
+	err = c.BindJSON(&input)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, common.Error{Error: fmt.Sprintf("wrong email address")})
+		return
+	}
+
+	if err = check(input); err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	mailToken, _ := toolToken.Generate(4)
+	pass := ""
+
+	// グループ所属ユーザの登録
+	resultAuth := auth.GroupAuthentication(0, core.Token{UserToken: userToken, AccessToken: accessToken})
+	if resultAuth.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAuth.Err.Error()})
+		return
+	}
+
+	if resultAuth.User.Level > 2 {
+		c.JSON(http.StatusForbidden, common.Error{Error: "error: access is not permitted"})
+		return
+	}
+
+	resultGroup := dbGroup.Get(group.ID, &core.Group{Model: gorm.Model{ID: uint(id)}})
+	if resultGroup.Err != nil {
+		c.JSON(http.StatusForbidden, common.Error{Error: "error: access is not permitted"})
+		return
+	}
+
+	if resultAuth.User.GroupID != uint(id) {
+		c.JSON(http.StatusBadRequest, common.Error{Error: "error: group id is invalid"})
+		return
+	}
+
+	if !(1 < input.Level && input.Level < 5) {
+		c.JSON(http.StatusBadRequest, common.Error{Error: "error: user level is invalid"})
+		return
+	}
+
+	pass = gen.GenerateUUID()
+
+	data = core.User{
+		GroupID:       resultAuth.User.GroupID,
+		Name:          input.Name,
+		NameEn:        input.NameEn,
+		Email:         input.Email,
+		Pass:          strings.ToLower(hash.Generate(pass)),
+		ExpiredStatus: &[]uint{0}[0],
+		Level:         input.Level,
+		MailVerify:    &[]bool{false}[0],
+		MailToken:     mailToken,
+	}
+
+	//check exist for database
+	result := dbUser.Get(user.Email, &core.User{Email: input.Email})
+	if result.Err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
+		return
+	}
+
+	if len(result.User) != 0 {
+		c.JSON(http.StatusBadRequest, common.Error{Error: "this email is already registered: \" + u.Email"})
+		return
+	}
+
+	err = dbUser.Create(&data)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		return
+	}
+
+	attachment := slack.Attachment{}
+	attachment.AddField(slack.Field{Title: "Title", Value: "新規ユーザ登録"}).
+		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(id) + "-" + resultAuth.User.Group.Org}).
+		AddField(slack.Field{Title: "メールアドレス", Value: input.Email}).
+		AddField(slack.Field{Title: "Name", Value: input.Name}).
+		AddField(slack.Field{Title: "Name(English)", Value: input.NameEn})
+	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+
+	mail.SendMail(mail.Mail{
+		ToMail:  data.Email,
+		Subject: "本人確認メールにつきまして",
+		Content: " " + input.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
+			config.Conf.Controller.User.Url + "/api/v1/verify/" + mailToken + "\n" +
+			"本人確認が完了次第、ログイン可能になります。\n" + "仮パスワード: " + pass,
+	})
+
+	c.JSON(http.StatusOK, user.Result{})
 }
 
 func MailVerify(c *gin.Context) {
 	mailToken := c.Param("token")
 
-	result := dbUser.Get(user.MailToken, &user.User{MailToken: mailToken})
+	result := dbUser.Get(user.MailToken, &core.User{MailToken: mailToken})
 	if result.Err != nil {
-		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: result.Err.Error() + "| we can't find token data"})
+		c.JSON(http.StatusBadRequest, common.Error{Error: result.Err.Error() + "| we can't find token data"})
 		return
 	}
 
 	if *result.User[0].MailVerify {
-		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: fmt.Sprintf("This email has already been checked")})
+		c.Writer.WriteString(`<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>dsysメール確認システム</title>
+    <meta http-equiv="refresh" content="5; URL=` + config.Conf.Web.URL + `">
+</head>
+<body>
+<h1>すでにメールアドレスの確認はできています。</h1>
+<p>5秒後にログイン画面に移動します</p>
+<br>
+<p>This email has already been checked</p>
+</body>
+</html>`)
+		c.JSON(http.StatusBadRequest, common.Error{Error: fmt.Sprintf("This email has already been checked")})
 		return
 	}
-	if result.User[0].Status >= 100 {
-		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: fmt.Sprintf("error: user status")})
+	if *result.User[0].ExpiredStatus >= 1 {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: fmt.Sprintf("error: あなたのアカウントは凍結されています。")})
 		return
 	}
 
-	if err := dbUser.Update(user.UpdateVerifyMail, &user.User{Model: gorm.Model{ID: result.User[0].ID},
-		MailVerify: &[]bool{true}[0]}); err != nil {
-		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
+	if err := dbUser.Update(user.UpdateVerifyMail, &core.User{
+		Model:      gorm.Model{ID: result.User[0].ID},
+		MailVerify: &[]bool{true}[0],
+	}); err != nil {
+		c.Writer.WriteString(`<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>dsysメール確認システム</title>
+    <meta http-equiv="refresh" content="30; URL=` + config.Conf.Web.URL + `">
+</head>
+<body>
+<h1>メールの確認ができませんでした。</h1>
+<br>
+<p>` + err.Error() +
+			`</p>
+</body>
+</html>`)
 	} else {
-		c.JSON(http.StatusOK, &user.Result{Status: true})
+		c.Writer.WriteString(`<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>dsysメール確認システム</title>
+    <meta http-equiv="refresh" content="5; URL=` + config.Conf.Web.URL + `">
+</head>
+<body>
+<h1>メールの確認ができました。</h1>
+<p>5秒後にログイン画面に移動します</p>
+</body>
+</html>`)
 	}
 }
 
 func Update(c *gin.Context) {
-	var input user.User
+	var input user.Input
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, user.Result{Status: false, Error: fmt.Sprintf("id error")})
+		c.JSON(http.StatusBadRequest, common.Error{Error: fmt.Sprintf("id error")})
 		return
 	}
+
+	if id == 0 {
+		c.JSON(http.StatusBadRequest, common.Error{Error: "error: This GroupID is bad request (0)"})
+		return
+	}
+
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	log.Println(c.BindJSON(&input))
+	err = c.BindJSON(&input)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
 
-	authResult := auth.UserAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	authResult := auth.UserAuthentication(core.Token{UserToken: userToken, AccessToken: accessToken})
 	if authResult.Err != nil {
-		c.JSON(http.StatusUnauthorized, user.Result{Status: false, Error: authResult.Err.Error()})
+		c.JSON(http.StatusUnauthorized, common.Error{Error: authResult.Err.Error()})
 		return
 	}
 
-	if !*authResult.User.MailVerify {
-		c.JSON(http.StatusBadRequest, user.Result{Status: false, Error: "not verify for user mail"})
-		return
-	}
-
-	var u, serverData user.User
+	var u, serverData core.User
 
 	if authResult.User.ID == uint(id) || id == 0 {
 		serverData = authResult.User
-		u.Model.ID = authResult.User.ID
-		u.Status = authResult.User.Status
 	} else {
 		if authResult.User.GroupID == 0 {
-			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: "error: Group ID = 0"})
+			c.JSON(http.StatusForbidden, common.Error{Error: "error: Group ID = 0"})
 			return
 		}
-		if authResult.User.Level > 1 {
-			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: "error: failed user level"})
+		if authResult.User.Level > 2 {
+			c.JSON(http.StatusForbidden, common.Error{Error: "error: failed user level"})
 			return
 		}
-		userResult := dbUser.Get(user.ID, &user.User{Model: gorm.Model{ID: uint(id)}})
+		userResult := dbUser.Get(user.ID, &core.User{Model: gorm.Model{ID: uint(id)}})
 		if userResult.Err != nil {
-			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: userResult.Err.Error()})
+			c.JSON(http.StatusInternalServerError, common.Error{Error: userResult.Err.Error()})
 			return
 		}
 		if userResult.User[0].GroupID != authResult.User.GroupID {
-			c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: fmt.Sprintf("failed group authentication")})
+			c.JSON(http.StatusInternalServerError, common.Error{Error: fmt.Sprintf("failed group authentication")})
 			return
 		}
 		serverData = userResult.User[0]
-		u.Model.ID = uint(id)
-		u.Status = userResult.User[0].Status
 	}
 
 	u, err = replaceUser(serverData, input)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
 
-	if err := dbUser.Update(user.UpdateAll, &u); err != nil {
-		c.JSON(http.StatusInternalServerError, user.Result{Status: false, Error: err.Error()})
+	noticeSlack(authResult.User, serverData, input)
+
+	if err = dbUser.Update(user.UpdateAll, &u); err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 	} else {
-		c.JSON(http.StatusOK, user.Result{Status: true})
+		c.JSON(http.StatusOK, user.Result{})
 	}
 }
 
@@ -215,13 +348,88 @@ func Get(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	authResult := auth.UserAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: fmt.Sprintf("id error")})
+		return
+	}
+
+	authResult := auth.UserAuthentication(core.Token{UserToken: userToken, AccessToken: accessToken})
 	authResult.User.Pass = ""
 	authResult.User.MailToken = ""
 	if authResult.Err != nil {
-		c.JSON(http.StatusUnauthorized, user.Result{Status: false, Error: authResult.Err.Error()})
+		c.JSON(http.StatusUnauthorized, common.Error{Error: authResult.Err.Error()})
+		return
+	}
+
+	var tmpUser core.User
+
+	if authResult.User.ID == uint(id) {
+		tmpUser = authResult.User
+	} else if authResult.User.GroupID != 0 {
+		if authResult.User.Level >= 3 {
+			c.JSON(http.StatusForbidden, common.Error{Error: "You don't have the authority."})
+			return
+		}
+
+		resultUser := dbUser.Get(user.ID, &core.User{Model: gorm.Model{ID: uint(id)}})
+		if resultUser.Err != nil {
+			c.JSON(http.StatusUnauthorized, common.Error{Error: resultUser.Err.Error()})
+			return
+		}
+
+		if resultUser.User[0].GroupID != authResult.User.GroupID {
+			c.JSON(http.StatusBadRequest, common.Error{Error: "GroupID is not match."})
+			return
+		}
+		tmpUser = resultUser.User[0]
+	}
+
+	c.JSON(http.StatusOK, user.ResultOne{
+		ID:         tmpUser.ID,
+		GroupID:    tmpUser.GroupID,
+		Name:       tmpUser.Name,
+		NameEn:     tmpUser.NameEn,
+		Email:      tmpUser.Email,
+		Level:      tmpUser.Level,
+		MailVerify: tmpUser.MailVerify,
+	})
+}
+
+func GetOwn(c *gin.Context) {
+	userToken := c.Request.Header.Get("USER_TOKEN")
+	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
+
+	authResult := auth.UserAuthentication(core.Token{UserToken: userToken, AccessToken: accessToken})
+	authResult.User.Pass = ""
+	authResult.User.MailToken = ""
+
+	var simpleGroup *user.SimpleGroup = nil
+
+	if authResult.User.Group != nil {
+		simpleGroup = &user.SimpleGroup{
+			ID:            authResult.User.Group.ID,
+			Student:       authResult.User.Group.Student,
+			Pass:          authResult.User.Group.Pass,
+			Lock:          authResult.User.Group.Lock,
+			ExpiredStatus: authResult.User.Group.ExpiredStatus,
+			Status:        authResult.User.Group.Status,
+		}
+	}
+
+	if authResult.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: authResult.Err.Error()})
 	} else {
-		c.JSON(http.StatusOK, user.ResultOne{Status: true, User: authResult.User})
+		c.JSON(http.StatusOK, user.ResultOne{
+			ID:         authResult.User.ID,
+			GroupID:    authResult.User.GroupID,
+			Name:       authResult.User.Name,
+			NameEn:     authResult.User.NameEn,
+			Email:      authResult.User.Email,
+			Level:      authResult.User.Level,
+			MailVerify: authResult.User.MailVerify,
+			Group:      simpleGroup,
+		})
 	}
 }
 
@@ -229,21 +437,44 @@ func GetGroup(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	authResult := auth.GroupAuthentication(token.Token{UserToken: userToken, AccessToken: accessToken})
-	result := dbUser.Get(user.GID, &user.User{GroupID: authResult.Group.ID})
-	if result.Err != nil {
-		c.JSON(http.StatusUnauthorized, user.Result{Status: false, Error: result.Err.Error()})
+	authUserResult := auth.UserAuthentication(core.Token{UserToken: userToken, AccessToken: accessToken})
+	if authUserResult.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: authUserResult.Err.Error()})
 		return
 	}
 
-	var data []user.User
+	var data user.Result
 
-	for _, tmp := range result.User {
-		tmp.Pass = ""
-		tmp.MailToken = ""
-		if 0 < tmp.Status && tmp.Status < 100 {
-			data = append(data, tmp)
+	if authUserResult.User.GroupID != 0 && authUserResult.User.Level < 3 {
+		resultGroupUser := dbUser.Get(user.GID, &core.User{GroupID: authUserResult.User.GroupID})
+		if resultGroupUser.Err != nil {
+			c.JSON(http.StatusInternalServerError, common.Error{Error: resultGroupUser.Err.Error()})
+			return
 		}
+
+		for _, grp := range resultGroupUser.User {
+			data.User = append(data.User, user.ResultOne{
+				ID:         grp.ID,
+				GroupID:    grp.GroupID,
+				Name:       grp.Name,
+				NameEn:     grp.NameEn,
+				Email:      grp.Email,
+				Level:      grp.Level,
+				MailVerify: grp.MailVerify,
+			})
+		}
+	} else {
+		// User権限がLevel=2の時、又はユーザのGroupIDが0の時（グループ未登録時）
+		data.User = append(data.User, user.ResultOne{
+			ID:         authUserResult.User.ID,
+			GroupID:    authUserResult.User.GroupID,
+			Name:       authUserResult.User.Name,
+			NameEn:     authUserResult.User.NameEn,
+			Email:      authUserResult.User.Email,
+			Level:      authUserResult.User.Level,
+			MailVerify: authUserResult.User.MailVerify,
+		})
 	}
-	c.JSON(http.StatusOK, user.Result{Status: true, User: data})
+
+	c.JSON(http.StatusOK, data)
 }

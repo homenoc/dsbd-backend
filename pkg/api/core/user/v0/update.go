@@ -2,6 +2,7 @@ package v0
 
 import (
 	"fmt"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/mail"
 	toolToken "github.com/homenoc/dsbd-backend/pkg/api/core/tool/token"
@@ -11,8 +12,7 @@ import (
 	"strings"
 )
 
-func replaceUser(serverData, input user.User) (user.User, error) {
-	updateInfo := 0
+func replaceUser(serverData core.User, input user.Input) (core.User, error) {
 	//Name
 	if input.Name != "" {
 		serverData.Name = input.Name
@@ -26,9 +26,9 @@ func replaceUser(serverData, input user.User) (user.User, error) {
 	//E-Mail
 	if input.Email != "" {
 		if !strings.Contains(input.Email, "@") {
-			return user.User{}, fmt.Errorf("wrong email address")
+			return core.User{}, fmt.Errorf("wrong email address")
 		}
-		tmp := dbUser.Get(user.Email, &user.User{Email: input.Email})
+		tmp := dbUser.Get(user.Email, &core.User{Email: input.Email})
 		if tmp.Err != nil {
 			return serverData, tmp.Err
 		}
@@ -46,7 +46,7 @@ func replaceUser(serverData, input user.User) (user.User, error) {
 			ToMail:  input.Email,
 			Subject: "本人確認のメールにつきまして",
 			Content: " " + serverData.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
-				config.Conf.Controller.User.Url + "/api/v1/user/verify/" + mailToken + "\n" +
+				config.Conf.Controller.User.Url + "/api/v1/verify/" + mailToken + "\n" +
 				"本人確認が完了次第、ログイン可能になります。\n",
 		})
 	}
@@ -54,98 +54,27 @@ func replaceUser(serverData, input user.User) (user.User, error) {
 	//Pass
 	if input.Pass != "" {
 		serverData.Pass = input.Pass
+
+		mail.SendMail(mail.Mail{
+			ToMail:  serverData.Email,
+			Subject: "[通知] パスワード変更",
+			Content: " " + serverData.Name + "様\n\n" + "パスワードが変更されました。\n",
+		})
 	}
 
-	//GroupHandle
-	if input.GroupHandle != serverData.GroupHandle {
-		serverData.GroupHandle = input.GroupHandle
-	}
-
-	//Org
-	if input.Org != "" {
-		serverData.Org = input.Org
-		updateInfo++
-	}
-
-	//Org (English)
-	if input.OrgEn != "" {
-		serverData.OrgEn = input.OrgEn
-		updateInfo++
-	}
-
-	//PostCode
-	if input.PostCode != "" {
-		serverData.PostCode = input.PostCode
-		updateInfo++
-	}
-
-	//Address
-	if input.Address != "" {
-		serverData.Address = input.Address
-		updateInfo++
-	}
-
-	//Address(English)
-	if input.AddressEn != "" {
-		serverData.AddressEn = input.AddressEn
-		updateInfo++
-	}
-
-	//Dept
-	if input.Dept != "" {
-		serverData.Dept = input.Dept
-		updateInfo++
-	}
-
-	//Dept(English)
-	if input.DeptEn != "" {
-		serverData.DeptEn = input.DeptEn
-		updateInfo++
-	}
-
-	//Pos
-	if input.Pos != "" {
-		serverData.Pos = input.Pos
-		updateInfo++
-	}
-
-	//Pos(English)
-	if input.PosEn != "" {
-		serverData.PosEn = input.PosEn
-		updateInfo++
-	}
-
-	//Tel
-	if input.Tel != "" {
-		serverData.Tel = input.Tel
-		updateInfo++
-	}
-
-	//Fax
-	if input.Fax != "" {
-		serverData.Fax = input.Fax
-		updateInfo++
-	}
-
-	//Country
-	if input.Country != "" {
-		serverData.Country = input.Country
-		updateInfo++
-	}
-
-	//Tech
-	if serverData.GroupID != 0 && serverData.Level <= 1 && input.Status == 1 {
-		serverData.Tech = input.Tech
-	}
-
-	if serverData.Status == 0 && updateInfo == 12 {
-		serverData.Status = 1
+	//Level
+	if input.Level != 0 {
+		if !(1 < input.Level && input.Level < 5) {
+			return core.User{}, fmt.Errorf("error: user level is invalid")
+		} else {
+			serverData.Level = input.Level
+		}
 	}
 
 	return serverData, nil
 }
 
-func updateAdminUser(input, replace user.User) (user.User, error) {
+func updateAdminUser(input, replace core.User) (core.User, error) {
 	//Name
 	if input.Name != "" {
 		replace.Name = input.Name
@@ -159,9 +88,9 @@ func updateAdminUser(input, replace user.User) (user.User, error) {
 	//E-Mail
 	if input.Email != "" {
 		if !strings.Contains(input.Email, "@") {
-			return user.User{}, fmt.Errorf("wrong email address")
+			return core.User{}, fmt.Errorf("wrong email address")
 		}
-		tmp := dbUser.Get(user.Email, &user.User{Email: input.Email})
+		tmp := dbUser.Get(user.Email, &core.User{Email: input.Email})
 		if tmp.Err != nil {
 			return replace, tmp.Err
 		}
@@ -181,76 +110,7 @@ func updateAdminUser(input, replace user.User) (user.User, error) {
 		replace.Pass = input.Pass
 	}
 
-	//Org
-	if input.Org != "" {
-		replace.Org = input.Org
-	}
-
-	//Org (English)
-	if input.OrgEn != "" {
-		replace.OrgEn = input.OrgEn
-	}
-
-	//PostCode
-	if input.PostCode != "" {
-		replace.PostCode = input.PostCode
-	}
-
-	//Address
-	if input.Address != "" {
-		replace.Address = input.Address
-	}
-
-	//Address(English)
-	if input.AddressEn != "" {
-		replace.AddressEn = input.AddressEn
-	}
-
-	//Dept
-	if input.Dept != "" {
-		replace.Dept = input.Dept
-	}
-
-	//Dept(English)
-	if input.DeptEn != "" {
-		replace.DeptEn = input.DeptEn
-	}
-
-	//Pos
-	if input.Pos != "" {
-		replace.Pos = input.Pos
-	}
-
-	//Pos(English)
-	if input.PosEn != "" {
-		replace.PosEn = input.PosEn
-	}
-
-	//Tel
-	if input.Tel != "" {
-		replace.Tel = input.Tel
-	}
-
-	//Fax
-	if input.Fax != "" {
-		replace.Fax = input.Fax
-	}
-
-	//Country
-	if input.Country != "" {
-		replace.Country = input.Country
-	}
-
 	// uint boolean
-	//Tech
-	if input.Tech != replace.Tech {
-		replace.Tech = input.Tech
-	}
-
-	//Status
-	if input.Status != replace.Status {
-		replace.Status = input.Status
-	}
 
 	//Level
 	if input.Level != replace.Level {

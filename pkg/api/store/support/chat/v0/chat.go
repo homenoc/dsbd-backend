@@ -2,6 +2,7 @@ package v0
 
 import (
 	"fmt"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support/chat"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
 	"github.com/jinzhu/gorm"
@@ -9,7 +10,7 @@ import (
 	"time"
 )
 
-func Create(support *chat.Chat) (*chat.Chat, error) {
+func Create(support *core.Chat) (*core.Chat, error) {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -21,7 +22,7 @@ func Create(support *chat.Chat) (*chat.Chat, error) {
 	return support, err
 }
 
-func Delete(support *chat.Chat) error {
+func Delete(support *core.Chat) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -32,7 +33,7 @@ func Delete(support *chat.Chat) error {
 	return db.Delete(support).Error
 }
 
-func Update(base int, s chat.Chat) error {
+func Update(base int, s core.Chat) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -43,10 +44,14 @@ func Update(base int, s chat.Chat) error {
 	var result *gorm.DB
 
 	if chat.UpdateUserID == base {
-		result = db.Model(&chat.Chat{Model: gorm.Model{ID: s.ID}}).Update(chat.Chat{UserID: s.UserID})
+		result = db.Model(&core.Chat{Model: gorm.Model{ID: s.ID}}).Update(core.Chat{UserID: s.UserID})
 	} else if chat.UpdateAll == base {
-		result = db.Model(&chat.Chat{Model: gorm.Model{ID: s.ID}}).Update(chat.Chat{
-			TicketID: s.TicketID, UserID: s.UserID, Admin: s.Admin, Data: s.Data})
+		result = db.Model(&core.Chat{Model: gorm.Model{ID: s.ID}}).Update(core.Chat{
+			TicketID: s.TicketID,
+			UserID:   s.UserID,
+			Admin:    s.Admin,
+			Data:     s.Data,
+		})
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
@@ -54,7 +59,7 @@ func Update(base int, s chat.Chat) error {
 	return result.Error
 }
 
-func Get(base int, data *chat.Chat) chat.ResultDatabase {
+func Get(base int, data *core.Chat) chat.ResultDatabase {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -62,7 +67,7 @@ func Get(base int, data *chat.Chat) chat.ResultDatabase {
 	}
 	defer db.Close()
 
-	var chatStruct []chat.Chat
+	var chatStruct []core.Chat
 
 	if base == chat.ID { //ID
 		err = db.First(&chatStruct, data.ID).Error
@@ -83,7 +88,7 @@ func GetAll() chat.ResultDatabase {
 	}
 	defer db.Close()
 
-	var chats []chat.Chat
+	var chats []core.Chat
 	err = db.Find(&chats).Error
 	return chat.ResultDatabase{Chat: chats, Err: err}
 }

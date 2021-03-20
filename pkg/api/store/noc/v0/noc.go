@@ -2,6 +2,7 @@ package v0
 
 import (
 	"fmt"
+	core "github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/noc"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
 	"github.com/jinzhu/gorm"
@@ -9,7 +10,7 @@ import (
 	"time"
 )
 
-func Create(noc *noc.NOC) (*noc.NOC, error) {
+func Create(noc *core.NOC) (*core.NOC, error) {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -21,7 +22,7 @@ func Create(noc *noc.NOC) (*noc.NOC, error) {
 	return noc, err
 }
 
-func Delete(noc *noc.NOC) error {
+func Delete(noc *core.NOC) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -32,7 +33,7 @@ func Delete(noc *noc.NOC) error {
 	return db.Delete(noc).Error
 }
 
-func Update(base int, data noc.NOC) error {
+func Update(base int, data core.NOC) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -43,9 +44,13 @@ func Update(base int, data noc.NOC) error {
 	var result *gorm.DB
 
 	if noc.UpdateAll == base {
-		result = db.Model(&noc.NOC{Model: gorm.Model{ID: data.ID}}).Update(noc.NOC{
-			Name: data.Name, Location: data.Location, Bandwidth: data.Bandwidth,
-			Enable: data.Enable, Comment: data.Comment})
+		result = db.Model(&core.NOC{Model: gorm.Model{ID: data.ID}}).Update(core.NOC{
+			Name:      data.Name,
+			Location:  data.Location,
+			Bandwidth: data.Bandwidth,
+			Enable:    data.Enable,
+			Comment:   data.Comment,
+		})
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
@@ -53,7 +58,7 @@ func Update(base int, data noc.NOC) error {
 	return result.Error
 }
 
-func Get(base int, data *noc.NOC) noc.ResultDatabase {
+func Get(base int, data *core.NOC) noc.ResultDatabase {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -61,7 +66,7 @@ func Get(base int, data *noc.NOC) noc.ResultDatabase {
 	}
 	defer db.Close()
 
-	var nocStruct []noc.NOC
+	var nocStruct []core.NOC
 
 	if base == noc.ID { //ID
 		err = db.First(&nocStruct, data.ID).Error
@@ -84,7 +89,10 @@ func GetAll() noc.ResultDatabase {
 	}
 	defer db.Close()
 
-	var nocs []noc.NOC
-	err = db.Find(&nocs).Error
+	var nocs []core.NOC
+	err = db.Preload("BGPRouter").
+		Preload("TunnelEndPointRouter").
+		Preload("TunnelEndPointRouter.TunnelEndPointRouterIP").
+		Find(&nocs).Error
 	return noc.ResultDatabase{NOC: nocs, Err: err}
 }

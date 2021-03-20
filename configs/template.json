@@ -1,0 +1,201 @@
+{
+  "service": [
+    {
+      "type": "2000",
+      "hidden": false,
+      "name": "L2",
+      "comment": "L2接続"
+    },
+    {
+      "type": "3S00",
+      "hidden": false,
+      "name": "L3 Static",
+      "comment": "Staticにて接続"
+    },
+    {
+      "type": "3B00",
+      "hidden": false,
+      "name": "L3 BGP",
+      "comment": "BGPにて接続"
+    },
+    {
+      "type": "IP3B",
+      "hidden": false,
+      "name": "トランジット提供",
+      "comment": "グローバルASのユーザに対するトランジット提供(L3 BGP)"
+    },
+    {
+      "type": "CL20",
+      "hidden": true,
+      "name": "CoLocation",
+      "comment": "団体所有のラックにおけるコロケーションサービス(L2)"
+    },
+    {
+      "type": "CL3S",
+      "hidden": true,
+      "name": "CoLocation",
+      "comment": "団体所有のラックにおけるコロケーションサービス(L3 Static)"
+    },
+    {
+      "type": "CL3B",
+      "hidden": true,
+      "name": "CoLocation",
+      "comment": "団体所有のラックにおけるコロケーションサービス(L3 BGP)"
+    },
+    {
+      "type": "ET00",
+      "hidden": true,
+      "name": "その他",
+      "comment": "その他"
+    }
+  ],
+  "connection": [
+    {
+      "type": "EIP",
+      "hidden": false,
+      "name": "Ether IP",
+      "comment": "EtherIP上で提供"
+    },
+    {
+      "type": "IPT",
+      "hidden": false,
+      "name": "IPトンネル",
+      "comment": "IP-IP又はGREトンネル上で/30のP2P接続を行う"
+    },
+    {
+      "type": "CC0",
+      "hidden": false,
+      "name": "Cross Connect",
+      "comment": "校内接続、構内線、キャリア専用線上で提供\n"
+    },
+    {
+      "type": "ETC",
+      "hidden": false,
+      "name": "その他",
+      "comment": "その他の接続方式"
+    }
+  ],
+  "ntt": [
+    {
+      "hidden": false,
+      "name": "はい（IPoEによりIPv6インターネットへ接続可能）",
+      "comment": "はい（IPoEによりIPv6インターネットへ接続可能）"
+    },
+    {
+      "hidden": false,
+      "name": "はい（IPoEによりIPv6インターネットへ接続不可）",
+      "comment": "はい（IPoEによりIPv6インターネットへ接続不可）"
+    },
+    {
+      "hidden": false,
+      "name": "はい（フレッツv6オプションの契約なし）",
+      "comment": "はい（フレッツv6オプションの契約なし）"
+    },
+    {
+      "hidden": false,
+      "name": "いいえ（フレッツ以外でインターネットに接続可能）",
+      "comment": "いいえ（フレッツ以外でインターネットに接続可能）"
+    },
+    {
+      "hidden": false,
+      "name": "いいえ（IPv6でのインターネット接続不可）",
+      "comment": "いいえ（IPv6でのインターネット接続不可）"
+    }
+  ],
+  "noc": [
+    {
+      "name": "NOC01",
+      "location": "神奈川県横浜市",
+      "bandwidth": "2Gbps",
+      "enable": true,
+      "comment": "",
+      "bgp_router": [
+        {
+          "address": "",
+          "hostname": "noc01er01",
+          "enable": true
+        }
+      ]
+    },
+    {
+      "name": "NOC02",
+      "location": "千葉県市川市",
+      "bandwidth": "1Gbps",
+      "enable": true,
+      "comment": "",
+      "bgp_router": [
+        {
+          "address": "",
+          "hostname": "noc02er01",
+          "enable": true
+        }
+      ]
+    },
+    {
+      "name": "NOC05",
+      "location": "東京都渋谷区",
+      "bandwidth": "1Gbps",
+      "enable": true,
+      "comment": "",
+      "bgp_router": [
+        {
+          "address": "",
+          "hostname": "noc05er01",
+          "enable": true
+        }
+      ]
+    },
+    {
+      "name": "POP03",
+      "location": "東京都渋谷区",
+      "bandwidth": "10Gbps",
+      "enable": true,
+      "comment": "渋谷DC",
+      "bgp_router": [
+        {
+          "address": "",
+          "hostname": "pop03er01",
+          "enable": true
+        },
+        {
+          "address": "",
+          "hostname": "pop03er02",
+          "enable": true
+        },
+        {
+          "address": "",
+          "hostname": "pop03er03",
+          "enable": true
+        }
+      ]
+    },
+    {
+      "name": "POP52",
+      "location": "大阪府大阪市",
+      "bandwidth": "10Gbps",
+      "enable": true,
+      "comment": "堂島DC",
+      "bgp_router": [
+        {
+          "address": "",
+          "hostname": "pop52er01",
+          "enable": true
+        }
+      ]
+    },
+    {
+      "name": "NOC51",
+      "location": "大阪府貝塚市",
+      "bandwidth": "",
+      "enable": true,
+      "comment": "",
+      "bgp_router": [
+        {
+          "address": "",
+          "hostname": "noc51er01",
+          "enable": true
+        }
+      ]
+    }
+  ]
+}

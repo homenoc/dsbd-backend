@@ -1,12 +1,9 @@
 package group
 
 import (
-	connection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
-	network "github.com/homenoc/dsbd-backend/pkg/api/core/group/network"
-	jpnicAdmin "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicAdmin"
-	jpnicTech "github.com/homenoc/dsbd-backend/pkg/api/core/group/network/jpnicTech"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
-	"github.com/jinzhu/gorm"
 )
 
 const (
@@ -19,60 +16,60 @@ const (
 	UpdateStatus = 102
 	UpdateTechID = 103
 	UpdateInfo   = 104
-	UpdateAll    = 110
+	UpdateAll    = 150
 )
 
+type Input struct {
+	Agree          *bool   `json:"agree"`
+	Question       string  `json:"question"`
+	Org            string  `json:"org"`
+	OrgEn          string  `json:"org_en"`
+	PostCode       string  `json:"postcode"`
+	Address        string  `json:"address"`
+	AddressEn      string  `json:"address_en"`
+	Tel            string  `json:"tel"`
+	Country        string  `json:"country"`
+	Contract       string  `json:"contract"`
+	Student        *bool   `json:"student"`
+	StudentExpired *string `json:"student_expired"`
+}
+
+type ResultAdmin struct {
+	Group core.Group `json:"group"`
+}
+
+type ResultAdminAll struct {
+	Group []core.Group `json:"group"`
+}
+
 type Group struct {
-	gorm.Model
-	Agree     *bool  `json:"agree"`
-	Question  string `json:"question"`
-	Org       string `json:"org"`
-	Status    uint   `json:"status"`
-	Bandwidth string `json:"bandwidth"`
-	Contract  string `json:"contract"`
-	Student   *bool  `json:"student"`
-	Comment   string `json:"comment"`
-	Lock      *bool  `json:"lock"`
+	ID            uint               `json:"id"`
+	Agree         *bool              `json:"agree"`
+	Question      string             `json:"question"`
+	Org           string             `json:"org"`
+	OrgEn         string             `json:"org_en"`
+	PostCode      string             `json:"postcode"`
+	Address       string             `json:"address"`
+	AddressEn     string             `json:"address_en"`
+	Tel           string             `json:"tel"`
+	Country       string             `json:"country"`
+	Status        uint               `json:"status"`
+	Bandwidth     string             `json:"bandwidth"`
+	Contract      string             `json:"contract"`
+	Student       *bool              `json:"student"`
+	Pass          *bool              `json:"pass"`
+	Lock          *bool              `json:"lock"`
+	ExpiredStatus uint               `json:"expired_status"`
+	Open          *bool              `json:"open"`
+	Service       *[]service.Service `json:"service"`
+	User          []user.User        `json:"user"`
 }
 
 type Result struct {
-	Status bool    `json:"status"`
-	Error  string  `json:"error"`
-	Group  []Group `json:"group"`
-}
-
-type AdminResult struct {
-	Status     bool                    `json:"status"`
-	Error      string                  `json:"error"`
-	User       []user.User             `json:"user"`
-	Group      []Group                 `json:"group"`
-	Network    []NetworkInfo           `json:"network"`
-	Connection []connection.Connection `json:"connection"`
-}
-
-type NetworkInfo struct {
-	Network    network.Network         `json:"network"`
-	JPNICAdmin []jpnicAdmin.JpnicAdmin `json:"jpnic_admin"`
-	JPNICTech  []jpnicTech.JpnicTech   `json:"jpnic_tech"`
-}
-
-type ResultOne struct {
-	Status bool   `json:"status"`
-	Error  string `json:"error"`
-	Group  Group  `json:"group"`
-}
-
-type ResultAll struct {
-	Status     bool                    `json:"status"`
-	Error      string                  `json:"error"`
-	Group      Group                   `json:"group"`
-	Network    []network.Network       `json:"network"`
-	JpnicAdmin []jpnicAdmin.JpnicAdmin `json:"admin"`
-	JpnicTech  []jpnicTech.JpnicTech   `json:"tech"`
-	Connection []connection.Connection `json:"connection"`
+	Group Group `json:"group"`
 }
 
 type ResultDatabase struct {
 	Err   error
-	Group []Group
+	Group []core.Group
 }

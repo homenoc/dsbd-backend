@@ -2,6 +2,7 @@ package v0
 
 import (
 	"fmt"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
 	"github.com/jinzhu/gorm"
@@ -9,7 +10,7 @@ import (
 	"time"
 )
 
-func Create(t *token.Token) error {
+func Create(t *core.Token) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -20,7 +21,7 @@ func Create(t *token.Token) error {
 	return db.Create(t).Error
 }
 
-func Delete(t *token.Token) error {
+func Delete(t *core.Token) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -42,7 +43,7 @@ func DeleteAll() error {
 	return db.Exec("DELETE FROM tokens").Error
 }
 
-func Update(base int, t *token.Token) error {
+func Update(base int, t *core.Token) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -51,14 +52,20 @@ func Update(base int, t *token.Token) error {
 	defer db.Close()
 
 	if token.AddToken == base {
-		err = db.Model(&token.Token{Model: gorm.Model{ID: t.ID}}).Update(token.Token{Model: gorm.Model{},
+		err = db.Model(&core.Token{Model: gorm.Model{ID: t.ID}}).Update(core.Token{Model: gorm.Model{},
 			ExpiredAt: t.ExpiredAt, UserID: t.UserID, Status: t.Status, AccessToken: t.AccessToken}).Error
 	} else if token.UpdateToken == base {
-		err = db.Model(&token.Token{Model: gorm.Model{ID: t.ID}}).Update("expired_at", t.ExpiredAt).Error
+		err = db.Model(&core.Token{Model: gorm.Model{ID: t.ID}}).Update("expired_at", t.ExpiredAt).Error
 	} else if token.UpdateAll == base {
-		err = db.Model(&token.Token{Model: gorm.Model{ID: t.ID}}).Update(token.Token{
-			ExpiredAt: t.ExpiredAt, UserID: t.UserID, Status: t.Status, UserToken: t.UserToken, TmpToken: t.TmpToken,
-			AccessToken: t.AccessToken, Debug: t.Debug}).Error
+		err = db.Model(&core.Token{Model: gorm.Model{ID: t.ID}}).Update(core.Token{
+			ExpiredAt:   t.ExpiredAt,
+			UserID:      t.UserID,
+			Status:      t.Status,
+			UserToken:   t.UserToken,
+			TmpToken:    t.TmpToken,
+			AccessToken: t.AccessToken,
+			Debug:       t.Debug,
+		}).Error
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n %s", time.Now(), err)
@@ -67,7 +74,7 @@ func Update(base int, t *token.Token) error {
 }
 
 // value of base can reference from api/core/user/interface.go
-func Get(base int, input *token.Token) token.ResultDatabase {
+func Get(base int, input *core.Token) token.ResultDatabase {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -75,14 +82,17 @@ func Get(base int, input *token.Token) token.ResultDatabase {
 	}
 	defer db.Close()
 
-	var tokenStruct []token.Token
+	var tokenStruct []core.Token
 
 	if base == token.UserToken {
 		err = db.Where("user_token = ? AND admin = ? AND expired_at > ?",
 			input.UserToken, false, time.Now()).Find(&tokenStruct).Error
 	} else if base == token.UserTokenAndAccessToken {
 		err = db.Where("user_token = ? AND access_token = ? AND admin = ? AND expired_at > ?",
-			input.UserToken, input.AccessToken, false, time.Now()).Find(&tokenStruct).Error
+			input.UserToken, input.AccessToken, false, time.Now()).
+			Preload("User").
+			Preload("User.Group").
+			Find(&tokenStruct).Error
 	} else if base == token.AdminToken {
 		err = db.Where("access_token = ? AND admin = ? AND expired_at > ?",
 			input.AccessToken, true, time.Now()).Find(&tokenStruct).Error
@@ -103,7 +113,7 @@ func GetAll() token.ResultDatabase {
 	}
 	defer db.Close()
 
-	var tokens []token.Token
+	var tokens []core.Token
 	err = db.Find(&tokens).Error
 	return token.ResultDatabase{Token: tokens, Err: err}
 }

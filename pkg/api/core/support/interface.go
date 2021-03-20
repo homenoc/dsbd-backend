@@ -2,8 +2,7 @@ package support
 
 import (
 	"github.com/gorilla/websocket"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/support/chat"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/support/ticket"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/jinzhu/gorm"
 	"time"
 )
@@ -20,15 +19,26 @@ type WebSocketResult struct {
 	UserToken   string    `json:"user_token"`
 	AccessToken string    `json:"access_token"`
 	UserID      uint      `json:"user_id"`
+	UserName    string    `json:"user_name"`
 	GroupID     uint      `json:"group_id"`
 	Admin       bool      `json:"admin"`
 	Message     string    `json:"message"`
+}
+
+type WebSocketChatResponse struct {
+	Time     string `json:"time"`
+	UserID   uint   `json:"user_id"`
+	UserName string `json:"username"`
+	GroupID  uint   `json:"group_id"`
+	Admin    bool   `json:"admin"`
+	Message  string `json:"message"`
 }
 
 type WebSocket struct {
 	TicketID uint
 	GroupID  uint
 	UserID   uint
+	UserName string
 	Admin    bool
 	Socket   *websocket.Conn
 }
@@ -42,8 +52,6 @@ type FirstInput struct {
 }
 
 type Result struct {
-	Status bool            `json:"status"`
-	Error  string          `json:"error"`
-	Ticket []ticket.Ticket `json:"support_ticket"`
-	Chat   []chat.Chat     `json:"support_chat"`
+	Ticket []core.Ticket `json:"ticket"`
+	Chat   []core.Chat   `json:"chat"`
 }

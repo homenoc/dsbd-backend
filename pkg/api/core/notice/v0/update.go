@@ -1,10 +1,8 @@
 package v0
 
-import (
-	"github.com/homenoc/dsbd-backend/pkg/api/core/notice"
-)
+import "github.com/homenoc/dsbd-backend/pkg/api/core"
 
-func updateAdminUser(input, replace notice.Notice) notice.Notice {
+func updateAdminUser(input, replace core.Notice) core.Notice {
 
 	//Title
 	if input.Title != "" {
@@ -29,8 +27,8 @@ func updateAdminUser(input, replace notice.Notice) notice.Notice {
 		replace.StartTime = input.StartTime
 	}
 	//EndTime
-	if input.EndingTime != replace.EndingTime {
-		replace.EndingTime = input.EndingTime
+	if input.EndTime != replace.EndTime {
+		replace.EndTime = input.EndTime
 	}
 	//Everyone
 	if input.Everyone != replace.Everyone {

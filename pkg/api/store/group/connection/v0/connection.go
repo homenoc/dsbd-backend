@@ -2,6 +2,7 @@ package v0
 
 import (
 	"fmt"
+	core "github.com/homenoc/dsbd-backend/pkg/api/core"
 	connection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
 	"github.com/jinzhu/gorm"
@@ -9,7 +10,7 @@ import (
 	"time"
 )
 
-func Create(connection *connection.Connection) (*connection.Connection, error) {
+func Create(connection *core.Connection) (*core.Connection, error) {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -21,7 +22,7 @@ func Create(connection *connection.Connection) (*connection.Connection, error) {
 	return connection, err
 }
 
-func Delete(connection *connection.Connection) error {
+func Delete(connection *core.Connection) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -32,7 +33,7 @@ func Delete(connection *connection.Connection) error {
 	return db.Delete(connection).Error
 }
 
-func Update(base int, c connection.Connection) error {
+func Update(base int, c core.Connection) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -43,17 +44,16 @@ func Update(base int, c connection.Connection) error {
 	var result *gorm.DB
 
 	if connection.UpdateInfo == base {
-		result = db.Model(&connection.Connection{Model: gorm.Model{ID: c.ID}}).Update(connection.Connection{
-			UserID: c.UserID, Service: c.Service, NTT: c.NTT, NOC: c.NOC, TermIP: c.TermIP, Monitor: c.Monitor})
-	} else if connection.UpdateUserInfo == base {
-		result = db.Model(&connection.Connection{Model: gorm.Model{ID: c.ID}}).Update(connection.Connection{UserID: c.UserID})
-	} else if connection.UpdateGID == base {
-		result = db.Model(&connection.Connection{Model: gorm.Model{ID: c.ID}}).Update(connection.Connection{GroupID: c.GroupID})
+		result = db.Model(&core.Connection{Model: gorm.Model{ID: c.ID}}).Update(core.Connection{
+			NTTTemplateID: c.NTTTemplateID,
+			NOC:           c.NOC,
+			TermIP:        c.TermIP,
+			Monitor:       c.Monitor,
+		})
+	} else if connection.UpdateServiceID == base {
+		result = db.Model(&core.Connection{Model: gorm.Model{ID: c.ID}}).Update(core.Connection{ServiceID: c.ServiceID})
 	} else if base == connection.UpdateAll {
-		result = db.Model(&connection.Connection{Model: gorm.Model{ID: c.ID}}).Update(connection.Connection{
-			GroupID: c.GroupID, ServiceID: c.ServiceID, UserID: c.UserID, Service: c.Service, NTT: c.NTT, NOC: c.NOC,
-			TermIP: c.TermIP, Monitor: c.Monitor, LinkV4Our: c.LinkV4Our, LinkV4Your: c.LinkV4Your,
-			LinkV6Our: c.LinkV6Our, LinkV6Your: c.LinkV6Your, Fee: c.Fee, Open: c.Open})
+		result = db.Model(&core.Connection{Model: gorm.Model{ID: c.ID}}).Update(c)
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
@@ -61,7 +61,7 @@ func Update(base int, c connection.Connection) error {
 	return result.Error
 }
 
-func Get(base int, data *connection.Connection) connection.ResultDatabase {
+func Get(base int, data *core.Connection) connection.ResultDatabase {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -69,12 +69,20 @@ func Get(base int, data *connection.Connection) connection.ResultDatabase {
 	}
 	defer db.Close()
 
-	var connectionStruct []connection.Connection
+	var connectionStruct []core.Connection
 
 	if base == connection.ID { //ID
-		err = db.First(&connectionStruct, data.ID).Error
-	} else if base == connection.GID {
-		err = db.Where("group_id = ?", data.GroupID).Find(&connectionStruct).Error
+		err = db.Preload("ConnectionTemplate").
+			Preload("NOC").
+			Preload("BGPRouter").
+			Preload("TunnelEndPointRouterIP").
+			Preload("NTTTemplate").
+			Preload("Service").
+			Preload("Service.ServiceTemplate").
+			Preload("Service.Group").
+			First(&connectionStruct, data.ID).Error
+	} else if base == connection.ServiceID {
+		err = db.Where("service_id = ?", data.ServiceID).Find(&connectionStruct).Error
 	} else {
 		log.Println("base select error")
 		return connection.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
@@ -90,8 +98,13 @@ func GetAll() connection.ResultDatabase {
 	}
 	defer db.Close()
 
-	var connections []connection.Connection
-	err = db.Find(&connections).Error
+	var connections []core.Connection
+	err = db.Preload("ConnectionTemplate").
+		Preload("NTTTemplate").
+		Preload("NOC").
+		Preload("BGPRouter").
+		Preload("TunnelEndPointRouterIP").
+		Find(&connections).Error
 	return connection.ResultDatabase{Connection: connections, Err: err}
 
 }
