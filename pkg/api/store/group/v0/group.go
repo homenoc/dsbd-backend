@@ -56,10 +56,6 @@ func Update(base int, g core.Group) error {
 		result = db.Model(&core.Group{Model: gorm.Model{ID: g.ID}}).Update("org", g.Org)
 	} else if group.UpdateStatus == base {
 		result = db.Model(&core.Group{Model: gorm.Model{ID: g.ID}}).Update("status", g.Status)
-	} else if group.UpdateInfo == base {
-		result = db.Model(&core.Group{Model: gorm.Model{ID: g.ID}}).Update(core.Group{
-			Org: g.Org,
-		})
 	} else if group.UpdateAll == base {
 		result = db.Model(&core.Group{Model: gorm.Model{ID: g.ID}}).Update(g)
 	} else {
