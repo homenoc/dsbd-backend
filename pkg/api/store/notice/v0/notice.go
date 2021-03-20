@@ -10,6 +10,10 @@ import (
 	"time"
 )
 
+//
+// DBに入っている情報はUTCベースなので注意が必要
+//
+
 func Create(notice *core.Notice) (*core.Notice, error) {
 	db, err := store.ConnectDB()
 	if err != nil {
@@ -72,7 +76,8 @@ func Get(base int, data *core.Notice) notice.ResultDatabase {
 
 	var noticeStruct []core.Notice
 
-	dateTime := time.Now()
+	//DBに入っているデータがUTCベースのため
+	dateTime := time.Now().Add(9 * time.Hour)
 
 	if base == notice.ID { //ID
 		err = db.First(&noticeStruct, data.ID).Error
