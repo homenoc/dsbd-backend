@@ -3,26 +3,68 @@ package v0
 import (
 	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
-	"log"
 	"strconv"
 )
 
-func noticeSlackAdmin(before, after core.Group) {
+func noticeSlack(loginUser core.User, before core.Group, after group.Input) {
 	// 審査ステータスのSlack通知
 	attachment := slack.Attachment{}
 
-	log.Println(*before.Pass)
-	log.Println(after.Pass)
-
 	attachment.AddField(slack.Field{Title: "Title", Value: "Group情報の更新"}).
-		AddField(slack.Field{Title: "申請者", Value: "管理者"}).
+		AddField(slack.Field{Title: "申請者", Value: strconv.Itoa(int(loginUser.ID)) + "-" + loginUser.Name}).
 		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(before.ID)) + ":" + before.Org}).
 		AddField(slack.Field{Title: "更新状況", Value: changeText(before, after)})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 }
 
-func changeText(before, after core.Group) string {
+func noticeSlackAdmin(before, after core.Group) {
+	// 審査ステータスのSlack通知
+	attachment := slack.Attachment{}
+
+	attachment.AddField(slack.Field{Title: "Title", Value: "Group情報の更新"}).
+		AddField(slack.Field{Title: "申請者", Value: "管理者"}).
+		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(before.ID)) + ":" + before.Org}).
+		AddField(slack.Field{Title: "更新状況", Value: changeTextAdmin(before, after)})
+	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+}
+
+func changeText(before core.Group, after group.Input) string {
+	data := ""
+
+	if after.Org != "" && after.Org != before.Org {
+		data += "Org: " + before.Org + "=>" + after.Org + "\n"
+	}
+
+	if after.OrgEn != "" && after.OrgEn != before.OrgEn {
+		data += "Org(En): " + before.OrgEn + "=>" + after.OrgEn + "\n"
+	}
+
+	if after.PostCode != "" && after.PostCode != before.PostCode {
+		data += "PostCode: " + before.PostCode + "=>" + after.PostCode + "\n"
+	}
+
+	if after.Address != "" && after.Address != before.Address {
+		data += "Address: " + before.Address + "=>" + after.Address + "\n"
+	}
+
+	if after.AddressEn != "" && after.AddressEn != before.AddressEn {
+		data += "Address(En): " + before.AddressEn + "=>" + after.AddressEn + "\n"
+	}
+
+	if after.Tel != "" && after.Tel != before.Tel {
+		data += "Tel: " + before.Tel + "=>" + after.Tel + "\n"
+	}
+
+	if after.Country != "" && after.Country != before.Country {
+		data += "Country: " + before.Country + "=>" + after.Country + "\n"
+	}
+
+	return data
+}
+
+func changeTextAdmin(before, after core.Group) string {
 	data := ""
 	if after.Open != nil {
 		if *before.Open != *after.Open {

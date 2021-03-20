@@ -335,7 +335,7 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	noticeSlack(serverData, input)
+	noticeSlack(authResult.User, serverData, input)
 
 	if err = dbUser.Update(user.UpdateAll, &u); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
