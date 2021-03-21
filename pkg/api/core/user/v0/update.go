@@ -3,8 +3,9 @@ package v0
 import (
 	"fmt"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/mail"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/mail/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/mail"
 	toolToken "github.com/homenoc/dsbd-backend/pkg/api/core/tool/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
@@ -42,7 +43,7 @@ func replaceUser(serverData core.User, input user.Input) (core.User, error) {
 		serverData.MailVerify = &[]bool{false}[0]
 		serverData.MailToken = mailToken
 
-		mail.SendMail(mail.Mail{
+		v0.SendMail(mail.Mail{
 			ToMail:  input.Email,
 			Subject: "本人確認のメールにつきまして",
 			Content: " " + serverData.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
@@ -55,7 +56,7 @@ func replaceUser(serverData core.User, input user.Input) (core.User, error) {
 	if input.Pass != "" {
 		serverData.Pass = input.Pass
 
-		mail.SendMail(mail.Mail{
+		v0.SendMail(mail.Mail{
 			ToMail:  serverData.Email,
 			Subject: "[通知] パスワード変更",
 			Content: " " + serverData.Name + "様\n\n" + "パスワードが変更されました。\n",

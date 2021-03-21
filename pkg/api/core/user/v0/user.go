@@ -8,10 +8,11 @@ import (
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/mail"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/mail/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/gen"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/hash"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/mail"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	toolToken "github.com/homenoc/dsbd-backend/pkg/api/core/tool/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
@@ -85,7 +86,7 @@ func Add(c *gin.Context) {
 		AddField(slack.Field{Title: "Name(English)", Value: input.NameEn})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 
-	mail.SendMail(mail.Mail{
+	v0.SendMail(mail.Mail{
 		ToMail:  data.Email,
 		Subject: "本人確認のメールにつきまして",
 		Content: " " + input.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
@@ -197,7 +198,7 @@ func AddGroup(c *gin.Context) {
 		AddField(slack.Field{Title: "Name(English)", Value: input.NameEn})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 
-	mail.SendMail(mail.Mail{
+	v0.SendMail(mail.Mail{
 		ToMail:  data.Email,
 		Subject: "本人確認メールにつきまして",
 		Content: " " + input.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +

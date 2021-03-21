@@ -9,9 +9,10 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	controllerInterface "github.com/homenoc/dsbd-backend/pkg/api/core/controller"
 	controller "github.com/homenoc/dsbd-backend/pkg/api/core/controller/v0"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/mail"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/mail/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support/ticket"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/mail"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbChat "github.com/homenoc/dsbd-backend/pkg/api/store/support/chat/v0"
 	dbTicket "github.com/homenoc/dsbd-backend/pkg/api/store/support/ticket/v0"
@@ -264,7 +265,7 @@ func GetAdminWebSocket(c *gin.Context) {
 				if len(resultUser.User) != 0 {
 					for _, userTmp := range resultUser.User {
 						//グループ側にメール送信
-						mail.SendMail(mail.Mail{
+						v0.SendMail(mail.Mail{
 							ToMail:  userTmp.Email,
 							Subject: "Supportより新着メッセージ",
 							Content: " " + userTmp.Name + "様\n\n" + "チャットより新着メッセージがあります\n" +
