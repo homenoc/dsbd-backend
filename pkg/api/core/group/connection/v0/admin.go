@@ -81,11 +81,6 @@ func AddAdmin(c *gin.Context) {
 		return
 	}
 
-	if !(*resultService.Service[0].AddAllow) {
-		c.JSON(http.StatusBadRequest, common.Error{Error: "error: You are not allowed to add any connection information."})
-		return
-	}
-
 	resultConnection := dbConnection.Get(connection.ServiceID, &core.Connection{ServiceID: uint(id)})
 	if resultConnection.Err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: resultConnection.Err.Error()})

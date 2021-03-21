@@ -156,6 +156,7 @@ func AddAdmin(c *gin.Context) {
 		JPNICTech:         input.JPNICTech,
 		Open:              &[]bool{false}[0],
 		Lock:              &[]bool{true}[0],
+		AddAllow:          &[]bool{false}[0],
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
