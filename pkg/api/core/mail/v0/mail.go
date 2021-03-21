@@ -1,9 +1,9 @@
-package mail
+package v0
 
 import (
 	"bytes"
 	"encoding/base64"
-	"fmt"
+	mailStruct "github.com/homenoc/dsbd-backend/pkg/api/core/mail"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"log"
 	"net/mail"
@@ -43,7 +43,7 @@ func encodeSubject(subject string) string {
 	return buffer.String()
 }
 
-func SendMail(d Mail) string {
+func SendMail(d mailStruct.Mail) error {
 	from := mail.Address{Name: "Home NOC Operators' Group Support", Address: config.Conf.Mail.From}
 	to := mail.Address{Address: d.ToMail}
 	receivers := []string{to.Address}
@@ -55,10 +55,15 @@ func SendMail(d Mail) string {
 		"\r\n" + d.Content + config.Conf.Mail.Contract + "\r\n"
 
 	auth := smtp.PlainAuth("", config.Conf.Mail.User, config.Conf.Mail.Pass, config.Conf.Mail.Host)
-	if err := smtp.SendMail(config.Conf.Mail.Host+":"+strconv.Itoa(config.Conf.Mail.Port), auth,
-		from.Address, receivers, []byte(msg)); err != nil {
+	err := smtp.SendMail(config.Conf.Mail.Host+":"+strconv.Itoa(config.Conf.Mail.Port), auth,
+		from.Address, receivers, []byte(msg))
+
+	noticeSlack(err, d)
+
+	if err != nil {
 		log.Printf("Error: %v\n", err)
-		return fmt.Sprintf("NG: %v", err)
+		return err
 	}
-	return "OK"
+
+	return nil
 }
