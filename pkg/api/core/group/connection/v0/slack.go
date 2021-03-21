@@ -59,13 +59,13 @@ func changeText(before, after core.Connection) string {
 	}
 
 	if after.BGPRouterID != nil {
-		if *before.BGPRouterID != *after.BGPRouterID {
+		if before.BGPRouterID == nil || *before.BGPRouterID != *after.BGPRouterID {
 			data += "BGPルータ: " + before.BGPRouter.HostName + " => " + bgpRouterText(*after.BGPRouterID) + "\n"
 		}
 	}
 
 	if after.TunnelEndPointRouterIPID != nil {
-		if *before.TunnelEndPointRouterIPID != *after.TunnelEndPointRouterIPID {
+		if before.TunnelEndPointRouterIPID == nil || *before.TunnelEndPointRouterIPID != *after.TunnelEndPointRouterIPID {
 			data += "トンネルエンドポイントルータ: " + before.TunnelEndPointRouterIP.TunnelEndPointRouter.HostName + " " +
 				before.TunnelEndPointRouterIP.IP + " => " +
 				tunnelEndPointRouterIPText(*after.TunnelEndPointRouterIPID) + "\n"
