@@ -8,6 +8,7 @@ import (
 	ip "github.com/homenoc/dsbd-backend/pkg/api/core/group/service/ip/v0"
 	service "github.com/homenoc/dsbd-backend/pkg/api/core/group/service/v0"
 	group "github.com/homenoc/dsbd-backend/pkg/api/core/group/v0"
+	mail "github.com/homenoc/dsbd-backend/pkg/api/core/mail/v0"
 	bgpRouter "github.com/homenoc/dsbd-backend/pkg/api/core/noc/bgpRouter/v0"
 	tunnelEndPointRouter "github.com/homenoc/dsbd-backend/pkg/api/core/noc/tunnelEndPointRouter/v0"
 	tunnelEndPointRouterIP "github.com/homenoc/dsbd-backend/pkg/api/core/noc/tunnelEndPointRouterIP/v0"
@@ -156,6 +157,11 @@ func AdminRestAPI() {
 			// IP
 			//
 			v1.PUT("/ip/:id", ip.UpdateAdmin)
+
+			//
+			// IP
+			//
+			v1.POST("/mail", mail.SendAdmin)
 
 			////
 			//// JPNIC Admin
