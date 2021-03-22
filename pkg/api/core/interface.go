@@ -293,3 +293,26 @@ type Notice struct {
 	Title     string    `json:"title"`
 	Data      string    `json:"data" gorm:"size:65535"`
 }
+
+type Request struct {
+	gorm.Model
+	RequestTemplateID uint            `json:"request_template_id"`
+	RequestTemplate   RequestTemplate `json:"request_template"`
+	TargetID          *uint           `json:"target_id"`
+	Reason1           string          `json:"reason_1"`
+	Reason2           string          `json:"reason_2"`
+	Accept            *bool           `json:"accept"`
+	User              User            `json:"user"`
+	Group             Group           `json:"group"`
+}
+
+// Type 1:追加 2:修正 3:削除
+// InfoType 1:グループ情報 2:サービス情報 3:IP 4:JPNICAdmin 5:JPNICTech 6:接続情報
+type RequestTemplate struct {
+	gorm.Model
+	Title       string `json:"title"`
+	Data        string `json:"data"`
+	RequestType uint   `json:"request_type"`
+	InfoType    uint   `json:"info_type"`
+	Comment     string `json:"comment"`
+}

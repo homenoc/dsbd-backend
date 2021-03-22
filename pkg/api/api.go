@@ -151,30 +151,40 @@ func AdminRestAPI() {
 			v1.PUT("/service/:id", service.UpdateAdmin)
 			v1.GET("/service", service.GetAllAdmin)
 			v1.GET("/service/:id", service.GetAdmin)
-			v1.PUT("/service/:id/ip/:ip_id", service.UpdateIP)
+
+			//
+			// JPNIC Admin
+			//
+			v1.POST("/service/:id/jpnic_admin", service.AddJPNICAdminAdmin)
+			v1.DELETE("/service/:id/jpnic_admin/:jpnic_id", service.DeleteJPNICAdminAdmin)
+			v1.PUT("/service/:id/jpnic_admin", service.UpdateJPNICAdminAdmin)
+
+			//
+			// JPNIC Admin
+			//
+			v1.POST("/service/:id/jpnic_tech", service.AddJPNICTechAdmin)
+			v1.DELETE("/service/:id/jpnic_tech/:jpnic_id", service.DeleteJPNICTechAdmin)
+			v1.PUT("/service/:id/jpnic_tech/:jpnic_id", service.UpdateJPNICTechAdmin)
 
 			//
 			// IP
 			//
+			v1.PUT("/service/:id/ip/:ip_id", service.UpdateIPAdmin)
+			v1.POST("/service/:id/ip", service.AddIPAdmin)
+			v1.DELETE("/service/:id/ip/:ip_id", service.DeleteIPAdmin)
 			v1.PUT("/ip/:id", ip.UpdateAdmin)
 
 			//
-			// IP
+			// Plan
+			//
+			v1.POST("/plan", service.AddPlanAdmin)
+			v1.DELETE("/plan/:id", service.DeletePlanAdmin)
+			v1.PUT("/plan/:id", service.UpdatePlanAdmin)
+
+			//
+			// Mail
 			//
 			v1.POST("/mail", mail.SendAdmin)
-
-			////
-			//// JPNIC Admin
-			////
-			//v1.POST("/group/network/jpnic", jpnicAdmin.AddAdmin)
-			//v1.DELETE("/group/network/jpnic", jpnicAdmin.DeleteAdmin)
-			//v1.GET("/group/network/jpnic", jpnicAdmin.GetAdmin)
-			////
-			//// JPNIC Admin
-			////
-			//v1.POST("/group/network/jpnic", jpnicTech.AddAdmin)
-			//v1.DELETE("/group/network/jpnic", jpnicTech.DeleteAdmin)
-			//v1.GET("/group/network/jpnic", jpnicTech.GetAdmin)
 		}
 	}
 	ws := router.Group("/ws")

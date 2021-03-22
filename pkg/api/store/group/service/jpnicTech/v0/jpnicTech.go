@@ -41,26 +41,14 @@ func Update(base int, u core.JPNICTech) error {
 	}
 	defer db.Close()
 
-	var result *gorm.DB
-
 	if base == jpnicTech.UpdateAll {
-		err = db.Model(&core.JPNICTech{Model: gorm.Model{ID: u.ID}}).Update(core.JPNICTech{
-			Org:       u.Org,
-			OrgEn:     u.OrgEn,
-			PostCode:  u.PostCode,
-			Address:   u.Address,
-			AddressEn: u.AddressEn,
-			Dept:      u.Dept,
-			DeptEn:    u.DeptEn,
-			Tel:       u.Tel,
-			Fax:       u.Fax,
-			Country:   u.Country,
-		}).Error
+		err = db.Model(&core.JPNICTech{Model: gorm.Model{ID: u.ID}}).Update(u).Error
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
 	}
-	return result.Error
+
+	return err
 }
 
 func Get(base int, data *core.JPNICTech) jpnicTech.ResultDatabase {

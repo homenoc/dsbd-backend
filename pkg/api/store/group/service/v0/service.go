@@ -88,7 +88,7 @@ func Update(base int, c core.Service) error {
 	return result
 }
 
-func JoinJPNICTech(serviceID, jpnicTechID uint) error {
+func JoinJPNICAdmin(serviceID uint, input core.JPNICAdmin) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -96,8 +96,70 @@ func JoinJPNICTech(serviceID, jpnicTechID uint) error {
 	}
 	defer db.Close()
 
-	db.Model(&core.Service{Model: gorm.Model{ID: serviceID}}).Association("JPNICTech").
-		Append(&core.JPNICTech{Model: gorm.Model{ID: jpnicTechID}})
+	db.Model(&core.Service{Model: gorm.Model{ID: serviceID}}).
+		Association("JPNICAdmin").
+		Append(input)
+
+	return nil
+}
+
+func UpdateJPNICAdmin(serviceID uint, input core.JPNICAdmin) error {
+	db, err := store.ConnectDB()
+	if err != nil {
+		log.Println("database connection error")
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer db.Close()
+
+	db.Model(&core.Service{Model: gorm.Model{ID: serviceID}}).
+		Association("JPNICAdmin").
+		Replace(&core.JPNICAdmin{Model: gorm.Model{ID: input.ID}}, &input)
+
+	return nil
+}
+
+func DeleteJPNICAdmin(serviceID, jpnicAdminID uint) error {
+	db, err := store.ConnectDB()
+	if err != nil {
+		log.Println("database connection error")
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer db.Close()
+
+	db.Model(&core.Service{Model: gorm.Model{ID: serviceID}}).
+		Association("JPNICAdmin").
+		Delete(&core.JPNICAdmin{Model: gorm.Model{ID: jpnicAdminID}})
+
+	return nil
+}
+
+func JoinJPNICTech(serviceID uint, input core.JPNICTech) error {
+	db, err := store.ConnectDB()
+	if err != nil {
+		log.Println("database connection error")
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer db.Close()
+
+	db.Model(&core.Service{Model: gorm.Model{ID: serviceID}}).
+		Association("JPNICTech").
+		Append(&input)
+
+	return nil
+}
+
+func UpdateJPNICTech(serviceID uint, before, after core.JPNICTech) error {
+	db, err := store.ConnectDB()
+	if err != nil {
+		log.Println("database connection error")
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer db.Close()
+
+	after.Model = before.Model
+	db.Model(&core.Service{Model: gorm.Model{ID: serviceID}}).
+		Association("JPNICTech").
+		Replace(&before, &after)
 
 	return nil
 }
@@ -110,8 +172,39 @@ func DeleteJPNICTech(serviceID, jpnicTechID uint) error {
 	}
 	defer db.Close()
 
-	db.Model(&core.Service{Model: gorm.Model{ID: serviceID}}).Association("JPNICTech").
+	db.Model(&core.Service{Model: gorm.Model{ID: serviceID}}).
+		Association("JPNICTech").
 		Delete(&core.JPNICTech{Model: gorm.Model{ID: jpnicTechID}})
+
+	return nil
+}
+
+func JoinIP(serviceID uint, input core.IP) error {
+	db, err := store.ConnectDB()
+	if err != nil {
+		log.Println("database connection error")
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer db.Close()
+
+	db.Model(&core.Service{Model: gorm.Model{ID: serviceID}}).
+		Association("IP").
+		Append(&input)
+
+	return nil
+}
+
+func DeleteIP(serviceID, jpnicTechID uint) error {
+	db, err := store.ConnectDB()
+	if err != nil {
+		log.Println("database connection error")
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer db.Close()
+
+	db.Model(&core.Service{Model: gorm.Model{ID: serviceID}}).
+		Association("IP").
+		Delete(&core.IP{Model: gorm.Model{ID: jpnicTechID}})
 
 	return nil
 }

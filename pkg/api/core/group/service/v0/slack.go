@@ -21,6 +21,28 @@ func noticeSlackAdmin(before, after core.Service) {
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 }
 
+func noticeSlackJPNICAdminAdmin(before, after core.Service) {
+	// 審査ステータスのSlack通知
+	attachment := slack.Attachment{}
+
+	attachment.AddField(slack.Field{Title: "Title", Value: "Service情報の更新"}).
+		AddField(slack.Field{Title: "申請者", Value: "管理者"}).
+		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(before.ID)) + "-" + before.Group.Org}).
+		AddField(slack.Field{Title: "更新状況", Value: changeText(before, after)})
+	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+}
+
+func noticeSlackJPNICTechAdmin(before, after core.Service) {
+	// 審査ステータスのSlack通知
+	attachment := slack.Attachment{}
+
+	attachment.AddField(slack.Field{Title: "Title", Value: "Service情報の更新"}).
+		AddField(slack.Field{Title: "申請者", Value: "管理者"}).
+		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(before.ID)) + "-" + before.Group.Org}).
+		AddField(slack.Field{Title: "更新状況", Value: changeText(before, after)})
+	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+}
+
 func changeText(before, after core.Service) string {
 	data := ""
 	if after.Open != nil {

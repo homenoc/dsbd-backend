@@ -6,11 +6,11 @@ import (
 	"time"
 )
 
-func ipProcess(restrict bool, input []service.IPInput) ([]core.IP, error) {
+func ipProcess(admin, restrict bool, input []service.IPInput) ([]core.IP, error) {
 	var net []core.IP
 
 	for _, tmpIP := range input {
-		if err := ipCheck(restrict, tmpIP); err != nil {
+		if err := ipCheck(admin, restrict, tmpIP); err != nil {
 			return nil, err
 		}
 
