@@ -51,9 +51,11 @@ func Update(base int, data core.Notice) error {
 		result = db.Model(&core.Notice{Model: gorm.Model{ID: data.ID}}).Update(core.Notice{
 			UserID:    data.UserID,
 			GroupID:   data.GroupID,
+			NOCID:     data.NOCID,
 			StartTime: data.StartTime,
 			EndTime:   data.EndTime,
 			Important: data.Important,
+			Everyone:  data.Everyone,
 			Fault:     data.Fault,
 			Info:      data.Info,
 			Title:     data.Title,

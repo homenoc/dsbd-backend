@@ -88,7 +88,7 @@ func Add(c *gin.Context) {
 			}
 		}
 
-		grpIP, err = ipProcess(true, input.IP)
+		grpIP, err = ipProcess(false, true, input.IP)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 			return
@@ -106,7 +106,7 @@ func Add(c *gin.Context) {
 			return
 		}
 
-		grpIP, err = ipProcess(false, input.IP)
+		grpIP, err = ipProcess(false, false, input.IP)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 			return
