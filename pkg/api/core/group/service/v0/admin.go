@@ -8,8 +8,13 @@ import (
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service/ip"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service/jpnicTech"
 	serviceTemplate "github.com/homenoc/dsbd-backend/pkg/api/core/template/service"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
+	dbPlan "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/ip/plan/v0"
+	dbIP "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/ip/v0"
+	dbJPNICTech "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/jpnicTech/v0"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
 	dbServiceTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/service/v0"
 	"github.com/jinzhu/gorm"
@@ -85,7 +90,7 @@ func AddAdmin(c *gin.Context) {
 			}
 		}
 
-		grpIP, err = ipProcess(true, input.IP)
+		grpIP, err = ipProcess(true, true, input.IP)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 			return
@@ -103,7 +108,7 @@ func AddAdmin(c *gin.Context) {
 			return
 		}
 
-		grpIP, err = ipProcess(false, input.IP)
+		grpIP, err = ipProcess(true, false, input.IP)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 			return
@@ -174,6 +179,123 @@ func AddAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, service.Result{})
 }
 
+func AddIPAdmin(c *gin.Context) {
+	var input service.IPInput
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	err = c.BindJSON(&input)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	if resultAdmin.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
+		return
+	}
+
+	resultIP, err := ipProcess(true, false, []service.IPInput{input})
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	if err = dbService.JoinIP(uint(id), resultIP[0]); err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, service.Result{})
+}
+
+func AddPlanAdmin(c *gin.Context) {
+	var input core.Plan
+
+	err := c.BindJSON(&input)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	if resultAdmin.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
+		return
+	}
+
+	if _, err = dbPlan.Create(&input); err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, service.Result{})
+}
+
+func AddJPNICAdminAdmin(c *gin.Context) {
+	var input core.JPNICAdmin
+
+	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	if resultAdmin.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	err = c.BindJSON(&input)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	if err = dbService.JoinJPNICAdmin(uint(id), input); err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, common.Result{})
+}
+
+func AddJPNICTechAdmin(c *gin.Context) {
+	var input core.JPNICTech
+
+	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	if resultAdmin.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	err = c.BindJSON(&input)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	if err = dbService.JoinJPNICTech(uint(id), input); err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, common.Result{})
+}
+
 func DeleteAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
@@ -192,6 +314,104 @@ func DeleteAdmin(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, service.Result{})
+}
+
+func DeleteIPAdmin(c *gin.Context) {
+	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	if resultAdmin.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	ipID, err := strconv.Atoi(c.Param("ip_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	if err = dbService.DeleteIP(uint(id), uint(ipID)); err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, common.Result{})
+}
+
+func DeletePlanAdmin(c *gin.Context) {
+	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	if resultAdmin.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
+		return
+	}
+
+	planID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	if err = dbPlan.Delete(&core.Plan{Model: gorm.Model{ID: uint(planID)}}); err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, common.Result{})
+}
+
+func DeleteJPNICAdminAdmin(c *gin.Context) {
+	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	if resultAdmin.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	jpnicID, err := strconv.Atoi(c.Param("jpnic_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	if err = dbService.DeleteJPNICAdmin(uint(id), uint(jpnicID)); err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, common.Result{})
+}
+
+func DeleteJPNICTechAdmin(c *gin.Context) {
+	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	if resultAdmin.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	jpnicID, err := strconv.Atoi(c.Param("jpnic_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	if err = dbService.DeleteJPNICTech(uint(id), uint(jpnicID)); err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, common.Result{})
 }
 
 func UpdateAdmin(c *gin.Context) {
@@ -233,10 +453,10 @@ func UpdateAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, service.Result{})
 }
 
-func UpdateIP(c *gin.Context) {
-	var input core.Service
+func UpdateIPAdmin(c *gin.Context) {
+	var input service.IPInput
 
-	id, err := strconv.Atoi(c.Param("id"))
+	_, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 		return
@@ -261,24 +481,135 @@ func UpdateIP(c *gin.Context) {
 		return
 	}
 
-	input.ID = uint(id)
-	input.IP[0].ID = uint(ipID)
-
+	resultIP, err := ipProcess(true, false, []service.IPInput{input})
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+	resultIP[0].ID = uint(ipID)
 	log.Println(input)
 
-	if err = dbService.Update(service.ReplaceIP, input); err != nil {
+	if err = dbIP.Update(ip.UpdateAll, resultIP[0]); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, service.Result{})
 }
 
-func AppendJPNICTech(c *gin.Context) {
+func UpdatePlanAdmin(c *gin.Context) {
+	var input core.Plan
 
+	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	if resultAdmin.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	err = c.BindJSON(&input)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	input.ID = uint(id)
+
+	if err = dbPlan.Update(input); err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, common.Result{})
 }
 
-func DeleteJPNICTech(c *gin.Context) {
+func UpdateJPNICAdminAdmin(c *gin.Context) {
+	var input core.JPNICAdmin
 
+	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	if resultAdmin.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	err = c.BindJSON(&input)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	if err = dbService.UpdateJPNICAdmin(uint(id), input); err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, common.Result{})
+}
+
+func UpdateJPNICTechAdmin(c *gin.Context) {
+	var input core.JPNICTech
+
+	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	if resultAdmin.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	jpnicID, err := strconv.Atoi(c.Param("jpnic_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	err = c.BindJSON(&input)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	ok := false
+
+	resultJPNICTech := dbService.Get(service.ID, &core.Service{Model: gorm.Model{ID: uint(id)}})
+	if resultJPNICTech.Err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: resultJPNICTech.Err.Error()})
+		return
+	}
+
+	for _, tmp := range resultJPNICTech.Service[0].JPNICTech {
+		if tmp.ID == uint(jpnicID) {
+			ok = true
+			input.Model = tmp.Model
+			break
+		}
+	}
+
+	if ok {
+		if err = dbJPNICTech.Update(jpnicTech.UpdateAll, input); err != nil {
+			c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, common.Result{})
+	} else {
+		c.JSON(http.StatusBadRequest, common.Error{Error: "Not Found GroupID"})
+	}
 }
 
 func GetAdmin(c *gin.Context) {

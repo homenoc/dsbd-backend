@@ -90,7 +90,7 @@ func checkJPNICTechUser(input core.JPNICTech) error {
 	return nil
 }
 
-func ipCheck(restrict bool, ip service.IPInput) error {
+func ipCheck(admin, restrict bool, ip service.IPInput) error {
 
 	nowTime := time.Now()
 
@@ -103,15 +103,17 @@ func ipCheck(restrict bool, ip service.IPInput) error {
 			return fmt.Errorf("no network name")
 		}
 	}
-	startDate, _ := time.Parse("2006-01-02", ip.StartDate)
-	if startDate.UTC().Unix() < nowTime.UTC().Unix() {
-		return fmt.Errorf("invalid start Date")
-	}
+	if !admin {
+		startDate, _ := time.Parse("2006-01-02", ip.StartDate)
+		if startDate.UTC().Unix() < nowTime.UTC().Unix() {
+			return fmt.Errorf("invalid start Date")
+		}
 
-	if ip.EndDate != nil {
-		endDate, _ := time.Parse("2006-01-02", *ip.EndDate)
-		if endDate.UTC().Unix() < nowTime.UTC().Unix() && startDate.UTC().Unix() >= endDate.UTC().Unix() {
-			return fmt.Errorf("invalid end Date")
+		if ip.EndDate != nil {
+			endDate, _ := time.Parse("2006-01-02", *ip.EndDate)
+			if endDate.UTC().Unix() < nowTime.UTC().Unix() && startDate.UTC().Unix() >= endDate.UTC().Unix() {
+				return fmt.Errorf("invalid end Date")
+			}
 		}
 	}
 
