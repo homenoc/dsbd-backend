@@ -87,26 +87,61 @@ func DeleteAdmin(c *gin.Context) {
 }
 
 func UpdateAdmin(c *gin.Context) {
-	var input core.Notice
+	var input notice.Input
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
 		return
 	}
-	err := c.BindJSON(&input)
-	log.Println(err)
 
-	tmp := dbNotice.Get(notice.ID, &core.Notice{Model: gorm.Model{ID: input.ID}})
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	if err = c.BindJSON(&input); err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	// 時間はJST基準
+	jst, _ := time.LoadLocation("Asia/Tokyo")
+
+	startTime, _ := time.ParseInLocation(layoutInput, input.StartTime, jst)
+	endTime, _ := time.ParseInLocation(layoutInput, *input.EndTime, jst)
+
+	tmp := dbNotice.Get(notice.ID, &core.Notice{Model: gorm.Model{ID: uint(id)}})
 	if tmp.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: tmp.Err.Error()})
 		return
 	}
 
-	if err = dbNotice.Update(notice.UpdateAll, updateAdminUser(input, tmp.Notice[0])); err != nil {
+	log.Println(startTime)
+	log.Println(endTime)
+
+	noticeSlackReplaceAdmin(tmp.Notice[0], input)
+
+	if err = dbNotice.Update(notice.UpdateAll, core.Notice{
+		Model:     gorm.Model{ID: uint(id)},
+		UserID:    input.UserID,
+		GroupID:   input.GroupID,
+		NOCID:     input.NOCID,
+		StartTime: startTime,
+		EndTime:   endTime,
+		Everyone:  input.Everyone,
+		Important: input.Important,
+		Fault:     input.Fault,
+		Info:      input.Info,
+		Title:     input.Title,
+		Data:      input.Data,
+	}); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
+
 	c.JSON(http.StatusOK, notice.ResultAdmin{})
 }
 
