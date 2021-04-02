@@ -9,6 +9,7 @@ import (
 	dbIPv4Template "github.com/homenoc/dsbd-backend/pkg/api/store/template/ipv4/v0"
 	dbIPv6Template "github.com/homenoc/dsbd-backend/pkg/api/store/template/ipv6/v0"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -57,6 +58,9 @@ func checkJPNICAdminUser(input core.JPNICAdmin) error {
 	if input.OrgEn == "" {
 		return fmt.Errorf("failed data: org(english)")
 	}
+	if input.Mail == "" || !strings.Contains(input.Mail, "@") {
+		return fmt.Errorf("failed data: mail")
+	}
 	if input.PostCode == "" {
 		return fmt.Errorf("failed data: postcode")
 	}
@@ -79,6 +83,9 @@ func checkJPNICTechUser(input core.JPNICTech) error {
 	}
 	if input.OrgEn == "" {
 		return fmt.Errorf("failed data: org(english)")
+	}
+	if input.Mail == "" || !strings.Contains(input.Mail, "@") {
+		return fmt.Errorf("failed data: mail")
 	}
 	if input.PostCode == "" {
 		return fmt.Errorf("failed data: postcode")
