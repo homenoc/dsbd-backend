@@ -44,6 +44,8 @@ func InitDB() {
 		&core.Chat{},
 		&core.Token{},
 		&core.Notice{},
+		&core.IPv4Template{},
+		&core.IPv6Template{},
 	)
 	log.Println(result.Error)
 }

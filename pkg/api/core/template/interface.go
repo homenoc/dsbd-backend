@@ -21,6 +21,8 @@ type Result struct {
 	BGPRouter              []core.BGPRouter              `json:"bgp_router"`
 	TunnelEndPointRouter   []core.TunnelEndPointRouter   `json:"tunnel_endpoint_router"`
 	TunnelEndPointRouterIP []core.TunnelEndPointRouterIP `json:"tunnel_endpoint_router_ip"`
+	IPv4                   []core.IPv4Template           `json:"ipv4"`
+	IPv6                   []core.IPv6Template           `json:"ipv6"`
 }
 
 type ResultDatabase struct {
