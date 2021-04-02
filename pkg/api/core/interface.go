@@ -184,6 +184,7 @@ type JPNICAdmin struct {
 	JPNICHandle string    `json:"jpnic_handle"`
 	Name        string    `json:"name"`
 	NameEn      string    `json:"name_en"`
+	Mail        string    `json:"mail"`
 	Org         string    `json:"org"`
 	OrgEn       string    `json:"org_en"`
 	PostCode    string    `json:"postcode"`
@@ -203,6 +204,7 @@ type JPNICTech struct {
 	JPNICHandle string    `json:"jpnic_handle"`
 	Name        string    `json:"name"`
 	NameEn      string    `json:"name_en"`
+	Mail        string    `json:"mail"`
 	Org         string    `json:"org"`
 	OrgEn       string    `json:"org_en"`
 	PostCode    string    `json:"postcode"`
