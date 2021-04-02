@@ -56,7 +56,7 @@ func TestAddJPNICTech(t *testing.T) {
 		MaxDownstream:  0,
 		MaxBandWidthAS: 0,
 		IP:             nil,
-		//Connections:       nil,
+		//IPv4:       nil,
 		JPNICAdminID: 0,
 		JPNICAdmin: core.JPNICAdmin{
 			Org:   "HomeNOC",

@@ -71,7 +71,7 @@ func Update(base int, c core.Service) error {
 	} else if service.AppendJPNICTech == base {
 		result = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Association("JPNICTech").Append(c.JPNICTech[0]).Error
 	} else if service.AppendConnection == base {
-		result = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Association("Connections").Replace(c.Connection[0]).Error
+		result = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Association("IPv4").Replace(c.Connection[0]).Error
 	} else if service.DeleteIP == base {
 		result = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Association("IP").Replace(c.IP[0]).Error
 	} else if service.DeleteJPNICAdmin == base {
@@ -79,7 +79,7 @@ func Update(base int, c core.Service) error {
 	} else if service.DeleteJPNICTech == base {
 		result = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Association("JPNICTech").Delete(c.JPNICTech[0]).Error
 	} else if service.DeleteConnection == base {
-		result = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Association("Connections").Delete(c.Connection[0]).Error
+		result = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Association("IPv4").Delete(c.Connection[0]).Error
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())

@@ -12,10 +12,12 @@ import (
 )
 
 type Template struct {
-	Service    []core.ServiceTemplate    `json:"service"`
-	Connection []core.ConnectionTemplate `json:"connection"`
-	NTT        []core.NTTTemplate        `json:"ntt"`
-	NOC        []core.NOC                `json:"noc"`
+	Service      []core.ServiceTemplate    `json:"service"`
+	Connection   []core.ConnectionTemplate `json:"connection"`
+	NTT          []core.NTTTemplate        `json:"ntt"`
+	NOC          []core.NOC                `json:"noc"`
+	IPv4Template []core.IPv4Template       `json:"ipv4_template"`
+	IPv6Template []core.IPv6Template       `json:"ipv6_template"`
 }
 
 func RegisterTemplateConfig(inputTemplatePath string) error {
