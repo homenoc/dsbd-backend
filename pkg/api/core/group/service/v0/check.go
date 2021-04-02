@@ -4,6 +4,12 @@ import (
 	"fmt"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
+	ipv4 "github.com/homenoc/dsbd-backend/pkg/api/core/template/ipv4"
+	ipv6 "github.com/homenoc/dsbd-backend/pkg/api/core/template/ipv6"
+	dbIPv4Template "github.com/homenoc/dsbd-backend/pkg/api/store/template/ipv4/v0"
+	dbIPv6Template "github.com/homenoc/dsbd-backend/pkg/api/store/template/ipv6/v0"
+	"log"
+	"strings"
 	"time"
 )
 
@@ -52,6 +58,9 @@ func checkJPNICAdminUser(input core.JPNICAdmin) error {
 	if input.OrgEn == "" {
 		return fmt.Errorf("failed data: org(english)")
 	}
+	if input.Mail == "" || !strings.Contains(input.Mail, "@") {
+		return fmt.Errorf("failed data: mail")
+	}
 	if input.PostCode == "" {
 		return fmt.Errorf("failed data: postcode")
 	}
@@ -74,6 +83,9 @@ func checkJPNICTechUser(input core.JPNICTech) error {
 	}
 	if input.OrgEn == "" {
 		return fmt.Errorf("failed data: org(english)")
+	}
+	if input.Mail == "" || !strings.Contains(input.Mail, "@") {
+		return fmt.Errorf("failed data: mail")
 	}
 	if input.PostCode == "" {
 		return fmt.Errorf("failed data: postcode")
@@ -125,16 +137,50 @@ func ipCheck(admin, restrict bool, ip service.IPInput) error {
 			if ip.Plan == nil {
 				return fmt.Errorf("invalid plan data")
 			}
-		} else {
-			// Planの計算
+			resultIPv4Template := dbIPv4Template.Get(ipv4.Subnet, &core.IPv4Template{Subnet: ip.IP})
+			if resultIPv4Template.Err != nil {
+				log.Println(resultIPv4Template.Err)
+				return resultIPv4Template.Err
+			}
+			if len(resultIPv4Template.IPv4) == 0 {
+				return fmt.Errorf("Invalid IP address or subnet ")
+			}
 
-			//for _, tmp := range ip.Plan {
-			//	tmp.
-			//}
+			var after uint = 0
+			var halfYear uint = 0
+			var oneYear uint = 0
+
+			// Planの計算
+			for _, tmp := range ip.Plan {
+				after += tmp.After
+				halfYear += tmp.HalfYear
+				oneYear += tmp.OneYear
+			}
+
+			if after < (resultIPv4Template.IPv4[0].Quantity/4) || after > resultIPv4Template.IPv4[0].Quantity {
+				return fmt.Errorf("address count error: (after)")
+			}
+			if halfYear < (resultIPv4Template.IPv4[0].Quantity/4) || halfYear > resultIPv4Template.IPv4[0].Quantity {
+				return fmt.Errorf("address count error: (half year)")
+			}
+			if oneYear < (resultIPv4Template.IPv4[0].Quantity/2) || oneYear > resultIPv4Template.IPv4[0].Quantity {
+				return fmt.Errorf("address count error: (one year)")
+			}
+
 		}
 	} else if ip.Version == 6 {
 		if ip.IP == "" {
 			return fmt.Errorf("invalid ipv6 address")
+		}
+		if restrict {
+			resultIPv6Template := dbIPv6Template.Get(ipv6.Subnet, &core.IPv6Template{Subnet: ip.IP})
+			if resultIPv6Template.Err != nil {
+				log.Println(resultIPv6Template.Err)
+				return resultIPv6Template.Err
+			}
+			if len(resultIPv6Template.IPv6) == 0 {
+				return fmt.Errorf("Invalid IP address or subnet ")
+			}
 		}
 	} else {
 		return fmt.Errorf("invalid ip version")

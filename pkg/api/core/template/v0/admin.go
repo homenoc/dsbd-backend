@@ -9,6 +9,8 @@ import (
 	dbTunnelEndPointRouterIP "github.com/homenoc/dsbd-backend/pkg/api/store/noc/tunnelEndPointRouterIP/v0"
 	dbNOC "github.com/homenoc/dsbd-backend/pkg/api/store/noc/v0"
 	dbConnectionTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/connection/v0"
+	dbIPv4Template "github.com/homenoc/dsbd-backend/pkg/api/store/template/ipv4/v0"
+	dbIPv6Template "github.com/homenoc/dsbd-backend/pkg/api/store/template/ipv6/v0"
 	dbNTTTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ntt/v0"
 	dbServiceTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/service/v0"
 	"net/http"
@@ -55,6 +57,16 @@ func GetAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: resultTunnelEndPointRouterIP.Err.Error()})
 		return
 	}
+	resultIPv4 := dbIPv4Template.GetAll()
+	if resultIPv4.Err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: resultIPv4.Err.Error()})
+		return
+	}
+	resultIPv6 := dbIPv6Template.GetAll()
+	if resultIPv6.Err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: resultIPv6.Err.Error()})
+		return
+	}
 
 	c.JSON(http.StatusOK, template.Result{
 		Services:               resultService.Services,
@@ -63,5 +75,7 @@ func GetAdmin(c *gin.Context) {
 		NOC:                    resultNOC.NOC,
 		BGPRouter:              resultBGPRouter.BGPRouter,
 		TunnelEndPointRouterIP: resultTunnelEndPointRouterIP.TunnelEndPointRouterIP,
+		IPv4:                   resultIPv4.IPv4,
+		IPv6:                   resultIPv6.IPv6,
 	})
 }

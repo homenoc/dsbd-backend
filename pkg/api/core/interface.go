@@ -184,6 +184,7 @@ type JPNICAdmin struct {
 	JPNICHandle string    `json:"jpnic_handle"`
 	Name        string    `json:"name"`
 	NameEn      string    `json:"name_en"`
+	Mail        string    `json:"mail"`
 	Org         string    `json:"org"`
 	OrgEn       string    `json:"org_en"`
 	PostCode    string    `json:"postcode"`
@@ -203,6 +204,7 @@ type JPNICTech struct {
 	JPNICHandle string    `json:"jpnic_handle"`
 	Name        string    `json:"name"`
 	NameEn      string    `json:"name_en"`
+	Mail        string    `json:"mail"`
 	Org         string    `json:"org"`
 	OrgEn       string    `json:"org_en"`
 	PostCode    string    `json:"postcode"`
@@ -304,6 +306,24 @@ type Request struct {
 	Accept            *bool           `json:"accept"`
 	User              User            `json:"user"`
 	Group             Group           `json:"group"`
+}
+
+type IPv4Template struct {
+	gorm.Model
+	Title    string `json:"title"`
+	Subnet   string `json:"subnet"`
+	Quantity uint   `json:"quantity"`
+	Hide     *bool  `json:"hide"`
+	Comment  string `json:"comment"`
+}
+
+type IPv6Template struct {
+	gorm.Model
+	Title    string `json:"title"`
+	Subnet   string `json:"subnet"`
+	Quantity uint   `json:"quantity"`
+	Hide     *bool  `json:"hide"`
+	Comment  string `json:"comment"`
 }
 
 // Type 1:追加 2:修正 3:削除

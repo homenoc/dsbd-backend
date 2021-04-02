@@ -264,44 +264,46 @@ func GetWebSocket(c *gin.Context) {
 			return
 		}
 
-		_, err = dbChat.Create(&core.Chat{
-			TicketID: ticketResult.Tickets[0].ID,
-			UserID:   result.User.ID,
-			Admin:    false,
-			Data:     msg.Message,
-		})
-		if err != nil {
-			conn.WriteJSON(&support.WebSocketResult{Err: "db write error"})
-		} else {
-
-			msg.UserID = result.User.ID
-			msg.GroupID = resultGroup.User.GroupID
-			msg.Admin = false
-			msg.UserName = result.User.Name
-			// Token関連の初期化
-			msg.AccessToken = ""
-			msg.UserToken = ""
-
-			//ユーザ側に送信
-			controller.SendChatUser(controllerInterface.Chat{
-				CreatedAt: msg.CreatedAt,
-				UserID:    result.User.ID,
-				UserName:  result.User.Name,
-				GroupID:   resultGroup.User.GroupID,
-				Admin:     msg.Admin,
-				Message:   msg.Message,
+		if !*ticketResult.Tickets[0].Solved {
+			_, err = dbChat.Create(&core.Chat{
+				TicketID: ticketResult.Tickets[0].ID,
+				UserID:   result.User.ID,
+				Admin:    false,
+				Data:     msg.Message,
 			})
+			if err != nil {
+				conn.WriteJSON(&support.WebSocketResult{Err: "db write error"})
+			} else {
 
-			//Slackに送信
-			attachment := slack.Attachment{}
-			attachment.AddField(slack.Field{Title: "Title", Value: "Support(新規メッセージ)"}).
-				AddField(slack.Field{Title: "発行者", Value: strconv.Itoa(int(result.User.ID)) + "-" + result.User.Name}).
-				AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(result.User.GroupID)) + "-" + result.User.Group.Org}).
-				AddField(slack.Field{Title: "Title", Value: ticketResult.Tickets[0].Title}).
-				AddField(slack.Field{Title: "Message", Value: msg.Message})
-			notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+				msg.UserID = result.User.ID
+				msg.GroupID = resultGroup.User.GroupID
+				msg.Admin = false
+				msg.UserName = result.User.Name
+				// Token関連の初期化
+				msg.AccessToken = ""
+				msg.UserToken = ""
 
-			support.Broadcast <- msg
+				//ユーザ側に送信
+				controller.SendChatUser(controllerInterface.Chat{
+					CreatedAt: msg.CreatedAt,
+					UserID:    result.User.ID,
+					UserName:  result.User.Name,
+					GroupID:   resultGroup.User.GroupID,
+					Admin:     msg.Admin,
+					Message:   msg.Message,
+				})
+
+				//Slackに送信
+				attachment := slack.Attachment{}
+				attachment.AddField(slack.Field{Title: "Title", Value: "Support(新規メッセージ)"}).
+					AddField(slack.Field{Title: "発行者", Value: strconv.Itoa(int(result.User.ID)) + "-" + result.User.Name}).
+					AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(result.User.GroupID)) + "-" + result.User.Group.Org}).
+					AddField(slack.Field{Title: "Title", Value: ticketResult.Tickets[0].Title}).
+					AddField(slack.Field{Title: "Message", Value: msg.Message})
+				notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+
+				support.Broadcast <- msg
+			}
 		}
 	}
 }
