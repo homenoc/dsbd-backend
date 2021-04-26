@@ -87,6 +87,6 @@ func GetAll() tunnelEndPointRouterIP.ResultDatabase {
 	defer db.Close()
 
 	var routers []core.TunnelEndPointRouterIP
-	err = db.Find(&routers).Error
+	err = db.Preload("TunnelEndPointRouter").Find(&routers).Error
 	return tunnelEndPointRouterIP.ResultDatabase{TunnelEndPointRouterIP: routers, Err: err}
 }
