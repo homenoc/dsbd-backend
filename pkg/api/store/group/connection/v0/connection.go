@@ -104,6 +104,9 @@ func GetAll() connection.ResultDatabase {
 		Preload("NOC").
 		Preload("BGPRouter").
 		Preload("TunnelEndPointRouterIP").
+		Preload("Service").
+		Preload("Service.ServiceTemplate").
+		Preload("Service.Group").
 		Find(&connections).Error
 	return connection.ResultDatabase{Connection: connections, Err: err}
 
