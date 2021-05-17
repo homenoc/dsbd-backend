@@ -25,6 +25,20 @@ type Result struct {
 	IPv6                   []core.IPv6Template           `json:"ipv6"`
 }
 
+type ResultAdmin struct {
+	Services               []core.ServiceTemplate        `json:"services"`
+	Connections            []core.ConnectionTemplate     `json:"connections"`
+	NTTs                   []core.NTTTemplate            `json:"ntts"`
+	NOC                    []core.NOC                    `json:"nocs"`
+	BGPRouter              []core.BGPRouter              `json:"bgp_router"`
+	TunnelEndPointRouter   []core.TunnelEndPointRouter   `json:"tunnel_endpoint_router"`
+	TunnelEndPointRouterIP []core.TunnelEndPointRouterIP `json:"tunnel_endpoint_router_ip"`
+	IPv4                   []core.IPv4Template           `json:"ipv4"`
+	IPv6                   []core.IPv6Template           `json:"ipv6"`
+	User                   []core.User                   `json:"user"`
+	Group                  []core.Group                  `json:"group"`
+}
+
 type ResultDatabase struct {
 	Err      error
 	Services []core.ServiceTemplate
