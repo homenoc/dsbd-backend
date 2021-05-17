@@ -5,6 +5,7 @@ import (
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	template "github.com/homenoc/dsbd-backend/pkg/api/core/template"
+	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	dbBGPRouter "github.com/homenoc/dsbd-backend/pkg/api/store/noc/bgpRouter/v0"
 	dbTunnelEndPointRouterIP "github.com/homenoc/dsbd-backend/pkg/api/store/noc/tunnelEndPointRouterIP/v0"
 	dbNOC "github.com/homenoc/dsbd-backend/pkg/api/store/noc/v0"
@@ -13,6 +14,7 @@ import (
 	dbIPv6Template "github.com/homenoc/dsbd-backend/pkg/api/store/template/ipv6/v0"
 	dbNTTTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ntt/v0"
 	dbServiceTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/service/v0"
+	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"net/http"
 )
 
@@ -68,7 +70,19 @@ func GetAdmin(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, template.Result{
+	resultUser := dbUser.GetAll()
+	if resultUser.Err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: resultUser.Err.Error()})
+		return
+	}
+
+	resultGroup := dbGroup.GetAll()
+	if resultGroup.Err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: resultGroup.Err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, template.ResultAdmin{
 		Services:               resultService.Services,
 		Connections:            resultConnection.Connections,
 		NTTs:                   resultNTT.NTTs,
@@ -77,5 +91,7 @@ func GetAdmin(c *gin.Context) {
 		TunnelEndPointRouterIP: resultTunnelEndPointRouterIP.TunnelEndPointRouterIP,
 		IPv4:                   resultIPv4.IPv4,
 		IPv6:                   resultIPv6.IPv6,
+		User:                   resultUser.User,
+		Group:                  resultGroup.Group,
 	})
 }
