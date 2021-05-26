@@ -133,7 +133,6 @@ func UpdateAdmin(c *gin.Context) {
 		Model:     gorm.Model{ID: uint(id)},
 		StartTime: startTime,
 		EndTime:   endTime,
-		Everyone:  input.Everyone,
 		Important: input.Important,
 		Fault:     input.Fault,
 		Info:      input.Info,
