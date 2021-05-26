@@ -5,7 +5,6 @@ import (
 	controller "github.com/homenoc/dsbd-backend/pkg/api/core/controller/v0"
 	connection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection/v0"
 	info "github.com/homenoc/dsbd-backend/pkg/api/core/group/info/v0"
-	ip "github.com/homenoc/dsbd-backend/pkg/api/core/group/service/ip/v0"
 	service "github.com/homenoc/dsbd-backend/pkg/api/core/group/service/v0"
 	group "github.com/homenoc/dsbd-backend/pkg/api/core/group/v0"
 	mail "github.com/homenoc/dsbd-backend/pkg/api/core/mail/v0"
@@ -156,28 +155,27 @@ func AdminRestAPI() {
 			// JPNIC Admin
 			//
 			v1.POST("/service/:id/jpnic_admin", service.AddJPNICAdminAdmin)
-			v1.DELETE("/service/:id/jpnic_admin/:jpnic_id", service.DeleteJPNICAdminAdmin)
-			v1.PUT("/service/:id/jpnic_admin", service.UpdateJPNICAdminAdmin)
+			v1.DELETE("/jpnic_admin/:id", service.DeleteJPNICAdminAdmin)
+			v1.PUT("/jpnic_admin/:id", service.UpdateJPNICAdminAdmin)
 
 			//
-			// JPNIC Admin
+			// JPNIC Tech
 			//
 			v1.POST("/service/:id/jpnic_tech", service.AddJPNICTechAdmin)
-			v1.DELETE("/service/:id/jpnic_tech/:jpnic_id", service.DeleteJPNICTechAdmin)
-			v1.PUT("/service/:id/jpnic_tech/:jpnic_id", service.UpdateJPNICTechAdmin)
+			v1.DELETE("/jpnic_tech/:id", service.DeleteJPNICTechAdmin)
+			v1.PUT("/jpnic_tech/:id", service.UpdateJPNICTechAdmin)
 
 			//
 			// IP
 			//
-			v1.PUT("/service/:id/ip/:ip_id", service.UpdateIPAdmin)
 			v1.POST("/service/:id/ip", service.AddIPAdmin)
-			v1.DELETE("/service/:id/ip/:ip_id", service.DeleteIPAdmin)
-			v1.PUT("/ip/:id", ip.UpdateAdmin)
+			v1.DELETE("/ip/:id", service.DeleteIPAdmin)
+			v1.PUT("/ip/:id", service.UpdateIPAdmin)
 
 			//
 			// Plan
 			//
-			v1.POST("/plan", service.AddPlanAdmin)
+			v1.POST("/ip/:id/plan", service.AddPlanAdmin)
 			v1.DELETE("/plan/:id", service.DeletePlanAdmin)
 			v1.PUT("/plan/:id", service.UpdatePlanAdmin)
 
