@@ -71,13 +71,15 @@ type Service struct {
 	MaxUpstream       uint             `json:"max_upstream"`
 	AveDownstream     uint             `json:"avg_downstream"`
 	MaxDownstream     uint             `json:"max_downstream"`
-	MaxBandWidthAS    uint             `json:"max_bandwidth_as"`
+	MaxBandWidthAS    string           `json:"max_bandwidth_as"`
 	Fee               *uint            `json:"fee"`
 	IP                []IP             `json:"ip"`
 	Connection        []*Connection    `json:"connections"`
 	JPNICAdminID      uint             `json:"jpnic_admin_id"`
 	JPNICAdmin        JPNICAdmin       `json:"jpnic_admin"`
 	JPNICTech         []JPNICTech      `json:"jpnic_tech" gorm:"many2many:service_jpnic_tech;"`
+	StartDate         time.Time        `json:"start_date"`
+	EndDate           *time.Time       `json:"end_date"`
 	Open              *bool            `json:"open"`
 	Lock              *bool            `json:"lock"`
 	AddAllow          *bool            `json:"add_allow"`
@@ -239,6 +241,8 @@ type ConnectionTemplate struct {
 	NeedInternet     *bool  `json:"need_internet"`
 	NeedComment      *bool  `json:"need_comment"`
 	NeedCrossConnect *bool  `json:"need_cross_connect"`
+	L2               *bool  `json:"l2"`
+	L3               *bool  `json:"l3"`
 }
 
 type NTTTemplate struct {
@@ -283,9 +287,7 @@ type Token struct {
 
 type Notice struct {
 	gorm.Model
-	UserID    uint      `json:"user_id"`
-	GroupID   uint      `json:"group_id"`
-	NOCID     uint      `json:"noc_id"`
+	User      []User    `json:"user" gorm:"many2many:notice_user;"`
 	Everyone  *bool     `json:"everyone"`
 	StartTime time.Time `json:"start_time"`
 	EndTime   time.Time `json:"end_time"`
