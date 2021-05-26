@@ -47,10 +47,14 @@ func AddAdmin(c *gin.Context) {
 
 	noticeSlackAddAdmin(input)
 
+	var userArray []core.User
+
+	for _, tmpID := range userExtraction(input.UserID, input.GroupID, input.NOCID) {
+		userArray = append(userArray, core.User{Model: gorm.Model{ID: tmpID}})
+	}
+
 	if _, err = dbNotice.Create(&core.Notice{
-		UserID:    input.UserID,
-		GroupID:   input.GroupID,
-		NOCID:     input.NOCID,
+		User:      userArray,
 		Everyone:  input.Everyone,
 		StartTime: startTime,
 		EndTime:   endTime,
@@ -126,9 +130,6 @@ func UpdateAdmin(c *gin.Context) {
 
 	if err = dbNotice.Update(notice.UpdateAll, core.Notice{
 		Model:     gorm.Model{ID: uint(id)},
-		UserID:    input.UserID,
-		GroupID:   input.GroupID,
-		NOCID:     input.NOCID,
 		StartTime: startTime,
 		EndTime:   endTime,
 		Everyone:  input.Everyone,

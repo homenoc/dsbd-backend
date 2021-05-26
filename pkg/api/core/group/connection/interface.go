@@ -11,6 +11,7 @@ const (
 	Email           = 3
 	ServiceID       = 4
 	SearchNewNumber = 5
+	NOCID           = 6
 	UpdateID        = 100
 	UpdateServiceID = 101
 	UpdateUserInfo  = 102

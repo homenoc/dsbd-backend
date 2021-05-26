@@ -5,12 +5,10 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/notice"
-	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
 	dbNotice "github.com/homenoc/dsbd-backend/pkg/api/store/notice/v0"
+	"github.com/jinzhu/gorm"
 	"net/http"
-	"strconv"
 )
 
 type noticeHandler struct {
@@ -39,70 +37,24 @@ func Get(c *gin.Context) {
 
 	h := noticeHandler{notice: responseNotice}
 
-	if result.User.GroupID != 0 {
+	noticeResult = dbNotice.Get(notice.UIDOrAll, &core.Notice{
+		User: []core.User{{Model: gorm.Model{ID: result.User.ID}}},
+	})
+	if noticeResult.Err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
+		return
+	}
 
-		serviceResult := dbService.Get(service.Open, &core.Service{GroupID: result.User.GroupID})
-		if serviceResult.Err != nil {
-			c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
-			return
-		}
-
-		var nocIDs []string
-
-		for _, tmpService := range serviceResult.Service {
-			for _, tmpConnection := range tmpService.Connection {
-				if tmpConnection.BGPRouter.NOCID != 0 {
-					if !arrayContains(nocIDs, strconv.Itoa(int(tmpConnection.BGPRouter.NOCID))) {
-						nocIDs = append(nocIDs, strconv.Itoa(int(tmpConnection.BGPRouter.NOCID)))
-					}
-				}
-			}
-		}
-
-		noticeResult = dbNotice.GetArray(notice.UIDOrGIDOrNOCAllOrAll, &core.Notice{
-			UserID:  result.User.ID,
-			GroupID: result.User.GroupID,
-		}, nocIDs)
-		if noticeResult.Err != nil {
-			c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
-			return
-		}
-
-		for _, tmpNotice := range noticeResult.Notice {
-			h.appendNotice(tmpNotice, tmpNotice.StartTime.Format(layout), tmpNotice.EndTime.Format(layout))
-		}
-
-	} else {
-		noticeResult = dbNotice.Get(notice.UIDOrAll, &core.Notice{
-			UserID: result.User.ID,
-		})
-		if noticeResult.Err != nil {
-			c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
-			return
-		}
-		for _, tmpNotice := range noticeResult.Notice {
-			h.appendNotice(tmpNotice, tmpNotice.StartTime.Format(layout), tmpNotice.EndTime.Format(layout))
-		}
+	for _, tmpNotice := range noticeResult.Notice {
+		h.appendNotice(tmpNotice, tmpNotice.StartTime.Format(layout), tmpNotice.EndTime.Format(layout))
 	}
 
 	c.JSON(http.StatusOK, notice.Result{Notice: h.notice})
 }
 
-func arrayContains(arr []string, str string) bool {
-	for _, v := range arr {
-		if v == str {
-			return true
-		}
-	}
-	return false
-}
-
 func (h *noticeHandler) appendNotice(data core.Notice, startTime, endTime string) {
 	h.notice = append(h.notice, notice.Notice{
 		ID:        data.ID,
-		UserID:    data.UserID,
-		GroupID:   data.GroupID,
-		NOCID:     data.NOCID,
 		Everyone:  *data.Everyone,
 		StartTime: startTime,
 		EndTime:   endTime,
