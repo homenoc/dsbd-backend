@@ -17,9 +17,9 @@ const (
 )
 
 type Input struct {
-	UserID    uint    `json:"user_id"`
-	GroupID   uint    `json:"group_id"`
-	NOCID     uint    `json:"noc_id"`
+	UserID    []uint  `json:"user_id"`
+	GroupID   []uint  `json:"group_id"`
+	NOCID     []uint  `json:"noc_id"`
 	Everyone  *bool   `json:"everyone"`
 	StartTime string  `json:"start_time"`
 	EndTime   *string `json:"end_time"`

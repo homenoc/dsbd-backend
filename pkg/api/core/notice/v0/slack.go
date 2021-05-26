@@ -50,17 +50,17 @@ func changeText(before core.Notice, after notice.Input) string {
 		data += "Contents: " + before.Data + " => " + after.Data + "\n"
 	}
 
-	if after.UserID != before.UserID {
-		data += "UserID: " + strconv.Itoa(int(before.UserID)) + " => " + strconv.Itoa(int(after.UserID)) + "\n"
-	}
-
-	if after.GroupID != before.GroupID {
-		data += "GroupID: " + strconv.Itoa(int(before.UserID)) + " => " + strconv.Itoa(int(after.UserID)) + "\n"
-	}
-
-	if after.NOCID != before.NOCID {
-		data += "NOCID: " + strconv.Itoa(int(before.NOCID)) + " => " + strconv.Itoa(int(after.NOCID)) + "\n"
-	}
+	//if after.UserID != before.UserID {
+	//	data += "UserID: " + strconv.Itoa(int(before.UserID)) + " => " + strconv.Itoa(int(after.UserID)) + "\n"
+	//}
+	//
+	//if after.GroupID != before.GroupID {
+	//	data += "GroupID: " + strconv.Itoa(int(before.UserID)) + " => " + strconv.Itoa(int(after.UserID)) + "\n"
+	//}
+	//
+	//if after.NOCID != before.NOCID {
+	//	data += "NOCID: " + strconv.Itoa(int(before.NOCID)) + " => " + strconv.Itoa(int(after.NOCID)) + "\n"
+	//}
 
 	if after.StartTime != before.StartTime.Add(9*time.Hour).Format(layoutInput) {
 		data += "Start Time: " + before.StartTime.Add(9*time.Hour).Format(layoutInput) + " => " + after.StartTime + "\n"

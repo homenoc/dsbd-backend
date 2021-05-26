@@ -2,8 +2,8 @@ package v0
 
 import (
 	"fmt"
-	core "github.com/homenoc/dsbd-backend/pkg/api/core"
-	connection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
 	"github.com/jinzhu/gorm"
 	"log"
@@ -83,6 +83,18 @@ func Get(base int, data *core.Connection) connection.ResultDatabase {
 			First(&connectionStruct, data.ID).Error
 	} else if base == connection.ServiceID {
 		err = db.Where("service_id = ?", data.ServiceID).Find(&connectionStruct).Error
+	} else if base == connection.NOCID {
+		err = db.Preload("ConnectionTemplate").
+			Preload("NOC").
+			Preload("BGPRouter").
+			Preload("TunnelEndPointRouterIP").
+			Preload("NTTTemplate").
+			Preload("Service").
+			Preload("Service.Group").
+			Preload("Service.ServiceTemplate").
+			Preload("Service.Group.User").
+			Where("noc_id = ?", data.NOCID).
+			Find(&connectionStruct).Error
 	} else {
 		log.Println("base select error")
 		return connection.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
