@@ -9,19 +9,7 @@ import (
 	"time"
 )
 
-func Create(plan *core.Plan) (*core.Plan, error) {
-	db, err := store.ConnectDB()
-	if err != nil {
-		log.Println("database connection error")
-		return plan, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	defer db.Close()
-
-	err = db.Create(&plan).Error
-	return plan, err
-}
-
-func Delete(plan *core.Plan) error {
+func JoinJPNICTech(serviceID uint, input core.JPNICTech) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -29,10 +17,12 @@ func Delete(plan *core.Plan) error {
 	}
 	defer db.Close()
 
-	return db.Delete(plan).Error
+	return db.Model(&core.Service{Model: gorm.Model{ID: serviceID}}).
+		Association("JPNICTech").
+		Append(&input).Error
 }
 
-func Update(u core.Plan) error {
+func DeleteJPNICTech(id uint) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -40,7 +30,16 @@ func Update(u core.Plan) error {
 	}
 	defer db.Close()
 
-	err = db.Model(&core.Plan{Model: gorm.Model{ID: u.ID}}).Update(u).Error
+	return db.Delete(core.JPNICTech{Model: gorm.Model{ID: id}}).Error
+}
 
-	return err
+func UpdateJPNICTech(input core.JPNICTech) error {
+	db, err := store.ConnectDB()
+	if err != nil {
+		log.Println("database connection error")
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer db.Close()
+
+	return db.Model(&core.JPNICTech{Model: gorm.Model{ID: input.ID}}).Update(input).Error
 }
