@@ -54,7 +54,7 @@ func TestAddJPNICTech(t *testing.T) {
 		MaxUpstream:    0,
 		AveDownstream:  0,
 		MaxDownstream:  0,
-		MaxBandWidthAS: 0,
+		MaxBandWidthAS: "0",
 		IP:             nil,
 		//IPv4:       nil,
 		JPNICAdminID: 0,
