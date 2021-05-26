@@ -6,6 +6,7 @@ import (
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/notice"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	dbNotice "github.com/homenoc/dsbd-backend/pkg/api/store/notice/v0"
 	"github.com/jinzhu/gorm"
 	"log"
@@ -35,7 +36,7 @@ func AddAdmin(c *gin.Context) {
 	}
 
 	// 時間はJST基準
-	jst, _ := time.LoadLocation("Asia/Tokyo")
+	jst, _ := time.LoadLocation(config.Conf.Controller.TimeZone)
 
 	// 9999年12月31日 23:59:59.59
 	var endTime = time.Date(9999, time.December, 31, 23, 59, 59, 59, jst)
@@ -112,7 +113,7 @@ func UpdateAdmin(c *gin.Context) {
 	}
 
 	// 時間はJST基準
-	jst, _ := time.LoadLocation("Asia/Tokyo")
+	jst, _ := time.LoadLocation(config.Conf.Controller.TimeZone)
 
 	startTime, _ := time.ParseInLocation(layoutInput, input.StartTime, jst)
 	endTime, _ := time.ParseInLocation(layoutInput, *input.EndTime, jst)

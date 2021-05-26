@@ -16,9 +16,10 @@ type Config struct {
 }
 
 type Controller struct {
-	User  User  `json:"user"`
-	Admin Admin `json:"admin"`
-	Auth  Auth  `json:"auth"`
+	User     User   `json:"user"`
+	Admin    Admin  `json:"admin"`
+	Auth     Auth   `json:"auth"`
+	TimeZone string `json:"timezone"`
 }
 
 type User struct {
