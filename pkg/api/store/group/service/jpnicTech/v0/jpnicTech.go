@@ -10,19 +10,19 @@ import (
 	"time"
 )
 
-func Create(network *core.JPNICTech) (*core.JPNICTech, error) {
+func Create(jpnic *core.JPNICTech) (*core.JPNICTech, error) {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
-		return network, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+		return jpnic, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
 	defer db.Close()
 
-	err = db.Create(&network).Error
-	return network, err
+	err = db.Create(&jpnic).Error
+	return jpnic, err
 }
 
-func Delete(network *core.JPNICTech) error {
+func Delete(jpnic *core.JPNICTech) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -30,10 +30,10 @@ func Delete(network *core.JPNICTech) error {
 	}
 	defer db.Close()
 
-	return db.Delete(network).Error
+	return db.Delete(jpnic).Error
 }
 
-func Update(base int, u core.JPNICTech) error {
+func Update(base int, jpnic core.JPNICTech) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -42,7 +42,7 @@ func Update(base int, u core.JPNICTech) error {
 	defer db.Close()
 
 	if base == jpnicTech.UpdateAll {
-		err = db.Model(&core.JPNICTech{Model: gorm.Model{ID: u.ID}}).Update(u).Error
+		err = db.Model(&core.JPNICTech{Model: gorm.Model{ID: jpnic.ID}}).Update(jpnic).Error
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
