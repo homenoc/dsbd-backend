@@ -36,7 +36,10 @@ func AddJPNICTechAdmin(c *gin.Context) {
 		return
 	}
 
-	if err = dbService.JoinJPNICTech(uint(id), input); err != nil {
+	input.ID = 0
+	input.ServiceID = uint(id)
+
+	if err = dbService.JoinJPNICTech(input); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
