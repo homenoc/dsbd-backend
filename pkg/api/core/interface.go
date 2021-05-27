@@ -77,7 +77,7 @@ type Service struct {
 	Connection        []*Connection    `json:"connections"`
 	JPNICAdminID      uint             `json:"jpnic_admin_id"`
 	JPNICAdmin        JPNICAdmin       `json:"jpnic_admin"`
-	JPNICTech         []JPNICTech      `json:"jpnic_tech" gorm:"many2many:service_jpnic_tech;"`
+	JPNICTech         []JPNICTech      `json:"jpnic_tech"`
 	StartDate         time.Time        `json:"start_date"`
 	EndDate           *time.Time       `json:"end_date"`
 	Open              *bool            `json:"open"`
@@ -182,42 +182,44 @@ type Plan struct {
 
 type JPNICAdmin struct {
 	gorm.Model
-	Service     []Service `gorm:"foreignkey:JPNICAdminID"`
-	JPNICHandle string    `json:"jpnic_handle"`
-	Name        string    `json:"name"`
-	NameEn      string    `json:"name_en"`
-	Mail        string    `json:"mail"`
-	Org         string    `json:"org"`
-	OrgEn       string    `json:"org_en"`
-	PostCode    string    `json:"postcode"`
-	Address     string    `json:"address"`
-	AddressEn   string    `json:"address_en"`
-	Dept        string    `json:"dept"`
-	DeptEn      string    `json:"dept_en"`
-	Tel         string    `json:"tel"`
-	Fax         string    `json:"fax"`
-	Country     string    `json:"country"`
-	Lock        *bool     `json:"lock"`
+	ServiceID uint `json:"service_id"`
+	//Service     []Service `gorm:"foreignkey:JPNICAdminID"`
+	JPNICHandle string `json:"jpnic_handle"`
+	Name        string `json:"name"`
+	NameEn      string `json:"name_en"`
+	Mail        string `json:"mail"`
+	Org         string `json:"org"`
+	OrgEn       string `json:"org_en"`
+	PostCode    string `json:"postcode"`
+	Address     string `json:"address"`
+	AddressEn   string `json:"address_en"`
+	Dept        string `json:"dept"`
+	DeptEn      string `json:"dept_en"`
+	Tel         string `json:"tel"`
+	Fax         string `json:"fax"`
+	Country     string `json:"country"`
+	Lock        *bool  `json:"lock"`
 }
 
 type JPNICTech struct {
 	gorm.Model
-	Service     []Service `json:"service" gorm:"many2many:service_jpnic_tech;"`
-	JPNICHandle string    `json:"jpnic_handle"`
-	Name        string    `json:"name"`
-	NameEn      string    `json:"name_en"`
-	Mail        string    `json:"mail"`
-	Org         string    `json:"org"`
-	OrgEn       string    `json:"org_en"`
-	PostCode    string    `json:"postcode"`
-	Address     string    `json:"address"`
-	AddressEn   string    `json:"address_en"`
-	Dept        string    `json:"dept"`
-	DeptEn      string    `json:"dept_en"`
-	Tel         string    `json:"tel"`
-	Fax         string    `json:"fax"`
-	Country     string    `json:"country"`
-	Lock        *bool     `json:"lock"`
+	//Service     []Service `json:"service" gorm:"many2many:service_jpnic_tech;"`
+	ServiceID   uint   `json:"service_id"`
+	JPNICHandle string `json:"jpnic_handle"`
+	Name        string `json:"name"`
+	NameEn      string `json:"name_en"`
+	Mail        string `json:"mail"`
+	Org         string `json:"org"`
+	OrgEn       string `json:"org_en"`
+	PostCode    string `json:"postcode"`
+	Address     string `json:"address"`
+	AddressEn   string `json:"address_en"`
+	Dept        string `json:"dept"`
+	DeptEn      string `json:"dept_en"`
+	Tel         string `json:"tel"`
+	Fax         string `json:"fax"`
+	Country     string `json:"country"`
+	Lock        *bool  `json:"lock"`
 }
 
 type ServiceTemplate struct {

@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func JoinJPNICTech(serviceID uint, input core.JPNICTech) error {
+func JoinJPNICTech(input core.JPNICTech) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -17,9 +17,7 @@ func JoinJPNICTech(serviceID uint, input core.JPNICTech) error {
 	}
 	defer db.Close()
 
-	return db.Model(&core.Service{Model: gorm.Model{ID: serviceID}}).
-		Association("JPNICTech").
-		Append(&input).Error
+	return db.Create(&input).Error
 }
 
 func DeleteJPNICTech(id uint) error {
