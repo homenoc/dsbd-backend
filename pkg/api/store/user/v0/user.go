@@ -113,6 +113,22 @@ func Get(base int, u *core.User) user.ResultDatabase {
 	return user.ResultDatabase{User: userStruct, Err: err}
 }
 
+// value of base can reference from api/core/user/interface.go
+func GetArray(u []uint) user.ResultDatabase {
+	db, err := store.ConnectDB()
+	if err != nil {
+		log.Println("database connection error")
+		return user.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+	}
+	defer db.Close()
+
+	var userStruct []core.User
+
+	err = db.Where(u).Find(&userStruct).Error
+
+	return user.ResultDatabase{User: userStruct, Err: err}
+}
+
 func GetAll() user.ResultDatabase {
 	db, err := store.ConnectDB()
 	if err != nil {
