@@ -8,6 +8,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/notice"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	dbNotice "github.com/homenoc/dsbd-backend/pkg/api/store/notice/v0"
+	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"github.com/jinzhu/gorm"
 	"log"
 	"net/http"
@@ -46,16 +47,21 @@ func AddAdmin(c *gin.Context) {
 		endTime, _ = time.ParseInLocation("2006-01-02 15:04:05", *input.EndTime, jst)
 	}
 
-	noticeSlackAddAdmin(input)
-
-	var userArray []core.User
+	var userIDArray []uint
 
 	for _, tmpID := range userExtraction(input.UserID, input.GroupID, input.NOCID) {
-		userArray = append(userArray, core.User{Model: gorm.Model{ID: tmpID}})
+		userIDArray = append(userIDArray, tmpID)
+	}
+
+	resultUser := dbUser.GetArray(userIDArray)
+	if resultUser.Err != nil {
+		log.Println(resultUser.Err.Error())
+		c.JSON(http.StatusInternalServerError, common.Error{Error: resultUser.Err.Error()})
+		return
 	}
 
 	if _, err = dbNotice.Create(&core.Notice{
-		User:      userArray,
+		User:      resultUser.User,
 		Everyone:  input.Everyone,
 		StartTime: startTime,
 		EndTime:   endTime,
@@ -68,6 +74,7 @@ func AddAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
+	noticeSlackAddAdmin(input)
 	c.JSON(http.StatusOK, notice.Result{})
 }
 
