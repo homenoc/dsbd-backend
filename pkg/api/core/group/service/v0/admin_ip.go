@@ -44,7 +44,9 @@ func AddIPAdmin(c *gin.Context) {
 		return
 	}
 
-	if err = dbService.JoinIP(uint(id), resultIP[0]); err != nil {
+	resultIP[0].ServiceID = uint(id)
+
+	if err = dbService.JoinIP(resultIP[0]); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}

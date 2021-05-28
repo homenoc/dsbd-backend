@@ -30,7 +30,7 @@ func DeletePlan(id uint) error {
 	}
 	defer db.Close()
 
-	return db.Delete(core.IP{Model: gorm.Model{ID: id}}).Error
+	return db.Delete(core.Plan{Model: gorm.Model{ID: id}}).Error
 }
 
 func UpdatePlan(input core.Plan) error {
