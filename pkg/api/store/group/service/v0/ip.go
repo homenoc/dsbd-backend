@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func JoinIP(serviceID uint, input core.IP) error {
+func JoinIP(input core.IP) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -17,9 +17,7 @@ func JoinIP(serviceID uint, input core.IP) error {
 	}
 	defer db.Close()
 
-	return db.Model(&core.Service{Model: gorm.Model{ID: serviceID}}).
-		Association("IP").
-		Append(&input).Error
+	return db.Create(&input).Error
 }
 
 func DeleteIP(id uint) error {
