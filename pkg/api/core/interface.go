@@ -81,6 +81,7 @@ type Service struct {
 	StartDate         time.Time        `json:"start_date"`
 	EndDate           *time.Time       `json:"end_date"`
 	Open              *bool            `json:"open"`
+	Enable            *bool            `json:"enable"`
 	Lock              *bool            `json:"lock"`
 	AddAllow          *bool            `json:"add_allow"`
 	Group             Group            `json:"group"`
@@ -96,6 +97,8 @@ type Connection struct {
 	ConnectionComment        string                 `json:"connection_comment"` // ServiceがETCの時や補足説明で必要
 	ConnectionNumber         uint                   `json:"connection_number"`
 	NTTTemplateID            *uint                  `json:"ntt_template_id"`
+	IPv4RouteTemplateID      *uint                  `json:"ipv4_route_template_id"`
+	IPv6RouteTemplateID      *uint                  `json:"ipv6_route_template_id"`
 	NOCID                    *uint                  `json:"noc_id"`
 	TermIP                   string                 `json:"term_ip"`
 	Monitor                  *bool                  `json:"monitor"`
@@ -105,8 +108,11 @@ type Connection struct {
 	LinkV6Our                string                 `json:"link_v6_our"`
 	LinkV6Your               string                 `json:"link_v6_your"`
 	Open                     *bool                  `json:"open"`
+	Enable                   *bool                  `json:"enable"`
 	Lock                     *bool                  `json:"lock"`
 	Comment                  string                 `json:"comment"`
+	IPv4RouteTemplate        *IPv4RouteTemplate     `json:"ipv4_route_template"`
+	IPv6RouteTemplate        *IPv6RouteTemplate     `json:"ipv6_route_template"`
 	NTTTemplate              *NTTTemplate           `json:"ntt_template"`
 	NOC                      *NOC                   `json:"noc"`
 	BGPRouter                BGPRouter              `json:"bgp_router"`
@@ -232,6 +238,16 @@ type ServiceTemplate struct {
 	NeedGlobalAS *bool  `json:"need_global_as"`
 	NeedComment  *bool  `json:"need_comment"`
 	NeedRoute    *bool  `json:"need_route"`
+}
+
+type IPv4RouteTemplate struct {
+	gorm.Model
+	Name string `json:"name"`
+}
+
+type IPv6RouteTemplate struct {
+	gorm.Model
+	Name string `json:"name"`
 }
 
 type ConnectionTemplate struct {
