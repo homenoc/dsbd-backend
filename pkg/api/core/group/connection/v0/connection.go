@@ -108,8 +108,15 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	if !(*resultService.Service[0].AddAllow) {
-		c.JSON(http.StatusBadRequest, common.Error{Error: "error: You are not allowed to add any connection information."})
+	// check service enable
+	if !*resultService.Service[0].Enable {
+		c.JSON(http.StatusBadRequest, common.Error{Error: "You don't allow this operation. [enable]"})
+		return
+	}
+
+	// check add_allow
+	if !*resultService.Service[0].AddAllow {
+		c.JSON(http.StatusBadRequest, common.Error{Error: "You don't allow this operation. [add_allow]"})
 		return
 	}
 
@@ -148,6 +155,7 @@ func Add(c *gin.Context) {
 		TermIP:                   input.TermIP,
 		Address:                  input.Address,
 		Monitor:                  input.Monitor,
+		Enable:                   &[]bool{true}[0],
 		Open:                     &[]bool{false}[0],
 		Lock:                     &[]bool{true}[0],
 	})
