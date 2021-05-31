@@ -93,6 +93,9 @@ func Get(base int, input *core.Token) token.ResultDatabase {
 			Preload("User").
 			Preload("User.Group").
 			Find(&tokenStruct).Error
+	} else if base == token.AccessToken {
+		err = db.Where("access_token = ? AND admin = ?", input.AccessToken, true).
+			Find(&tokenStruct).Error
 	} else if base == token.AdminToken {
 		err = db.Where("access_token = ? AND admin = ? AND expired_at > ?",
 			input.AccessToken, true, time.Now()).Find(&tokenStruct).Error

@@ -58,6 +58,12 @@ func AdminRestAPI() {
 			v1.GET("/user", user.GetAllAdmin)
 			v1.GET("/user/:id", user.GetAdmin)
 			//
+			// Login / Logout
+			//
+			v1.POST("/login", token.GenerateAdmin)
+			v1.POST("/logout", token.DeleteAdminUser)
+
+			//
 			// Token
 			//
 			v1.POST("/token/generate", token.GenerateAdmin)

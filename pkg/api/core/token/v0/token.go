@@ -120,3 +120,21 @@ func Delete(c *gin.Context) {
 
 	c.JSON(http.StatusOK, common.Result{})
 }
+
+func DeleteAdminUser(c *gin.Context) {
+	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
+
+	result := dbToken.Get(token.AccessToken, &core.Token{AccessToken: accessToken})
+	if result.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
+		return
+	}
+
+	if err := dbToken.Delete(&core.Token{Model: gorm.Model{ID: result.Token[0].ID}}); err != nil {
+		//エラー時はTokenがすでに消えている状態なので、問題なし
+		c.JSON(http.StatusOK, common.Result{})
+		return
+	}
+
+	c.JSON(http.StatusOK, common.Result{})
+}
