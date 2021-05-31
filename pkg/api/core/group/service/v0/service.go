@@ -113,11 +113,6 @@ func Add(c *gin.Context) {
 		}
 	}
 
-	if *resultServiceTemplate.Services[0].NeedRoute && input.RouteV4 == "" && input.RouteV6 == "" {
-		c.JSON(http.StatusBadRequest, common.Error{Error: "no data: Route Information"})
-		return
-	}
-
 	resultNetwork := dbService.Get(service.SearchNewNumber, &core.Service{GroupID: result.User.Group.ID})
 	if resultNetwork.Err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: resultNetwork.Err.Error()})
@@ -146,8 +141,6 @@ func Add(c *gin.Context) {
 		PostCode:          input.Postcode,
 		Address:           input.Address,
 		AddressEn:         input.AddressEn,
-		RouteV4:           input.RouteV4,
-		RouteV6:           input.RouteV6,
 		AveUpstream:       input.AveUpstream,
 		MaxUpstream:       input.MaxUpstream,
 		AveDownstream:     input.AveDownstream,
@@ -157,6 +150,7 @@ func Add(c *gin.Context) {
 		IP:                grpIP,
 		JPNICAdmin:        input.JPNICAdmin,
 		JPNICTech:         input.JPNICTech,
+		Enable:            &[]bool{true}[0],
 		Open:              &[]bool{false}[0],
 		Lock:              &[]bool{true}[0],
 		AddAllow:          &[]bool{true}[0],

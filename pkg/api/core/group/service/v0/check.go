@@ -58,6 +58,12 @@ func checkJPNICAdminUser(input core.JPNICAdmin) error {
 	if input.OrgEn == "" {
 		return fmt.Errorf("failed data: org(english)")
 	}
+	if input.Name == "" {
+		return fmt.Errorf("failed data: [jpnic admin] name")
+	}
+	if input.NameEn == "" {
+		return fmt.Errorf("failed data: [jpnic admin] name(english)")
+	}
 	if input.Mail == "" || !strings.Contains(input.Mail, "@") {
 		return fmt.Errorf("failed data: mail")
 	}
@@ -83,6 +89,12 @@ func checkJPNICTechUser(input core.JPNICTech) error {
 	}
 	if input.OrgEn == "" {
 		return fmt.Errorf("failed data: org(english)")
+	}
+	if input.Name == "" {
+		return fmt.Errorf("failed data: [jpnic tech] name")
+	}
+	if input.NameEn == "" {
+		return fmt.Errorf("failed data: [jpnic tech] name(english)")
 	}
 	if input.Mail == "" || !strings.Contains(input.Mail, "@") {
 		return fmt.Errorf("failed data: mail")
