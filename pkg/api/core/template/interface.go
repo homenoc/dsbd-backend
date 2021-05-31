@@ -23,6 +23,8 @@ type Result struct {
 	TunnelEndPointRouterIP []core.TunnelEndPointRouterIP `json:"tunnel_endpoint_router_ip"`
 	IPv4                   []core.IPv4Template           `json:"ipv4"`
 	IPv6                   []core.IPv6Template           `json:"ipv6"`
+	IPv4Route              []core.IPv4RouteTemplate      `json:"ipv4_route"`
+	IPv6Route              []core.IPv6RouteTemplate      `json:"ipv6_route"`
 }
 
 type ResultAdmin struct {
@@ -35,6 +37,8 @@ type ResultAdmin struct {
 	TunnelEndPointRouterIP []core.TunnelEndPointRouterIP `json:"tunnel_endpoint_router_ip"`
 	IPv4                   []core.IPv4Template           `json:"ipv4"`
 	IPv6                   []core.IPv6Template           `json:"ipv6"`
+	IPv4Route              []core.IPv4RouteTemplate      `json:"ipv4_route"`
+	IPv6Route              []core.IPv6RouteTemplate      `json:"ipv6_route"`
 	User                   []core.User                   `json:"user"`
 	Group                  []core.Group                  `json:"group"`
 }

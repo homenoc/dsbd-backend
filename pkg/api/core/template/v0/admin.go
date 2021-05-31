@@ -11,7 +11,9 @@ import (
 	dbNOC "github.com/homenoc/dsbd-backend/pkg/api/store/noc/v0"
 	dbConnectionTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/connection/v0"
 	dbIPv4Template "github.com/homenoc/dsbd-backend/pkg/api/store/template/ipv4/v0"
+	dbIPv4RouteTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ipv4_route/v0"
 	dbIPv6Template "github.com/homenoc/dsbd-backend/pkg/api/store/template/ipv6/v0"
+	dbIPv6RouteTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ipv6_route/v0"
 	dbNTTTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ntt/v0"
 	dbServiceTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/service/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
@@ -70,6 +72,17 @@ func GetAdmin(c *gin.Context) {
 		return
 	}
 
+	resultIPv4Route, err := dbIPv4RouteTemplate.GetAll()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		return
+	}
+	resultIPv6Route, err := dbIPv6RouteTemplate.GetAll()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		return
+	}
+
 	resultUser := dbUser.GetAll()
 	if resultUser.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: resultUser.Err.Error()})
@@ -91,6 +104,8 @@ func GetAdmin(c *gin.Context) {
 		TunnelEndPointRouterIP: resultTunnelEndPointRouterIP.TunnelEndPointRouterIP,
 		IPv4:                   resultIPv4.IPv4,
 		IPv6:                   resultIPv6.IPv6,
+		IPv4Route:              resultIPv4Route,
+		IPv6Route:              resultIPv6Route,
 		User:                   resultUser.User,
 		Group:                  resultGroup.Group,
 	})
