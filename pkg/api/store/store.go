@@ -46,6 +46,8 @@ func InitDB() {
 		&core.Notice{},
 		&core.IPv4Template{},
 		&core.IPv6Template{},
+		&core.IPv4RouteTemplate{},
+		&core.IPv6RouteTemplate{},
 	)
 	log.Println(result.Error)
 }
