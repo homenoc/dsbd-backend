@@ -84,7 +84,7 @@ func Update(base int, c core.Service) error {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
 	}
-	result = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Update(core.Service{AddAllow: c.AddAllow}).Error
+
 	return result
 }
 
