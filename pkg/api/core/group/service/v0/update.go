@@ -35,9 +35,14 @@ func replaceService(replace, input core.Service) core.Service {
 		replace.RouteV4 = input.RouteV4
 	}
 
-	//Route(V4)
+	//Route(V6)
 	if input.RouteV6 != "" {
 		replace.RouteV6 = input.RouteV6
+	}
+
+	//Open
+	if input.Open != replace.Open {
+		replace.Open = input.Open
 	}
 
 	//Lock

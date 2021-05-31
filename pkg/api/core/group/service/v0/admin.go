@@ -54,6 +54,7 @@ func AddAdmin(c *gin.Context) {
 
 	var grpIP []core.IP = nil
 
+	// get service template
 	resultServiceTemplate := dbServiceTemplate.Get(serviceTemplate.ID, &core.ServiceTemplate{Model: gorm.Model{ID: input.ServiceTemplateID}})
 	if resultServiceTemplate.Err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: resultServiceTemplate.Err.Error()})
@@ -71,6 +72,7 @@ func AddAdmin(c *gin.Context) {
 			return
 		}
 
+		// 0 < jpnic_tech count < 3
 		if len(input.JPNICTech) == 0 || len(input.JPNICTech) > 2 {
 			c.JSON(http.StatusBadRequest, common.Error{Error: "error: user tech count"})
 			return
@@ -108,11 +110,6 @@ func AddAdmin(c *gin.Context) {
 		}
 	}
 
-	if *resultServiceTemplate.Services[0].NeedRoute && input.RouteV4 == "" && input.RouteV6 == "" {
-		c.JSON(http.StatusBadRequest, common.Error{Error: "no data: Route Information"})
-		return
-	}
-
 	resultNetwork := dbService.Get(service.SearchNewNumber, &core.Service{GroupID: uint(id)})
 	if resultNetwork.Err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: resultNetwork.Err.Error()})
@@ -141,8 +138,6 @@ func AddAdmin(c *gin.Context) {
 		PostCode:          input.Postcode,
 		Address:           input.Address,
 		AddressEn:         input.AddressEn,
-		RouteV4:           input.RouteV4,
-		RouteV6:           input.RouteV6,
 		AveUpstream:       input.AveUpstream,
 		MaxUpstream:       input.MaxUpstream,
 		AveDownstream:     input.AveDownstream,
@@ -153,6 +148,7 @@ func AddAdmin(c *gin.Context) {
 		IP:                grpIP,
 		JPNICAdmin:        input.JPNICAdmin,
 		JPNICTech:         input.JPNICTech,
+		Enable:            &[]bool{true}[0],
 		Open:              &[]bool{false}[0],
 		Lock:              &[]bool{true}[0],
 		AddAllow:          &[]bool{false}[0],
