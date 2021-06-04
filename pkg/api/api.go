@@ -13,7 +13,6 @@ import (
 	tunnelEndPointRouterIP "github.com/homenoc/dsbd-backend/pkg/api/core/noc/tunnelEndPointRouterIP/v0"
 	noc "github.com/homenoc/dsbd-backend/pkg/api/core/noc/v0"
 	notice "github.com/homenoc/dsbd-backend/pkg/api/core/notice/v0"
-	chat "github.com/homenoc/dsbd-backend/pkg/api/core/support/chat/v0"
 	ticket "github.com/homenoc/dsbd-backend/pkg/api/core/support/ticket/v0"
 	template "github.com/homenoc/dsbd-backend/pkg/api/core/template/v0"
 	token "github.com/homenoc/dsbd-backend/pkg/api/core/token/v0"
@@ -215,85 +214,61 @@ func UserRestAPI() {
 			//
 			v1.POST("/controller/chat", controller.ReceiveChatUser)
 
+			// User Mail MailVerify
+			v1.GET("/verify/:token", user.MailVerify)
+
+			//
+			// Login / Logout
+			//
+			v1.POST("/login", token.Generate)
+			v1.GET("/login", token.GenerateInit)
+			v1.POST("/logout", token.Delete)
+
 			//
 			// User
 			//
 			// User Create
 			v1.POST("/user", user.Add)
 			// User Create(Group)
-			v1.POST("/user/:id", user.AddGroup)
-			// User Delete
-			//router.DELETE("/user", user.Delete)
-			// User Get
-			v1.GET("/login", user.GetOwn)
-			v1.GET("/user/:id", user.Get)
-			v1.GET("/user", user.GetGroup)
-			// User ID Get
+			v1.POST("/group/:id/user", user.AddGroup)
 			// User Update
 			v1.PUT("/user/:id", user.Update)
 
-			// User Mail MailVerify
-			v1.GET("/verify/:token", user.MailVerify)
 			//
-			// Token
+			// Info
 			//
-			// get token for CHAP authentication
-			v1.GET("/token/init", token.GenerateInit)
-			// get token for user
-			v1.GET("/token", token.Generate)
-			// delete
-			v1.DELETE("/token", token.Delete)
+			v1.GET("/info", info.Get)
+
 			//
 			// Group
 			//
 			// Group Create
 			v1.POST("/group", group.Add)
-			v1.GET("/group", group.Get)
-			v1.PUT("/group", group.Update)
-			v1.GET("/group/all", group.GetAll)
-			// Group Delete
-			//v1.DELETE("/group", group.Delete)
+
+			// Template
+			v1.GET("/template", template.Get)
+
 			// Service add
-			v1.POST("/group/service", service.Add)
-			v1.GET("/group/service/add_allow", service.GetAddAllow)
+			v1.POST("/service", service.Add)
+			v1.GET("/service/add_allow", service.GetAddAllow)
 			//v1.PUT("/group/network", network.Update)
 
 			// Connection Create
 			v1.POST("/service/:id/connection", connection.Add)
 
 			//
-			// Info
-			//
-			v1.GET("/group/info", info.Get)
-
-			// Template
-			v1.GET("/template", template.Get)
-
-			// NOC
-			v1.GET("/noc", noc.GetAll)
-
-			//
 			// Support
 			//
 			v1.POST("/support", ticket.Create)
-			v1.GET("/support", ticket.GetAll)
-			v1.POST("/support/:id", chat.Add)
-			v1.GET("/support/:id", ticket.Get)
-			//
-			// Notice
-			//
-			v1.GET("/notice", notice.Get)
+			v1.PUT("/support/:id", ticket.Update)
 
-			// 現在検討中
+			// User Delete
+			// User ID Get
 
-			// Service JPNIC Admin
-			//v1.POST("/group/jpnic/admin", jpnicAdmin.Add)
-			//v1.DELETE("/group/jpnic/admin", jpnicAdmin.Delete)
-			//v1.GET("/group/network/jpnic/admin", jpnicAdmin.GetAll)
-			// Service JPNIC Tech
-			//v1.POST("/group/jpnic/tech", jpnicTech.Add)
-			//v1.DELETE("/group/jpnic/tech", jpnicTech.Delete)
-			//v1.GET("/group/service/jpnic/tech", jpnicTech.GetAll)
+			// Group Delete
+			//v1.DELETE("/group", group.Delete)
+
+			//v1.POST("/support/:id", chat.Add)
 		}
 	}
 
