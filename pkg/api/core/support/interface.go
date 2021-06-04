@@ -45,6 +45,7 @@ type WebSocket struct {
 
 type FirstInput struct {
 	gorm.Model
+	IsGroup  bool   `json:"is_group"`
 	TicketID uint   `json:"ticket_id"`
 	Title    string `json:"title"`
 	Data     string `json:"data"`

@@ -9,6 +9,7 @@ type User struct {
 	gorm.Model
 	Tokens        []*Token  `json:"tokens"`
 	Notice        []*Notice `json:"notice"`
+	Ticket        []Ticket  `json:"tickets"`
 	Group         *Group    `json:"group"`
 	GroupID       uint      `json:"group_id"`
 	Name          string    `json:"name"`

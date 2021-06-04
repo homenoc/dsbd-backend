@@ -36,26 +36,45 @@ func Create(c *gin.Context) {
 		return
 	}
 
-	// Group authentication
-	result := auth.GroupAuthentication(0, core.Token{UserToken: userToken, AccessToken: accessToken})
-	if result.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
-		return
-	}
-
 	// input check
-	if err := check(input); err != nil {
+	if err = check(input); err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 		return
 	}
 
+	resultTicket := &core.Ticket{
+		Solved: &[]bool{false}[0],
+		Title:  input.Title,
+	}
+	var groupOrg string
+
+	// isn't group
+	if !input.IsGroup {
+		result := auth.UserAuthentication(core.Token{UserToken: userToken, AccessToken: accessToken})
+		if result.Err != nil {
+			c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
+			return
+		}
+		resultTicket.GroupID = 0
+		resultTicket.UserID = result.User.ID
+		groupOrg = "個人ユーザ"
+
+	} else {
+		//is group
+		// Group authentication
+		result := auth.GroupAuthentication(1, core.Token{UserToken: userToken, AccessToken: accessToken})
+		if result.Err != nil {
+			c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
+			return
+		}
+		resultTicket.GroupID = result.User.GroupID
+		resultTicket.UserID = result.User.ID
+		groupOrg = result.User.Group.Org
+
+	}
+
 	// Tickets DBに登録
-	ticketResult, err := dbTicket.Create(&core.Ticket{
-		GroupID: result.User.GroupID,
-		UserID:  result.User.ID,
-		Solved:  &[]bool{false}[0],
-		Title:   input.Title,
-	})
+	ticketResult, err := dbTicket.Create(resultTicket)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
@@ -63,7 +82,7 @@ func Create(c *gin.Context) {
 
 	// Chat DBに登録
 	_, err = dbChat.Create(&core.Chat{
-		UserID:   result.User.ID,
+		UserID:   resultTicket.UserID,
 		Admin:    false,
 		Data:     input.Data,
 		TicketID: ticketResult.ID,
@@ -76,8 +95,8 @@ func Create(c *gin.Context) {
 	//HomeNOC Slackに送信
 	attachment := slack.Attachment{}
 	attachment.AddField(slack.Field{Title: "Title", Value: "新規チケット作成"}).
-		AddField(slack.Field{Title: "発行者", Value: strconv.Itoa(int(result.User.ID))}).
-		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(result.User.GroupID)) + "-" + result.User.Group.Org}).
+		AddField(slack.Field{Title: "発行者", Value: strconv.Itoa(int(resultTicket.UserID))}).
+		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(resultTicket.GroupID)) + "-" + groupOrg}).
 		AddField(slack.Field{Title: "Title", Value: input.Title}).
 		AddField(slack.Field{Title: "Message", Value: input.Data})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
@@ -85,9 +104,18 @@ func Create(c *gin.Context) {
 	c.JSON(http.StatusOK, ticket.Ticket{ID: ticketResult.ID})
 }
 
-func Get(c *gin.Context) {
+func Update(c *gin.Context) {
+	var input core.Ticket
+
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
+
+	err := c.BindJSON(&input)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -95,97 +123,41 @@ func Get(c *gin.Context) {
 		return
 	}
 
-	// Group authentication
-	result := auth.GroupAuthentication(0, core.Token{UserToken: userToken, AccessToken: accessToken})
-	if result.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
+	// Tickets DBからデータを取得
+	ticketResult := dbTicket.Get(ticket.ID, &core.Ticket{Model: gorm.Model{ID: uint(id)}})
+	if ticketResult.Err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: ticketResult.Err.Error()})
 		return
 	}
 
-	// IDからDBからチケットを検索
-	resultTicket := dbTicket.Get(ticket.ID, &core.Ticket{Model: gorm.Model{ID: uint(id)}})
-	if resultTicket.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: resultTicket.Err.Error()})
-		return
-	}
+	updateTicketData := ticketResult.Tickets[0]
 
-	// GroupIDが一致しない場合はここでエラーを返す
-	if resultTicket.Tickets[0].GroupID != result.User.GroupID {
-		c.JSON(http.StatusForbidden, common.Error{Error: "Auth Error: group id failed..."})
-		return
-	}
-
-	var response ticket.Ticket
-
-	var resultChat []ticket.Chat
-	for _, tmpChat := range resultTicket.Tickets[0].Chat {
-		resultChat = append(resultChat, ticket.Chat{
-			Time:     tmpChat.CreatedAt.Add(9 * time.Hour).Format(timeLayout),
-			UserID:   tmpChat.UserID,
-			UserName: tmpChat.User.Name,
-			Admin:    tmpChat.Admin,
-			Data:     tmpChat.Data,
-		})
-	}
-
-	response = ticket.Ticket{
-		ID:       resultTicket.Tickets[0].ID,
-		Time:     resultTicket.Tickets[0].CreatedAt.Add(9 * time.Hour).Format(timeLayout),
-		GroupID:  resultTicket.Tickets[0].GroupID,
-		UserID:   resultTicket.Tickets[0].UserID,
-		Solved:   resultTicket.Tickets[0].Solved,
-		Chat:     resultChat,
-		Title:    resultTicket.Tickets[0].Title,
-		UserName: resultTicket.Tickets[0].User.Name,
-	}
-
-	c.JSON(http.StatusOK, ticket.Result{Ticket: response})
-}
-
-func GetAll(c *gin.Context) {
-	userToken := c.Request.Header.Get("USER_TOKEN")
-	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
-
-	result := auth.GroupAuthentication(0, core.Token{UserToken: userToken, AccessToken: accessToken})
-	if result.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
-		return
-	}
-
-	// Tickets DBからGroup IDのTicketデータを抽出
-	resultTicket := dbTicket.Get(ticket.GID, &core.Ticket{GroupID: result.User.GroupID})
-	if resultTicket.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: resultTicket.Err.Error()})
-		return
-	}
-
-	var response []ticket.Ticket
-
-	for _, tmp := range resultTicket.Tickets {
-		var resultChat []ticket.Chat
-		for _, tmpChat := range tmp.Chat {
-			resultChat = append(resultChat, ticket.Chat{
-				Time:     tmpChat.CreatedAt.Add(9 * time.Hour).Format(timeLayout),
-				UserID:   tmpChat.UserID,
-				UserName: tmpChat.User.Name,
-				Admin:    tmpChat.Admin,
-				Data:     tmpChat.Data,
-			})
+	// isn't group
+	if ticketResult.Tickets[0].GroupID == 0 {
+		result := auth.UserAuthentication(core.Token{UserToken: userToken, AccessToken: accessToken})
+		if result.Err != nil {
+			c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
+			return
 		}
-
-		response = append(response, ticket.Ticket{
-			ID:       tmp.ID,
-			Time:     tmp.CreatedAt.Add(9 * time.Hour).Format(timeLayout),
-			GroupID:  tmp.GroupID,
-			UserID:   tmp.UserID,
-			Solved:   tmp.Solved,
-			Chat:     resultChat,
-			Title:    tmp.Title,
-			UserName: tmp.User.Name,
-		})
+	} else {
+		//is group
+		// Group authentication
+		result := auth.GroupAuthentication(1, core.Token{UserToken: userToken, AccessToken: accessToken})
+		if result.Err != nil {
+			c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
+			return
+		}
 	}
 
-	c.JSON(http.StatusOK, ticket.ResultAll{Tickets: response})
+	updateTicketData.Solved = input.Solved
+
+	// Ticketのアップデート
+	err = dbTicket.Update(ticket.UpdateAll, updateTicketData)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, support.Result{})
 }
 
 func GetWebSocket(c *gin.Context) {
