@@ -48,6 +48,7 @@ type Group struct {
 	Pass           *bool         `json:"pass"`
 	Lock           *bool         `json:"lock"`
 	ExpiredStatus  *uint         `json:"expired_status"`
+	AddAllow       *bool         `json:"add_allow"`
 }
 
 type Service struct {
