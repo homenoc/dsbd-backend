@@ -6,6 +6,7 @@ import (
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	template "github.com/homenoc/dsbd-backend/pkg/api/core/template"
+	dbNOC "github.com/homenoc/dsbd-backend/pkg/api/store/noc/v0"
 	dbConnectionTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/connection/v0"
 	dbIPv4Template "github.com/homenoc/dsbd-backend/pkg/api/store/template/ipv4/v0"
 	dbIPv4RouteTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ipv4_route/v0"
@@ -41,6 +42,12 @@ func Get(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: resultNTT.Err.Error()})
 		return
 	}
+	resultNOC := dbNOC.GetAll()
+	if resultNOC.Err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: resultNTT.Err.Error()})
+		return
+	}
+
 	resultIPv4 := dbIPv4Template.GetAll()
 	if resultIPv4.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: resultIPv4.Err.Error()})
@@ -67,6 +74,7 @@ func Get(c *gin.Context) {
 		Services:    resultService.Services,
 		Connections: resultConnection.Connections,
 		NTTs:        resultNTT.NTTs,
+		NOC:         resultNOC.NOC,
 		IPv4:        resultIPv4.IPv4,
 		IPv6:        resultIPv6.IPv6,
 		IPv4Route:   resultIPv4Route,
