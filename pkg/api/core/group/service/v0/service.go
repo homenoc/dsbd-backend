@@ -57,6 +57,12 @@ func Add(c *gin.Context) {
 		return
 	}
 
+	// add_allow check for group
+	if !(*result.User.Group.AddAllow) {
+		c.JSON(http.StatusForbidden, common.Error{Error: "error: failed group add_allow status"})
+		return
+	}
+
 	var grpIP []core.IP = nil
 
 	resultServiceTemplate := dbServiceTemplate.Get(serviceTemplate.ID, &core.ServiceTemplate{Model: gorm.Model{ID: input.ServiceTemplateID}})
@@ -170,8 +176,11 @@ func Add(c *gin.Context) {
 
 	// ---------ここまで処理が通っている場合、DBへの書き込みにすべて成功している
 	// GroupのStatusをAfterStatusにする
-	if err = dbGroup.Update(group.UpdateStatus, core.Group{Model: gorm.Model{ID: result.User.Group.ID},
-		Status: &[]uint{2}[0]}); err != nil {
+	if err = dbGroup.Update(group.UpdateStatus, core.Group{
+		Model:    gorm.Model{ID: result.User.Group.ID},
+		Status:   &[]uint{2}[0],
+		AddAllow: &[]bool{false}[0],
+	}); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
