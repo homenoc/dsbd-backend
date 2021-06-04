@@ -93,7 +93,10 @@ func Get(base int, u *core.User) user.ResultDatabase {
 	if base == user.ID { //ID
 		err = db.First(&userStruct, u.ID).Error
 	} else if base == user.IDDetail {
-		err = db.Preload("Group").
+		err = db.
+			Preload("Ticket").
+			Preload("Ticket.Chat").
+			Preload("Group").
 			Preload("Group.Users").
 			Preload("Group.Services").
 			Preload("Group.Tickets").

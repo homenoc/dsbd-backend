@@ -34,6 +34,7 @@ type Group struct {
 	Lock           *bool      `json:"lock"`
 	ExpiredStatus  *uint      `json:"expired_status"`
 	Status         *uint      `json:"status"`
+	AddAllow       *bool      `json:"add_allow"`
 }
 
 type Notice struct {
@@ -113,11 +114,20 @@ type JPNIC struct {
 	Country   string `json:"country"`
 }
 
+type Service struct {
+	ID          uint   `json:"id"`
+	ServiceID   string `json:"service_id"`
+	ServiceType string `json:"service_type"`
+	NeedRoute   bool   `json:"need_route"`
+	AddAllow    bool   `json:"add_allow"`
+}
+
 type Result struct {
-	User     User     `json:"user"`
-	Group    Group    `json:"group"`
-	UserList []User   `json:"user_list"`
-	Notice   []Notice `json:"notice"`
-	Ticket   []Ticket `json:"ticket"`
-	Info     []Info   `json:"info"`
+	User     User      `json:"user"`
+	Group    Group     `json:"group"`
+	UserList []User    `json:"user_list"`
+	Notice   []Notice  `json:"notice"`
+	Ticket   []Ticket  `json:"ticket"`
+	Service  []Service `json:"service"`
+	Info     []Info    `json:"info"`
 }
