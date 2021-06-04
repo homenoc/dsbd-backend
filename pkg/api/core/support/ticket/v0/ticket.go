@@ -82,7 +82,7 @@ func Create(c *gin.Context) {
 		AddField(slack.Field{Title: "Message", Value: input.Data})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 
-	c.JSON(http.StatusOK, common.Result{})
+	c.JSON(http.StatusOK, ticket.Ticket{ID: ticketResult.ID})
 }
 
 func Get(c *gin.Context) {
@@ -210,7 +210,7 @@ func GetWebSocket(c *gin.Context) {
 
 	defer conn.Close()
 
-	result := auth.GroupAuthentication(0, core.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.UserAuthentication(core.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		log.Println("ws:// support error:Auth error")
 		conn.WriteMessage(websocket.TextMessage, []byte("error: auth error"))
@@ -224,8 +224,8 @@ func GetWebSocket(c *gin.Context) {
 		return
 	}
 
-	if ticketResult.Tickets[0].ID != uint(id) {
-		log.Println("ticketID not match.")
+	if ticketResult.Tickets[0].GroupID != result.User.GroupID {
+		log.Println("groupID not match.")
 	}
 
 	// WebSocket送信
@@ -255,12 +255,17 @@ func GetWebSocket(c *gin.Context) {
 			break
 		}
 		// 入力されたデータをTokenにて認証
-		resultGroup := auth.GroupAuthentication(0, core.Token{
+		resultAuth := auth.UserAuthentication(core.Token{
 			UserToken:   msg.UserToken,
 			AccessToken: msg.AccessToken,
 		})
-		if resultGroup.Err != nil {
-			log.Println(resultGroup.Err)
+		if resultAuth.Err != nil {
+			log.Println(resultAuth.Err)
+			return
+		}
+
+		if result.User.ID != resultAuth.User.ID {
+			log.Println("UserID is not match")
 			return
 		}
 
@@ -276,7 +281,7 @@ func GetWebSocket(c *gin.Context) {
 			} else {
 
 				msg.UserID = result.User.ID
-				msg.GroupID = resultGroup.User.GroupID
+				msg.GroupID = resultAuth.User.GroupID
 				msg.Admin = false
 				msg.UserName = result.User.Name
 				// Token関連の初期化
@@ -288,7 +293,7 @@ func GetWebSocket(c *gin.Context) {
 					CreatedAt: msg.CreatedAt,
 					UserID:    result.User.ID,
 					UserName:  result.User.Name,
-					GroupID:   resultGroup.User.GroupID,
+					GroupID:   result.User.GroupID,
 					Admin:     msg.Admin,
 					Message:   msg.Message,
 				})
