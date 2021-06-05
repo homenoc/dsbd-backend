@@ -195,8 +195,19 @@ func GetWebSocket(c *gin.Context) {
 		return
 	}
 
-	if ticketResult.Tickets[0].GroupID != result.User.GroupID {
+	// check groupID
+	if ticketResult.Tickets[0].GroupID != 0 && ticketResult.Tickets[0].GroupID != result.User.GroupID {
 		log.Println("groupID not match.")
+	}
+	// check userID
+	if ticketResult.Tickets[0].GroupID == 0 && ticketResult.Tickets[0].UserID != result.User.ID {
+		log.Println("userID not match.")
+	}
+
+	var groupID uint = 0
+
+	if ticketResult.Tickets[0].GroupID != 0 {
+		groupID = ticketResult.Tickets[0].GroupID
 	}
 
 	// WebSocket送信
@@ -205,7 +216,7 @@ func GetWebSocket(c *gin.Context) {
 		Admin:    false,
 		UserID:   result.User.ID,
 		UserName: result.User.Name,
-		GroupID:  result.User.GroupID,
+		GroupID:  groupID,
 		Socket:   conn,
 	}] = true
 
@@ -220,7 +231,7 @@ func GetWebSocket(c *gin.Context) {
 				Admin:    false,
 				UserID:   result.User.ID,
 				UserName: result.User.Name,
-				GroupID:  result.User.GroupID,
+				GroupID:  groupID,
 				Socket:   conn,
 			})
 			break
@@ -252,7 +263,7 @@ func GetWebSocket(c *gin.Context) {
 			} else {
 
 				msg.UserID = result.User.ID
-				msg.GroupID = resultAuth.User.GroupID
+				msg.GroupID = groupID
 				msg.Admin = false
 				msg.UserName = result.User.Name
 				// Token関連の初期化
@@ -264,7 +275,7 @@ func GetWebSocket(c *gin.Context) {
 					CreatedAt: msg.CreatedAt,
 					UserID:    result.User.ID,
 					UserName:  result.User.Name,
-					GroupID:   result.User.GroupID,
+					GroupID:   groupID,
 					Admin:     msg.Admin,
 					Message:   msg.Message,
 				})
@@ -291,8 +302,20 @@ func HandleMessages() {
 		//登録されているクライアント宛にデータ送信する
 		for client := range support.Clients {
 			// ユーザのみの場合
-			if client.GroupID == 0 {
-				return
+			if msg.GroupID == 0 && client.GroupID == 0 && client.UserID == msg.UserID {
+				err := client.Socket.WriteJSON(support.WebSocketChatResponse{
+					Time:     time.Now().UTC().Add(9 * time.Hour).Format(timeLayout),
+					UserID:   msg.UserID,
+					UserName: msg.UserName,
+					GroupID:  0,
+					Admin:    msg.Admin,
+					Message:  msg.Message,
+				})
+				if err != nil {
+					log.Printf("error: %v", err)
+					client.Socket.Close()
+					delete(support.Clients, client)
+				}
 			} else if client.GroupID == msg.GroupID {
 				err := client.Socket.WriteJSON(support.WebSocketChatResponse{
 					Time:     time.Now().UTC().Add(9 * time.Hour).Format(timeLayout),

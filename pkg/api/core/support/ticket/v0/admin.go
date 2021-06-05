@@ -218,12 +218,18 @@ func GetAdminWebSocket(c *gin.Context) {
 		return
 	}
 
+	var groupID uint = 0
+
+	if ticketResult.Tickets[0].GroupID != 0 {
+		groupID = ticketResult.Tickets[0].GroupID
+	}
+
 	// WebSocket送信
 	support.Clients[&support.WebSocket{
 		TicketID: uint(id),
 		UserID:   resultAdmin.AdminID,
 		UserName: "HomeNOC",
-		GroupID:  ticketResult.Tickets[0].GroupID,
+		GroupID:  groupID,
 		Socket:   conn,
 	}] = true
 
@@ -237,7 +243,7 @@ func GetAdminWebSocket(c *gin.Context) {
 				TicketID: uint(id),
 				UserID:   resultAdmin.AdminID,
 				UserName: "HomeNOC(運営)",
-				GroupID:  ticketResult.Tickets[0].GroupID,
+				GroupID:  groupID,
 				Socket:   conn,
 			})
 			break
@@ -253,7 +259,7 @@ func GetAdminWebSocket(c *gin.Context) {
 			conn.WriteJSON(&support.WebSocketResult{Err: "db write error"})
 		} else {
 			msg.UserID = resultAdmin.AdminID
-			msg.GroupID = ticketResult.Tickets[0].GroupID
+			msg.GroupID = groupID
 			msg.UserName = "HomeNOC(運営)"
 			msg.Admin = true
 			// Token関連の初期化
@@ -266,7 +272,7 @@ func GetAdminWebSocket(c *gin.Context) {
 				Admin:     msg.Admin,
 				UserID:    resultAdmin.AdminID,
 				UserName:  msg.UserName,
-				GroupID:   ticketResult.Tickets[0].GroupID,
+				GroupID:   groupID,
 				Message:   msg.Message,
 			})
 
@@ -306,8 +312,21 @@ func HandleMessagesAdmin() {
 		//登録されているクライアント宛にデータ送信する
 		for client := range support.Clients {
 			// ユーザのみの場合
-			if client.GroupID == 0 {
-				return
+			log.Println(msg)
+			if msg.GroupID == 0 {
+				err := client.Socket.WriteJSON(support.WebSocketChatResponse{
+					Time:     time.Now().UTC().Add(9 * time.Hour).Format(timeLayout),
+					UserID:   msg.UserID,
+					UserName: msg.UserName,
+					GroupID:  0,
+					Admin:    msg.Admin,
+					Message:  msg.Message,
+				})
+				if err != nil {
+					log.Printf("error: %v", err)
+					client.Socket.Close()
+					delete(support.Clients, client)
+				}
 			} else if client.GroupID == msg.GroupID {
 				err := client.Socket.WriteJSON(support.WebSocketChatResponse{
 					Time:     time.Now().UTC().Add(9 * time.Hour).Format(timeLayout),
