@@ -49,6 +49,7 @@ type FirstInput struct {
 	TicketID uint   `json:"ticket_id"`
 	Title    string `json:"title"`
 	Data     string `json:"data"`
+	UserID   uint   `json:"user_id"`
 	GroupID  uint   `json:"group_id"`
 }
 

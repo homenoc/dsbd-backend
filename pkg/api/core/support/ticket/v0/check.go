@@ -24,9 +24,6 @@ func checkAdmin(input support.FirstInput) error {
 	if input.Data == "" {
 		return fmt.Errorf("no data: data")
 	}
-	if input.GroupID == 0 {
-		return fmt.Errorf("no data: data")
-	}
 
 	return nil
 }

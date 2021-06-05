@@ -46,14 +46,34 @@ func CreateAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
+	resultTicket := &core.Ticket{
+		Solved: &[]bool{false}[0],
+		Title:  input.Title,
+		Admin:  &[]bool{true}[0],
+	}
+
+	// isn't group
+	if !input.IsGroup {
+		if input.UserID == 0 {
+			c.JSON(http.StatusBadRequest, common.Error{Error: "UserID is wrong"})
+			return
+		}
+
+		resultTicket.GroupID = 0
+		resultTicket.UserID = input.UserID
+	} else {
+		//is group
+		if input.UserID == 0 {
+			c.JSON(http.StatusBadRequest, common.Error{Error: "GroupID is wrong"})
+			return
+		}
+
+		resultTicket.GroupID = input.GroupID
+		resultTicket.UserID = 0
+	}
 
 	// Tickets DBに登録
-	ticketResult, err := dbTicket.Create(&core.Ticket{
-		GroupID: input.GroupID,
-		UserID:  0,
-		Solved:  &[]bool{false}[0],
-		Title:   input.Title,
-	})
+	ticketResult, err := dbTicket.Create(resultTicket)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
