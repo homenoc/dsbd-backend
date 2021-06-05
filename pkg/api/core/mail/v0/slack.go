@@ -18,10 +18,10 @@ func noticeSlack(err error, input mail.Mail) {
 			AddField(slack.Field{Title: "Error", Value: err.Error()})
 		notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: false})
 	} else {
-		attachment.AddField(slack.Field{Title: "Title", Value: "メール送信"}).
-			AddField(slack.Field{Title: "To", Value: input.ToMail}).
-			AddField(slack.Field{Title: "Subject", Value: input.Subject}).
-			AddField(slack.Field{Title: "Content", Value: input.Content})
-		notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+		//attachment.AddField(slack.Field{Title: "Title", Value: "メール送信"}).
+		//	AddField(slack.Field{Title: "To", Value: input.ToMail}).
+		//	AddField(slack.Field{Title: "Subject", Value: input.Subject}).
+		//	AddField(slack.Field{Title: "Content", Value: input.Content})
+		//notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 	}
 }
