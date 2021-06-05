@@ -109,31 +109,9 @@ func Get(c *gin.Context) {
 
 	// Ticket
 	var resultTicket []info.Ticket
-	for _, tmpTicket := range dbUserResult.User[0].Group.Tickets {
-		var resultChat []info.Chat
-		for _, tmpChat := range tmpTicket.Chat {
-			resultChat = append(resultChat, info.Chat{
-				CreatedAt: tmpChat.CreatedAt,
-				TicketID:  tmpChat.TicketID,
-				UserID:    tmpChat.UserID,
-				Admin:     tmpChat.Admin,
-				Data:      tmpChat.Data,
-			})
-		}
-		resultTicket = append(resultTicket, info.Ticket{
-			ID:        tmpTicket.ID,
-			CreatedAt: tmpTicket.CreatedAt,
-			GroupID:   tmpTicket.GroupID,
-			UserID:    tmpTicket.UserID,
-			Chat:      resultChat,
-			Solved:    tmpTicket.Solved,
-			Admin:     tmpTicket.Admin,
-			Title:     tmpTicket.Title,
-		})
-	}
-	for _, tmpTicket := range dbUserResult.User[0].Ticket {
-		var resultChat []info.Chat
-		if tmpTicket.GroupID == 0 {
+	if dbUserResult.User[0].GroupID != 0 {
+		for _, tmpTicket := range dbUserResult.User[0].Group.Tickets {
+			var resultChat []info.Chat
 			for _, tmpChat := range tmpTicket.Chat {
 				resultChat = append(resultChat, info.Chat{
 					CreatedAt: tmpChat.CreatedAt,
@@ -150,16 +128,40 @@ func Get(c *gin.Context) {
 				UserID:    tmpTicket.UserID,
 				Chat:      resultChat,
 				Solved:    tmpTicket.Solved,
+				Admin:     tmpTicket.Admin,
 				Title:     tmpTicket.Title,
 			})
 		}
-	}
-	sort.Slice(resultTicket, func(i, j int) bool {
-		if resultTicket[i].ID < resultTicket[j].ID {
-			return true
+		for _, tmpTicket := range dbUserResult.User[0].Ticket {
+			var resultChat []info.Chat
+			if tmpTicket.GroupID == 0 {
+				for _, tmpChat := range tmpTicket.Chat {
+					resultChat = append(resultChat, info.Chat{
+						CreatedAt: tmpChat.CreatedAt,
+						TicketID:  tmpChat.TicketID,
+						UserID:    tmpChat.UserID,
+						Admin:     tmpChat.Admin,
+						Data:      tmpChat.Data,
+					})
+				}
+				resultTicket = append(resultTicket, info.Ticket{
+					ID:        tmpTicket.ID,
+					CreatedAt: tmpTicket.CreatedAt,
+					GroupID:   tmpTicket.GroupID,
+					UserID:    tmpTicket.UserID,
+					Chat:      resultChat,
+					Solved:    tmpTicket.Solved,
+					Title:     tmpTicket.Title,
+				})
+			}
 		}
-		return false
-	})
+		sort.Slice(resultTicket, func(i, j int) bool {
+			if resultTicket[i].ID < resultTicket[j].ID {
+				return true
+			}
+			return false
+		})
+	}
 
 	// Info
 	var resultInfo []info.Info
