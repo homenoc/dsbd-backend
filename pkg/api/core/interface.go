@@ -82,7 +82,7 @@ type Service struct {
 	JPNICTech         []JPNICTech      `json:"jpnic_tech"`
 	StartDate         time.Time        `json:"start_date"`
 	EndDate           *time.Time       `json:"end_date"`
-	Open              *bool            `json:"open"`
+	Pass              *bool            `json:"pass"`
 	Enable            *bool            `json:"enable"`
 	Lock              *bool            `json:"lock"`
 	AddAllow          *bool            `json:"add_allow"`

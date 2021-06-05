@@ -149,7 +149,7 @@ func AddAdmin(c *gin.Context) {
 		JPNICAdmin:        input.JPNICAdmin,
 		JPNICTech:         input.JPNICTech,
 		Enable:            &[]bool{true}[0],
-		Open:              &[]bool{false}[0],
+		Pass:              &[]bool{false}[0],
 		Lock:              &[]bool{true}[0],
 		AddAllow:          &[]bool{false}[0],
 	})
