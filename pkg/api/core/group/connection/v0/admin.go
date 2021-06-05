@@ -16,6 +16,8 @@ import (
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
 	dbNOC "github.com/homenoc/dsbd-backend/pkg/api/store/noc/v0"
 	dbConnectionTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/connection/v0"
+	dbIPv4RouteTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ipv4_route/v0"
+	dbIPv6RouteTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ipv6_route/v0"
 	dbNTTTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ntt/v0"
 	"github.com/jinzhu/gorm"
 	"log"
@@ -57,19 +59,19 @@ func AddAdmin(c *gin.Context) {
 	}
 
 	resultConnectionTemplate := dbConnectionTemplate.Get(connectionTemplate.ID,
-		&core.ConnectionTemplate{Model: gorm.Model{ID: *input.ConnectionTemplateID}})
+		&core.ConnectionTemplate{Model: gorm.Model{ID: input.ConnectionTemplateID}})
 	if resultConnectionTemplate.Err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: resultConnectionTemplate.Err.Error()})
 		return
 	}
 
-	resultNTT := dbNTTTemplate.Get(ntt.ID, &core.NTTTemplate{Model: gorm.Model{ID: *input.NOCID}})
+	resultNTT := dbNTTTemplate.Get(ntt.ID, &core.NTTTemplate{Model: gorm.Model{ID: input.NOCID}})
 	if resultNTT.Err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: resultNTT.Err.Error()})
 		return
 	}
 
-	resultNOC := dbNOC.Get(noc.ID, &core.NOC{Model: gorm.Model{ID: *input.NOCID}})
+	resultNOC := dbNOC.Get(noc.ID, &core.NOC{Model: gorm.Model{ID: input.NOCID}})
 	if resultNOC.Err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: resultNOC.Err.Error()})
 		return
@@ -87,6 +89,20 @@ func AddAdmin(c *gin.Context) {
 		return
 	}
 
+	// if need_route is true
+	if *resultService.Service[0].ServiceTemplate.NeedRoute {
+		_, err = dbIPv4RouteTemplate.Get(input.IPv4RouteTemplateID)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, common.Error{Error: "error: invalid ipv4 route template."})
+			return
+		}
+		_, err = dbIPv6RouteTemplate.Get(input.IPv6RouteTemplateID)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, common.Error{Error: "error: invalid ipv4 route template."})
+			return
+		}
+	}
+
 	var number uint = 1
 	for _, tmp := range resultConnection.Connection {
 		if tmp.ConnectionNumber >= 1 {
@@ -101,14 +117,16 @@ func AddAdmin(c *gin.Context) {
 
 	_, err = dbConnection.Create(&core.Connection{
 		ServiceID:            resultService.Service[0].ID,
-		ConnectionTemplateID: input.ConnectionTemplateID,
+		ConnectionTemplateID: &[]uint{input.ConnectionTemplateID}[0],
 		ConnectionComment:    input.ConnectionComment,
 		ConnectionNumber:     number,
-		NTTTemplateID:        input.NTTTemplateID,
-		NOCID:                input.NOCID,
+		IPv4RouteTemplateID:  &[]uint{input.IPv4RouteTemplateID}[0],
+		IPv6RouteTemplateID:  &[]uint{input.IPv6RouteTemplateID}[0],
+		NTTTemplateID:        &[]uint{input.NTTTemplateID}[0],
+		NOCID:                &[]uint{input.NOCID}[0],
 		TermIP:               input.TermIP,
 		Address:              input.Address,
-		Monitor:              input.Monitor,
+		Monitor:              &[]bool{input.Monitor}[0],
 		Enable:               &[]bool{true}[0],
 		Open:                 &[]bool{false}[0],
 		Lock:                 &[]bool{true}[0],

@@ -7,7 +7,6 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/noc"
@@ -16,9 +15,10 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	dbConnection "github.com/homenoc/dsbd-backend/pkg/api/store/group/connection/v0"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
-	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	dbNOC "github.com/homenoc/dsbd-backend/pkg/api/store/noc/v0"
 	dbConnectionTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/connection/v0"
+	dbIPv4RouteTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ipv4_route/v0"
+	dbIPv6RouteTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ipv6_route/v0"
 	dbNTTTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ntt/v0"
 	"github.com/jinzhu/gorm"
 	"log"
@@ -68,7 +68,7 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	if !(*result.User.Group.Status == 3 && *result.User.Group.ExpiredStatus == 0) {
+	if *result.User.Group.ExpiredStatus != 0 {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: "error: failed group status"})
 		return
 	}
@@ -79,14 +79,14 @@ func Add(c *gin.Context) {
 	}
 
 	resultConnectionTemplate := dbConnectionTemplate.Get(connectionTemplate.ID,
-		&core.ConnectionTemplate{Model: gorm.Model{ID: *input.ConnectionTemplateID}})
+		&core.ConnectionTemplate{Model: gorm.Model{ID: input.ConnectionTemplateID}})
 	if resultConnectionTemplate.Err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: resultConnectionTemplate.Err.Error()})
 		return
 	}
 
 	if *resultConnectionTemplate.Connections[0].NeedInternet {
-		resultNTT := dbNTTTemplate.Get(ntt.ID, &core.NTTTemplate{Model: gorm.Model{ID: *input.NTTTemplateID}})
+		resultNTT := dbNTTTemplate.Get(ntt.ID, &core.NTTTemplate{Model: gorm.Model{ID: input.NTTTemplateID}})
 		if resultNTT.Err != nil {
 			c.JSON(http.StatusBadRequest, common.Error{Error: resultNTT.Err.Error()})
 			return
@@ -94,8 +94,8 @@ func Add(c *gin.Context) {
 	}
 
 	// NOCIDが0の時、「どこでも収容」という意味
-	if *input.NOCID != 0 {
-		resultNOC := dbNOC.Get(noc.ID, &core.NOC{Model: gorm.Model{ID: *input.NOCID}})
+	if input.NOCID != 0 {
+		resultNOC := dbNOC.Get(noc.ID, &core.NOC{Model: gorm.Model{ID: input.NOCID}})
 		if resultNOC.Err != nil {
 			c.JSON(http.StatusBadRequest, common.Error{Error: resultNOC.Err.Error()})
 			return
@@ -114,6 +114,12 @@ func Add(c *gin.Context) {
 		return
 	}
 
+	// check service pass
+	if !*resultService.Service[0].Pass {
+		c.JSON(http.StatusBadRequest, common.Error{Error: "You don't allow this operation. [pass]"})
+		return
+	}
+
 	// check add_allow
 	if !*resultService.Service[0].AddAllow {
 		c.JSON(http.StatusBadRequest, common.Error{Error: "You don't allow this operation. [add_allow]"})
@@ -124,6 +130,20 @@ func Add(c *gin.Context) {
 	if resultService.Service[0].GroupID != result.User.Group.ID {
 		c.JSON(http.StatusBadRequest, common.Error{Error: "error: GroupID does not match."})
 		return
+	}
+
+	// if need_route is true
+	if *resultService.Service[0].ServiceTemplate.NeedRoute {
+		_, err = dbIPv4RouteTemplate.Get(input.IPv4RouteTemplateID)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, common.Error{Error: "error: invalid ipv4 route template."})
+			return
+		}
+		_, err = dbIPv6RouteTemplate.Get(input.IPv6RouteTemplateID)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, common.Error{Error: "error: invalid ipv4 route template."})
+			return
+		}
 	}
 
 	resultConnection := dbConnection.Get(connection.ServiceID, &core.Connection{ServiceID: uint(id)})
@@ -145,16 +165,18 @@ func Add(c *gin.Context) {
 
 	_, err = dbConnection.Create(&core.Connection{
 		ServiceID:                resultService.Service[0].ID,
-		ConnectionTemplateID:     input.ConnectionTemplateID,
+		ConnectionTemplateID:     &[]uint{input.ConnectionTemplateID}[0],
 		ConnectionComment:        input.ConnectionComment,
 		ConnectionNumber:         number,
-		NTTTemplateID:            input.NTTTemplateID,
-		NOCID:                    input.NOCID,
+		IPv4RouteTemplateID:      &[]uint{input.IPv4RouteTemplateID}[0],
+		IPv6RouteTemplateID:      &[]uint{input.IPv6RouteTemplateID}[0],
+		NTTTemplateID:            &[]uint{input.NTTTemplateID}[0],
+		NOCID:                    &[]uint{input.NOCID}[0],
 		BGPRouterID:              &[]uint{0}[0],
 		TunnelEndPointRouterIPID: &[]uint{0}[0],
 		TermIP:                   input.TermIP,
 		Address:                  input.Address,
-		Monitor:                  input.Monitor,
+		Monitor:                  &[]bool{input.Monitor}[0],
 		Enable:                   &[]bool{true}[0],
 		Open:                     &[]bool{false}[0],
 		Lock:                     &[]bool{true}[0],
@@ -175,15 +197,15 @@ func Add(c *gin.Context) {
 		AddField(slack.Field{Title: "接続コード（補足情報）", Value: input.ConnectionComment})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 
-	if err = dbGroup.Update(group.UpdateStatus, core.Group{
-		Model:  gorm.Model{ID: result.User.Group.ID},
-		Status: &[]uint{4}[0],
-	}); err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
-		return
-	}
+	//if err = dbGroup.Update(group.UpdateStatus, core.Group{
+	//	Model:  gorm.Model{ID: result.User.Group.ID},
+	//	Status: &[]uint{4}[0],
+	//}); err != nil {
+	//	c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+	//	return
+	//}
 
-	if err = dbService.Update(service.UpdateStatus, core.Service{
+	if err = dbService.Update(service.UpdateAll, core.Service{
 		Model:    gorm.Model{ID: resultService.Service[0].ID},
 		AddAllow: &[]bool{false}[0],
 	}); err != nil {
