@@ -41,8 +41,8 @@ func replaceService(replace, input core.Service) core.Service {
 	}
 
 	//Open
-	if input.Open != replace.Open {
-		replace.Open = input.Open
+	if input.Pass != replace.Pass {
+		replace.Pass = input.Pass
 	}
 
 	//Lock

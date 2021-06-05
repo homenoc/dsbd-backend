@@ -120,14 +120,21 @@ type Service struct {
 	ServiceType string `json:"service_type"`
 	NeedRoute   bool   `json:"need_route"`
 	AddAllow    bool   `json:"add_allow"`
+	Pass        bool   `json:"pass"`
+}
+
+type Connection struct {
+	ID   uint `json:"id"`
+	Open bool `json:"open"`
 }
 
 type Result struct {
-	User     User      `json:"user"`
-	Group    Group     `json:"group"`
-	UserList []User    `json:"user_list"`
-	Notice   []Notice  `json:"notice"`
-	Ticket   []Ticket  `json:"ticket"`
-	Service  []Service `json:"service"`
-	Info     []Info    `json:"info"`
+	User       User         `json:"user"`
+	Group      Group        `json:"group"`
+	UserList   []User       `json:"user_list"`
+	Notice     []Notice     `json:"notice"`
+	Ticket     []Ticket     `json:"ticket"`
+	Service    []Service    `json:"service"`
+	Connection []Connection `json:"connection"`
+	Info       []Info       `json:"info"`
 }

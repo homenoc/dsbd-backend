@@ -52,7 +52,7 @@ func Add(c *gin.Context) {
 	}
 
 	// status check for group
-	if !(*result.User.Group.Status == 1 && *result.User.Group.ExpiredStatus == 0 && *result.User.Group.Pass) {
+	if !(*result.User.Group.ExpiredStatus == 0 && *result.User.Group.Pass) {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: "error: failed group status"})
 		return
 	}
@@ -157,7 +157,7 @@ func Add(c *gin.Context) {
 		JPNICAdmin:        input.JPNICAdmin,
 		JPNICTech:         input.JPNICTech,
 		Enable:            &[]bool{true}[0],
-		Open:              &[]bool{false}[0],
+		Pass:              &[]bool{false}[0],
 		Lock:              &[]bool{true}[0],
 		AddAllow:          &[]bool{true}[0],
 	})

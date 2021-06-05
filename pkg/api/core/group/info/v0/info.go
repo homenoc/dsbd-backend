@@ -163,6 +163,7 @@ func Get(c *gin.Context) {
 	// Info
 	var resultInfo []info.Info
 	var resultService []info.Service
+	var resultConnection []info.Connection
 
 	if authResult.User.GroupID != 0 {
 
@@ -172,16 +173,28 @@ func Get(c *gin.Context) {
 		}
 
 		for _, tmpService := range dbUserResult.User[0].Group.Services {
-			resultService = append(resultService, info.Service{
-				ID: tmpService.ID,
-				ServiceID: strconv.Itoa(int(tmpService.GroupID)) + "-" + tmpService.ServiceTemplate.Type +
-					fmt.Sprintf("%03d", tmpService.ServiceNumber),
-				ServiceType: tmpService.ServiceTemplate.Type,
-				NeedRoute:   *tmpService.ServiceTemplate.NeedRoute,
-				AddAllow:    *tmpService.AddAllow,
-			})
-			if *tmpService.Open && *tmpService.Enable {
-				for _, tmpConnection := range tmpService.Connection {
+			// Service
+			if *tmpService.Enable {
+				resultService = append(resultService, info.Service{
+					ID: tmpService.ID,
+					ServiceID: strconv.Itoa(int(tmpService.GroupID)) + "-" + tmpService.ServiceTemplate.Type +
+						fmt.Sprintf("%03d", tmpService.ServiceNumber),
+					ServiceType: tmpService.ServiceTemplate.Type,
+					NeedRoute:   *tmpService.ServiceTemplate.NeedRoute,
+					AddAllow:    *tmpService.AddAllow,
+					Pass:        *tmpService.Pass,
+				})
+			}
+			for _, tmpConnection := range tmpService.Connection {
+				// Connection
+				if *tmpConnection.Enable {
+					resultConnection = append(resultConnection, info.Connection{
+						ID:   tmpConnection.ID,
+						Open: *tmpConnection.Open,
+					})
+				}
+
+				if *tmpService.Pass && *tmpService.Enable {
 					var fee string
 					var v4, v6 []string
 					if *tmpService.Fee == 0 {
@@ -223,16 +236,18 @@ func Get(c *gin.Context) {
 					}
 				}
 			}
+
 		}
 	}
 
 	c.JSON(http.StatusOK, info.Result{
-		User:     resultUser,
-		Group:    resultGroup,
-		UserList: resultUserList,
-		Service:  resultService,
-		Notice:   resultNotice,
-		Ticket:   resultTicket,
-		Info:     resultInfo,
+		User:       resultUser,
+		Group:      resultGroup,
+		UserList:   resultUserList,
+		Service:    resultService,
+		Connection: resultConnection,
+		Notice:     resultNotice,
+		Ticket:     resultTicket,
+		Info:       resultInfo,
 	})
 }
