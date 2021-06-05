@@ -127,6 +127,7 @@ func Get(c *gin.Context) {
 			UserID:    tmpTicket.UserID,
 			Chat:      resultChat,
 			Solved:    tmpTicket.Solved,
+			Admin:     tmpTicket.Admin,
 			Title:     tmpTicket.Title,
 		})
 	}

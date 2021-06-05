@@ -45,6 +45,7 @@ func Create(c *gin.Context) {
 	resultTicket := &core.Ticket{
 		Solved: &[]bool{false}[0],
 		Title:  input.Title,
+		Admin:  &[]bool{true}[0],
 	}
 	var groupOrg string
 
@@ -58,7 +59,6 @@ func Create(c *gin.Context) {
 		resultTicket.GroupID = 0
 		resultTicket.UserID = result.User.ID
 		groupOrg = "個人ユーザ"
-
 	} else {
 		//is group
 		// Group authentication
@@ -70,7 +70,6 @@ func Create(c *gin.Context) {
 		resultTicket.GroupID = result.User.GroupID
 		resultTicket.UserID = result.User.ID
 		groupOrg = result.User.Group.Org
-
 	}
 
 	// Tickets DBに登録

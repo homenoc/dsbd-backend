@@ -54,6 +54,7 @@ type Ticket struct {
 	GroupID   uint      `json:"group_id"`
 	UserID    uint      `json:"user_id"`
 	Title     string    `json:"title"`
+	Admin     *bool     `json:"admin"`
 	Chat      []Chat    `json:"chat"`
 	Solved    *bool     `json:"solved"`
 }
