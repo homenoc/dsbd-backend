@@ -78,7 +78,7 @@ func Get(base int, data *core.Group) group.ResultDatabase {
 	if base == group.ID { //ID
 		err = db.Preload("Users").
 			Preload("Services").
-			Preload("Tickets").
+			Preload("Ticket").
 			Preload("Services.IP").
 			Preload("Services.IP.Plan").
 			Preload("Services.Connection").

@@ -53,6 +53,20 @@ func Update(base int, c core.IPv4RouteTemplate) error {
 	return result.Error
 }
 
+func Get(id uint) ([]core.IPv4RouteTemplate, error) {
+	db, err := store.ConnectDB()
+	if err != nil {
+		log.Println("database ipv4 error")
+		return []core.IPv4RouteTemplate{}, err
+	}
+	defer db.Close()
+
+	var ipv4s []core.IPv4RouteTemplate
+
+	err = db.First(&ipv4s, id).Error
+	return ipv4s, err
+}
+
 func GetAll() ([]core.IPv4RouteTemplate, error) {
 	db, err := store.ConnectDB()
 	if err != nil {

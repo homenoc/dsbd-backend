@@ -93,7 +93,7 @@ func Get(base int, u *core.User) user.ResultDatabase {
 	if base == user.ID { //ID
 		err = db.First(&userStruct, u.ID).Error
 	} else if base == user.IDDetail {
-		err = db.
+		err = db.Where("id = ?", u.ID).
 			Preload("Ticket").
 			Preload("Ticket.Chat").
 			Preload("Group").
@@ -111,7 +111,7 @@ func Get(base int, u *core.User) user.ResultDatabase {
 			Preload("Group.Services.Connection.TunnelEndPointRouterIP").
 			Preload("Group.Services.ServiceTemplate").
 			Preload("Group.Services.JPNICAdmin").
-			Preload("Group.Services.JPNICTech").First(&userStruct, u.ID).Find(&userStruct).Error
+			Preload("Group.Services.JPNICTech").Find(&userStruct).Error
 	} else if base == user.GID { //GroupID
 		err = db.Where("group_id = ?", u.GroupID).Find(&userStruct).Error
 	} else if base == user.Email { //Mail
