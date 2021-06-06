@@ -107,8 +107,10 @@ func Get(c *gin.Context) {
 		})
 	}
 
-	// Ticket
+	// Ticket/Request
 	var resultTicket []info.Ticket
+	var resultRequest []info.Request
+
 	if dbUserResult.User[0].GroupID != 0 {
 		for _, tmpTicket := range dbUserResult.User[0].Group.Tickets {
 			var resultChat []info.Chat
@@ -121,16 +123,33 @@ func Get(c *gin.Context) {
 					Data:      tmpChat.Data,
 				})
 			}
-			resultTicket = append(resultTicket, info.Ticket{
-				ID:        tmpTicket.ID,
-				CreatedAt: tmpTicket.CreatedAt,
-				GroupID:   tmpTicket.GroupID,
-				UserID:    tmpTicket.UserID,
-				Chat:      resultChat,
-				Solved:    tmpTicket.Solved,
-				Admin:     tmpTicket.Admin,
-				Title:     tmpTicket.Title,
-			})
+
+			if !*tmpTicket.Request {
+				// Ticket
+				resultTicket = append(resultTicket, info.Ticket{
+					ID:        tmpTicket.ID,
+					CreatedAt: tmpTicket.CreatedAt,
+					GroupID:   tmpTicket.GroupID,
+					UserID:    tmpTicket.UserID,
+					Chat:      resultChat,
+					Solved:    tmpTicket.Solved,
+					Admin:     tmpTicket.Admin,
+					Title:     tmpTicket.Title,
+				})
+			} else {
+				// Request
+				resultRequest = append(resultRequest, info.Request{
+					ID:        tmpTicket.ID,
+					CreatedAt: tmpTicket.CreatedAt,
+					GroupID:   tmpTicket.GroupID,
+					UserID:    tmpTicket.UserID,
+					Chat:      resultChat,
+					Reject:    tmpTicket.RequestReject,
+					Solved:    tmpTicket.Solved,
+					Admin:     tmpTicket.Admin,
+					Title:     tmpTicket.Title,
+				})
+			}
 		}
 		for _, tmpTicket := range dbUserResult.User[0].Ticket {
 			var resultChat []info.Chat
@@ -251,6 +270,7 @@ func Get(c *gin.Context) {
 		Connection: resultConnection,
 		Notice:     resultNotice,
 		Ticket:     resultTicket,
+		Request:    resultRequest,
 		Info:       resultInfo,
 	})
 }

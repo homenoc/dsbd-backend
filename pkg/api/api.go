@@ -257,9 +257,10 @@ func UserRestAPI() {
 			v1.POST("/service/:id/connection", connection.Add)
 
 			//
-			// Support
+			// Support/Request
 			//
 			v1.POST("/support", ticket.Create)
+			v1.POST("/Request", ticket.Request)
 			v1.PUT("/support/:id", ticket.Update)
 
 			// User Delete

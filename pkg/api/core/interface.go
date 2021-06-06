@@ -272,16 +272,19 @@ type NTTTemplate struct {
 	Comment string `json:"comment"`
 }
 
+// 申請中/承諾済み/却下
 type Ticket struct {
 	gorm.Model
-	GroupID uint   `json:"group_id"`
-	UserID  uint   `json:"user_id"`
-	Chat    []Chat `json:"chat"`
-	Solved  *bool  `json:"solved"`
-	Admin   *bool  `json:"admin"`
-	Title   string `json:"title"`
-	Group   Group  `json:"group"`
-	User    User   `json:"user"`
+	GroupID       uint   `json:"group_id"`
+	UserID        uint   `json:"user_id"`
+	Chat          []Chat `json:"chat"`
+	Request       *bool  `json:"request"`
+	RequestReject *bool  `json:"request_reject"`
+	Solved        *bool  `json:"solved"`
+	Admin         *bool  `json:"admin"`
+	Title         string `json:"title"`
+	Group         Group  `json:"group"`
+	User          User   `json:"user"`
 }
 
 type Chat struct {
