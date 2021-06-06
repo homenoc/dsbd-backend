@@ -129,6 +129,18 @@ type Connection struct {
 	Open bool `json:"open"`
 }
 
+type Request struct {
+	ID        uint      `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	GroupID   uint      `json:"group_id"`
+	UserID    uint      `json:"user_id"`
+	Title     string    `json:"title"`
+	Admin     *bool     `json:"admin"`
+	Chat      []Chat    `json:"chat"`
+	Solved    *bool     `json:"solved"`
+	Reject    *bool     `json:"reject"`
+}
+
 type Result struct {
 	User       User         `json:"user"`
 	Group      Group        `json:"group"`
@@ -137,5 +149,6 @@ type Result struct {
 	Ticket     []Ticket     `json:"ticket"`
 	Service    []Service    `json:"service"`
 	Connection []Connection `json:"connection"`
+	Request    []Request    `json:"request"`
 	Info       []Info       `json:"info"`
 }

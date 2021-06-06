@@ -43,9 +43,11 @@ func Create(c *gin.Context) {
 	}
 
 	resultTicket := &core.Ticket{
-		Solved: &[]bool{false}[0],
-		Title:  input.Title,
-		Admin:  &[]bool{true}[0],
+		Solved:        &[]bool{false}[0],
+		Title:         input.Title,
+		Admin:         &[]bool{true}[0],
+		Request:       &[]bool{false}[0],
+		RequestReject: &[]bool{false}[0],
 	}
 	var groupOrg string
 
@@ -96,6 +98,72 @@ func Create(c *gin.Context) {
 	attachment.AddField(slack.Field{Title: "Title", Value: "新規チケット作成"}).
 		AddField(slack.Field{Title: "発行者", Value: strconv.Itoa(int(resultTicket.UserID))}).
 		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(resultTicket.GroupID)) + "-" + groupOrg}).
+		AddField(slack.Field{Title: "Title", Value: input.Title}).
+		AddField(slack.Field{Title: "Message", Value: input.Data})
+	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+
+	c.JSON(http.StatusOK, ticket.Ticket{ID: ticketResult.ID})
+}
+
+func Request(c *gin.Context) {
+	var input support.FirstInput
+	userToken := c.Request.Header.Get("USER_TOKEN")
+	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
+
+	err := c.BindJSON(&input)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	// Group authentication
+	result := auth.GroupAuthentication(1, core.Token{UserToken: userToken, AccessToken: accessToken})
+	if result.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
+		return
+	}
+
+	// input check
+	if err = check(input); err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	resultTicket := &core.Ticket{
+		GroupID:       result.User.GroupID,
+		UserID:        result.User.ID,
+		Solved:        &[]bool{false}[0],
+		Title:         input.Title,
+		Admin:         &[]bool{true}[0],
+		Request:       &[]bool{true}[0],
+		RequestReject: &[]bool{false}[0],
+	}
+
+	// Tickets DBに登録
+	ticketResult, err := dbTicket.Create(resultTicket)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		return
+	}
+
+	// Chat DBに登録
+	_, err = dbChat.Create(&core.Chat{
+		UserID:   resultTicket.UserID,
+		Admin:    false,
+		Data:     input.Data,
+		TicketID: ticketResult.ID,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		return
+	}
+
+	//HomeNOC Slackに送信
+	attachment := slack.Attachment{}
+	attachment.AddField(slack.Field{Title: "Title", Value: "[新規] 追加・変更手続き"}).
+		AddField(slack.Field{Title: "発行者", Value: strconv.Itoa(int(resultTicket.UserID))}).
+		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(resultTicket.GroupID)) + "-" + result.User.Group.Org}).
 		AddField(slack.Field{Title: "Title", Value: input.Title}).
 		AddField(slack.Field{Title: "Message", Value: input.Data})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
