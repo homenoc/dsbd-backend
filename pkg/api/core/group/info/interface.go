@@ -99,7 +99,7 @@ type Info struct {
 }
 
 type JPNIC struct {
-	ID        string `json:"id"`
+	ID        uint   `json:"id"`
 	Name      string `json:"name"`
 	NameEn    string `json:"name_en"`
 	Mail      string `json:"mail"`
@@ -115,18 +115,53 @@ type JPNIC struct {
 	Country   string `json:"country"`
 }
 
+type IP struct {
+	ID        uint   `json:"id"`
+	Version   uint   `json:"version"`
+	Name      string `json:"name"`
+	IP        string `json:"ip"`
+	Plan      []Plan `json:"plan" `
+	PlanJPNIC string `json:"" gorm:"size:65535"`
+	UseCase   string `json:"use_case"`
+}
+
+type Plan struct {
+	ID       uint   `json:"id"`
+	IPID     uint   `json:"ip_id"`
+	Name     string `json:"name"`
+	After    uint   `json:"after"`
+	HalfYear uint   `json:"half_year"`
+	OneYear  uint   `json:"one_year"`
+}
+
 type Service struct {
-	ID          uint   `json:"id"`
-	ServiceID   string `json:"service_id"`
-	ServiceType string `json:"service_type"`
-	NeedRoute   bool   `json:"need_route"`
-	AddAllow    bool   `json:"add_allow"`
-	Pass        bool   `json:"pass"`
+	ID             uint    `json:"id"`
+	ServiceID      string  `json:"service_id"`
+	ServiceType    string  `json:"service_type"`
+	NeedRoute      bool    `json:"need_route"`
+	NeedJPNIC      bool    `json:"need_jpnic"`
+	AddAllow       bool    `json:"add_allow"`
+	Pass           bool    `json:"pass"`
+	Org            string  `json:"org"`
+	OrgEn          string  `json:"org_en"`
+	PostCode       string  `json:"postcode"`
+	Address        string  `json:"address"`
+	AddressEn      string  `json:"address_en"`
+	ASN            *uint   `json:"asn"`
+	AveUpstream    uint    `json:"avg_upstream"`
+	MaxUpstream    uint    `json:"max_upstream"`
+	AveDownstream  uint    `json:"avg_downstream"`
+	MaxDownstream  uint    `json:"max_downstream"`
+	MaxBandWidthAS string  `json:"max_bandwidth_as"`
+	JPNICAdmin     JPNIC   `json:"jpnic_admin"`
+	JPNICTech      []JPNIC `json:"jpnic_tech"`
+	IP             []IP    `json:"ip"`
 }
 
 type Connection struct {
-	ID   uint `json:"id"`
-	Open bool `json:"open"`
+	ID        uint   `json:"id"`
+	ServiceID string `json:"service_id"`
+	Open      bool   `json:"open"`
 }
 
 type Request struct {

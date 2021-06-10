@@ -197,22 +197,109 @@ func Get(c *gin.Context) {
 		for _, tmpService := range dbUserResult.User[0].Group.Services {
 			// Service
 			if *tmpService.Enable {
+				var resultServiceJPNICAdmin info.JPNIC
+				var resultServiceJPNICTech []info.JPNIC
+				var resultServiceIP []info.IP
+
+				// JPNIC Admin
+				resultServiceJPNICAdmin.ID = tmpService.JPNICAdmin.ID
+				resultServiceJPNICAdmin.Org = tmpService.JPNICAdmin.Org
+				resultServiceJPNICAdmin.OrgEn = tmpService.JPNICAdmin.OrgEn
+				resultServiceJPNICAdmin.PostCode = tmpService.JPNICAdmin.PostCode
+				resultServiceJPNICAdmin.Name = tmpService.JPNICAdmin.Name
+				resultServiceJPNICAdmin.NameEn = tmpService.JPNICAdmin.NameEn
+				resultServiceJPNICAdmin.Dept = tmpService.JPNICAdmin.Dept
+				resultServiceJPNICAdmin.DeptEn = tmpService.JPNICAdmin.DeptEn
+				resultServiceJPNICAdmin.Tel = tmpService.JPNICAdmin.Tel
+				resultServiceJPNICAdmin.Fax = tmpService.JPNICAdmin.Fax
+				resultServiceJPNICAdmin.Mail = tmpService.JPNICAdmin.Mail
+				resultServiceJPNICAdmin.Country = tmpService.JPNICAdmin.Country
+
+				// JPNIC Tech
+				for _, tmpJPNICTech := range tmpService.JPNICTech {
+					resultServiceJPNICTech = append(resultServiceJPNICTech, info.JPNIC{
+						ID:        tmpJPNICTech.ID,
+						Name:      tmpJPNICTech.Name,
+						NameEn:    tmpJPNICTech.NameEn,
+						Org:       tmpJPNICTech.Org,
+						OrgEn:     tmpJPNICTech.OrgEn,
+						PostCode:  tmpJPNICTech.PostCode,
+						Address:   tmpJPNICTech.Address,
+						AddressEn: tmpJPNICTech.AddressEn,
+						Dept:      tmpJPNICTech.Dept,
+						DeptEn:    tmpJPNICTech.DeptEn,
+						Tel:       tmpJPNICTech.Tel,
+						Fax:       tmpJPNICTech.Fax,
+						Mail:      tmpJPNICTech.Mail,
+						Country:   tmpJPNICTech.Country,
+					})
+				}
+
+				// IP
+				for _, tmpIP := range tmpService.IP {
+					if *tmpIP.Open {
+						var resultIPPlan []info.Plan = nil
+						if tmpIP.Plan != nil {
+							for _, tmpIPPlan := range tmpIP.Plan {
+								resultIPPlan = append(resultIPPlan, info.Plan{
+									ID:       tmpIPPlan.ID,
+									IPID:     tmpIPPlan.IPID,
+									Name:     tmpIPPlan.Name,
+									After:    tmpIPPlan.After,
+									HalfYear: tmpIPPlan.HalfYear,
+									OneYear:  tmpIPPlan.OneYear,
+								})
+							}
+						}
+
+						resultServiceIP = append(resultServiceIP, info.IP{
+							ID:        tmpIP.ID,
+							Version:   tmpIP.Version,
+							Name:      tmpIP.Name,
+							IP:        tmpIP.IP,
+							Plan:      resultIPPlan,
+							PlanJPNIC: "",
+							UseCase:   tmpIP.UseCase,
+						})
+					}
+				}
+
 				resultService = append(resultService, info.Service{
 					ID: tmpService.ID,
 					ServiceID: strconv.Itoa(int(tmpService.GroupID)) + "-" + tmpService.ServiceTemplate.Type +
 						fmt.Sprintf("%03d", tmpService.ServiceNumber),
-					ServiceType: tmpService.ServiceTemplate.Type,
-					NeedRoute:   *tmpService.ServiceTemplate.NeedRoute,
-					AddAllow:    *tmpService.AddAllow,
-					Pass:        *tmpService.Pass,
+					ServiceType:    tmpService.ServiceTemplate.Type,
+					NeedRoute:      *tmpService.ServiceTemplate.NeedRoute,
+					NeedJPNIC:      *tmpService.ServiceTemplate.NeedJPNIC,
+					AddAllow:       *tmpService.AddAllow,
+					Pass:           *tmpService.Pass,
+					Org:            tmpService.Org,
+					OrgEn:          tmpService.OrgEn,
+					PostCode:       tmpService.PostCode,
+					Address:        tmpService.Address,
+					AddressEn:      tmpService.AddressEn,
+					ASN:            tmpService.ASN,
+					AveUpstream:    tmpService.AveUpstream,
+					MaxUpstream:    tmpService.MaxUpstream,
+					AveDownstream:  tmpService.AveDownstream,
+					MaxDownstream:  tmpService.MaxDownstream,
+					MaxBandWidthAS: tmpService.MaxBandWidthAS,
+					IP:             resultServiceIP,
+					JPNICAdmin:     resultServiceJPNICAdmin,
+					JPNICTech:      resultServiceJPNICTech,
 				})
 			}
 			for _, tmpConnection := range tmpService.Connection {
+				serviceID := strconv.Itoa(int(tmpService.GroupID)) + "-" + tmpService.ServiceTemplate.Type +
+					fmt.Sprintf("%03d", tmpService.ServiceNumber) + "-" + tmpConnection.ConnectionTemplate.Type +
+					fmt.Sprintf("%03d", tmpConnection.ConnectionNumber)
+
 				// Connection
 				if *tmpConnection.Enable {
 					resultConnection = append(resultConnection, info.Connection{
-						ID:   tmpConnection.ID,
-						Open: *tmpConnection.Open,
+						ID:        tmpConnection.ID,
+						ServiceID: serviceID,
+						Open:      *tmpConnection.Open,
 					})
 				}
 
@@ -224,9 +311,6 @@ func Get(c *gin.Context) {
 					} else {
 						fee = strconv.Itoa(int(*tmpService.Fee)) + "円"
 					}
-					serviceID := strconv.Itoa(int(tmpService.GroupID)) + "-" + tmpService.ServiceTemplate.Type +
-						fmt.Sprintf("%03d", tmpService.ServiceNumber) + "-" + tmpConnection.ConnectionTemplate.Type +
-						fmt.Sprintf("%03d", tmpConnection.ConnectionNumber)
 
 					for _, tmpIP := range tmpService.IP {
 						if *tmpIP.Open {
