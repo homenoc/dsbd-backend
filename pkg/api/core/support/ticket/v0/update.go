@@ -23,6 +23,10 @@ func updateAdminTicket(input, replace core.Ticket) (core.Ticket, error) {
 	if input.GroupID != replace.GroupID {
 		replace.GroupID = input.GroupID
 	}
+	//RequestReject
+	if input.RequestReject != replace.RequestReject {
+		replace.RequestReject = input.RequestReject
+	}
 
 	return replace, nil
 }

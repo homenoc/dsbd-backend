@@ -46,9 +46,11 @@ func Update(base int, t core.Ticket) error {
 	//#4 Issue(解決済み）
 	if ticket.UpdateAll == base {
 		result = db.Model(&core.Ticket{Model: gorm.Model{ID: t.ID}}).Update(&core.Ticket{Title: t.Title,
-			GroupID: t.GroupID,
-			UserID:  t.UserID,
-			Solved:  t.Solved,
+			GroupID:       t.GroupID,
+			UserID:        t.UserID,
+			Solved:        t.Solved,
+			Request:       t.Request,
+			RequestReject: t.RequestReject,
 		})
 	} else {
 		log.Println("base select error")

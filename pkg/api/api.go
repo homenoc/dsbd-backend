@@ -260,7 +260,7 @@ func UserRestAPI() {
 			// Support/Request
 			//
 			v1.POST("/support", ticket.Create)
-			v1.POST("/Request", ticket.Request)
+			v1.POST("/request", ticket.Request)
 			v1.PUT("/support/:id", ticket.Update)
 
 			// User Delete
