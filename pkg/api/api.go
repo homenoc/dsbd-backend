@@ -35,159 +35,159 @@ func AdminRestAPI() {
 		{
 			// Controller
 			//noc
-			v1.POST("/controller/chat", controller.ReceiveChatAdmin)
+			v1.POST("/controller/chat", controller.ReceiveChatByAdmin)
 
 			// Notice
 			//
-			v1.POST("/notice", notice.AddAdmin)
-			v1.DELETE("/notice/:id", notice.DeleteAdmin)
-			v1.GET("/notice", notice.GetAllAdmin)
-			v1.GET("/notice/:id", notice.GetAdmin)
-			v1.PUT("/notice/:id", notice.UpdateAdmin)
+			v1.POST("/notice", notice.AddByAdmin)
+			v1.DELETE("/notice/:id", notice.DeleteByAdmin)
+			v1.GET("/notice", notice.GetAllByAdmin)
+			v1.GET("/notice/:id", notice.GetByAdmin)
+			v1.PUT("/notice/:id", notice.UpdateByAdmin)
 
 			//
 			// User
 			//
 			// User Create
-			v1.POST("/user", user.AddAdmin)
+			v1.POST("/user", user.AddByAdmin)
 			// User Delete
-			v1.DELETE("/user", user.DeleteAdmin)
+			v1.DELETE("/user", user.DeleteByAdmin)
 			// User Update
-			v1.PUT("/user/:id", user.UpdateAdmin)
-			v1.GET("/user", user.GetAllAdmin)
-			v1.GET("/user/:id", user.GetAdmin)
+			v1.PUT("/user/:id", user.UpdateByAdmin)
+			v1.GET("/user", user.GetAllByAdmin)
+			v1.GET("/user/:id", user.GetByAdmin)
 			//
 			// Login / Logout
 			//
-			v1.POST("/login", token.GenerateAdmin)
+			v1.POST("/login", token.GenerateByAdmin)
 			v1.POST("/logout", token.DeleteAdminUser)
 
 			//
 			// Token
 			//
-			v1.POST("/token/generate", token.GenerateAdmin)
+			v1.POST("/token/generate", token.GenerateByAdmin)
 
-			v1.POST("/token", token.AddAdmin)
+			v1.POST("/token", token.AddByAdmin)
 			// Token Delete
-			v1.DELETE("/token", token.DeleteAllAdmin)
-			v1.DELETE("/token/:id", token.DeleteAdmin)
+			v1.DELETE("/token", token.DeleteAllByAdmin)
+			v1.DELETE("/token/:id", token.DeleteByAdmin)
 			// Token Update
-			v1.PUT("/token/:id", token.UpdateAdmin)
-			v1.GET("/token", token.GetAllAdmin)
-			v1.GET("/token/:id", token.GetAdmin)
+			v1.PUT("/token/:id", token.UpdateByAdmin)
+			v1.GET("/token", token.GetAllByAdmin)
+			v1.GET("/token/:id", token.GetByAdmin)
 			//
 			// Group
 			//
-			v1.POST("/group", group.AddAdmin)
+			v1.POST("/group", group.AddByAdmin)
 			// Group Delete
-			v1.DELETE("/group", group.DeleteAdmin)
+			v1.DELETE("/group", group.DeleteByAdmin)
 			// Group Update
-			v1.PUT("/group/:id", group.UpdateAdmin)
-			v1.GET("/group", group.GetAllAdmin)
-			v1.GET("/group/:id", group.GetAdmin)
+			v1.PUT("/group/:id", group.UpdateByAdmin)
+			v1.GET("/group", group.GetAllByAdmin)
+			v1.GET("/group/:id", group.GetByAdmin)
 
 			// Template
-			v1.GET("/template", template.GetAdmin)
+			v1.GET("/template", template.GetByAdmin)
 
 			//
 			// NOC
 			//
-			v1.POST("/noc", noc.AddAdmin)
-			v1.GET("/noc", noc.GetAllAdmin)
-			v1.DELETE("/noc/:id", noc.DeleteAdmin)
-			v1.GET("/noc/:id", noc.GetAdmin)
-			v1.PUT("/noc/:id", noc.UpdateAdmin)
+			v1.POST("/noc", noc.AddByAdmin)
+			v1.GET("/noc", noc.GetAllByAdmin)
+			v1.DELETE("/noc/:id", noc.DeleteByAdmin)
+			v1.GET("/noc/:id", noc.GetByAdmin)
+			v1.PUT("/noc/:id", noc.UpdateByAdmin)
 
 			//
 			// NOC Router
 			//
-			v1.POST("/router", bgpRouter.AddAdmin)
-			v1.GET("/router", bgpRouter.GetAllAdmin)
-			v1.DELETE("/router/:id", bgpRouter.DeleteAdmin)
-			v1.GET("/router/:id", bgpRouter.GetAdmin)
-			v1.PUT("/router/:id", bgpRouter.UpdateAdmin)
+			v1.POST("/router", bgpRouter.AddByAdmin)
+			v1.GET("/router", bgpRouter.GetAllByAdmin)
+			v1.DELETE("/router/:id", bgpRouter.DeleteByAdmin)
+			v1.GET("/router/:id", bgpRouter.GetByAdmin)
+			v1.PUT("/router/:id", bgpRouter.UpdateByAdmin)
 
 			//
 			// NOC Gateway
 			//
-			v1.POST("/gateway", tunnelEndPointRouter.AddAdmin)
-			v1.GET("/gateway", tunnelEndPointRouter.GetAllAdmin)
-			v1.DELETE("/gateway/:id", tunnelEndPointRouter.DeleteAdmin)
-			v1.GET("/gateway/:id", tunnelEndPointRouter.GetAdmin)
-			v1.PUT("/gateway/:id", tunnelEndPointRouter.UpdateAdmin)
+			v1.POST("/gateway", tunnelEndPointRouter.AddByAdmin)
+			v1.GET("/gateway", tunnelEndPointRouter.GetAllByAdmin)
+			v1.DELETE("/gateway/:id", tunnelEndPointRouter.DeleteByAdmin)
+			v1.GET("/gateway/:id", tunnelEndPointRouter.GetByAdmin)
+			v1.PUT("/gateway/:id", tunnelEndPointRouter.UpdateByAdmin)
 
 			//
 			// NOC Gateway IP
 			//
-			v1.POST("/gateway_ip", tunnelEndPointRouterIP.AddAdmin)
-			v1.GET("/gateway_ip", tunnelEndPointRouterIP.GetAllAdmin)
-			v1.DELETE("/gateway_ip/:id", tunnelEndPointRouterIP.DeleteAdmin)
-			v1.GET("/gateway_ip/:id", tunnelEndPointRouterIP.GetAdmin)
-			v1.PUT("/gateway_ip/:id", tunnelEndPointRouterIP.UpdateAdmin)
+			v1.POST("/gateway_ip", tunnelEndPointRouterIP.AddByAdmin)
+			v1.GET("/gateway_ip", tunnelEndPointRouterIP.GetAllByAdmin)
+			v1.DELETE("/gateway_ip/:id", tunnelEndPointRouterIP.DeleteByAdmin)
+			v1.GET("/gateway_ip/:id", tunnelEndPointRouterIP.GetByAdmin)
+			v1.PUT("/gateway_ip/:id", tunnelEndPointRouterIP.UpdateByAdmin)
 
 			//
 			// Support
 			//
-			v1.POST("/support", ticket.CreateAdmin)
-			v1.GET("/support", ticket.GetAllAdmin)
-			//v1.POST("/support/:id", chat.AddAdmin)
-			v1.GET("/support/:id", ticket.GetAdmin)
-			v1.PUT("/support/:id", ticket.UpdateAdmin)
+			v1.POST("/support", ticket.CreateByAdmin)
+			v1.GET("/support", ticket.GetAllByAdmin)
+			//v1.POST("/support/:id", chat.AddByAdmin)
+			v1.GET("/support/:id", ticket.GetByAdmin)
+			v1.PUT("/support/:id", ticket.UpdateByAdmin)
 
 			////
 			//// Connection
 			////
-			v1.POST("/service/:id/connection", connection.AddAdmin)
+			v1.POST("/service/:id/connection", connection.AddByAdmin)
 			// Group Delete
-			v1.DELETE("/connection/:id", connection.DeleteAdmin)
+			v1.DELETE("/connection/:id", connection.DeleteByAdmin)
 			// Group Update
-			v1.PUT("/connection/:id", connection.UpdateAdmin)
-			v1.GET("/connection", connection.GetAllAdmin)
-			v1.GET("/connection/:id", connection.GetAdmin)
+			v1.PUT("/connection/:id", connection.UpdateByAdmin)
+			v1.GET("/connection", connection.GetAllByAdmin)
+			v1.GET("/connection/:id", connection.GetByAdmin)
 
 			//
 			// Service
 			//
-			v1.POST("/group/:id/service", service.AddAdmin)
+			v1.POST("/group/:id/service", service.AddByAdmin)
 			// Service Delete
-			v1.DELETE("/service/:id", service.DeleteAdmin)
+			v1.DELETE("/service/:id", service.DeleteByAdmin)
 			// Service Update
-			v1.PUT("/service/:id", service.UpdateAdmin)
-			v1.GET("/service", service.GetAllAdmin)
-			v1.GET("/service/:id", service.GetAdmin)
+			v1.PUT("/service/:id", service.UpdateByAdmin)
+			v1.GET("/service", service.GetAllByAdmin)
+			v1.GET("/service/:id", service.GetByAdmin)
 
 			//
-			// JPNIC Admin
+			// JPNIC ByAdmin
 			//
-			v1.POST("/service/:id/jpnic_admin", service.AddJPNICAdminAdmin)
-			v1.DELETE("/jpnic_admin/:id", service.DeleteJPNICAdminAdmin)
-			v1.PUT("/jpnic_admin/:id", service.UpdateJPNICAdminAdmin)
+			v1.POST("/service/:id/jpnic_ByAdmin", service.AddJPNICAdminByAdmin)
+			v1.DELETE("/jpnic_ByAdmin/:id", service.DeleteJPNICAdminByAdmin)
+			v1.PUT("/jpnic_ByAdmin/:id", service.UpdateJPNICAdminByAdmin)
 
 			//
 			// JPNIC Tech
 			//
-			v1.POST("/service/:id/jpnic_tech", service.AddJPNICTechAdmin)
-			v1.DELETE("/jpnic_tech/:id", service.DeleteJPNICTechAdmin)
-			v1.PUT("/jpnic_tech/:id", service.UpdateJPNICTechAdmin)
+			v1.POST("/service/:id/jpnic_tech", service.AddJPNICTechByAdmin)
+			v1.DELETE("/jpnic_tech/:id", service.DeleteJPNICTechByAdmin)
+			v1.PUT("/jpnic_tech/:id", service.UpdateJPNICTechByAdmin)
 
 			//
 			// IP
 			//
-			v1.POST("/service/:id/ip", service.AddIPAdmin)
-			v1.DELETE("/ip/:id", service.DeleteIPAdmin)
-			v1.PUT("/ip/:id", service.UpdateIPAdmin)
+			v1.POST("/service/:id/ip", service.AddIPByAdmin)
+			v1.DELETE("/ip/:id", service.DeleteIPByAdmin)
+			v1.PUT("/ip/:id", service.UpdateIPByAdmin)
 
 			//
 			// Plan
 			//
-			v1.POST("/ip/:id/plan", service.AddPlanAdmin)
-			v1.DELETE("/plan/:id", service.DeletePlanAdmin)
-			v1.PUT("/plan/:id", service.UpdatePlanAdmin)
+			v1.POST("/ip/:id/plan", service.AddPlanByAdmin)
+			v1.DELETE("/plan/:id", service.DeletePlanByAdmin)
+			v1.PUT("/plan/:id", service.UpdatePlanByAdmin)
 
 			//
 			// Mail
 			//
-			v1.POST("/mail", mail.SendAdmin)
+			v1.POST("/mail", mail.SendByAdmin)
 		}
 	}
 	ws := router.Group("/ws")
@@ -198,7 +198,7 @@ func AdminRestAPI() {
 		}
 	}
 
-	go ticket.HandleMessagesAdmin()
+	go ticket.HandleMessagesByAdmin()
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(config.Conf.Controller.Admin.Port), router))
 }
 

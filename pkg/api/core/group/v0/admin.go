@@ -14,7 +14,7 @@ import (
 	"strconv"
 )
 
-func AddAdmin(c *gin.Context) {
+func AddByAdmin(c *gin.Context) {
 	var input core.Group
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
@@ -37,7 +37,7 @@ func AddAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, group.ResultAdmin{})
 }
 
-func DeleteAdmin(c *gin.Context) {
+func DeleteByAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
@@ -57,7 +57,7 @@ func DeleteAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, group.ResultAdmin{})
 }
 
-func UpdateAdmin(c *gin.Context) {
+func UpdateByAdmin(c *gin.Context) {
 	// ID取得
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -92,7 +92,7 @@ func UpdateAdmin(c *gin.Context) {
 		return
 	}
 
-	noticeSlackAdmin(tmp.Group[0], input)
+	noticeSlackByAdmin(tmp.Group[0], input)
 
 	input.ID = uint(id)
 
@@ -103,7 +103,7 @@ func UpdateAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, group.ResultAdmin{})
 }
 
-func GetAdmin(c *gin.Context) {
+func GetByAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
@@ -126,7 +126,7 @@ func GetAdmin(c *gin.Context) {
 	})
 }
 
-func GetAllAdmin(c *gin.Context) {
+func GetAllByAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})

@@ -17,7 +17,7 @@ func check(input support.FirstInput) error {
 	return nil
 }
 
-func checkAdmin(input support.FirstInput) error {
+func checkByAdmin(input support.FirstInput) error {
 	if input.Title == "" {
 		return fmt.Errorf("no data: title")
 	}

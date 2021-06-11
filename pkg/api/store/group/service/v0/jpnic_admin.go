@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func JoinJPNICAdmin(serviceID uint, input core.JPNICAdmin) error {
+func JoinJPNICByAdmin(serviceID uint, input core.JPNICAdmin) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -22,7 +22,7 @@ func JoinJPNICAdmin(serviceID uint, input core.JPNICAdmin) error {
 		Append(input).Error
 }
 
-func DeleteJPNICAdmin(id uint) error {
+func DeleteJPNICByAdmin(id uint) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
@@ -33,7 +33,7 @@ func DeleteJPNICAdmin(id uint) error {
 	return db.Delete(core.JPNICAdmin{Model: gorm.Model{ID: id}}).Error
 }
 
-func UpdateJPNICAdmin(input core.JPNICAdmin) error {
+func UpdateJPNICByAdmin(input core.JPNICAdmin) error {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")

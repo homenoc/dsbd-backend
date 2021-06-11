@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-func GenerateAdmin(c *gin.Context) {
+func GenerateByAdmin(c *gin.Context) {
 	resultAuth := auth.AdminRadiusAuthentication(authInterface.AdminStruct{
 		User: c.Request.Header.Get("USER"), Pass: c.Request.Header.Get("PASS")})
 	if resultAuth.Err != nil {
@@ -38,7 +38,7 @@ func GenerateAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, token.Result{Token: []core.Token{{AccessToken: accessToken}}})
 }
 
-func AddAdmin(c *gin.Context) {
+func AddByAdmin(c *gin.Context) {
 	var input core.Token
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
@@ -67,7 +67,7 @@ func AddAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, token.ResultTmpToken{Token: accessToken})
 }
 
-func DeleteAdmin(c *gin.Context) {
+func DeleteByAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
@@ -87,7 +87,7 @@ func DeleteAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, token.Result{})
 }
 
-func DeleteAllAdmin(c *gin.Context) {
+func DeleteAllByAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
@@ -102,7 +102,7 @@ func DeleteAllAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, token.Result{})
 }
 
-func UpdateAdmin(c *gin.Context) {
+func UpdateByAdmin(c *gin.Context) {
 	var input core.Token
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
@@ -125,7 +125,7 @@ func UpdateAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, token.Result{})
 }
 
-func GetAdmin(c *gin.Context) {
+func GetByAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
@@ -145,7 +145,7 @@ func GetAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, token.Result{Token: result.Token})
 }
 
-func GetAllAdmin(c *gin.Context) {
+func GetAllByAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})

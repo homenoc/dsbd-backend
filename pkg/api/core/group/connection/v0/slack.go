@@ -18,7 +18,7 @@ import (
 	"strconv"
 )
 
-func noticeSlackAdmin(before, after core.Connection) {
+func noticeSlackByAdmin(before, after core.Connection) {
 	// 審査ステータスのSlack通知
 	attachment := slack.Attachment{}
 

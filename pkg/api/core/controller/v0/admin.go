@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-func SendChatAdmin(data controller.Chat) {
+func SendChatByAdmin(data controller.Chat) {
 	client := &http.Client{}
 	client.Timeout = time.Second * 5
 
@@ -60,7 +60,7 @@ func SendChatAdmin(data controller.Chat) {
 	}
 }
 
-func ReceiveChatAdmin(c *gin.Context) {
+func ReceiveChatByAdmin(c *gin.Context) {
 	token1 := c.Request.Header.Get("TOKEN_1")
 	token2 := c.Request.Header.Get("TOKEN_2")
 

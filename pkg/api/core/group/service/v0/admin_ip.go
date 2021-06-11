@@ -15,7 +15,7 @@ import (
 	"strconv"
 )
 
-func AddIPAdmin(c *gin.Context) {
+func AddIPByAdmin(c *gin.Context) {
 	var input service.IPInput
 
 	id, err := strconv.Atoi(c.Param("id"))
@@ -54,7 +54,7 @@ func AddIPAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, service.Result{})
 }
 
-func DeleteIPAdmin(c *gin.Context) {
+func DeleteIPByAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
@@ -77,7 +77,7 @@ func DeleteIPAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, common.Result{})
 }
 
-func UpdateIPAdmin(c *gin.Context) {
+func UpdateIPByAdmin(c *gin.Context) {
 	var input core.IP
 
 	id, err := strconv.Atoi(c.Param("id"))

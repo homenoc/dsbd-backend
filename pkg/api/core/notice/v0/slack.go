@@ -11,7 +11,7 @@ import (
 
 const layoutInput = "2006-01-02 15:04:05"
 
-func noticeSlackAddAdmin(input notice.Input) {
+func noticeSlackAddByAdmin(input notice.Input) {
 	// 審査ステータスのSlack通知
 	attachment := slack.Attachment{}
 
@@ -28,7 +28,7 @@ func noticeSlackAddAdmin(input notice.Input) {
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 }
 
-func noticeSlackReplaceAdmin(before core.Notice, after notice.Input) {
+func noticeSlackReplaceByAdmin(before core.Notice, after notice.Input) {
 	// 審査ステータスのSlack通知
 	attachment := slack.Attachment{}
 
