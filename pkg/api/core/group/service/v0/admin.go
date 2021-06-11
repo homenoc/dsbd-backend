@@ -16,7 +16,7 @@ import (
 	"strconv"
 )
 
-func AddAdmin(c *gin.Context) {
+func AddByAdmin(c *gin.Context) {
 	// ID取得
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -161,7 +161,7 @@ func AddAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, service.Result{})
 }
 
-func DeleteAdmin(c *gin.Context) {
+func DeleteByAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
@@ -182,7 +182,7 @@ func DeleteAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, service.Result{})
 }
 
-func UpdateAdmin(c *gin.Context) {
+func UpdateByAdmin(c *gin.Context) {
 	var input core.Service
 
 	id, err := strconv.Atoi(c.Param("id"))
@@ -220,7 +220,7 @@ func UpdateAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, service.Result{})
 }
 
-func GetAdmin(c *gin.Context) {
+func GetByAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
@@ -241,7 +241,7 @@ func GetAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, service.Result{Service: result.Service})
 }
 
-func GetAllAdmin(c *gin.Context) {
+func GetAllByAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})

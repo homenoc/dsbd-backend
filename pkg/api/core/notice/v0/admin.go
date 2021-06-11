@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-func AddAdmin(c *gin.Context) {
+func AddByAdmin(c *gin.Context) {
 	var input notice.Input
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
@@ -74,11 +74,11 @@ func AddAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	noticeSlackAddAdmin(input)
+	noticeSlackAddByAdmin(input)
 	c.JSON(http.StatusOK, notice.Result{})
 }
 
-func DeleteAdmin(c *gin.Context) {
+func DeleteByAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
@@ -98,7 +98,7 @@ func DeleteAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, notice.Result{})
 }
 
-func UpdateAdmin(c *gin.Context) {
+func UpdateByAdmin(c *gin.Context) {
 	var input notice.Input
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
@@ -134,7 +134,7 @@ func UpdateAdmin(c *gin.Context) {
 	log.Println(startTime)
 	log.Println(endTime)
 
-	noticeSlackReplaceAdmin(tmp.Notice[0], input)
+	noticeSlackReplaceByAdmin(tmp.Notice[0], input)
 
 	if err = dbNotice.Update(notice.UpdateAll, core.Notice{
 		Model:     gorm.Model{ID: uint(id)},
@@ -153,7 +153,7 @@ func UpdateAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, notice.ResultAdmin{})
 }
 
-func GetAdmin(c *gin.Context) {
+func GetByAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
@@ -173,7 +173,7 @@ func GetAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, notice.ResultAdmin{Notice: result.Notice})
 }
 
-func GetAllAdmin(c *gin.Context) {
+func GetAllByAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})

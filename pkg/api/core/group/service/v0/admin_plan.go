@@ -12,7 +12,7 @@ import (
 	"strconv"
 )
 
-func AddPlanAdmin(c *gin.Context) {
+func AddPlanByAdmin(c *gin.Context) {
 	var input core.Plan
 
 	err := c.BindJSON(&input)
@@ -44,7 +44,7 @@ func AddPlanAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, common.Result{})
 }
 
-func DeletePlanAdmin(c *gin.Context) {
+func DeletePlanByAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
@@ -65,7 +65,7 @@ func DeletePlanAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, common.Result{})
 }
 
-func UpdatePlanAdmin(c *gin.Context) {
+func UpdatePlanByAdmin(c *gin.Context) {
 	var input core.Plan
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))

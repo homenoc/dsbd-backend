@@ -19,14 +19,14 @@ func noticeSlack(loginUser core.User, before core.Group, after group.Input) {
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 }
 
-func noticeSlackAdmin(before, after core.Group) {
+func noticeSlackByAdmin(before, after core.Group) {
 	// 審査ステータスのSlack通知
 	attachment := slack.Attachment{}
 
 	attachment.AddField(slack.Field{Title: "Title", Value: "Group情報の更新"}).
 		AddField(slack.Field{Title: "申請者", Value: "管理者"}).
 		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(before.ID)) + ":" + before.Org}).
-		AddField(slack.Field{Title: "更新状況", Value: changeTextAdmin(before, after)})
+		AddField(slack.Field{Title: "更新状況", Value: changeTextByAdmin(before, after)})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 }
 
@@ -64,7 +64,7 @@ func changeText(before core.Group, after group.Input) string {
 	return data
 }
 
-func changeTextAdmin(before, after core.Group) string {
+func changeTextByAdmin(before, after core.Group) string {
 	data := ""
 	if after.Open != nil {
 		if *before.Open != *after.Open {

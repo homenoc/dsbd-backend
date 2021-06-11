@@ -29,7 +29,7 @@ func noticeSlackAdd(groupID int, serviceCode, serviceCodeComment string) {
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 }
 
-func noticeSlackAddJPNICAdmin(serviceID int, input core.JPNICAdmin) {
+func noticeSlackAddJPNICByAdmin(serviceID int, input core.JPNICAdmin) {
 	attachment := slack.Attachment{}
 
 	attachment.AddField(slack.Field{Title: "Title", Value: "JPNIC管理者連絡窓口の追加"}).
@@ -94,13 +94,13 @@ func noticeSlackUpdate(before, after core.Service) {
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 }
 
-func noticeSlackUpdateJPNICAdmin(before, after core.JPNICAdmin) {
+func noticeSlackUpdateJPNICByAdmin(before, after core.JPNICAdmin) {
 	attachment := slack.Attachment{}
 
 	attachment.AddField(slack.Field{Title: "Title", Value: "JPNIC管理者連絡窓口の更新"}).
 		AddField(slack.Field{Title: "申請者", Value: "管理者"}).
 		AddField(slack.Field{Title: "JPNICAdmin", Value: strconv.Itoa(int(before.ID))}).
-		AddField(slack.Field{Title: "更新状況", Value: changeTextJPNICAdmin(before, after)})
+		AddField(slack.Field{Title: "更新状況", Value: changeTextJPNICByAdmin(before, after)})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 }
 
@@ -244,7 +244,7 @@ func changeText(before, after core.Service) string {
 	return data
 }
 
-func changeTextJPNICAdmin(before, after core.JPNICAdmin) string {
+func changeTextJPNICByAdmin(before, after core.JPNICAdmin) string {
 	data := ""
 
 	if after.Lock != nil {

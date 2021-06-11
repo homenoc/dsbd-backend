@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func SendAdmin(c *gin.Context) {
+func SendByAdmin(c *gin.Context) {
 	var input mail.Mail
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))

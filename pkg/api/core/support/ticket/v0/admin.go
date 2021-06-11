@@ -24,7 +24,7 @@ import (
 	"time"
 )
 
-func CreateAdmin(c *gin.Context) {
+func CreateByAdmin(c *gin.Context) {
 	var input support.FirstInput
 
 	// Admin authentication
@@ -42,7 +42,7 @@ func CreateAdmin(c *gin.Context) {
 	}
 
 	// input check
-	if err = checkAdmin(input); err != nil {
+	if err = checkByAdmin(input); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
@@ -97,7 +97,7 @@ func CreateAdmin(c *gin.Context) {
 	})
 }
 
-func UpdateAdmin(c *gin.Context) {
+func UpdateByAdmin(c *gin.Context) {
 	var input core.Ticket
 	// Admin authentication
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
@@ -142,7 +142,7 @@ func UpdateAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, support.Result{})
 }
 
-func GetAdmin(c *gin.Context) {
+func GetByAdmin(c *gin.Context) {
 	// Admin authentication
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
@@ -165,7 +165,7 @@ func GetAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, support.Result{Ticket: resultTicket.Tickets})
 }
 
-func GetAllAdmin(c *gin.Context) {
+func GetAllByAdmin(c *gin.Context) {
 	// Admin authentication
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
@@ -267,7 +267,7 @@ func GetAdminWebSocket(c *gin.Context) {
 			msg.UserToken = ""
 
 			//Admin側に送信
-			controller.SendChatAdmin(controllerInterface.Chat{
+			controller.SendChatByAdmin(controllerInterface.Chat{
 				CreatedAt: msg.CreatedAt,
 				Admin:     msg.Admin,
 				UserID:    resultAdmin.AdminID,
@@ -306,7 +306,7 @@ func GetAdminWebSocket(c *gin.Context) {
 	}
 }
 
-func HandleMessagesAdmin() {
+func HandleMessagesByAdmin() {
 	for {
 		msg := <-support.Broadcast
 		//登録されているクライアント宛にデータ送信する

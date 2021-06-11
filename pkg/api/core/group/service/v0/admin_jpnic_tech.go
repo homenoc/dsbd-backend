@@ -14,7 +14,7 @@ import (
 	"strconv"
 )
 
-func AddJPNICTechAdmin(c *gin.Context) {
+func AddJPNICTechByAdmin(c *gin.Context) {
 	var input core.JPNICTech
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
@@ -47,7 +47,7 @@ func AddJPNICTechAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, common.Result{})
 }
 
-func DeleteJPNICTechAdmin(c *gin.Context) {
+func DeleteJPNICTechByAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
@@ -68,7 +68,7 @@ func DeleteJPNICTechAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, common.Result{})
 }
 
-func UpdateJPNICTechAdmin(c *gin.Context) {
+func UpdateJPNICTechByAdmin(c *gin.Context) {
 	var input core.JPNICTech
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))

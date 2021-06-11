@@ -14,7 +14,7 @@ import (
 	"strconv"
 )
 
-func AddJPNICAdminAdmin(c *gin.Context) {
+func AddJPNICAdminByAdmin(c *gin.Context) {
 	var input core.JPNICAdmin
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
@@ -36,15 +36,15 @@ func AddJPNICAdminAdmin(c *gin.Context) {
 		return
 	}
 
-	if err = dbService.JoinJPNICAdmin(uint(id), input); err != nil {
+	if err = dbService.JoinJPNICByAdmin(uint(id), input); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	noticeSlackAddJPNICAdmin(id, input)
+	noticeSlackAddJPNICByAdmin(id, input)
 	c.JSON(http.StatusOK, common.Result{})
 }
 
-func DeleteJPNICAdminAdmin(c *gin.Context) {
+func DeleteJPNICAdminByAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
@@ -57,7 +57,7 @@ func DeleteJPNICAdminAdmin(c *gin.Context) {
 		return
 	}
 
-	if err = dbService.DeleteJPNICAdmin(uint(id)); err != nil {
+	if err = dbService.DeleteJPNICByAdmin(uint(id)); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
@@ -65,7 +65,7 @@ func DeleteJPNICAdminAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, common.Result{})
 }
 
-func UpdateJPNICAdminAdmin(c *gin.Context) {
+func UpdateJPNICAdminByAdmin(c *gin.Context) {
 	var input core.JPNICAdmin
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
@@ -95,10 +95,10 @@ func UpdateJPNICAdminAdmin(c *gin.Context) {
 
 	input.ID = uint(id)
 
-	if err = dbService.UpdateJPNICAdmin(input); err != nil {
+	if err = dbService.UpdateJPNICByAdmin(input); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	noticeSlackUpdateJPNICAdmin(before.Admins[0], input)
+	noticeSlackUpdateJPNICByAdmin(before.Admins[0], input)
 	c.JSON(http.StatusOK, common.Result{})
 }
