@@ -9,6 +9,7 @@ type Config struct {
 	Controller Controller `json:"controller"`
 	Web        Web        `json:"web"`
 	DB         DB         `json:"db"`
+	Stripe     Stripe     `json:"stripe"`
 	Mail       Mail       `json:"mail"`
 	Radius     Radius     `json:"radius"`
 	Slack      []Slack    `json:"slack"`
@@ -36,6 +37,11 @@ type Admin struct {
 
 type Web struct {
 	URL string `json:"url"`
+}
+
+type Stripe struct {
+	WebhookSecretKey string `json:"webhook_secret_key"`
+	SecretKey        string `json:"secret_key"`
 }
 
 type AdminAuth struct {
