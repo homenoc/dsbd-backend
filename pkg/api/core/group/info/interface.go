@@ -5,36 +5,43 @@ import (
 )
 
 type User struct {
-	ID         uint   `json:"id"`
-	GroupID    uint   `json:"group_id"`
-	Name       string `json:"name"`
-	NameEn     string `json:"name_en"`
-	Email      string `json:"email"`
-	Status     uint   `json:"status"`
-	Level      uint   `json:"level"`
-	MailVerify *bool  `json:"mail_verify"`
+	ID               uint   `json:"id"`
+	GroupID          uint   `json:"group_id"`
+	StripeCustomerID string `json:"stripe_customer_id"`
+	Name             string `json:"name"`
+	NameEn           string `json:"name_en"`
+	Email            string `json:"email"`
+	Status           uint   `json:"status"`
+	Level            uint   `json:"level"`
+	MailVerify       *bool  `json:"mail_verify"`
 }
 
 type Group struct {
-	ID             uint       `json:"id"`
-	Agree          *bool      `json:"agree"`
-	Question       string     `json:"question"`
-	Org            string     `json:"org"`
-	OrgEn          string     `json:"org_en"`
-	PostCode       string     `json:"postcode"`
-	Address        string     `json:"address"`
-	AddressEn      string     `json:"address_en"`
-	Tel            string     `json:"tel"`
-	Country        string     `json:"country"`
-	Contract       string     `json:"contract"`
-	StudentExpired *time.Time `json:"student_expired"`
-	Fee            *uint      `json:"fee"`
-	Student        *bool      `json:"student"`
-	Pass           *bool      `json:"pass"`
-	Lock           *bool      `json:"lock"`
-	ExpiredStatus  *uint      `json:"expired_status"`
-	Status         *uint      `json:"status"`
-	AddAllow       *bool      `json:"add_allow"`
+	ID                        uint       `json:"id"`
+	PaymentMembershipTemplate string     `json:"payment_membership_template"`
+	Agree                     *bool      `json:"agree"`
+	Question                  string     `json:"question"`
+	Org                       string     `json:"org"`
+	OrgEn                     string     `json:"org_en"`
+	PostCode                  string     `json:"postcode"`
+	Address                   string     `json:"address"`
+	AddressEn                 string     `json:"address_en"`
+	Tel                       string     `json:"tel"`
+	Country                   string     `json:"country"`
+	Contract                  string     `json:"contract"`
+	Fee                       *uint      `json:"fee"`
+	Paid                      *bool      `json:"paid"`
+	AutomaticUpdate           bool       `json:"automatic_update"`
+	DiscountRate              uint       `json:"discount_rate"`
+	MemberInfo                string     `json:"member_info"`
+	MemberExpired             *time.Time `json:"member_expired"`
+	Student                   *bool      `json:"student"`
+	StudentExpired            *time.Time `json:"student_expired"`
+	Pass                      *bool      `json:"pass"`
+	Lock                      *bool      `json:"lock"`
+	ExpiredStatus             *uint      `json:"expired_status"`
+	Status                    *uint      `json:"status"`
+	AddAllow                  *bool      `json:"add_allow"`
 }
 
 type Notice struct {

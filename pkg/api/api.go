@@ -13,6 +13,7 @@ import (
 	tunnelEndPointRouterIP "github.com/homenoc/dsbd-backend/pkg/api/core/noc/tunnelEndPointRouterIP/v0"
 	noc "github.com/homenoc/dsbd-backend/pkg/api/core/noc/v0"
 	notice "github.com/homenoc/dsbd-backend/pkg/api/core/notice/v0"
+	payment "github.com/homenoc/dsbd-backend/pkg/api/core/payment/v0"
 	ticket "github.com/homenoc/dsbd-backend/pkg/api/core/support/ticket/v0"
 	template "github.com/homenoc/dsbd-backend/pkg/api/core/template/v0"
 	token "github.com/homenoc/dsbd-backend/pkg/api/core/token/v0"
@@ -83,6 +84,7 @@ func AdminRestAPI() {
 			v1.DELETE("/group", group.DeleteByAdmin)
 			// Group Update
 			v1.PUT("/group/:id", group.UpdateByAdmin)
+			v1.DELETE("/group/:id/subscription", group.CancelSubscription)
 			v1.GET("/group", group.GetAllByAdmin)
 			v1.GET("/group/:id", group.GetByAdmin)
 
@@ -157,6 +159,17 @@ func AdminRestAPI() {
 			v1.GET("/service/:id", service.GetByAdmin)
 
 			//
+			// Payment
+			//
+			//v1.POST("/group/:id/service", service.AddByAdmin)
+			// Service Delete
+			v1.DELETE("/payment/:id", payment.DeleteByAdmin)
+			// Service Update
+			//v1.PUT("/service/:id", service.UpdateByAdmin)
+			v1.GET("/payment", payment.GetAllByAdmin)
+			//v1.GET("/service/:id", service.GetByAdmin)
+
+			//
 			// JPNIC ByAdmin
 			//
 			v1.POST("/service/:id/jpnic_ByAdmin", service.AddJPNICAdminByAdmin)
@@ -214,6 +227,11 @@ func UserRestAPI() {
 			//
 			v1.POST("/controller/chat", controller.ReceiveChatUser)
 
+			// Stripe
+			//
+			//v1.POST("/stripe", payment.GetStripeWebHook)
+			v1.Any("/stripe", payment.GetStripeWebHook)
+
 			// User Mail MailVerify
 			v1.GET("/verify/:token", user.MailVerify)
 
@@ -255,6 +273,14 @@ func UserRestAPI() {
 
 			// Connection Create
 			v1.POST("/service/:id/connection", connection.Add)
+
+			//
+			// Payment
+			//
+			v1.POST("/payment/membership", payment.MembershipPayment)
+			v1.POST("/payment/donate", payment.DonatePayment)
+			v1.PUT("/payment/card", payment.ChangeCardPayment)
+			v1.GET("/payment/card", payment.ChangeCardPaymentInit)
 
 			//
 			// Support/Request

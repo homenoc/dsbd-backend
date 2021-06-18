@@ -54,6 +54,14 @@ func Update(base int, g core.Group) error {
 
 	if group.UpdateOrg == base {
 		result = db.Model(&core.Group{Model: gorm.Model{ID: g.ID}}).Update("org", g.Org)
+	} else if group.UpdateMembership == base {
+		result = db.Model(&core.Group{Model: gorm.Model{ID: g.ID}}).Update(core.Group{
+			StripeCustomerID:            g.StripeCustomerID,
+			StripePaymentMethodID:       g.StripePaymentMethodID,
+			StripeSubscriptionID:        g.StripeSubscriptionID,
+			PaymentMembershipTemplateID: g.PaymentMembershipTemplateID,
+			MemberExpired:               g.MemberExpired,
+		})
 	} else if group.UpdateStatus == base {
 		result = db.Model(&core.Group{Model: gorm.Model{ID: g.ID}}).Update("status", g.Status)
 	} else if group.UpdateAll == base {
@@ -76,9 +84,11 @@ func Get(base int, data *core.Group) group.ResultDatabase {
 	var groupStruct []core.Group
 
 	if base == group.ID { //ID
-		err = db.Preload("Users").
+		err = db.Preload("PaymentMembershipTemplate").
+			Preload("Users").
 			Preload("Services").
 			Preload("Tickets").
+			Preload("PaymentCouponTemplate").
 			Preload("Services.IP").
 			Preload("Services.IP.Plan").
 			Preload("Services.Connection").

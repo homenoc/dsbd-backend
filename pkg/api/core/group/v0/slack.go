@@ -30,6 +30,17 @@ func noticeSlackByAdmin(before, after core.Group) {
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 }
 
+func noticeSlackCancelSubscriptionByAdmin(group core.Group) {
+	// 審査ステータスのSlack通知
+	attachment := slack.Attachment{}
+
+	attachment.AddField(slack.Field{Title: "Title", Value: "Cancel Subscription"}).
+		AddField(slack.Field{Title: "申請者", Value: "管理者"}).
+		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(group.ID)) + ":" + group.Org})
+
+	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: false})
+}
+
 func changeText(before core.Group, after group.Input) string {
 	data := ""
 

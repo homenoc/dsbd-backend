@@ -15,6 +15,9 @@ import (
 	dbIPv6Template "github.com/homenoc/dsbd-backend/pkg/api/store/template/ipv6/v0"
 	dbIPv6RouteTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ipv6_route/v0"
 	dbNTTTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ntt/v0"
+	dbPaymentCouponTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/payment_coupon/v0"
+	dbPaymentDonateTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/payment_donate/v0"
+	dbPaymentMembershipTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/payment_membership/v0"
 	dbServiceTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/service/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"net/http"
@@ -95,18 +98,37 @@ func GetByAdmin(c *gin.Context) {
 		return
 	}
 
+	resultPaymentMembership, err := dbPaymentMembershipTemplate.GetAll()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		return
+	}
+	resultDonateMembership, err := dbPaymentDonateTemplate.GetAll()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		return
+	}
+	resultPaymentCoupon, err := dbPaymentCouponTemplate.GetAll()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusOK, template.ResultAdmin{
-		Services:               resultService.Services,
-		Connections:            resultConnection.Connections,
-		NTTs:                   resultNTT.NTTs,
-		NOC:                    resultNOC.NOC,
-		BGPRouter:              resultBGPRouter.BGPRouter,
-		TunnelEndPointRouterIP: resultTunnelEndPointRouterIP.TunnelEndPointRouterIP,
-		IPv4:                   resultIPv4.IPv4,
-		IPv6:                   resultIPv6.IPv6,
-		IPv4Route:              resultIPv4Route,
-		IPv6Route:              resultIPv6Route,
-		User:                   resultUser.User,
-		Group:                  resultGroup.Group,
+		Services:                  resultService.Services,
+		Connections:               resultConnection.Connections,
+		NTTs:                      resultNTT.NTTs,
+		NOC:                       resultNOC.NOC,
+		BGPRouter:                 resultBGPRouter.BGPRouter,
+		TunnelEndPointRouterIP:    resultTunnelEndPointRouterIP.TunnelEndPointRouterIP,
+		IPv4:                      resultIPv4.IPv4,
+		IPv6:                      resultIPv6.IPv6,
+		IPv4Route:                 resultIPv4Route,
+		IPv6Route:                 resultIPv6Route,
+		User:                      resultUser.User,
+		Group:                     resultGroup.Group,
+		PaymentMembershipTemplate: resultPaymentMembership,
+		PaymentDonateTemplate:     resultDonateMembership,
+		PaymentCouponTemplate:     resultPaymentCoupon,
 	})
 }
