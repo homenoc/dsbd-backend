@@ -7,8 +7,11 @@ import (
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	"github.com/jinzhu/gorm"
+	"github.com/stripe/stripe-go/v72"
+	"github.com/stripe/stripe-go/v72/sub"
 	"log"
 	"net/http"
 	"strconv"
@@ -138,4 +141,59 @@ func GetAllByAdmin(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusOK, group.ResultAdminAll{Group: result.Group})
 	}
+}
+
+func CancelSubscription(c *gin.Context) {
+	// ID取得
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	// serviceIDが0の時エラー処理
+	if id == 0 {
+		c.JSON(http.StatusBadRequest, common.Error{Error: fmt.Sprintf("This id is wrong... ")})
+		return
+	}
+
+	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	if resultAdmin.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
+		return
+	}
+
+	resultGroup := dbGroup.Get(group.ID, &core.Group{Model: gorm.Model{ID: uint(id)}})
+	if resultGroup.Err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: resultGroup.Err.Error()})
+		return
+	}
+
+	if resultGroup.Group[0].StripeSubscriptionID == nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: "Subscription ID is not exists."})
+		return
+	}
+
+	noticeSlackCancelSubscriptionByAdmin(resultGroup.Group[0])
+
+	stripe.Key = config.Conf.Stripe.SecretKey
+
+	_, err = sub.Cancel(*resultGroup.Group[0].StripeSubscriptionID, nil)
+	if err != nil {
+		log.Printf("pi.New: %v", err)
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		return
+	}
+
+	err = dbGroup.Update(group.UpdateAll, core.Group{
+		StripeSubscriptionID:        &[]string{""}[0],
+		PaymentMembershipTemplateID: &[]uint{0}[0],
+	})
+	if err != nil {
+		log.Printf("Error: %v", err)
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, common.Result{})
 }

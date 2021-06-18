@@ -7,11 +7,14 @@ import (
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"github.com/jinzhu/gorm"
+	"github.com/stripe/stripe-go/v72"
+	"github.com/stripe/stripe-go/v72/customer"
 	"log"
 	"net/http"
 	"strconv"
@@ -59,30 +62,43 @@ func Add(c *gin.Context) {
 		studentExpired = &tmpStudentExpired
 	}
 
+	// added customer (stripe)
+	stripe.Key = config.Conf.Stripe.SecretKey
+
+	params := &stripe.CustomerParams{
+		Description: stripe.String("Org: " + input.Org + "(" + input.OrgEn + ")"),
+	}
+	cus, err := customer.New(params)
+	if err != nil {
+		log.Println("Error: " + err.Error())
+	}
+
 	result, err := dbGroup.Create(&core.Group{
-		Agree:          &[]bool{*input.Agree}[0],
-		Question:       input.Question,
-		Org:            input.Org,
-		OrgEn:          input.OrgEn,
-		PostCode:       input.PostCode,
-		Address:        input.Address,
-		AddressEn:      input.AddressEn,
-		Tel:            input.Tel,
-		Country:        input.Country,
-		Status:         &[]uint{1}[0],
-		ExpiredStatus:  &[]uint{0}[0],
-		Contract:       input.Contract,
-		Student:        input.Student,
-		StudentExpired: studentExpired,
-		Open:           &[]bool{false}[0],
-		Pass:           &[]bool{false}[0],
-		Lock:           &[]bool{true}[0],
-		AddAllow:       &[]bool{true}[0],
+		Agree:            &[]bool{*input.Agree}[0],
+		StripeCustomerID: &cus.ID,
+		Question:         input.Question,
+		Org:              input.Org,
+		OrgEn:            input.OrgEn,
+		PostCode:         input.PostCode,
+		Address:          input.Address,
+		AddressEn:        input.AddressEn,
+		Tel:              input.Tel,
+		Country:          input.Country,
+		Status:           &[]uint{1}[0],
+		ExpiredStatus:    &[]uint{0}[0],
+		Contract:         input.Contract,
+		Student:          input.Student,
+		MemberExpired:    studentExpired,
+		Open:             &[]bool{false}[0],
+		Pass:             &[]bool{false}[0],
+		Lock:             &[]bool{true}[0],
+		AddAllow:         &[]bool{true}[0],
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
+
 	attachment := slack.Attachment{}
 	attachment.AddField(slack.Field{Title: "Title", Value: "グループ登録"}).
 		AddField(slack.Field{Title: "Question", Value: input.Question}).

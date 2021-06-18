@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"sort"
 	"strconv"
+	"time"
 )
 
 func Get(c *gin.Context) {
@@ -43,20 +44,46 @@ func Get(c *gin.Context) {
 		MailVerify: authResult.User.MailVerify,
 	}
 
+	//log.Println(*authResult.User.Group.PaymentCouponTemplateID)
+	//log.Println(*authResult.User.Group.PaymentMembershipTemplateID)
+
+	// Membership Info
+	membershipInfo := "一般会員"
+	membershipPlan := "未設定"
+	paid := false
+	automaticUpdate := false
+	var discountRate uint = 0
+	if authResult.User.Group.PaymentCouponTemplateID != nil && *authResult.User.Group.PaymentCouponTemplateID != 0 {
+		membershipInfo = dbUserResult.User[0].Group.PaymentCouponTemplate.Title
+		discountRate = dbUserResult.User[0].Group.PaymentCouponTemplate.DiscountRate
+	}
+	if authResult.User.Group.PaymentMembershipTemplateID != nil && *authResult.User.Group.PaymentMembershipTemplateID != 0 {
+		membershipPlan = dbUserResult.User[0].Group.PaymentMembershipTemplate.Plan
+		automaticUpdate = true
+	}
+	if dbUserResult.User[0].Group.MemberExpired != nil && dbUserResult.User[0].Group.MemberExpired.Unix() > time.Now().Unix() {
+		paid = true
+	}
+
 	// Group and UserList
 	var resultGroup info.Group
 	var resultUserList []info.User
 
 	if authResult.User.GroupID != 0 {
 		resultGroup = info.Group{
-			ID:             authResult.User.Group.ID,
-			Student:        authResult.User.Group.Student,
-			StudentExpired: dbUserResult.User[0].Group.StudentExpired,
-			Fee:            dbUserResult.User[0].Group.Fee,
-			Pass:           authResult.User.Group.Pass,
-			Lock:           authResult.User.Group.Lock,
-			ExpiredStatus:  authResult.User.Group.ExpiredStatus,
-			Status:         authResult.User.Group.Status,
+			ID:                        authResult.User.Group.ID,
+			Student:                   authResult.User.Group.Student,
+			Fee:                       dbUserResult.User[0].Group.Fee,
+			Pass:                      authResult.User.Group.Pass,
+			Lock:                      authResult.User.Group.Lock,
+			ExpiredStatus:             authResult.User.Group.ExpiredStatus,
+			MemberInfo:                membershipInfo,
+			Status:                    authResult.User.Group.Status,
+			AutomaticUpdate:           automaticUpdate,
+			Paid:                      &paid,
+			DiscountRate:              discountRate,
+			PaymentMembershipTemplate: membershipPlan,
+			MemberExpired:             authResult.User.Group.MemberExpired,
 		}
 		if authResult.User.Level < 3 {
 			resultGroup.Agree = dbUserResult.User[0].Group.Agree

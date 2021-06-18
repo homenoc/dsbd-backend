@@ -48,6 +48,10 @@ func InitDB() {
 		&core.IPv6Template{},
 		&core.IPv4RouteTemplate{},
 		&core.IPv6RouteTemplate{},
+		&core.Payment{},
+		&core.PaymentCouponTemplate{},
+		&core.PaymentMembershipTemplate{},
+		&core.PaymentDonateTemplate{},
 	)
 	log.Println(result.Error)
 }

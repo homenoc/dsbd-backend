@@ -7,16 +7,16 @@ import (
 )
 
 const (
-	ID           = 0
-	OrgJa        = 1
-	Org          = 2
-	Email        = 3
-	UpdateID     = 100
-	UpdateOrg    = 101
-	UpdateStatus = 102
-	UpdateTechID = 103
-	UpdateInfo   = 104
-	UpdateAll    = 150
+	ID               = 0
+	OrgJa            = 1
+	Org              = 2
+	Email            = 3
+	UpdateID         = 100
+	UpdateOrg        = 101
+	UpdateStatus     = 102
+	UpdateTechID     = 103
+	UpdateMembership = 105
+	UpdateAll        = 150
 )
 
 type Input struct {

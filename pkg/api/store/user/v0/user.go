@@ -97,6 +97,8 @@ func Get(base int, u *core.User) user.ResultDatabase {
 			Preload("Ticket").
 			Preload("Ticket.Chat").
 			Preload("Group").
+			Preload("Group.PaymentMembershipTemplate").
+			Preload("Group.PaymentCouponTemplate").
 			Preload("Group.Users").
 			Preload("Group.Services").
 			Preload("Group.Tickets").

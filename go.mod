@@ -13,6 +13,7 @@ require (
 	github.com/parnurzeal/gorequest v0.2.16 // indirect
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/viper v1.7.1
+	github.com/stripe/stripe-go/v72 v72.50.0
 	golang.org/x/crypto v0.0.0-20210314154223-e6e6c4f2bb5b
 	moul.io/http2curl v1.0.0 // indirect
 )
