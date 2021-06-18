@@ -176,7 +176,7 @@ func Add(c *gin.Context) {
 
 	// ---------ここまで処理が通っている場合、DBへの書き込みにすべて成功している
 	// GroupのStatusをAfterStatusにする
-	if err = dbGroup.Update(group.UpdateStatus, core.Group{
+	if err = dbGroup.Update(group.UpdateAll, core.Group{
 		Model:    gorm.Model{ID: result.User.Group.ID},
 		Status:   &[]uint{2}[0],
 		AddAllow: &[]bool{false}[0],
