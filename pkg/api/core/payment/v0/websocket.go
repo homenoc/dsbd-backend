@@ -109,6 +109,8 @@ func GetStripeWebHook(c *gin.Context) {
 			log.Println(err)
 		}
 
+		noticeSlackPaymentPaid(event.Data.Object["id"].(string))
+
 	} else if event.Type == "charge.succeeded" {
 		log.Printf("charge.succeeded: " + event.Data.Object["id"].(string))
 	} else if event.Type == "charge.refunded" {
@@ -124,6 +126,7 @@ func GetStripeWebHook(c *gin.Context) {
 		if err != nil {
 			log.Println(err)
 		}
+
 	}
 
 	c.JSON(http.StatusOK, common.Result{})
