@@ -45,6 +45,8 @@ func Update(base int, input *core.Payment) error {
 
 	if payment.UpdatePaid == base {
 		result = db.Model(&core.Payment{PaymentIntentID: input.PaymentIntentID}).Update(core.Payment{Paid: input.Paid})
+	} else if payment.UpdateAll == base {
+		result = db.Model(&core.Payment{Model: gorm.Model{ID: input.ID}}).Update(&input)
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())

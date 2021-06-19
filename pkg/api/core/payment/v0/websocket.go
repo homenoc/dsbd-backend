@@ -111,6 +111,19 @@ func GetStripeWebHook(c *gin.Context) {
 
 	} else if event.Type == "charge.succeeded" {
 		log.Printf("charge.succeeded: " + event.Data.Object["id"].(string))
+	} else if event.Type == "charge.refunded" {
+		log.Printf("charge.succeeded: " + event.Data.Object["id"].(string) + "| " + event.Data.Object["payment_intent"].(string))
+		result, err := dbPayment.Get(payment.PaymentIntentID, core.Payment{PaymentIntentID: event.Data.Object["payment_intent"].(string)})
+		if err != nil {
+			log.Println(err)
+		}
+		err = dbPayment.Update(payment.UpdateAll, &core.Payment{
+			Model:  gorm.Model{ID: result[0].ID},
+			Refund: &[]bool{true}[0],
+		})
+		if err != nil {
+			log.Println(err)
+		}
 	}
 
 	c.JSON(http.StatusOK, common.Result{})
