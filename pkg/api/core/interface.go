@@ -32,6 +32,7 @@ type Payment struct {
 	PaymentIntentID string `json:"payment_intent_id"`
 	IsMembership    *bool  `json:"is_membership"`
 	Paid            *bool  `json:"paid"`
+	Refund          *bool  `json:"refund"`
 	Fee             uint   `json:"fee"`
 	Comment         string `json:"comment"`
 }

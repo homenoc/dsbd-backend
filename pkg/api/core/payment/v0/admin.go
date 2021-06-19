@@ -7,8 +7,11 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/notice"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/payment"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	dbPayment "github.com/homenoc/dsbd-backend/pkg/api/store/payment/v0"
 	"github.com/jinzhu/gorm"
+	"github.com/stripe/stripe-go/v72"
+	"github.com/stripe/stripe-go/v72/refund"
 	"net/http"
 	"strconv"
 )
@@ -127,4 +130,35 @@ func GetAllByAdmin(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusOK, payment.ResultByAdmin{Payment: result})
 	}
+}
+
+func RefundByAdmin(c *gin.Context) {
+	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	if resultAdmin.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	result, err := dbPayment.Get(payment.ID, core.Payment{Model: gorm.Model{ID: uint(id)}})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		return
+	}
+
+	stripe.Key = config.Conf.Stripe.SecretKey
+
+	_, err = refund.New(&stripe.RefundParams{
+		PaymentIntent: stripe.String(result[0].PaymentIntentID),
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, common.Result{})
 }

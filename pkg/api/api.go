@@ -162,9 +162,10 @@ func AdminRestAPI() {
 			// Payment
 			//
 			//v1.POST("/group/:id/service", service.AddByAdmin)
-			// Service Delete
+			// Delete
 			v1.DELETE("/payment/:id", payment.DeleteByAdmin)
-			// Service Update
+			v1.POST("/payment/:id/refund", payment.RefundByAdmin)
+			// Update
 			//v1.PUT("/service/:id", service.UpdateByAdmin)
 			v1.GET("/payment", payment.GetAllByAdmin)
 			//v1.GET("/service/:id", service.GetByAdmin)

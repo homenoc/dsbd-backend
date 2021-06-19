@@ -5,7 +5,7 @@ import "github.com/homenoc/dsbd-backend/pkg/api/core"
 const (
 	ID              = 0
 	PaymentIntentID = 1
-	UpdatePaid      = 150
+	UpdatePaid      = 140
 	UpdateAll       = 150
 )
 
