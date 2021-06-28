@@ -17,7 +17,12 @@
       "token1": "token1",
       "token2": "token2",
       "token3": "token3"
-    }
+    },
+    "timezone": "Asia/Tokyo"
+  },
+  "stripe": {
+    "webhook_secret_key": "",
+    "secret_key": ""
   },
   "db": {
     "ip": "127.0.0.1",
