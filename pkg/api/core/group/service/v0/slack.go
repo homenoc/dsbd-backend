@@ -8,7 +8,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	dbServiceTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/service/v0"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"strconv"
 )
 

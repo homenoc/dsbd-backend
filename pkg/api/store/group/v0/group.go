@@ -5,7 +5,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	group "github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"log"
 	"time"
 )
@@ -25,7 +25,12 @@ func Create(g *core.Group) (*core.Group, error) {
 		log.Println("database connection error")
 		return g, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return nil, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	err = db.Create(&g).Error
 	return g, err
@@ -37,7 +42,12 @@ func Delete(group *core.Group) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	return db.Delete(group).Error
 }
@@ -48,29 +58,34 @@ func Update(base int, g core.Group) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
-	var result *gorm.DB
+	err = nil
 
 	if group.UpdateOrg == base {
-		result = db.Model(&core.Group{Model: gorm.Model{ID: g.ID}}).Update("org", g.Org)
+		err = db.Model(&core.Group{Model: gorm.Model{ID: g.ID}}).Updates(core.Group{Org: g.Org}).Error
 	} else if group.UpdateMembership == base {
-		result = db.Model(&core.Group{Model: gorm.Model{ID: g.ID}}).Update(core.Group{
+		err = db.Model(&core.Group{Model: gorm.Model{ID: g.ID}}).Updates(core.Group{
 			StripeCustomerID:            g.StripeCustomerID,
 			StripePaymentMethodID:       g.StripePaymentMethodID,
 			StripeSubscriptionID:        g.StripeSubscriptionID,
 			PaymentMembershipTemplateID: g.PaymentMembershipTemplateID,
 			MemberExpired:               g.MemberExpired,
-		})
+		}).Error
 	} else if group.UpdateStatus == base {
-		result = db.Model(&core.Group{Model: gorm.Model{ID: g.ID}}).Update("status", g.Status)
+		err = db.Model(&core.Group{Model: gorm.Model{ID: g.ID}}).Updates(core.Group{Status: g.Status}).Error
 	} else if group.UpdateAll == base {
-		result = db.Model(&core.Group{Model: gorm.Model{ID: g.ID}}).Update(g)
+		err = db.Model(&core.Group{Model: gorm.Model{ID: g.ID}}).Updates(g).Error
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
 	}
-	return result.Error
+	return err
 }
 
 func Get(base int, data *core.Group) group.ResultDatabase {
@@ -79,7 +94,12 @@ func Get(base int, data *core.Group) group.ResultDatabase {
 		log.Println("database connection error")
 		return group.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return group.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+	}
+	defer dbSQL.Close()
 
 	var groupStruct []core.Group
 
@@ -116,7 +136,12 @@ func GetAll() group.ResultDatabase {
 		log.Println("database connection error")
 		return group.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return group.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+	}
+	defer dbSQL.Close()
 
 	var groups []core.Group
 	err = db.Preload("Users").

@@ -5,7 +5,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"log"
 	"time"
 )
@@ -16,7 +16,12 @@ func Create(connection *core.Connection) (*core.Connection, error) {
 		log.Println("database connection error")
 		return connection, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return nil, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	err = db.Create(&connection).Error
 	return connection, err
@@ -28,7 +33,12 @@ func Delete(connection *core.Connection) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	return db.Delete(connection).Error
 }
@@ -39,26 +49,31 @@ func Update(base int, c core.Connection) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
-	var result *gorm.DB
+	err = nil
 
 	if connection.UpdateInfo == base {
-		result = db.Model(&core.Connection{Model: gorm.Model{ID: c.ID}}).Update(core.Connection{
+		err = db.Model(&core.Connection{Model: gorm.Model{ID: c.ID}}).Updates(core.Connection{
 			NTTTemplateID: c.NTTTemplateID,
 			NOC:           c.NOC,
 			TermIP:        c.TermIP,
 			Monitor:       c.Monitor,
-		})
+		}).Error
 	} else if connection.UpdateServiceID == base {
-		result = db.Model(&core.Connection{Model: gorm.Model{ID: c.ID}}).Update(core.Connection{ServiceID: c.ServiceID})
+		err = db.Model(&core.Connection{Model: gorm.Model{ID: c.ID}}).Updates(core.Connection{ServiceID: c.ServiceID}).Error
 	} else if base == connection.UpdateAll {
-		result = db.Model(&core.Connection{Model: gorm.Model{ID: c.ID}}).Update(c)
+		err = db.Model(&core.Connection{Model: gorm.Model{ID: c.ID}}).Updates(c).Error
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
 	}
-	return result.Error
+	return err
 }
 
 func Get(base int, data *core.Connection) connection.ResultDatabase {
@@ -67,7 +82,12 @@ func Get(base int, data *core.Connection) connection.ResultDatabase {
 		log.Println("database connection error")
 		return connection.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return connection.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+	}
+	defer dbSQL.Close()
 
 	var connectionStruct []core.Connection
 
@@ -108,7 +128,12 @@ func GetAll() connection.ResultDatabase {
 		log.Println("database connection error")
 		return connection.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return connection.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+	}
+	defer dbSQL.Close()
 
 	var connections []core.Connection
 	err = db.Preload("ConnectionTemplate").

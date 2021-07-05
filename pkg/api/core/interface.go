@@ -1,14 +1,14 @@
 package core
 
 import (
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"time"
 )
 
 type User struct {
 	gorm.Model
 	Tokens        []*Token  `json:"tokens"`
-	Notice        []*Notice `json:"notice"`
+	Notice        []*Notice `json:"notice" gorm:"many2many:user_notice;"`
 	Ticket        []Ticket  `json:"tickets"`
 	Group         *Group    `json:"group"`
 	Payment       []Payment `json:"payment_membership"`
@@ -43,9 +43,6 @@ type Group struct {
 	Payment                     []Payment                 `json:"payment_membership"`
 	Services                    []Service                 `json:"services"`
 	Tickets                     []Ticket                  `json:"tickets"`
-	Notice                      []*Notice                 `json:"notice"`
-	JPNICAdmin                  []*JPNICAdmin             `json:"jpnic_admin"`
-	JPNICTech                   []*JPNICTech              `json:"jpnic_tech"`
 	PaymentMembershipTemplate   PaymentMembershipTemplate `json:"payment_membership_template"`
 	PaymentCouponTemplate       PaymentCouponTemplate     `json:"payment_coupon_template"`
 	StripeCustomerID            *string                   `json:"stripe_customer_id"`
@@ -147,7 +144,6 @@ type Connection struct {
 
 type NOC struct {
 	gorm.Model
-	Notice               []*Notice               `json:"notice"`
 	BGPRouter            []*BGPRouter            `json:"bgp_router"`
 	TunnelEndPointRouter []*TunnelEndPointRouter `json:"tunnel_endpoint_router"`
 	Name                 string                  `json:"name"`
@@ -159,14 +155,13 @@ type NOC struct {
 
 type BGPRouter struct {
 	gorm.Model
-	NOCID        uint                    `json:"noc_id"`
-	NOC          NOC                     `json:"noc"`
-	Connection   []Connection            `json:"connection"`
-	HostName     string                  `json:"hostname"`
-	Address      string                  `json:"address"`
-	TunnelRouter []*TunnelEndPointRouter `json:"tunnel_endpoint_router"`
-	Enable       *bool                   `json:"enable"`
-	Comment      string                  `json:"comment"`
+	NOCID      uint         `json:"noc_id"`
+	NOC        NOC          `json:"noc"`
+	Connection []Connection `json:"connection"`
+	HostName   string       `json:"hostname"`
+	Address    string       `json:"address"`
+	Enable     *bool        `json:"enable"`
+	Comment    string       `json:"comment"`
 }
 
 type TunnelEndPointRouter struct {

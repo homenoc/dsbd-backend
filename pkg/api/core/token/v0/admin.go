@@ -9,7 +9,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	toolToken "github.com/homenoc/dsbd-backend/pkg/api/core/tool/token"
 	dbToken "github.com/homenoc/dsbd-backend/pkg/api/store/token/v0"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"strconv"

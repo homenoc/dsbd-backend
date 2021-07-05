@@ -11,7 +11,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbNotice "github.com/homenoc/dsbd-backend/pkg/api/store/notice/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"net/http"
 	"sort"
 	"strconv"

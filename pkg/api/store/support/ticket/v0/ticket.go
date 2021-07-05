@@ -5,7 +5,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support/ticket"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"log"
 	"time"
 )
@@ -16,7 +16,12 @@ func Create(support *core.Ticket) (*core.Ticket, error) {
 		log.Println("database connection error")
 		return support, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return nil, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	err = db.Create(&support).Error
 	return support, err
@@ -28,7 +33,12 @@ func Delete(support *core.Ticket) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	return db.Delete(support).Error
 }
@@ -39,24 +49,29 @@ func Update(base int, t core.Ticket) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
-	var result *gorm.DB
+	err = nil
 
 	//#4 Issue(解決済み）
 	if ticket.UpdateAll == base {
-		result = db.Model(&core.Ticket{Model: gorm.Model{ID: t.ID}}).Update(&core.Ticket{Title: t.Title,
+		err = db.Model(&core.Ticket{Model: gorm.Model{ID: t.ID}}).Updates(&core.Ticket{Title: t.Title,
 			GroupID:       t.GroupID,
 			UserID:        t.UserID,
 			Solved:        t.Solved,
 			Request:       t.Request,
 			RequestReject: t.RequestReject,
-		})
+		}).Error
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
 	}
-	return result.Error
+	return err
 }
 
 func Get(base int, data *core.Ticket) ticket.ResultDatabase {
@@ -65,7 +80,12 @@ func Get(base int, data *core.Ticket) ticket.ResultDatabase {
 		log.Println("database connection error")
 		return ticket.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return ticket.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+	}
+	defer dbSQL.Close()
 
 	var ticketStruct []core.Ticket
 
@@ -97,7 +117,12 @@ func GetAll() ticket.ResultDatabase {
 		log.Println("database connection error")
 		return ticket.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return ticket.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+	}
+	defer dbSQL.Close()
 
 	var tickets []core.Ticket
 	err = db.Preload("User").

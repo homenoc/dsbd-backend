@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"log"
 	"time"
 )
@@ -15,11 +15,16 @@ func JoinPlan(ipID uint, input core.Plan) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	return db.Model(&core.IP{Model: gorm.Model{ID: ipID}}).
 		Association("Plan").
-		Append(&input).Error
+		Append(&input)
 }
 
 func DeletePlan(id uint) error {
@@ -28,7 +33,12 @@ func DeletePlan(id uint) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	return db.Delete(core.Plan{Model: gorm.Model{ID: id}}).Error
 }
@@ -39,9 +49,14 @@ func UpdatePlan(input core.Plan) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
-	return db.Model(&core.Plan{Model: gorm.Model{ID: input.ID}}).Update(input).Error
+	return db.Model(&core.Plan{Model: gorm.Model{ID: input.ID}}).Updates(input).Error
 }
 
 func GetPlan(data *core.Plan) (core.Plan, error) {
@@ -52,7 +67,12 @@ func GetPlan(data *core.Plan) (core.Plan, error) {
 		log.Println("database connection error")
 		return plans, err
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return plans, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	err = db.First(&plans, data.ID).Error
 
