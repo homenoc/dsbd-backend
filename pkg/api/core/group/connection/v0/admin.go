@@ -19,7 +19,7 @@ import (
 	dbIPv4RouteTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ipv4_route/v0"
 	dbIPv6RouteTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ipv6_route/v0"
 	dbNTTTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ntt/v0"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"strconv"

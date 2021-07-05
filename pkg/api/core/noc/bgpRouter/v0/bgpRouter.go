@@ -7,7 +7,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	router "github.com/homenoc/dsbd-backend/pkg/api/core/noc/bgpRouter"
 	dbBGPRouter "github.com/homenoc/dsbd-backend/pkg/api/store/noc/bgpRouter/v0"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"strconv"

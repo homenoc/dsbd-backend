@@ -8,7 +8,7 @@ import (
 	ntt "github.com/homenoc/dsbd-backend/pkg/api/core/template/ntt"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/template/service"
 	dbNTTTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ntt/v0"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"strconv"

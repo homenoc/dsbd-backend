@@ -5,7 +5,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support/chat"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"log"
 	"time"
 )
@@ -16,7 +16,12 @@ func Create(support *core.Chat) (*core.Chat, error) {
 		log.Println("database connection error")
 		return support, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return nil, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	err = db.Create(&support).Error
 	return support, err
@@ -28,7 +33,12 @@ func Delete(support *core.Chat) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	return db.Delete(support).Error
 }
@@ -39,24 +49,29 @@ func Update(base int, s core.Chat) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
-	var result *gorm.DB
+	err = nil
 
 	if chat.UpdateUserID == base {
-		result = db.Model(&core.Chat{Model: gorm.Model{ID: s.ID}}).Update(core.Chat{UserID: s.UserID})
+		err = db.Model(&core.Chat{Model: gorm.Model{ID: s.ID}}).Updates(core.Chat{UserID: s.UserID}).Error
 	} else if chat.UpdateAll == base {
-		result = db.Model(&core.Chat{Model: gorm.Model{ID: s.ID}}).Update(core.Chat{
+		err = db.Model(&core.Chat{Model: gorm.Model{ID: s.ID}}).Updates(core.Chat{
 			TicketID: s.TicketID,
 			UserID:   s.UserID,
 			Admin:    s.Admin,
 			Data:     s.Data,
-		})
+		}).Error
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
 	}
-	return result.Error
+	return err
 }
 
 func Get(base int, data *core.Chat) chat.ResultDatabase {
@@ -65,7 +80,12 @@ func Get(base int, data *core.Chat) chat.ResultDatabase {
 		log.Println("database connection error")
 		return chat.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return chat.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+	}
+	defer dbSQL.Close()
 
 	var chatStruct []core.Chat
 
@@ -86,7 +106,12 @@ func GetAll() chat.ResultDatabase {
 		log.Println("database connection error")
 		return chat.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return chat.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+	}
+	defer dbSQL.Close()
 
 	var chats []core.Chat
 	err = db.Find(&chats).Error

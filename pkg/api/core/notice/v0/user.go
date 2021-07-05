@@ -6,7 +6,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
 	dbConnection "github.com/homenoc/dsbd-backend/pkg/api/store/group/connection/v0"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 func userExtraction(inputUser, inputGroup, inputNOC []uint) []uint {

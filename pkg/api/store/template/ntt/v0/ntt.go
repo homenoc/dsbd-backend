@@ -5,7 +5,6 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	ntt "github.com/homenoc/dsbd-backend/pkg/api/core/template/ntt"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
-	"github.com/jinzhu/gorm"
 	"log"
 	"time"
 )
@@ -16,7 +15,12 @@ func Create(ntt *core.NTTTemplate) (*core.NTTTemplate, error) {
 		log.Println("database ntt error")
 		return ntt, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return nil, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	err = db.Create(&ntt).Error
 	return ntt, err
@@ -28,7 +32,12 @@ func Delete(ntt *core.NTTTemplate) error {
 		log.Println("database ntt error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	return db.Delete(ntt).Error
 }
@@ -39,22 +48,16 @@ func Update(base int, c core.NTTTemplate) error {
 		log.Println("database ntt error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
-	var result *gorm.DB
+	err = nil
 
-	//if base == ntt.UpdateAll {
-	//	result = db.Model(&core.NTTTemplate{Model: gorm.Model{ID: c.ID}}).Update(core.NTTTemplate{
-	//		Hidden:  c.Hidden,
-	//		Name:    c.Name,
-	//		Comment: c.Comment,
-	//	})
-	//} else {
-	//	log.Println("base select error")
-	//	return fmt.Errorf("(%s)error: base select\n", time.Now())
-	//}
-
-	return result.Error
+	return err
 }
 
 func Get(base int, data *core.NTTTemplate) ntt.ResultDatabase {
@@ -63,7 +66,12 @@ func Get(base int, data *core.NTTTemplate) ntt.ResultDatabase {
 		log.Println("database ntt error")
 		return ntt.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return ntt.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+	}
+	defer dbSQL.Close()
 
 	var nttStruct []core.NTTTemplate
 
@@ -82,7 +90,12 @@ func GetAll() ntt.ResultDatabase {
 		log.Println("database ntt error")
 		return ntt.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return ntt.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+	}
+	defer dbSQL.Close()
 
 	var ntts []core.NTTTemplate
 	err = db.Find(&ntts).Error

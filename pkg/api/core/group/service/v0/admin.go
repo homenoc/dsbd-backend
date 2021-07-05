@@ -10,7 +10,7 @@ import (
 	serviceTemplate "github.com/homenoc/dsbd-backend/pkg/api/core/template/service"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
 	dbServiceTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/service/v0"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"strconv"

@@ -7,7 +7,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/noc/tunnelEndPointRouterIP"
 	dbTunnelEndPointRouterIP "github.com/homenoc/dsbd-backend/pkg/api/store/noc/tunnelEndPointRouterIP/v0"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"strconv"

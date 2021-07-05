@@ -4,7 +4,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/noc"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"testing"
 )
 

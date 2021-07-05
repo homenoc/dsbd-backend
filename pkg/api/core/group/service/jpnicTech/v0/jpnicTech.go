@@ -10,7 +10,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service/jpnicTech"
 	dbJPNICTech "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/jpnicTech/v0"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"strconv"

@@ -9,9 +9,9 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/payment"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	dbPayment "github.com/homenoc/dsbd-backend/pkg/api/store/payment/v0"
-	"github.com/jinzhu/gorm"
 	"github.com/stripe/stripe-go/v72"
 	"github.com/stripe/stripe-go/v72/refund"
+	"gorm.io/gorm"
 	"net/http"
 	"strconv"
 )

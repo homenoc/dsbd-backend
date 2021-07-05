@@ -5,7 +5,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/notice"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"log"
 	"time"
 )
@@ -20,7 +20,12 @@ func Create(notice *core.Notice) (*core.Notice, error) {
 		log.Println("database connection error")
 		return notice, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return nil, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	err = db.Create(&notice).Error
 	return notice, err
@@ -32,7 +37,12 @@ func Delete(notice *core.Notice) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	return db.Delete(notice).Error
 }
@@ -43,12 +53,17 @@ func Update(base int, data core.Notice) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
-	var result *gorm.DB
+	err = nil
 
 	if notice.UpdateAll == base {
-		result = db.Model(&core.Notice{Model: gorm.Model{ID: data.ID}}).Update(core.Notice{
+		err = db.Model(&core.Notice{Model: gorm.Model{ID: data.ID}}).Updates(core.Notice{
 			StartTime: data.StartTime,
 			EndTime:   data.EndTime,
 			Important: data.Important,
@@ -57,12 +72,12 @@ func Update(base int, data core.Notice) error {
 			Info:      data.Info,
 			Title:     data.Title,
 			Data:      data.Data,
-		})
+		}).Error
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
 	}
-	return result.Error
+	return err
 }
 
 func Get(base int, data *core.Notice) notice.ResultDatabase {
@@ -71,7 +86,12 @@ func Get(base int, data *core.Notice) notice.ResultDatabase {
 		log.Println("database connection error")
 		return notice.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return notice.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+	}
+	defer dbSQL.Close()
 
 	var noticeStruct []core.Notice
 
@@ -121,7 +141,12 @@ func GetAll() notice.ResultDatabase {
 		log.Println("database connection error")
 		return notice.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return notice.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+	}
+	defer dbSQL.Close()
 
 	var notices []core.Notice
 	err = db.Find(&notices).Error

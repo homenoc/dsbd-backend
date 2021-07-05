@@ -8,7 +8,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/notice"
 	ipv6 "github.com/homenoc/dsbd-backend/pkg/api/core/template/ipv6"
 	dbIPv6Template "github.com/homenoc/dsbd-backend/pkg/api/store/template/ipv6/v0"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"strconv"

@@ -9,7 +9,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service/ip"
 	dbIP "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/ip/v0"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"strconv"

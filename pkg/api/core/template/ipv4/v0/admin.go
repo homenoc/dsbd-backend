@@ -8,7 +8,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/notice"
 	ipv4 "github.com/homenoc/dsbd-backend/pkg/api/core/template/ipv4"
 	dbIPv4Template "github.com/homenoc/dsbd-backend/pkg/api/store/template/ipv4/v0"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"strconv"

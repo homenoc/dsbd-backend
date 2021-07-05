@@ -3,7 +3,7 @@ package support
 import (
 	"github.com/gorilla/websocket"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"time"
 )
 

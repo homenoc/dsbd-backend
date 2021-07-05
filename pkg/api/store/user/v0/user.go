@@ -5,7 +5,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"log"
 	"time"
 )
@@ -17,7 +17,12 @@ func Create(u *core.User) error {
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
 
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	return db.Create(&u).Error
 }
@@ -28,7 +33,12 @@ func Delete(u *core.User) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	return db.Delete(u).Error
 }
@@ -39,14 +49,19 @@ func Update(base int, u *core.User) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
-	var result *gorm.DB
+	err = nil
 
 	if user.UpdateVerifyMail == base {
-		result = db.Model(&core.User{Model: gorm.Model{ID: u.ID}}).Update(core.User{MailVerify: u.MailVerify})
+		err = db.Model(&core.User{Model: gorm.Model{ID: u.ID}}).Updates(core.User{MailVerify: u.MailVerify}).Error
 	} else if user.UpdateInfo == base {
-		result = db.Model(&core.User{Model: gorm.Model{ID: u.ID}}).Update(core.User{
+		err = db.Model(&core.User{Model: gorm.Model{ID: u.ID}}).Updates(core.User{
 			Name:       u.Name,
 			NameEn:     u.NameEn,
 			Email:      u.Email,
@@ -54,13 +69,13 @@ func Update(base int, u *core.User) error {
 			Level:      u.Level,
 			MailVerify: u.MailVerify,
 			MailToken:  u.MailToken,
-		})
+		}).Error
 	} else if user.UpdateGID == base {
-		result = db.Model(&core.User{Model: gorm.Model{ID: u.ID}}).Update(core.User{GroupID: u.GroupID})
+		err = db.Model(&core.User{Model: gorm.Model{ID: u.ID}}).Updates(core.User{GroupID: u.GroupID}).Error
 	} else if user.UpdateLevel == base {
-		result = db.Model(&core.User{Model: gorm.Model{ID: u.ID}}).Update("level", u.Level)
+		err = db.Model(&core.User{Model: gorm.Model{ID: u.ID}}).Updates(core.User{Level: u.Level}).Error
 	} else if user.UpdateAll == base {
-		result = db.Model(&core.User{Model: gorm.Model{ID: u.ID}}).Update(core.User{
+		err = db.Model(&core.User{Model: gorm.Model{ID: u.ID}}).Updates(core.User{
 			GroupID:       u.GroupID,
 			Name:          u.Name,
 			NameEn:        u.NameEn,
@@ -70,13 +85,13 @@ func Update(base int, u *core.User) error {
 			MailVerify:    u.MailVerify,
 			MailToken:     u.MailToken,
 			ExpiredStatus: u.ExpiredStatus,
-		})
+		}).Error
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
 	}
 
-	return result.Error
+	return err
 }
 
 // value of base can reference from api/core/user/interface.go
@@ -86,7 +101,12 @@ func Get(base int, u *core.User) user.ResultDatabase {
 		log.Println("database connection error")
 		return user.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return user.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+	}
+	defer dbSQL.Close()
 
 	var userStruct []core.User
 
@@ -142,7 +162,12 @@ func GetArray(u []uint) user.ResultDatabase {
 		log.Println("database connection error")
 		return user.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return user.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+	}
+	defer dbSQL.Close()
 
 	var userStruct []core.User
 
@@ -157,7 +182,13 @@ func GetAll() user.ResultDatabase {
 		log.Println("database connection error")
 		return user.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	defer db.Close()
+
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return user.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+	}
+	defer dbSQL.Close()
 
 	var users []core.User
 	err = db.Find(&users).Error

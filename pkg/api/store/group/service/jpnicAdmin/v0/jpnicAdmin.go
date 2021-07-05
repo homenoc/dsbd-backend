@@ -5,7 +5,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service/jpnicAdmin"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"log"
 	"time"
 )
@@ -16,7 +16,12 @@ func Create(network *core.JPNICAdmin) (*core.JPNICAdmin, error) {
 		log.Println("database connection error")
 		return network, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return nil, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	err = db.Create(&network).Error
 	return network, err
@@ -28,7 +33,12 @@ func Delete(network *core.JPNICAdmin) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	return db.Delete(network).Error
 }
@@ -39,12 +49,17 @@ func Update(base int, u core.JPNICAdmin) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
-	var result *gorm.DB
+	err = nil
 
 	if base == jpnicAdmin.UpdateAll {
-		err = db.Model(&core.JPNICAdmin{Model: gorm.Model{ID: u.ID}}).Update(core.JPNICAdmin{
+		err = db.Model(&core.JPNICAdmin{Model: gorm.Model{ID: u.ID}}).Updates(core.JPNICAdmin{
 			Org:       u.Org,
 			OrgEn:     u.OrgEn,
 			PostCode:  u.PostCode,
@@ -60,7 +75,7 @@ func Update(base int, u core.JPNICAdmin) error {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
 	}
-	return result.Error
+	return err
 }
 
 func Get(base int, data *core.JPNICAdmin) jpnicAdmin.ResultDatabase {
@@ -69,7 +84,12 @@ func Get(base int, data *core.JPNICAdmin) jpnicAdmin.ResultDatabase {
 		log.Println("database connection error")
 		return jpnicAdmin.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return jpnicAdmin.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+	}
+	defer dbSQL.Close()
 
 	var jpnicAdminStruct []core.JPNICAdmin
 
@@ -88,7 +108,12 @@ func GetAll() jpnicAdmin.ResultDatabase {
 		log.Println("database connection error")
 		return jpnicAdmin.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return jpnicAdmin.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+	}
+	defer dbSQL.Close()
 
 	var networks []core.JPNICAdmin
 	err = db.Find(&networks).Error
