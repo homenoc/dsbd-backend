@@ -49,7 +49,7 @@ func Create(c *gin.Context) {
 		Request:       &[]bool{false}[0],
 		RequestReject: &[]bool{false}[0],
 	}
-	var groupOrg string
+	var groupValue string
 
 	// isn't group
 	if !input.IsGroup {
@@ -58,9 +58,9 @@ func Create(c *gin.Context) {
 			c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 			return
 		}
-		resultTicket.GroupID = 0
-		resultTicket.UserID = result.User.ID
-		groupOrg = "個人ユーザ"
+		resultTicket.GroupID = nil
+		resultTicket.UserID = &result.User.ID
+		groupValue = "個人ユーザ"
 	} else {
 		//is group
 		// Group authentication
@@ -70,8 +70,8 @@ func Create(c *gin.Context) {
 			return
 		}
 		resultTicket.GroupID = result.User.GroupID
-		resultTicket.UserID = result.User.ID
-		groupOrg = result.User.Group.Org
+		resultTicket.UserID = &result.User.ID
+		groupValue = strconv.Itoa(int(*resultTicket.GroupID)) + "-" + result.User.Group.Org
 	}
 
 	// Tickets DBに登録
@@ -96,8 +96,8 @@ func Create(c *gin.Context) {
 	//HomeNOC Slackに送信
 	attachment := slack.Attachment{}
 	attachment.AddField(slack.Field{Title: "Title", Value: "新規チケット作成"}).
-		AddField(slack.Field{Title: "発行者", Value: strconv.Itoa(int(resultTicket.UserID))}).
-		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(resultTicket.GroupID)) + "-" + groupOrg}).
+		AddField(slack.Field{Title: "発行者", Value: strconv.Itoa(int(*resultTicket.UserID))}).
+		AddField(slack.Field{Title: "Group", Value: groupValue}).
 		AddField(slack.Field{Title: "Title", Value: input.Title}).
 		AddField(slack.Field{Title: "Message", Value: input.Data})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
@@ -132,7 +132,7 @@ func Request(c *gin.Context) {
 
 	resultTicket := &core.Ticket{
 		GroupID:       result.User.GroupID,
-		UserID:        result.User.ID,
+		UserID:        &result.User.ID,
 		Solved:        &[]bool{false}[0],
 		Title:         input.Title,
 		Admin:         &[]bool{true}[0],
@@ -162,8 +162,8 @@ func Request(c *gin.Context) {
 	//HomeNOC Slackに送信
 	attachment := slack.Attachment{}
 	attachment.AddField(slack.Field{Title: "Title", Value: "[新規] 追加・変更手続き"}).
-		AddField(slack.Field{Title: "発行者", Value: strconv.Itoa(int(resultTicket.UserID))}).
-		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(resultTicket.GroupID)) + "-" + result.User.Group.Org}).
+		AddField(slack.Field{Title: "発行者", Value: strconv.Itoa(int(*resultTicket.UserID))}).
+		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(*resultTicket.GroupID)) + "-" + result.User.Group.Org}).
 		AddField(slack.Field{Title: "Title", Value: input.Title}).
 		AddField(slack.Field{Title: "Message", Value: input.Data})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
@@ -200,7 +200,7 @@ func Update(c *gin.Context) {
 	updateTicketData := ticketResult.Tickets[0]
 
 	// isn't group
-	if ticketResult.Tickets[0].GroupID == 0 {
+	if ticketResult.Tickets[0].GroupID == nil {
 		result := auth.UserAuthentication(core.Token{UserToken: userToken, AccessToken: accessToken})
 		if result.Err != nil {
 			c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
@@ -264,18 +264,20 @@ func GetWebSocket(c *gin.Context) {
 	}
 
 	// check groupID
-	if ticketResult.Tickets[0].GroupID != 0 && ticketResult.Tickets[0].GroupID != result.User.GroupID {
+	if ticketResult.Tickets[0].GroupID != nil && ticketResult.Tickets[0].GroupID != result.User.GroupID {
+		//if ticketResult.Tickets[0].GroupID != result.User.GroupID {
+
 		log.Println("groupID not match.")
 	}
 	// check userID
-	if ticketResult.Tickets[0].GroupID == 0 && ticketResult.Tickets[0].UserID != result.User.ID {
+	if ticketResult.Tickets[0].GroupID == nil && ticketResult.Tickets[0].UserID != &result.User.ID {
 		log.Println("userID not match.")
 	}
 
 	var groupID uint = 0
 
-	if ticketResult.Tickets[0].GroupID != 0 {
-		groupID = ticketResult.Tickets[0].GroupID
+	if ticketResult.Tickets[0].GroupID != nil {
+		groupID = *ticketResult.Tickets[0].GroupID
 	}
 
 	// WebSocket送信
@@ -322,7 +324,7 @@ func GetWebSocket(c *gin.Context) {
 		if !*ticketResult.Tickets[0].Solved {
 			_, err = dbChat.Create(&core.Chat{
 				TicketID: ticketResult.Tickets[0].ID,
-				UserID:   result.User.ID,
+				UserID:   &result.User.ID,
 				Admin:    false,
 				Data:     msg.Message,
 			})
@@ -352,7 +354,7 @@ func GetWebSocket(c *gin.Context) {
 				attachment := slack.Attachment{}
 				attachment.AddField(slack.Field{Title: "Title", Value: "Support(新規メッセージ)"}).
 					AddField(slack.Field{Title: "発行者", Value: strconv.Itoa(int(result.User.ID)) + "-" + result.User.Name}).
-					AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(result.User.GroupID)) + "-" + result.User.Group.Org}).
+					AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(*result.User.GroupID)) + "-" + result.User.Group.Org}).
 					AddField(slack.Field{Title: "Title", Value: ticketResult.Tickets[0].Title}).
 					AddField(slack.Field{Title: "Message", Value: msg.Message})
 				notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})

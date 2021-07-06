@@ -163,17 +163,52 @@ func Add(c *gin.Context) {
 		return
 	}
 
+	var connectonTemplateID *uint
+	if input.ConnectionTemplateID == 0 {
+		connectonTemplateID = nil
+	} else {
+		connectonTemplateID = &[]uint{input.ConnectionTemplateID}[0]
+	}
+
+	var IPv4RouteTemplateID *uint
+	if input.IPv4RouteTemplateID == 0 {
+		IPv4RouteTemplateID = nil
+	} else {
+		IPv4RouteTemplateID = &[]uint{input.IPv4RouteTemplateID}[0]
+	}
+
+	var IPv6RouteTemplateID *uint
+	if input.IPv6RouteTemplateID == 0 {
+		IPv6RouteTemplateID = nil
+	} else {
+		IPv6RouteTemplateID = &[]uint{input.IPv6RouteTemplateID}[0]
+	}
+
+	var NTTTemplateID *uint
+	if input.NTTTemplateID == 0 {
+		NTTTemplateID = nil
+	} else {
+		NTTTemplateID = &[]uint{input.NTTTemplateID}[0]
+	}
+
+	var NOCID *uint
+	if input.NOCID == 0 {
+		NOCID = nil
+	} else {
+		NOCID = &[]uint{input.NOCID}[0]
+	}
+
 	_, err = dbConnection.Create(&core.Connection{
 		ServiceID:                resultService.Service[0].ID,
-		ConnectionTemplateID:     &[]uint{input.ConnectionTemplateID}[0],
+		ConnectionTemplateID:     connectonTemplateID,
 		ConnectionComment:        input.ConnectionComment,
 		ConnectionNumber:         number,
-		IPv4RouteTemplateID:      &[]uint{input.IPv4RouteTemplateID}[0],
-		IPv6RouteTemplateID:      &[]uint{input.IPv6RouteTemplateID}[0],
-		NTTTemplateID:            &[]uint{input.NTTTemplateID}[0],
-		NOCID:                    &[]uint{input.NOCID}[0],
-		BGPRouterID:              &[]uint{0}[0],
-		TunnelEndPointRouterIPID: &[]uint{0}[0],
+		IPv4RouteTemplateID:      IPv4RouteTemplateID,
+		IPv6RouteTemplateID:      IPv6RouteTemplateID,
+		NTTTemplateID:            NTTTemplateID,
+		NOCID:                    NOCID,
+		BGPRouterID:              nil,
+		TunnelEndPointRouterIPID: nil,
 		TermIP:                   input.TermIP,
 		Address:                  input.Address,
 		Monitor:                  &[]bool{input.Monitor}[0],

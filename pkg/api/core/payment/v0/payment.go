@@ -93,13 +93,13 @@ func MembershipPayment(c *gin.Context) {
 	})
 
 	dbGroup.Update(group.UpdateMembership, core.Group{
-		Model:                       gorm.Model{ID: result.User.GroupID},
+		Model:                       gorm.Model{ID: *result.User.GroupID},
 		StripeCustomerID:            result.User.Group.StripeCustomerID,
 		StripeSubscriptionID:        &pi.ID,
 		PaymentMembershipTemplateID: &resultTemplate.ID,
 	})
 
-	go noticeSlackPaymentMembershipPayment(result.User.GroupID, resultTemplate.Plan, pi.LatestInvoice.PaymentIntent.ID)
+	go noticeSlackPaymentMembershipPayment(*result.User.GroupID, resultTemplate.Plan, pi.LatestInvoice.PaymentIntent.ID)
 
 	c.JSON(http.StatusOK, payment.ResultByUser{
 		ClientSecret: pi.LatestInvoice.PaymentIntent.ClientSecret,

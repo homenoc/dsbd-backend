@@ -26,7 +26,7 @@ func GenerateByAdmin(c *gin.Context) {
 	accessToken, _ := toolToken.Generate(2)
 
 	if err := dbToken.Create(&core.Token{
-		UserID:      0,
+		UserID:      nil,
 		ExpiredAt:   time.Now().Add(60 * time.Minute),
 		Admin:       &[]bool{true}[0],
 		AccessToken: accessToken,

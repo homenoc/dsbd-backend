@@ -18,7 +18,7 @@ func replace(input, replace core.TunnelEndPointRouter) core.TunnelEndPointRouter
 
 	// uint boolean
 	//NOCID
-	if input.NOCID != 0 {
+	if *input.NOCID != 0 {
 		replace.NOCID = input.NOCID
 	}
 	//Capacity
