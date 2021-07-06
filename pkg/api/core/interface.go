@@ -102,7 +102,6 @@ type Service struct {
 	AveDownstream     uint             `json:"avg_downstream"`
 	MaxDownstream     uint             `json:"max_downstream"`
 	MaxBandWidthAS    string           `json:"max_bandwidth_as"`
-	Fee               *uint            `json:"fee"` //いらんかも
 	IP                []IP             `json:"ip"`
 	Connection        []*Connection    `json:"connections"`
 	JPNICAdmin        JPNICAdmin       `json:"jpnic_admin"`
@@ -231,7 +230,6 @@ type JPNICAdmin struct {
 
 type JPNICTech struct {
 	gorm.Model
-	//Service     []Service `json:"service" gorm:"many2many:service_jpnic_tech;"`
 	ServiceID   uint   `json:"service_id"`
 	JPNICHandle string `json:"jpnic_handle"`
 	Name        string `json:"name"`

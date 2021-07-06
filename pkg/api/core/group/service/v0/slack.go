@@ -163,12 +163,6 @@ func changeText(before, after core.Service) string {
 		}
 	}
 
-	if after.Fee != nil {
-		if *before.Fee != *after.Fee {
-			data += "Fee: " + strconv.Itoa(int(*before.Fee)) + " => " + strconv.Itoa(int(*after.Fee)) + "\n"
-		}
-	}
-
 	if before.AveDownstream != after.AveDownstream {
 		data += "平均ダウンロード帯域: " + strconv.Itoa(int(before.AveDownstream)) + "Kbps => " +
 			strconv.Itoa(int(after.AveDownstream)) + "Kbps\n"
