@@ -25,6 +25,7 @@ func Get(c *gin.Context) {
 	authResult := auth.UserAuthentication(core.Token{UserToken: userToken, AccessToken: accessToken})
 	if authResult.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: authResult.Err.Error()})
+		return
 	}
 
 	// User
