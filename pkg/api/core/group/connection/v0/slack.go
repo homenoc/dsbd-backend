@@ -41,16 +41,6 @@ func changeText(before, after core.Connection) string {
 		}
 	}
 
-	if after.Lock != nil {
-		if *before.Lock != *after.Lock {
-			if !*after.Lock {
-				data += "ユーザ変更: 禁止 => 許可\n"
-			} else {
-				data += "ユーザ変更: 許可 => 禁止\n"
-			}
-		}
-	}
-
 	if after.ConnectionTemplateID != nil {
 		if *before.ConnectionTemplateID != *after.ConnectionTemplateID {
 			data += "接続ID: " + before.ConnectionTemplate.Type + " => " +

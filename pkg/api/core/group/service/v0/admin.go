@@ -150,7 +150,6 @@ func AddByAdmin(c *gin.Context) {
 		JPNICTech:         input.JPNICTech,
 		Enable:            &[]bool{true}[0],
 		Pass:              &[]bool{false}[0],
-		Lock:              &[]bool{true}[0],
 		AddAllow:          &[]bool{false}[0],
 	})
 	if err != nil {

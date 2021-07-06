@@ -68,7 +68,6 @@ type Group struct {
 	Comment                     string                    `json:"comment"`
 	Open                        *bool                     `json:"open"`
 	Pass                        *bool                     `json:"pass"`
-	Lock                        *bool                     `json:"lock"` //いらん
 	ExpiredStatus               *uint                     `json:"expired_status"`
 	AddAllow                    *bool                     `json:"add_allow"`
 }
@@ -113,7 +112,6 @@ type Service struct {
 	EndDate           *time.Time       `json:"end_date"`
 	Pass              *bool            `json:"pass"`
 	Enable            *bool            `json:"enable"`
-	Lock              *bool            `json:"lock"` //いらん
 	AddAllow          *bool            `json:"add_allow"`
 	Group             Group            `json:"group"`
 }
@@ -140,7 +138,6 @@ type Connection struct {
 	LinkV6Your               string                 `json:"link_v6_your"`
 	Open                     *bool                  `json:"open"`
 	Enable                   *bool                  `json:"enable"`
-	Lock                     *bool                  `json:"lock"` //いらん
 	Comment                  string                 `json:"comment"`
 	IPv4RouteTemplate        *IPv4RouteTemplate     `json:"ipv4_route_template"`
 	IPv6RouteTemplate        *IPv6RouteTemplate     `json:"ipv6_route_template"`
@@ -233,7 +230,6 @@ type JPNICAdmin struct {
 	Tel         string `json:"tel"`
 	Fax         string `json:"fax"`
 	Country     string `json:"country"`
-	Lock        *bool  `json:"lock"`
 }
 
 type JPNICTech struct {
@@ -254,7 +250,6 @@ type JPNICTech struct {
 	Tel         string `json:"tel"`
 	Fax         string `json:"fax"`
 	Country     string `json:"country"`
-	Lock        *bool  `json:"lock"`
 }
 
 type PaymentMembershipTemplate struct {

@@ -97,16 +97,6 @@ func changeTextByAdmin(before, after core.Group) string {
 		}
 	}
 
-	if after.Lock != nil {
-		if !*before.Lock != *after.Lock {
-			if *after.Lock {
-				data += "ユーザ変更: 禁止 => 許可\n"
-			} else {
-				data += "ユーザ変更: 許可 => 禁止\n"
-			}
-		}
-	}
-
 	if after.ExpiredStatus != nil {
 		if *before.ExpiredStatus != *after.ExpiredStatus {
 			data += "ExpiredStatus: " + expiredStatusText(*before.ExpiredStatus) + " => " +

@@ -158,7 +158,6 @@ func Add(c *gin.Context) {
 		JPNICTech:         input.JPNICTech,
 		Enable:            &[]bool{true}[0],
 		Pass:              &[]bool{false}[0],
-		Lock:              &[]bool{true}[0],
 		AddAllow:          &[]bool{true}[0],
 	})
 	if err != nil {
@@ -232,10 +231,6 @@ func Update(c *gin.Context) {
 	}
 	if resultNetwork.Service[0].GroupID != result.User.Group.ID {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: "Authentication failure"})
-		return
-	}
-	if *resultNetwork.Service[0].Lock {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: "this network is locked..."})
 		return
 	}
 

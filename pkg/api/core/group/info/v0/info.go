@@ -82,7 +82,6 @@ func Get(c *gin.Context) {
 			Student:                   authResult.User.Group.Student,
 			Fee:                       dbUserResult.User[0].Group.Fee,
 			Pass:                      authResult.User.Group.Pass,
-			Lock:                      authResult.User.Group.Lock,
 			ExpiredStatus:             authResult.User.Group.ExpiredStatus,
 			MemberInfo:                membershipInfo,
 			Status:                    authResult.User.Group.Status,

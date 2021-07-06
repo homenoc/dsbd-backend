@@ -45,11 +45,6 @@ func replaceService(replace, input core.Service) core.Service {
 		replace.Pass = input.Pass
 	}
 
-	//Lock
-	if input.Lock != replace.Lock {
-		replace.Lock = input.Lock
-	}
-
 	////V4
 	//if input.V4 != "" {
 	//	replace.V4 = input.V4
