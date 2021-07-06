@@ -83,7 +83,6 @@ func Get(c *gin.Context) {
 			Pass:                      authResult.User.Group.Pass,
 			ExpiredStatus:             authResult.User.Group.ExpiredStatus,
 			MemberInfo:                membershipInfo,
-			Status:                    authResult.User.Group.Status,
 			AutomaticUpdate:           automaticUpdate,
 			Paid:                      &paid,
 			DiscountRate:              discountRate,

@@ -176,7 +176,6 @@ func Add(c *gin.Context) {
 	// GroupのStatusをAfterStatusにする
 	if err = dbGroup.Update(group.UpdateAll, core.Group{
 		Model:    gorm.Model{ID: result.User.Group.ID},
-		Status:   &[]uint{2}[0],
 		AddAllow: &[]bool{false}[0],
 	}); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
