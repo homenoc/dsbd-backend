@@ -59,7 +59,6 @@ type Group struct {
 	AddressEn                   string                    `json:"address_en"`
 	Tel                         string                    `json:"tel"`
 	Country                     string                    `json:"country"`
-	Status                      *uint                     `json:"status"`
 	Contract                    string                    `json:"contract"`
 	MemberExpired               *time.Time                `json:"member_expired"`
 	Student                     *bool                     `json:"student"`

@@ -39,10 +39,6 @@ func updateAdminGroup(input, replace core.Group) (core.Group, error) {
 	if input.Pass != replace.Pass {
 		replace.Pass = input.Pass
 	}
-	// Status
-	if input.Status != replace.Status {
-		replace.Status = input.Status
-	}
 	// ExpiredStatus
 	if input.ExpiredStatus != replace.ExpiredStatus {
 		replace.ExpiredStatus = input.ExpiredStatus

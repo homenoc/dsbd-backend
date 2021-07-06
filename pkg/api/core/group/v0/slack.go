@@ -104,12 +104,6 @@ func changeTextByAdmin(before, after core.Group) string {
 		}
 	}
 
-	if after.Status != nil {
-		if *before.Status != *after.Status {
-			data += "ExpiredStatus: " + statusText(*before.Status) + " => " + statusText(*after.Status) + "\n"
-		}
-	}
-
 	if after.Org != "" && after.Org != before.Org {
 		data += "Org: " + before.Org + "=>" + after.Org + "\n"
 	}

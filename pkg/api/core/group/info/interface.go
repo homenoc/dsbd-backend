@@ -29,7 +29,6 @@ type Group struct {
 	Tel                       string     `json:"tel"`
 	Country                   string     `json:"country"`
 	Contract                  string     `json:"contract"`
-	Fee                       *uint      `json:"fee"`
 	Paid                      *bool      `json:"paid"`
 	AutomaticUpdate           bool       `json:"automatic_update"`
 	DiscountRate              uint       `json:"discount_rate"`
@@ -40,7 +39,6 @@ type Group struct {
 	Pass                      *bool      `json:"pass"`
 	Lock                      *bool      `json:"lock"`
 	ExpiredStatus             *uint      `json:"expired_status"`
-	Status                    *uint      `json:"status"`
 	AddAllow                  *bool      `json:"add_allow"`
 }
 

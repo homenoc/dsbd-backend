@@ -3,7 +3,7 @@ package v0
 import (
 	"fmt"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
-	group "github.com/homenoc/dsbd-backend/pkg/api/core/group"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
 	"gorm.io/gorm"
 	"log"
@@ -76,8 +76,6 @@ func Update(base int, g core.Group) error {
 			PaymentMembershipTemplateID: g.PaymentMembershipTemplateID,
 			MemberExpired:               g.MemberExpired,
 		}).Error
-	} else if group.UpdateStatus == base {
-		err = db.Model(&core.Group{Model: gorm.Model{ID: g.ID}}).Updates(core.Group{Status: g.Status}).Error
 	} else if group.UpdateAll == base {
 		err = db.Model(&core.Group{Model: gorm.Model{ID: g.ID}}).Updates(g).Error
 	} else {
