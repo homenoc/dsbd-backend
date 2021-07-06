@@ -214,7 +214,6 @@ func Add(c *gin.Context) {
 		Monitor:                  &[]bool{input.Monitor}[0],
 		Enable:                   &[]bool{true}[0],
 		Open:                     &[]bool{false}[0],
-		Lock:                     &[]bool{true}[0],
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})

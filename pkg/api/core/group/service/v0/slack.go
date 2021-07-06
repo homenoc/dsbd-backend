@@ -146,16 +146,6 @@ func changeText(before, after core.Service) string {
 		}
 	}
 
-	if after.Lock != nil {
-		if *before.Lock != *after.Lock {
-			if !*after.Lock {
-				data += "ユーザ変更: 禁止 => 許可\n"
-			} else {
-				data += "ユーザ変更: 許可 => 禁止\n"
-			}
-		}
-	}
-
 	if after.AddAllow != nil {
 		if *before.AddAllow != *after.AddAllow {
 			if *after.AddAllow {
@@ -247,16 +237,6 @@ func changeText(before, after core.Service) string {
 func changeTextJPNICByAdmin(before, after core.JPNICAdmin) string {
 	data := ""
 
-	if after.Lock != nil {
-		if *before.Lock != *after.Lock {
-			if !*after.Lock {
-				data += "ユーザ変更: 禁止 => 許可\n"
-			} else {
-				data += "ユーザ変更: 許可 => 禁止\n"
-			}
-		}
-	}
-
 	if before.JPNICHandle != after.JPNICHandle {
 		data += "JPNICHandle: " + before.JPNICHandle + "=>" + after.JPNICHandle + "\n"
 	}
@@ -318,16 +298,6 @@ func changeTextJPNICByAdmin(before, after core.JPNICAdmin) string {
 
 func changeTextJPNICTech(before, after core.JPNICTech) string {
 	data := ""
-
-	if after.Lock != nil {
-		if *before.Lock != *after.Lock {
-			if !*after.Lock {
-				data += "ユーザ変更: 禁止 => 許可\n"
-			} else {
-				data += "ユーザ変更: 許可 => 禁止\n"
-			}
-		}
-	}
 
 	if before.JPNICHandle != after.JPNICHandle {
 		data += "JPNICHandle: " + before.JPNICHandle + "=>" + after.JPNICHandle + "\n"

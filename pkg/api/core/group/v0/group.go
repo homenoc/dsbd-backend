@@ -91,7 +91,6 @@ func Add(c *gin.Context) {
 		MemberExpired:    studentExpired,
 		Open:             &[]bool{false}[0],
 		Pass:             &[]bool{false}[0],
-		Lock:             &[]bool{true}[0],
 		AddAllow:         &[]bool{true}[0],
 	})
 	if err != nil {
