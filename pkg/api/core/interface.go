@@ -91,8 +91,6 @@ type Service struct {
 	Address           string           `json:"address"`
 	AddressEn         string           `json:"address_en"`
 	ASN               *uint            `json:"asn"`
-	RouteV4           string           `json:"route_v4"`
-	RouteV6           string           `json:"route_v6"`
 	V4Name            string           `json:"v4_name"`
 	V6Name            string           `json:"v6_name"`
 	AveUpstream       uint             `json:"avg_upstream"`

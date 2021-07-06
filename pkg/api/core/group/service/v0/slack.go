@@ -189,14 +189,6 @@ func changeText(before, after core.Service) string {
 		}
 	}
 
-	if before.RouteV4 != after.RouteV4 {
-		data += "広報方法(v4): " + before.RouteV4 + "=>" + after.RouteV4 + "\n"
-	}
-
-	if before.RouteV6 != after.RouteV6 {
-		data += "広報方法(v6): " + before.RouteV6 + "=>" + after.RouteV6 + "\n"
-	}
-
 	if before.V4Name != after.V4Name {
 		data += "ネットワーク名(v4): " + before.V4Name + "=>" + after.V4Name + "\n"
 	}

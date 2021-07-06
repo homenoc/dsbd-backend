@@ -65,14 +65,7 @@ func Update(base int, c core.Service) error {
 			PostCode:  c.PostCode,
 			Address:   c.Address,
 			AddressEn: c.AddressEn,
-			RouteV4:   c.RouteV4,
-			RouteV6:   c.RouteV6,
 			ASN:       c.ASN,
-		}).Error
-	} else if service.UpdateRoute == base {
-		err = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Updates(core.Service{
-			RouteV4: c.RouteV4,
-			RouteV6: c.RouteV6,
 		}).Error
 	} else if service.UpdateGID == base {
 		err = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Updates(core.Service{GroupID: c.GroupID}).Error
