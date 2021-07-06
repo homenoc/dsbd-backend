@@ -56,5 +56,5 @@ func InitDB() {
 		&core.PaymentMembershipTemplate{},
 		&core.PaymentDonateTemplate{},
 	)
-	log.Println(result.Error)
+	log.Println(result)
 }
