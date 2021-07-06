@@ -264,14 +264,16 @@ func GetWebSocket(c *gin.Context) {
 	}
 
 	// check groupID
-	if ticketResult.Tickets[0].GroupID != nil && ticketResult.Tickets[0].GroupID != result.User.GroupID {
+	if ticketResult.Tickets[0].GroupID == nil && ticketResult.Tickets[0].GroupID != result.User.GroupID {
 		//if ticketResult.Tickets[0].GroupID != result.User.GroupID {
 
 		log.Println("groupID not match.")
+		return
 	}
 	// check userID
 	if ticketResult.Tickets[0].GroupID == nil && ticketResult.Tickets[0].UserID != &result.User.ID {
 		log.Println("userID not match.")
+		return
 	}
 
 	var groupID uint = 0
