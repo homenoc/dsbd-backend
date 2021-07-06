@@ -20,8 +20,7 @@ func SendChatUser(data controller.Chat) {
 	client := &http.Client{}
 	client.Timeout = time.Second * 5
 
-	body, _ := json.Marshal(controller.Chat{Err: data.Err, CreatedAt: data.CreatedAt, UserID: data.UserID,
-		GroupID: data.GroupID, Admin: data.Admin, Message: data.Message})
+	body, _ := json.Marshal(data)
 
 	//Header部分
 	header := http.Header{}
@@ -72,6 +71,7 @@ func ReceiveChatUser(c *gin.Context) {
 
 	support.Broadcast <- support.WebSocketResult{
 		CreatedAt: time.Now(),
+		TicketID:  input.TicketID,
 		UserID:    input.UserID,
 		GroupID:   input.GroupID,
 		Admin:     input.Admin,

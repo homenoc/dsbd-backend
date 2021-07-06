@@ -16,6 +16,7 @@ type WebSocketResult struct {
 	ID          uint      `json:"id"`
 	Err         string    `json:"error"`
 	CreatedAt   time.Time `json:"created_at"`
+	TicketID    uint      `json:"ticket_id"`
 	UserToken   string    `json:"user_token"`
 	AccessToken string    `json:"access_token"`
 	UserID      uint      `json:"user_id"`
