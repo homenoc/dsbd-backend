@@ -194,19 +194,30 @@ func Get(c *gin.Context) {
 			var resultChat []info.Chat
 			if tmpTicket.GroupID == nil {
 				for _, tmpChat := range tmpTicket.Chat {
+
+					var userID uint = 0
+					if tmpChat.UserID != nil {
+						userID = *tmpChat.UserID
+					}
+
 					resultChat = append(resultChat, info.Chat{
 						CreatedAt: tmpChat.CreatedAt,
 						TicketID:  tmpChat.TicketID,
-						UserID:    *tmpChat.UserID,
+						UserID:    userID,
 						Admin:     tmpChat.Admin,
 						Data:      tmpChat.Data,
 					})
 				}
+				groupID = 0
+				if authResult.User.GroupID != nil {
+					groupID = *authResult.User.GroupID
+				}
+
 				resultTicket = append(resultTicket, info.Ticket{
 					ID:        tmpTicket.ID,
 					CreatedAt: tmpTicket.CreatedAt,
-					GroupID:   *tmpTicket.GroupID,
-					UserID:    *tmpTicket.UserID,
+					GroupID:   groupID,
+					UserID:    authResult.User.ID,
 					Chat:      resultChat,
 					Solved:    tmpTicket.Solved,
 					Title:     tmpTicket.Title,
