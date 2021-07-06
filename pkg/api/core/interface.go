@@ -49,10 +49,9 @@ type Group struct {
 	PaymentMembershipTemplate   PaymentMembershipTemplate `json:"payment_membership_template"`
 	PaymentCouponTemplate       PaymentCouponTemplate     `json:"payment_coupon_template"`
 	StripeCustomerID            *string                   `json:"stripe_customer_id"`
-	StripePaymentMethodID       *string                   `json:"stripe_payment_method_id"` //Todo: いらんかも
 	StripeSubscriptionID        *string                   `json:"stripe_subscription_id"`
 	Agree                       *bool                     `json:"agree"`
-	Question                    string                    `json:"question"  gorm:"size:10000"`
+	Question                    string                    `json:"question" gorm:"size:10000"`
 	Org                         string                    `json:"org"`
 	OrgEn                       string                    `json:"org_en"`
 	PostCode                    string                    `json:"postcode"`
@@ -161,9 +160,8 @@ type NOC struct {
 
 type BGPRouter struct {
 	gorm.Model
-	NOCID uint `json:"noc_id"`
-	NOC   NOC  `json:"noc"`
-	//Connection []Connection `json:"connection"`
+	NOCID    uint   `json:"noc_id"`
+	NOC      NOC    `json:"noc"`
 	HostName string `json:"hostname"`
 	Address  string `json:"address"`
 	Enable   *bool  `json:"enable"`
@@ -214,8 +212,7 @@ type Plan struct {
 
 type JPNICAdmin struct {
 	gorm.Model
-	ServiceID uint `json:"service_id"`
-	//Service     []Service `gorm:"foreignkey:JPNICAdminID"`
+	ServiceID   uint   `json:"service_id"`
 	JPNICHandle string `json:"jpnic_handle"`
 	Name        string `json:"name"`
 	NameEn      string `json:"name_en"`

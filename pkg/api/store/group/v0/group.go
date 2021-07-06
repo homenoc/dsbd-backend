@@ -72,7 +72,6 @@ func Update(base int, g core.Group) error {
 	} else if group.UpdateMembership == base {
 		err = db.Model(&core.Group{Model: gorm.Model{ID: g.ID}}).Updates(core.Group{
 			StripeCustomerID:            g.StripeCustomerID,
-			StripePaymentMethodID:       g.StripePaymentMethodID,
 			StripeSubscriptionID:        g.StripeSubscriptionID,
 			PaymentMembershipTemplateID: g.PaymentMembershipTemplateID,
 			MemberExpired:               g.MemberExpired,
