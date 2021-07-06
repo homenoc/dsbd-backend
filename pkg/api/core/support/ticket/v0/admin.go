@@ -311,8 +311,6 @@ func GetAdminWebSocket(c *gin.Context) {
 func HandleMessagesByAdmin() {
 	for {
 		msg := <-support.Broadcast
-		log.Println(msg)
-		log.Println(msg.TicketID)
 
 		//登録されているクライアント宛にデータ送信する
 		for client := range support.Clients {
