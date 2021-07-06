@@ -80,7 +80,6 @@ func Get(c *gin.Context) {
 		resultGroup = info.Group{
 			ID:                        authResult.User.Group.ID,
 			Student:                   authResult.User.Group.Student,
-			Fee:                       dbUserResult.User[0].Group.Fee,
 			Pass:                      authResult.User.Group.Pass,
 			ExpiredStatus:             authResult.User.Group.ExpiredStatus,
 			MemberInfo:                membershipInfo,
@@ -373,6 +372,7 @@ func Get(c *gin.Context) {
 							ASN:        *tmpService.ASN,
 							V4:         v4,
 							V6:         v6,
+							Fee:        "Free",
 							NOC:        tmpConnection.NOC.Name,
 							NOCIP:      tmpConnection.TunnelEndPointRouterIP.IP,
 							TermIP:     tmpConnection.TermIP,
