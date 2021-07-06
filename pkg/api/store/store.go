@@ -30,6 +30,7 @@ func InitDB() {
 	result := db.AutoMigrate(
 		&core.User{},
 		&core.Group{},
+		&core.Memo{},
 		&core.Service{},
 		&core.Connection{},
 		&core.NOC{},

@@ -43,6 +43,7 @@ type Group struct {
 	Payment                     []Payment                 `json:"payment_membership"`
 	Services                    []Service                 `json:"services"`
 	Tickets                     []Ticket                  `json:"tickets"`
+	Memos                       []Memo                    `json:"memos"`
 	PaymentMembershipTemplateID *uint                     `json:"payment_membership_template_id"`
 	PaymentCouponTemplateID     *uint                     `json:"payment_coupon_template_id"`
 	PaymentMembershipTemplate   PaymentMembershipTemplate `json:"payment_membership_template"`
@@ -70,6 +71,15 @@ type Group struct {
 	Lock                        *bool                     `json:"lock"` //いらん
 	ExpiredStatus               *uint                     `json:"expired_status"`
 	AddAllow                    *bool                     `json:"add_allow"`
+}
+
+// Memo Type 1:Important(Red) 2:Comment1(Blue) 3:Comment2(Gray)
+type Memo struct {
+	gorm.Model
+	GroupID uint   `json:"group_id"`
+	Type    uint   `json:"type"`
+	Title   string `json:"title" gorm:"size:10"`
+	Message string `json:"message"`
 }
 
 type Service struct {
