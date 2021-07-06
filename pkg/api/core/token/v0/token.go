@@ -110,6 +110,11 @@ func Delete(c *gin.Context) {
 		return
 	}
 
+	if len(result.Token) == 0 {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: "Error: Unauthorized..."})
+		return
+	}
+
 	logging.WriteLog(strconv.Itoa(int(result.Token[0].User.ID))+"-"+result.Token[0].User.Name, "Logout")
 
 	if err := dbToken.Delete(&core.Token{Model: gorm.Model{ID: result.Token[0].ID}}); err != nil {
