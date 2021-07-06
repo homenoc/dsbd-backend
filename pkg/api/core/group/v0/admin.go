@@ -98,6 +98,12 @@ func UpdateByAdmin(c *gin.Context) {
 	noticeSlackByAdmin(tmp.Group[0], input)
 
 	input.ID = uint(id)
+	if input.PaymentCouponTemplateID != nil && *input.PaymentCouponTemplateID == 0 {
+		input.PaymentCouponTemplateID = nil
+	}
+	if input.PaymentMembershipTemplateID != nil && *input.PaymentMembershipTemplateID == 0 {
+		input.PaymentMembershipTemplateID = nil
+	}
 
 	if err = dbGroup.Update(group.UpdateAll, input); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
