@@ -152,7 +152,6 @@ func Add(c *gin.Context) {
 		AveDownstream:     input.AveDownstream,
 		MaxDownstream:     input.MaxDownstream,
 		ASN:               &[]uint{input.ASN}[0],
-		Fee:               &[]uint{0}[0],
 		IP:                grpIP,
 		JPNICAdmin:        input.JPNICAdmin,
 		JPNICTech:         input.JPNICTech,

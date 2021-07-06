@@ -353,13 +353,7 @@ func Get(c *gin.Context) {
 				}
 
 				if *tmpService.Pass && *tmpService.Enable {
-					var fee string
 					var v4, v6 []string
-					if *tmpService.Fee == 0 {
-						fee = "Free"
-					} else {
-						fee = strconv.Itoa(int(*tmpService.Fee)) + "円"
-					}
 
 					for _, tmpIP := range tmpService.IP {
 						if *tmpIP.Open {
@@ -386,7 +380,6 @@ func Get(c *gin.Context) {
 							LinkV4Your: tmpConnection.LinkV4Your,
 							LinkV6Our:  tmpConnection.LinkV6Our,
 							LinkV6Your: tmpConnection.LinkV6Your,
-							Fee:        fee,
 						})
 					}
 				}

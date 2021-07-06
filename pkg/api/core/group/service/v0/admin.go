@@ -144,7 +144,6 @@ func AddByAdmin(c *gin.Context) {
 		MaxDownstream:     input.MaxDownstream,
 		MaxBandWidthAS:    input.MaxBandWidthAS,
 		ASN:               &[]uint{input.ASN}[0],
-		Fee:               &[]uint{0}[0],
 		IP:                grpIP,
 		JPNICAdmin:        input.JPNICAdmin,
 		JPNICTech:         input.JPNICTech,
