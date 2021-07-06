@@ -108,6 +108,7 @@ func Get(base int, data *core.Group) group.ResultDatabase {
 			Preload("Users").
 			Preload("Services").
 			Preload("Tickets").
+			Preload("Memos").
 			Preload("PaymentCouponTemplate").
 			Preload("Services.IP").
 			Preload("Services.IP.Plan").
@@ -145,6 +146,7 @@ func GetAll() group.ResultDatabase {
 
 	var groups []core.Group
 	err = db.Preload("Users").
+		Preload("Memos").
 		Find(&groups).Error
 	return group.ResultDatabase{Group: groups, Err: err}
 }

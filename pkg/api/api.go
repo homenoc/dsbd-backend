@@ -5,6 +5,7 @@ import (
 	controller "github.com/homenoc/dsbd-backend/pkg/api/core/controller/v0"
 	connection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection/v0"
 	info "github.com/homenoc/dsbd-backend/pkg/api/core/group/info/v0"
+	memo "github.com/homenoc/dsbd-backend/pkg/api/core/group/memo/v0"
 	service "github.com/homenoc/dsbd-backend/pkg/api/core/group/service/v0"
 	group "github.com/homenoc/dsbd-backend/pkg/api/core/group/v0"
 	mail "github.com/homenoc/dsbd-backend/pkg/api/core/mail/v0"
@@ -87,6 +88,12 @@ func AdminRestAPI() {
 			v1.DELETE("/group/:id/subscription", group.CancelSubscription)
 			v1.GET("/group", group.GetAllByAdmin)
 			v1.GET("/group/:id", group.GetByAdmin)
+
+			//
+			// Memo
+			//
+			v1.POST("/memo", memo.AddByAdmin)
+			v1.DELETE("/memo/:id", memo.DeleteByAdmin)
 
 			// Template
 			v1.GET("/template", template.GetByAdmin)
