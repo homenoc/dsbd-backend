@@ -59,8 +59,8 @@ func CreateByAdmin(c *gin.Context) {
 			return
 		}
 
-		resultTicket.GroupID = 0
-		resultTicket.UserID = input.UserID
+		resultTicket.GroupID = nil
+		resultTicket.UserID = &input.UserID
 	} else {
 		//is group
 		if input.UserID == 0 {
@@ -68,8 +68,8 @@ func CreateByAdmin(c *gin.Context) {
 			return
 		}
 
-		resultTicket.GroupID = input.GroupID
-		resultTicket.UserID = 0
+		resultTicket.GroupID = &input.GroupID
+		resultTicket.UserID = nil
 	}
 
 	// Tickets DBに登録
@@ -81,7 +81,7 @@ func CreateByAdmin(c *gin.Context) {
 
 	// Chat DBに登録
 	chatResult, err := dbChat.Create(&core.Chat{
-		UserID:   0,
+		UserID:   nil,
 		Admin:    true,
 		Data:     input.Data,
 		TicketID: ticketResult.ID,
@@ -220,8 +220,8 @@ func GetAdminWebSocket(c *gin.Context) {
 
 	var groupID uint = 0
 
-	if ticketResult.Tickets[0].GroupID != 0 {
-		groupID = ticketResult.Tickets[0].GroupID
+	if ticketResult.Tickets[0].GroupID != nil {
+		groupID = *ticketResult.Tickets[0].GroupID
 	}
 
 	// WebSocket送信
@@ -251,7 +251,7 @@ func GetAdminWebSocket(c *gin.Context) {
 
 		_, err = dbChat.Create(&core.Chat{
 			TicketID: ticketResult.Tickets[0].ID,
-			UserID:   resultAdmin.AdminID,
+			UserID:   &resultAdmin.AdminID,
 			Admin:    true,
 			Data:     msg.Message,
 		})

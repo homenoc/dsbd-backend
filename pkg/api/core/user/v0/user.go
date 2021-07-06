@@ -50,7 +50,7 @@ func Add(c *gin.Context) {
 	}
 
 	data = core.User{
-		GroupID:       0,
+		GroupID:       nil,
 		Name:          input.Name,
 		NameEn:        input.NameEn,
 		Email:         input.Email,
@@ -148,7 +148,12 @@ func AddGroup(c *gin.Context) {
 		return
 	}
 
-	if resultAuth.User.GroupID != uint(id) {
+	if resultAuth.User.GroupID == nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: "error: group is not found"})
+		return
+	}
+
+	if *resultAuth.User.GroupID != uint(id) {
 		c.JSON(http.StatusBadRequest, common.Error{Error: "error: group id is invalid"})
 		return
 	}
@@ -310,7 +315,7 @@ func Update(c *gin.Context) {
 	if authResult.User.ID == uint(id) || id == 0 {
 		serverData = authResult.User
 	} else {
-		if authResult.User.GroupID == 0 {
+		if authResult.User.GroupID == nil {
 			c.JSON(http.StatusForbidden, common.Error{Error: "error: Group ID = 0"})
 			return
 		}

@@ -34,9 +34,15 @@ func Get(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: dbUserResult.Err.Error()})
 		return
 	}
+
+	var groupID uint = 0
+	if authResult.User.GroupID != nil {
+		groupID = *authResult.User.GroupID
+	}
+
 	resultUser = info.User{
 		ID:         authResult.User.ID,
-		GroupID:    authResult.User.GroupID,
+		GroupID:    groupID,
 		Name:       authResult.User.Name,
 		NameEn:     authResult.User.NameEn,
 		Email:      authResult.User.Email,
@@ -47,29 +53,29 @@ func Get(c *gin.Context) {
 	//log.Println(*authResult.User.Group.PaymentCouponTemplateID)
 	//log.Println(*authResult.User.Group.PaymentMembershipTemplateID)
 
-	// Membership Info
-	membershipInfo := "一般会員"
-	membershipPlan := "未設定"
-	paid := false
-	automaticUpdate := false
-	var discountRate uint = 0
-	if authResult.User.Group.PaymentCouponTemplateID != nil && *authResult.User.Group.PaymentCouponTemplateID != 0 {
-		membershipInfo = dbUserResult.User[0].Group.PaymentCouponTemplate.Title
-		discountRate = dbUserResult.User[0].Group.PaymentCouponTemplate.DiscountRate
-	}
-	if authResult.User.Group.PaymentMembershipTemplateID != nil && *authResult.User.Group.PaymentMembershipTemplateID != 0 {
-		membershipPlan = dbUserResult.User[0].Group.PaymentMembershipTemplate.Plan
-		automaticUpdate = true
-	}
-	if dbUserResult.User[0].Group.MemberExpired != nil && dbUserResult.User[0].Group.MemberExpired.Unix() > time.Now().Unix() {
-		paid = true
-	}
-
 	// Group and UserList
 	var resultGroup info.Group
 	var resultUserList []info.User
 
-	if authResult.User.GroupID != 0 {
+	if authResult.User.GroupID != nil {
+		// Membership Info
+		membershipInfo := "一般会員"
+		membershipPlan := "未設定"
+		paid := false
+		automaticUpdate := false
+		var discountRate uint = 0
+		if authResult.User.Group.PaymentCouponTemplateID != nil && *authResult.User.Group.PaymentCouponTemplateID != 0 {
+			membershipInfo = dbUserResult.User[0].Group.PaymentCouponTemplate.Title
+			discountRate = dbUserResult.User[0].Group.PaymentCouponTemplate.DiscountRate
+		}
+		if authResult.User.Group.PaymentMembershipTemplateID != nil && *authResult.User.Group.PaymentMembershipTemplateID != 0 {
+			membershipPlan = dbUserResult.User[0].Group.PaymentMembershipTemplate.Plan
+			automaticUpdate = true
+		}
+		if dbUserResult.User[0].Group.MemberExpired != nil && dbUserResult.User[0].Group.MemberExpired.Unix() > time.Now().Unix() {
+			paid = true
+		}
+
 		resultGroup = info.Group{
 			ID:                        authResult.User.Group.ID,
 			Student:                   authResult.User.Group.Student,
@@ -103,7 +109,7 @@ func Get(c *gin.Context) {
 			for _, tmpUser := range dbUserResult.User[0].Group.Users {
 				resultUserList = append(resultUserList, info.User{
 					ID:         tmpUser.ID,
-					GroupID:    tmpUser.GroupID,
+					GroupID:    *tmpUser.GroupID,
 					Name:       tmpUser.Name,
 					NameEn:     tmpUser.NameEn,
 					Email:      tmpUser.Email,
@@ -138,14 +144,19 @@ func Get(c *gin.Context) {
 	var resultTicket []info.Ticket
 	var resultRequest []info.Request
 
-	if dbUserResult.User[0].GroupID != 0 {
+	if dbUserResult.User[0].GroupID != nil {
 		for _, tmpTicket := range dbUserResult.User[0].Group.Tickets {
 			var resultChat []info.Chat
 			for _, tmpChat := range tmpTicket.Chat {
+				var userID uint = 0
+				if tmpChat.UserID != nil {
+					userID = *tmpChat.UserID
+				}
+
 				resultChat = append(resultChat, info.Chat{
 					CreatedAt: tmpChat.CreatedAt,
 					TicketID:  tmpChat.TicketID,
-					UserID:    tmpChat.UserID,
+					UserID:    userID,
 					Admin:     tmpChat.Admin,
 					Data:      tmpChat.Data,
 				})
@@ -156,8 +167,8 @@ func Get(c *gin.Context) {
 				resultTicket = append(resultTicket, info.Ticket{
 					ID:        tmpTicket.ID,
 					CreatedAt: tmpTicket.CreatedAt,
-					GroupID:   tmpTicket.GroupID,
-					UserID:    tmpTicket.UserID,
+					GroupID:   *tmpTicket.GroupID,
+					UserID:    *tmpTicket.UserID,
 					Chat:      resultChat,
 					Solved:    tmpTicket.Solved,
 					Admin:     tmpTicket.Admin,
@@ -168,8 +179,8 @@ func Get(c *gin.Context) {
 				resultRequest = append(resultRequest, info.Request{
 					ID:        tmpTicket.ID,
 					CreatedAt: tmpTicket.CreatedAt,
-					GroupID:   tmpTicket.GroupID,
-					UserID:    tmpTicket.UserID,
+					GroupID:   *tmpTicket.GroupID,
+					UserID:    *tmpTicket.UserID,
 					Chat:      resultChat,
 					Reject:    tmpTicket.RequestReject,
 					Solved:    tmpTicket.Solved,
@@ -180,12 +191,12 @@ func Get(c *gin.Context) {
 		}
 		for _, tmpTicket := range dbUserResult.User[0].Ticket {
 			var resultChat []info.Chat
-			if tmpTicket.GroupID == 0 {
+			if tmpTicket.GroupID == nil {
 				for _, tmpChat := range tmpTicket.Chat {
 					resultChat = append(resultChat, info.Chat{
 						CreatedAt: tmpChat.CreatedAt,
 						TicketID:  tmpChat.TicketID,
-						UserID:    tmpChat.UserID,
+						UserID:    *tmpChat.UserID,
 						Admin:     tmpChat.Admin,
 						Data:      tmpChat.Data,
 					})
@@ -193,8 +204,8 @@ func Get(c *gin.Context) {
 				resultTicket = append(resultTicket, info.Ticket{
 					ID:        tmpTicket.ID,
 					CreatedAt: tmpTicket.CreatedAt,
-					GroupID:   tmpTicket.GroupID,
-					UserID:    tmpTicket.UserID,
+					GroupID:   *tmpTicket.GroupID,
+					UserID:    *tmpTicket.UserID,
 					Chat:      resultChat,
 					Solved:    tmpTicket.Solved,
 					Title:     tmpTicket.Title,
@@ -214,7 +225,7 @@ func Get(c *gin.Context) {
 	var resultService []info.Service
 	var resultConnection []info.Connection
 
-	if authResult.User.GroupID != 0 {
+	if authResult.User.GroupID != nil {
 
 		if !(0 < authResult.User.Level && authResult.User.Level <= 3) {
 			c.JSON(http.StatusForbidden, common.Error{Error: "error: access is not permitted"})

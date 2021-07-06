@@ -12,7 +12,7 @@ type User struct {
 	Ticket        []Ticket  `json:"tickets"`
 	Group         *Group    `json:"group"`
 	Payment       []Payment `json:"payment_membership"`
-	GroupID       uint      `json:"group_id"`
+	GroupID       *uint     `json:"group_id"`
 	Name          string    `json:"name"`
 	NameEn        string    `json:"name_en"`
 	Email         string    `json:"email"`
@@ -28,7 +28,7 @@ type Payment struct {
 	User            *User  `json:"user"`
 	Group           *Group `json:"group"`
 	UserID          uint   `json:"user_id"`
-	GroupID         uint   `json:"group_id"`
+	GroupID         *uint  `json:"group_id"`
 	PaymentIntentID string `json:"payment_intent_id"`
 	IsMembership    *bool  `json:"is_membership"`
 	Paid            *bool  `json:"paid"`
@@ -43,15 +43,15 @@ type Group struct {
 	Payment                     []Payment                 `json:"payment_membership"`
 	Services                    []Service                 `json:"services"`
 	Tickets                     []Ticket                  `json:"tickets"`
+	PaymentMembershipTemplateID *uint                     `json:"payment_membership_template_id"`
+	PaymentCouponTemplateID     *uint                     `json:"payment_coupon_template_id"`
 	PaymentMembershipTemplate   PaymentMembershipTemplate `json:"payment_membership_template"`
 	PaymentCouponTemplate       PaymentCouponTemplate     `json:"payment_coupon_template"`
 	StripeCustomerID            *string                   `json:"stripe_customer_id"`
 	StripePaymentMethodID       *string                   `json:"stripe_payment_method_id"` //Todo: いらんかも
 	StripeSubscriptionID        *string                   `json:"stripe_subscription_id"`
-	PaymentMembershipTemplateID *uint                     `json:"payment_membership_template_id"`
-	PaymentCouponTemplateID     *uint                     `json:"payment_coupon_template_id"`
 	Agree                       *bool                     `json:"agree"`
-	Question                    string                    `json:"question"  gorm:"size:65535"`
+	Question                    string                    `json:"question"  gorm:"size:10000"`
 	Org                         string                    `json:"org"`
 	OrgEn                       string                    `json:"org_en"`
 	PostCode                    string                    `json:"postcode"`
@@ -67,7 +67,7 @@ type Group struct {
 	Comment                     string                    `json:"comment"`
 	Open                        *bool                     `json:"open"`
 	Pass                        *bool                     `json:"pass"`
-	Lock                        *bool                     `json:"lock"`
+	Lock                        *bool                     `json:"lock"` //いらん
 	ExpiredStatus               *uint                     `json:"expired_status"`
 	AddAllow                    *bool                     `json:"add_allow"`
 }
@@ -94,17 +94,16 @@ type Service struct {
 	AveDownstream     uint             `json:"avg_downstream"`
 	MaxDownstream     uint             `json:"max_downstream"`
 	MaxBandWidthAS    string           `json:"max_bandwidth_as"`
-	Fee               *uint            `json:"fee"`
+	Fee               *uint            `json:"fee"` //いらんかも
 	IP                []IP             `json:"ip"`
 	Connection        []*Connection    `json:"connections"`
-	JPNICAdminID      uint             `json:"jpnic_admin_id"`
 	JPNICAdmin        JPNICAdmin       `json:"jpnic_admin"`
 	JPNICTech         []JPNICTech      `json:"jpnic_tech"`
 	StartDate         time.Time        `json:"start_date"`
 	EndDate           *time.Time       `json:"end_date"`
 	Pass              *bool            `json:"pass"`
 	Enable            *bool            `json:"enable"`
-	Lock              *bool            `json:"lock"`
+	Lock              *bool            `json:"lock"` //いらん
 	AddAllow          *bool            `json:"add_allow"`
 	Group             Group            `json:"group"`
 }
@@ -131,7 +130,7 @@ type Connection struct {
 	LinkV6Your               string                 `json:"link_v6_your"`
 	Open                     *bool                  `json:"open"`
 	Enable                   *bool                  `json:"enable"`
-	Lock                     *bool                  `json:"lock"`
+	Lock                     *bool                  `json:"lock"` //いらん
 	Comment                  string                 `json:"comment"`
 	IPv4RouteTemplate        *IPv4RouteTemplate     `json:"ipv4_route_template"`
 	IPv6RouteTemplate        *IPv6RouteTemplate     `json:"ipv6_route_template"`
@@ -155,18 +154,18 @@ type NOC struct {
 
 type BGPRouter struct {
 	gorm.Model
-	NOCID      uint         `json:"noc_id"`
-	NOC        NOC          `json:"noc"`
-	Connection []Connection `json:"connection"`
-	HostName   string       `json:"hostname"`
-	Address    string       `json:"address"`
-	Enable     *bool        `json:"enable"`
-	Comment    string       `json:"comment"`
+	NOCID uint `json:"noc_id"`
+	NOC   NOC  `json:"noc"`
+	//Connection []Connection `json:"connection"`
+	HostName string `json:"hostname"`
+	Address  string `json:"address"`
+	Enable   *bool  `json:"enable"`
+	Comment  string `json:"comment"`
 }
 
 type TunnelEndPointRouter struct {
 	gorm.Model
-	NOCID                  uint                      `json:"noc_id"`
+	NOCID                  *uint                     `json:"noc_id"`
 	TunnelEndPointRouterIP []*TunnelEndPointRouterIP `json:"tunnel_endpoint_router_ip"`
 	HostName               string                    `json:"hostname"`
 	Capacity               uint                      `json:"capacity"`
@@ -177,7 +176,7 @@ type TunnelEndPointRouter struct {
 type TunnelEndPointRouterIP struct {
 	gorm.Model
 	TunnelEndPointRouter   TunnelEndPointRouter `json:"tunnel_endpoint_router"`
-	TunnelEndPointRouterID uint                 `json:"tunnel_endpoint_router_id"`
+	TunnelEndPointRouterID *uint                `json:"tunnel_endpoint_router_id"`
 	IP                     string               `json:"ip"`
 	Enable                 *bool                `json:"enable"`
 	Comment                string               `json:"comment"`
@@ -190,7 +189,7 @@ type IP struct {
 	Name      string     `json:"name"`
 	IP        string     `json:"ip"`
 	Plan      []*Plan    `json:"plan" `
-	PlanJPNIC *string    `json:"" gorm:"size:65535"`
+	PlanJPNIC *string    `json:"" gorm:"size:15000"` //いらんかも
 	StartDate time.Time  `json:"start_date"`
 	EndDate   *time.Time `json:"end_date"`
 	UseCase   string     `json:"use_case"`
@@ -319,8 +318,8 @@ type NTTTemplate struct {
 // 申請中/承諾済み/却下
 type Ticket struct {
 	gorm.Model
-	GroupID       uint   `json:"group_id"`
-	UserID        uint   `json:"user_id"`
+	GroupID       *uint  `json:"group_id"`
+	UserID        *uint  `json:"user_id"`
 	Chat          []Chat `json:"chat"`
 	Request       *bool  `json:"request"`
 	RequestReject *bool  `json:"request_reject"`
@@ -334,16 +333,16 @@ type Ticket struct {
 type Chat struct {
 	gorm.Model
 	TicketID uint   `json:"ticket_id"`
-	UserID   uint   `json:"user_id"`
+	UserID   *uint  `json:"user_id"`
 	Admin    bool   `json:"admin"`
-	Data     string `json:"data" gorm:"size:65535"`
+	Data     string `json:"data" gorm:"size:10000"`
 	User     User   `json:"user"`
 }
 
 type Token struct {
 	gorm.Model
 	ExpiredAt   time.Time `json:"expired_at"`
-	UserID      uint      `json:"user_id"`
+	UserID      *uint     `json:"user_id"`
 	User        User      `json:"user"`
 	Status      uint      `json:"status"` //0: initToken(30m) 1: 30m 2:6h 3: 12h 10: 30d 11:180d
 	Admin       *bool     `json:"admin"`
@@ -363,7 +362,7 @@ type Notice struct {
 	Fault     *bool     `json:"fault"`
 	Info      *bool     `json:"info"`
 	Title     string    `json:"title"`
-	Data      string    `json:"data" gorm:"size:65535"`
+	Data      string    `json:"data" gorm:"size:15000"`
 }
 
 type Request struct {

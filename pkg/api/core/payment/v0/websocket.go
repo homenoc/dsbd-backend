@@ -69,9 +69,14 @@ func GetStripeWebHook(c *gin.Context) {
 			log.Println(err)
 		}
 
+		if resultPayment[0].Group == nil {
+			log.Println("[paid] error: GroupID is not exists....")
+			return
+		}
+
 		// Membership
 		if *resultPayment[0].IsMembership {
-			resultGroup := dbGroup.Get(group.ID, &core.Group{Model: gorm.Model{ID: resultPayment[0].GroupID}})
+			resultGroup := dbGroup.Get(group.ID, &core.Group{Model: gorm.Model{ID: *resultPayment[0].GroupID}})
 			if resultGroup.Err != nil {
 				log.Println(resultGroup.Err)
 				return
@@ -96,7 +101,7 @@ func GetStripeWebHook(c *gin.Context) {
 			}
 
 			dbGroup.Update(group.UpdateMembership, core.Group{
-				Model:         gorm.Model{ID: resultPayment[0].GroupID},
+				Model:         gorm.Model{ID: *resultPayment[0].GroupID},
 				MemberExpired: &now,
 			})
 		}
