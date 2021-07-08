@@ -47,9 +47,10 @@ func CreateByAdmin(c *gin.Context) {
 		return
 	}
 	resultTicket := &core.Ticket{
-		Solved: &[]bool{false}[0],
-		Title:  input.Title,
-		Admin:  &[]bool{true}[0],
+		Solved:  &[]bool{false}[0],
+		Title:   input.Title,
+		Admin:   &[]bool{true}[0],
+		Request: &[]bool{false}[0],
 	}
 
 	// isn't group
