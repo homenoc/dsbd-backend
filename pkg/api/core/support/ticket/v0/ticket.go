@@ -45,7 +45,7 @@ func Create(c *gin.Context) {
 	resultTicket := &core.Ticket{
 		Solved:        &[]bool{false}[0],
 		Title:         input.Title,
-		Admin:         &[]bool{true}[0],
+		Admin:         &[]bool{false}[0],
 		Request:       &[]bool{false}[0],
 		RequestReject: &[]bool{false}[0],
 	}
@@ -135,7 +135,7 @@ func Request(c *gin.Context) {
 		UserID:        &result.User.ID,
 		Solved:        &[]bool{false}[0],
 		Title:         input.Title,
-		Admin:         &[]bool{true}[0],
+		Admin:         &[]bool{false}[0],
 		Request:       &[]bool{true}[0],
 		RequestReject: &[]bool{false}[0],
 	}
@@ -266,7 +266,7 @@ func GetWebSocket(c *gin.Context) {
 	// [group ticket] check groupID
 	if ticketResult.Tickets[0].GroupID != nil {
 		// [group ticket] check groupID
-		if ticketResult.Tickets[0].GroupID != result.User.GroupID {
+		if *ticketResult.Tickets[0].GroupID != *result.User.GroupID {
 			log.Println("groupID not match.")
 			return
 		}
