@@ -17,6 +17,7 @@ import (
 	toolToken "github.com/homenoc/dsbd-backend/pkg/api/core/tool/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
+	dbMailTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/mail/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"gorm.io/gorm"
 	"log"
@@ -85,12 +86,18 @@ func Add(c *gin.Context) {
 		AddField(slack.Field{Title: "Name(English)", Value: input.NameEn})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 
+	mailTemplate := core.MailTemplate{ProcessID: "signature"}
+	err = dbMailTemplate.Get(&mailTemplate)
+	if err != nil {
+		log.Println(err)
+	}
+
 	v0.SendMail(mail.Mail{
 		ToMail:  data.Email,
 		Subject: "本人確認のメールにつきまして",
 		Content: " " + input.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
 			config.Conf.Controller.User.Url + "/api/v1/verify/" + mailToken + "\n" +
-			"本人確認が完了次第、ログイン可能になります。\n",
+			"本人確認が完了次第、ログイン可能になります。" + mailTemplate.Message,
 	})
 
 	c.JSON(http.StatusOK, user.Result{})
@@ -202,12 +209,18 @@ func AddGroup(c *gin.Context) {
 		AddField(slack.Field{Title: "Name(English)", Value: input.NameEn})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 
+	mailTemplate := core.MailTemplate{ProcessID: "signature"}
+	err = dbMailTemplate.Get(&mailTemplate)
+	if err != nil {
+		log.Println(err)
+	}
+
 	v0.SendMail(mail.Mail{
 		ToMail:  data.Email,
 		Subject: "本人確認メールにつきまして",
 		Content: " " + input.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
 			config.Conf.Controller.User.Url + "/api/v1/verify/" + mailToken + "\n" +
-			"本人確認が完了次第、ログイン可能になります。\n" + "仮パスワード: " + pass,
+			"本人確認が完了次第、ログイン可能になります。\n" + "仮パスワード: " + pass + mailTemplate.Message,
 	})
 
 	c.JSON(http.StatusOK, user.Result{})

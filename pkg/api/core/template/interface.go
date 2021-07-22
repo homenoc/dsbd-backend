@@ -47,6 +47,7 @@ type ResultAdmin struct {
 	PaymentMembershipTemplate []core.PaymentMembershipTemplate `json:"payment_membership_template"`
 	PaymentDonateTemplate     []core.PaymentDonateTemplate     `json:"payment_donate_template"`
 	PaymentCouponTemplate     []core.PaymentCouponTemplate     `json:"payment_coupon_template"`
+	MailTemplate              []core.MailTemplate              `json:"mail_template"`
 }
 
 type ResultDatabase struct {

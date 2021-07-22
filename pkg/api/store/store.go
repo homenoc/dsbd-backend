@@ -56,6 +56,7 @@ func InitDB() {
 		&core.PaymentCouponTemplate{},
 		&core.PaymentMembershipTemplate{},
 		&core.PaymentDonateTemplate{},
+		&core.MailTemplate{},
 	)
 	log.Println(result)
 }

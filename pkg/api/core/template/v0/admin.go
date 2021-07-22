@@ -14,6 +14,7 @@ import (
 	dbIPv4RouteTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ipv4_route/v0"
 	dbIPv6Template "github.com/homenoc/dsbd-backend/pkg/api/store/template/ipv6/v0"
 	dbIPv6RouteTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ipv6_route/v0"
+	dbMailTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/mail/v0"
 	dbNTTTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ntt/v0"
 	dbPaymentCouponTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/payment_coupon/v0"
 	dbPaymentDonateTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/payment_donate/v0"
@@ -114,6 +115,12 @@ func GetByAdmin(c *gin.Context) {
 		return
 	}
 
+	resultMailTemplate, err := dbMailTemplate.GetAll()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusOK, template.ResultAdmin{
 		Services:                  resultService.Services,
 		Connections:               resultConnection.Connections,
@@ -130,5 +137,6 @@ func GetByAdmin(c *gin.Context) {
 		PaymentMembershipTemplate: resultPaymentMembership,
 		PaymentDonateTemplate:     resultDonateMembership,
 		PaymentCouponTemplate:     resultPaymentCoupon,
+		MailTemplate:              resultMailTemplate,
 	})
 }
