@@ -134,15 +134,35 @@ func Add(c *gin.Context) {
 
 	// if need_route is true
 	if *resultService.Service[0].ServiceTemplate.NeedRoute {
-		_, err = dbIPv4RouteTemplate.Get(input.IPv4RouteTemplateID)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, common.Error{Error: "error: invalid ipv4 route template."})
-			return
+		ipv4Enable := false
+		ipv6Enable := false
+
+		for _, tmpServiceIP := range resultService.Service[0].IP {
+			if tmpServiceIP.Version == 4 {
+				ipv4Enable = true
+				break
+			}
+			if tmpServiceIP.Version == 6 {
+				ipv6Enable = true
+				break
+			}
 		}
-		_, err = dbIPv6RouteTemplate.Get(input.IPv6RouteTemplateID)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, common.Error{Error: "error: invalid ipv4 route template."})
-			return
+
+		log.Println(input.IPv4RouteTemplateID)
+		log.Println(input.IPv6RouteTemplateID)
+		if ipv4Enable {
+			_, err = dbIPv4RouteTemplate.Get(input.IPv4RouteTemplateID)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, common.Error{Error: "error: invalid ipv4 route template."})
+				return
+			}
+		}
+		if ipv6Enable {
+			_, err = dbIPv6RouteTemplate.Get(input.IPv6RouteTemplateID)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, common.Error{Error: "error: invalid ipv4 route template."})
+				return
+			}
 		}
 	}
 
