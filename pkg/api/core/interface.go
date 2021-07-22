@@ -401,3 +401,9 @@ type RequestTemplate struct {
 	InfoType    uint   `json:"info_type"`
 	Comment     string `json:"comment"`
 }
+
+type MailTemplate struct {
+	ProcessID string `json:"process_id" gorm:"primaryKey" gorm:"size:100"`
+	Subject   string `json:"subject" gorm:"size:100"`
+	Message   string `json:"message" gorm:"size:10000"`
+}
