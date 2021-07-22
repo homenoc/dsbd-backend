@@ -64,11 +64,10 @@ func Add(c *gin.Context) {
 	//check exist for database
 	result := dbUser.Get(user.Email, &core.User{Email: input.Email})
 	if result.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
-		return
+		log.Println(result.Err)
 	}
 
-	if len(result.User) != 0 {
+	if len(result.User) != 0 && result.Err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: "this email is already registered: \" + u.Email"})
 		return
 	}
