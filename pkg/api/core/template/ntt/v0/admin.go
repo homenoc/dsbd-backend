@@ -8,13 +8,13 @@ import (
 	ntt "github.com/homenoc/dsbd-backend/pkg/api/core/template/ntt"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/template/service"
 	dbNTTTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ntt/v0"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"strconv"
 )
 
-func AddAdmin(c *gin.Context) {
+func AddByAdmin(c *gin.Context) {
 	var input core.NTTTemplate
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
@@ -41,7 +41,7 @@ func AddAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, ntt.Result{})
 }
 
-func DeleteAdmin(c *gin.Context) {
+func DeleteByAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
@@ -61,7 +61,7 @@ func DeleteAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, ntt.Result{})
 }
 
-func UpdateAdmin(c *gin.Context) {
+func UpdateByAdmin(c *gin.Context) {
 	var input core.NTTTemplate
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
@@ -85,7 +85,7 @@ func UpdateAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, ntt.Result{})
 }
 
-func GetAdmin(c *gin.Context) {
+func GetByAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
@@ -105,7 +105,7 @@ func GetAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, ntt.Result{NTTs: result.NTTs})
 }
 
-func GetAllAdmin(c *gin.Context) {
+func GetAllByAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})

@@ -11,6 +11,7 @@ type Chat struct {
 	ID        uint      `json:"id"`
 	Err       string    `json:"error"`
 	CreatedAt time.Time `json:"created_at"`
+	TicketID  uint      `json:"ticket_id"`
 	UserID    uint      `json:"user_id"`
 	UserName  string    `json:"user_name"`
 	GroupID   uint      `json:"group_id"`

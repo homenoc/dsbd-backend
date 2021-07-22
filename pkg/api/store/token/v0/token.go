@@ -5,7 +5,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"log"
 	"time"
 )
@@ -16,7 +16,12 @@ func Create(t *core.Token) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	return db.Create(t).Error
 }
@@ -27,7 +32,12 @@ func Delete(t *core.Token) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	return db.Delete(t).Error
 }
@@ -38,7 +48,12 @@ func DeleteAll() error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	return db.Exec("DELETE FROM tokens").Error
 }
@@ -49,15 +64,20 @@ func Update(base int, t *core.Token) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	if token.AddToken == base {
-		err = db.Model(&core.Token{Model: gorm.Model{ID: t.ID}}).Update(core.Token{Model: gorm.Model{},
+		err = db.Model(&core.Token{Model: gorm.Model{ID: t.ID}}).Updates(core.Token{
 			ExpiredAt: t.ExpiredAt, UserID: t.UserID, Status: t.Status, AccessToken: t.AccessToken}).Error
 	} else if token.UpdateToken == base {
-		err = db.Model(&core.Token{Model: gorm.Model{ID: t.ID}}).Update("expired_at", t.ExpiredAt).Error
+		err = db.Model(&core.Token{Model: gorm.Model{ID: t.ID}}).Updates(core.Token{ExpiredAt: t.ExpiredAt}).Error
 	} else if token.UpdateAll == base {
-		err = db.Model(&core.Token{Model: gorm.Model{ID: t.ID}}).Update(core.Token{
+		err = db.Model(&core.Token{Model: gorm.Model{ID: t.ID}}).Updates(core.Token{
 			ExpiredAt:   t.ExpiredAt,
 			UserID:      t.UserID,
 			Status:      t.Status,
@@ -80,7 +100,12 @@ func Get(base int, input *core.Token) token.ResultDatabase {
 		log.Println("database connection error")
 		return token.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return token.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+	}
+	defer dbSQL.Close()
 
 	var tokenStruct []core.Token
 
@@ -92,6 +117,9 @@ func Get(base int, input *core.Token) token.ResultDatabase {
 			input.UserToken, input.AccessToken, false, time.Now()).
 			Preload("User").
 			Preload("User.Group").
+			Find(&tokenStruct).Error
+	} else if base == token.AccessToken {
+		err = db.Where("access_token = ? AND admin = ?", input.AccessToken, true).
 			Find(&tokenStruct).Error
 	} else if base == token.AdminToken {
 		err = db.Where("access_token = ? AND admin = ? AND expired_at > ?",
@@ -111,7 +139,12 @@ func GetAll() token.ResultDatabase {
 		log.Println("database connection error")
 		return token.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return token.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+	}
+	defer dbSQL.Close()
 
 	var tokens []core.Token
 	err = db.Find(&tokens).Error

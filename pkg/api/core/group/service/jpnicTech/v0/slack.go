@@ -5,28 +5,29 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
+	slackTool "github.com/homenoc/dsbd-backend/pkg/api/core/tool/slack"
 	"strconv"
 )
 
-func noticeSlack(loginUser core.User, before core.Group, after group.Input) {
+func noticeSlack(genre uint, loginUser core.User, before core.Group, after group.Input) {
 	// 審査ステータスのSlack通知
 	attachment := slack.Attachment{}
 
-	attachment.AddField(slack.Field{Title: "Title", Value: "Group情報の更新"}).
+	attachment.AddField(slack.Field{Title: "Title", Value: "JPNIC技術連絡担当者の" + slackTool.NoticeSlackType(genre)}).
 		AddField(slack.Field{Title: "申請者", Value: strconv.Itoa(int(loginUser.ID)) + "-" + loginUser.Name}).
 		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(before.ID)) + ":" + before.Org}).
 		AddField(slack.Field{Title: "更新状況", Value: changeText(before, after)})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 }
 
-func noticeSlackAdmin(before, after core.Group) {
+func noticeSlackByAdmin(genre uint, before, after core.Group) {
 	// 審査ステータスのSlack通知
 	attachment := slack.Attachment{}
 
-	attachment.AddField(slack.Field{Title: "Title", Value: "Group情報の更新"}).
+	attachment.AddField(slack.Field{Title: "Title", Value: "JPNIC技術連絡担当者の" + slackTool.NoticeSlackType(genre)}).
 		AddField(slack.Field{Title: "申請者", Value: "管理者"}).
 		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(before.ID)) + ":" + before.Org}).
-		AddField(slack.Field{Title: "更新状況", Value: changeTextAdmin(before, after)})
+		AddField(slack.Field{Title: "更新状況", Value: changeTextByAdmin(before, after)})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 }
 
@@ -64,7 +65,7 @@ func changeText(before core.Group, after group.Input) string {
 	return data
 }
 
-func changeTextAdmin(before, after core.Group) string {
+func changeTextByAdmin(before, after core.Group) string {
 	data := ""
 	if after.Open != nil {
 		if *before.Open != *after.Open {

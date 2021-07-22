@@ -11,6 +11,7 @@ const (
 	Email           = 3
 	ServiceID       = 4
 	SearchNewNumber = 5
+	NOCID           = 6
 	UpdateID        = 100
 	UpdateServiceID = 101
 	UpdateUserInfo  = 102
@@ -21,13 +22,15 @@ const (
 )
 
 type Input struct {
-	ConnectionTemplateID *uint  `json:"connection_template_id"`
+	ConnectionTemplateID uint   `json:"connection_template_id"`
 	ConnectionComment    string `json:"connection_comment"` // ServiceがETCの時や補足説明で必要
-	NTTTemplateID        *uint  `json:"ntt_template_id"`
+	NTTTemplateID        uint   `json:"ntt_template_id"`
 	Address              string `json:"address"`
-	NOCID                *uint  `json:"noc_id"`
+	IPv4RouteTemplateID  uint   `json:"ipv4_route_template_id"`
+	IPv6RouteTemplateID  uint   `json:"ipv6_route_template_id"`
+	NOCID                uint   `json:"noc_id"`
 	TermIP               string `json:"term_ip"`
-	Monitor              *bool  `json:"monitor"`
+	Monitor              bool   `json:"monitor"`
 }
 
 type Connection struct {

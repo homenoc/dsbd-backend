@@ -30,19 +30,9 @@ func replaceService(replace, input core.Service) core.Service {
 		replace.AddressEn = input.AddressEn
 	}
 
-	//Route(V4)
-	if input.RouteV4 != "" {
-		replace.RouteV4 = input.RouteV4
-	}
-
-	//Route(V4)
-	if input.RouteV6 != "" {
-		replace.RouteV6 = input.RouteV6
-	}
-
-	//Lock
-	if input.Lock != replace.Lock {
-		replace.Lock = input.Lock
+	//Open
+	if input.Pass != replace.Pass {
+		replace.Pass = input.Pass
 	}
 
 	////V4

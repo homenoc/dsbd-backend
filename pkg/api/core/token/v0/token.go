@@ -12,7 +12,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbToken "github.com/homenoc/dsbd-backend/pkg/api/store/token/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"strconv"
@@ -27,7 +27,7 @@ func GenerateInit(c *gin.Context) {
 	tmpToken, _ := toolToken.Generate(2)
 	err := dbToken.Create(&core.Token{
 		ExpiredAt: time.Now().Add(30 * time.Minute),
-		UserID:    0,
+		UserID:    nil,
 		Status:    0,
 		UserToken: userToken,
 		TmpToken:  tmpToken,
@@ -84,7 +84,7 @@ func Generate(c *gin.Context) {
 	accessToken, _ := toolToken.Generate(2)
 	err := dbToken.Update(token.AddToken, &core.Token{Model: gorm.Model{ID: tokenResult.Token[0].Model.ID},
 		ExpiredAt:   time.Now().Add(30 * time.Minute),
-		UserID:      userResult.User[0].ID,
+		UserID:      &userResult.User[0].ID,
 		Status:      1,
 		AccessToken: accessToken,
 	})
@@ -110,7 +110,30 @@ func Delete(c *gin.Context) {
 		return
 	}
 
+	if len(result.Token) == 0 {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: "Error: Unauthorized..."})
+		return
+	}
+
 	logging.WriteLog(strconv.Itoa(int(result.Token[0].User.ID))+"-"+result.Token[0].User.Name, "Logout")
+
+	if err := dbToken.Delete(&core.Token{Model: gorm.Model{ID: result.Token[0].ID}}); err != nil {
+		//エラー時はTokenがすでに消えている状態なので、問題なし
+		c.JSON(http.StatusOK, common.Result{})
+		return
+	}
+
+	c.JSON(http.StatusOK, common.Result{})
+}
+
+func DeleteAdminUser(c *gin.Context) {
+	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
+
+	result := dbToken.Get(token.AccessToken, &core.Token{AccessToken: accessToken})
+	if result.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
+		return
+	}
 
 	if err := dbToken.Delete(&core.Token{Model: gorm.Model{ID: result.Token[0].ID}}); err != nil {
 		//エラー時はTokenがすでに消えている状態なので、問題なし

@@ -14,7 +14,7 @@ import (
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	dbServiceTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/service/v0"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"strconv"
@@ -52,8 +52,14 @@ func Add(c *gin.Context) {
 	}
 
 	// status check for group
-	if !(*result.User.Group.Status == 1 && *result.User.Group.ExpiredStatus == 0 && *result.User.Group.Pass) {
+	if !(*result.User.Group.ExpiredStatus == 0 && *result.User.Group.Pass) {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: "error: failed group status"})
+		return
+	}
+
+	// add_allow check for group
+	if !(*result.User.Group.AddAllow) {
+		c.JSON(http.StatusForbidden, common.Error{Error: "error: failed group add_allow status"})
 		return
 	}
 
@@ -113,11 +119,6 @@ func Add(c *gin.Context) {
 		}
 	}
 
-	if *resultServiceTemplate.Services[0].NeedRoute && input.RouteV4 == "" && input.RouteV6 == "" {
-		c.JSON(http.StatusBadRequest, common.Error{Error: "no data: Route Information"})
-		return
-	}
-
 	resultNetwork := dbService.Get(service.SearchNewNumber, &core.Service{GroupID: result.User.Group.ID})
 	if resultNetwork.Err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: resultNetwork.Err.Error()})
@@ -146,19 +147,16 @@ func Add(c *gin.Context) {
 		PostCode:          input.Postcode,
 		Address:           input.Address,
 		AddressEn:         input.AddressEn,
-		RouteV4:           input.RouteV4,
-		RouteV6:           input.RouteV6,
 		AveUpstream:       input.AveUpstream,
 		MaxUpstream:       input.MaxUpstream,
 		AveDownstream:     input.AveDownstream,
 		MaxDownstream:     input.MaxDownstream,
 		ASN:               &[]uint{input.ASN}[0],
-		Fee:               &[]uint{0}[0],
 		IP:                grpIP,
 		JPNICAdmin:        input.JPNICAdmin,
 		JPNICTech:         input.JPNICTech,
-		Open:              &[]bool{false}[0],
-		Lock:              &[]bool{true}[0],
+		Enable:            &[]bool{true}[0],
+		Pass:              &[]bool{false}[0],
 		AddAllow:          &[]bool{true}[0],
 	})
 	if err != nil {
@@ -176,8 +174,10 @@ func Add(c *gin.Context) {
 
 	// ---------ここまで処理が通っている場合、DBへの書き込みにすべて成功している
 	// GroupのStatusをAfterStatusにする
-	if err = dbGroup.Update(group.UpdateStatus, core.Group{Model: gorm.Model{ID: result.User.Group.ID},
-		Status: &[]uint{2}[0]}); err != nil {
+	if err = dbGroup.Update(group.UpdateAll, core.Group{
+		Model:    gorm.Model{ID: result.User.Group.ID},
+		AddAllow: &[]bool{false}[0],
+	}); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
@@ -229,10 +229,6 @@ func Update(c *gin.Context) {
 	}
 	if resultNetwork.Service[0].GroupID != result.User.Group.ID {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: "Authentication failure"})
-		return
-	}
-	if *resultNetwork.Service[0].Lock {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: "this network is locked..."})
 		return
 	}
 

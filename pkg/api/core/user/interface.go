@@ -2,10 +2,12 @@ package user
 
 import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/info"
 )
 
 const (
 	ID               = 0
+	IDDetail         = 10
 	GID              = 1
 	Name             = 2
 	Email            = 3
@@ -48,15 +50,20 @@ type SimpleGroup struct {
 }
 
 type ResultOne struct {
-	ID         uint         `json:"id"`
-	GroupID    uint         `json:"group_id"`
-	Name       string       `json:"name"`
-	NameEn     string       `json:"name_en"`
-	Email      string       `json:"email"`
-	Status     uint         `json:"status"`
-	Level      uint         `json:"level"`
-	MailVerify *bool        `json:"mail_verify"`
-	Group      *SimpleGroup `json:"group"`
+	User  SimpleUser  `json:"user"`
+	Group SimpleGroup `json:"group"`
+	Info  []info.Info `json:"info"`
+}
+
+type SimpleUser struct {
+	ID         uint   `json:"id"`
+	GroupID    uint   `json:"group_id"`
+	Name       string `json:"name"`
+	NameEn     string `json:"name_en"`
+	Email      string `json:"email"`
+	Status     uint   `json:"status"`
+	Level      uint   `json:"level"`
+	MailVerify *bool  `json:"mail_verify"`
 }
 
 type Result struct {

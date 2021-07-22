@@ -14,11 +14,11 @@ import (
 	dbNOC "github.com/homenoc/dsbd-backend/pkg/api/store/noc/v0"
 	dbConnectionTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/connection/v0"
 	dbNTTTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ntt/v0"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"strconv"
 )
 
-func noticeSlackAdmin(before, after core.Connection) {
+func noticeSlackByAdmin(before, after core.Connection) {
 	// 審査ステータスのSlack通知
 	attachment := slack.Attachment{}
 
@@ -37,16 +37,6 @@ func changeText(before, after core.Connection) string {
 				data += "開通: 未開通 => 開通済み\n"
 			} else {
 				data += "開通: 開通 => 未開通\n"
-			}
-		}
-	}
-
-	if after.Lock != nil {
-		if *before.Lock != *after.Lock {
-			if !*after.Lock {
-				data += "ユーザ変更: 禁止 => 許可\n"
-			} else {
-				data += "ユーザ変更: 許可 => 禁止\n"
 			}
 		}
 	}

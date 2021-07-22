@@ -6,15 +6,17 @@ import (
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/notice"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	dbNotice "github.com/homenoc/dsbd-backend/pkg/api/store/notice/v0"
-	"github.com/jinzhu/gorm"
+	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"strconv"
 	"time"
 )
 
-func AddAdmin(c *gin.Context) {
+func AddByAdmin(c *gin.Context) {
 	var input notice.Input
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
@@ -35,7 +37,7 @@ func AddAdmin(c *gin.Context) {
 	}
 
 	// 時間はJST基準
-	jst, _ := time.LoadLocation("Asia/Tokyo")
+	jst, _ := time.LoadLocation(config.Conf.Controller.TimeZone)
 
 	// 9999年12月31日 23:59:59.59
 	var endTime = time.Date(9999, time.December, 31, 23, 59, 59, 59, jst)
@@ -45,12 +47,21 @@ func AddAdmin(c *gin.Context) {
 		endTime, _ = time.ParseInLocation("2006-01-02 15:04:05", *input.EndTime, jst)
 	}
 
-	noticeSlackAddAdmin(input)
+	var userIDArray []uint
+
+	for _, tmpID := range userExtraction(input.UserID, input.GroupID, input.NOCID) {
+		userIDArray = append(userIDArray, tmpID)
+	}
+
+	resultUser := dbUser.GetArray(userIDArray)
+	if resultUser.Err != nil {
+		log.Println(resultUser.Err.Error())
+		c.JSON(http.StatusInternalServerError, common.Error{Error: resultUser.Err.Error()})
+		return
+	}
 
 	if _, err = dbNotice.Create(&core.Notice{
-		UserID:    input.UserID,
-		GroupID:   input.GroupID,
-		NOCID:     input.NOCID,
+		User:      resultUser.User,
 		Everyone:  input.Everyone,
 		StartTime: startTime,
 		EndTime:   endTime,
@@ -63,10 +74,11 @@ func AddAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
+	noticeSlackAddByAdmin(input)
 	c.JSON(http.StatusOK, notice.Result{})
 }
 
-func DeleteAdmin(c *gin.Context) {
+func DeleteByAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
@@ -86,7 +98,7 @@ func DeleteAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, notice.Result{})
 }
 
-func UpdateAdmin(c *gin.Context) {
+func UpdateByAdmin(c *gin.Context) {
 	var input notice.Input
 
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
@@ -108,7 +120,7 @@ func UpdateAdmin(c *gin.Context) {
 	}
 
 	// 時間はJST基準
-	jst, _ := time.LoadLocation("Asia/Tokyo")
+	jst, _ := time.LoadLocation(config.Conf.Controller.TimeZone)
 
 	startTime, _ := time.ParseInLocation(layoutInput, input.StartTime, jst)
 	endTime, _ := time.ParseInLocation(layoutInput, *input.EndTime, jst)
@@ -122,16 +134,12 @@ func UpdateAdmin(c *gin.Context) {
 	log.Println(startTime)
 	log.Println(endTime)
 
-	noticeSlackReplaceAdmin(tmp.Notice[0], input)
+	noticeSlackReplaceByAdmin(tmp.Notice[0], input)
 
 	if err = dbNotice.Update(notice.UpdateAll, core.Notice{
 		Model:     gorm.Model{ID: uint(id)},
-		UserID:    input.UserID,
-		GroupID:   input.GroupID,
-		NOCID:     input.NOCID,
 		StartTime: startTime,
 		EndTime:   endTime,
-		Everyone:  input.Everyone,
 		Important: input.Important,
 		Fault:     input.Fault,
 		Info:      input.Info,
@@ -145,7 +153,7 @@ func UpdateAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, notice.ResultAdmin{})
 }
 
-func GetAdmin(c *gin.Context) {
+func GetByAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
@@ -165,7 +173,7 @@ func GetAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, notice.ResultAdmin{Notice: result.Notice})
 }
 
-func GetAllAdmin(c *gin.Context) {
+func GetAllByAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})

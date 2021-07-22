@@ -2,28 +2,21 @@ package v0
 
 import (
 	"fmt"
-	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/gin-gonic/gin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service/ip"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service/jpnicTech"
 	serviceTemplate "github.com/homenoc/dsbd-backend/pkg/api/core/template/service"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
-	dbPlan "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/ip/plan/v0"
-	dbIP "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/ip/v0"
-	dbJPNICTech "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/jpnicTech/v0"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
 	dbServiceTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/service/v0"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"strconv"
 )
 
-func AddAdmin(c *gin.Context) {
+func AddByAdmin(c *gin.Context) {
 	// ID取得
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -61,6 +54,7 @@ func AddAdmin(c *gin.Context) {
 
 	var grpIP []core.IP = nil
 
+	// get service template
 	resultServiceTemplate := dbServiceTemplate.Get(serviceTemplate.ID, &core.ServiceTemplate{Model: gorm.Model{ID: input.ServiceTemplateID}})
 	if resultServiceTemplate.Err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: resultServiceTemplate.Err.Error()})
@@ -78,6 +72,7 @@ func AddAdmin(c *gin.Context) {
 			return
 		}
 
+		// 0 < jpnic_tech count < 3
 		if len(input.JPNICTech) == 0 || len(input.JPNICTech) > 2 {
 			c.JSON(http.StatusBadRequest, common.Error{Error: "error: user tech count"})
 			return
@@ -115,11 +110,6 @@ func AddAdmin(c *gin.Context) {
 		}
 	}
 
-	if *resultServiceTemplate.Services[0].NeedRoute && input.RouteV4 == "" && input.RouteV6 == "" {
-		c.JSON(http.StatusBadRequest, common.Error{Error: "no data: Route Information"})
-		return
-	}
-
 	resultNetwork := dbService.Get(service.SearchNewNumber, &core.Service{GroupID: uint(id)})
 	if resultNetwork.Err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: resultNetwork.Err.Error()})
@@ -148,39 +138,33 @@ func AddAdmin(c *gin.Context) {
 		PostCode:          input.Postcode,
 		Address:           input.Address,
 		AddressEn:         input.AddressEn,
-		RouteV4:           input.RouteV4,
-		RouteV6:           input.RouteV6,
 		AveUpstream:       input.AveUpstream,
 		MaxUpstream:       input.MaxUpstream,
 		AveDownstream:     input.AveDownstream,
 		MaxDownstream:     input.MaxDownstream,
+		MaxBandWidthAS:    input.MaxBandWidthAS,
 		ASN:               &[]uint{input.ASN}[0],
-		Fee:               &[]uint{0}[0],
 		IP:                grpIP,
 		JPNICAdmin:        input.JPNICAdmin,
 		JPNICTech:         input.JPNICTech,
-		Open:              &[]bool{false}[0],
-		Lock:              &[]bool{true}[0],
+		Enable:            &[]bool{true}[0],
+		Pass:              &[]bool{false}[0],
 		AddAllow:          &[]bool{false}[0],
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-
-	attachment := slack.Attachment{}
-	attachment.AddField(slack.Field{Title: "Title", Value: "ネットワーク情報登録(管理者実行)"}).
-		AddField(slack.Field{Title: "申請者", Value: "管理者"}).
-		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(id)}).
-		AddField(slack.Field{Title: "サービスコード（新規発番）", Value: resultServiceTemplate.Services[0].Type + fmt.Sprintf("%03d", number)}).
-		AddField(slack.Field{Title: "サービスコード（補足情報）", Value: input.ServiceComment})
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
-
+	noticeSlackAdd(id, resultServiceTemplate.Services[0].Type+fmt.Sprintf("%03d", number), input.ServiceComment)
 	c.JSON(http.StatusOK, service.Result{})
 }
 
-func AddIPAdmin(c *gin.Context) {
-	var input service.IPInput
+func DeleteByAdmin(c *gin.Context) {
+	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	if resultAdmin.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
+		return
+	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -188,233 +172,15 @@ func AddIPAdmin(c *gin.Context) {
 		return
 	}
 
-	err = c.BindJSON(&input)
-	if err != nil {
-		log.Println(err)
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
-
-	resultIP, err := ipProcess(true, false, []service.IPInput{input})
-	if err != nil {
-		log.Println(err)
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	if err = dbService.JoinIP(uint(id), resultIP[0]); err != nil {
+	if err = dbService.Delete(&core.Service{Model: gorm.Model{ID: uint(id)}}); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
+	noticeSlackDelete("Service情報", uint(id))
 	c.JSON(http.StatusOK, service.Result{})
 }
 
-func AddPlanAdmin(c *gin.Context) {
-	var input core.Plan
-
-	err := c.BindJSON(&input)
-	if err != nil {
-		log.Println(err)
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
-
-	if _, err = dbPlan.Create(&input); err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, service.Result{})
-}
-
-func AddJPNICAdminAdmin(c *gin.Context) {
-	var input core.JPNICAdmin
-
-	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
-
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	err = c.BindJSON(&input)
-	if err != nil {
-		log.Println(err)
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	if err = dbService.JoinJPNICAdmin(uint(id), input); err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, common.Result{})
-}
-
-func AddJPNICTechAdmin(c *gin.Context) {
-	var input core.JPNICTech
-
-	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
-
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	err = c.BindJSON(&input)
-	if err != nil {
-		log.Println(err)
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	if err = dbService.JoinJPNICTech(uint(id), input); err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, common.Result{})
-}
-
-func DeleteAdmin(c *gin.Context) {
-	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
-
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	if err := dbService.Delete(&core.Service{Model: gorm.Model{ID: uint(id)}}); err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, service.Result{})
-}
-
-func DeleteIPAdmin(c *gin.Context) {
-	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
-
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	ipID, err := strconv.Atoi(c.Param("ip_id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	if err = dbService.DeleteIP(uint(id), uint(ipID)); err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, common.Result{})
-}
-
-func DeletePlanAdmin(c *gin.Context) {
-	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
-
-	planID, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	if err = dbPlan.Delete(&core.Plan{Model: gorm.Model{ID: uint(planID)}}); err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, common.Result{})
-}
-
-func DeleteJPNICAdminAdmin(c *gin.Context) {
-	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
-
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	jpnicID, err := strconv.Atoi(c.Param("jpnic_id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	if err = dbService.DeleteJPNICAdmin(uint(id), uint(jpnicID)); err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, common.Result{})
-}
-
-func DeleteJPNICTechAdmin(c *gin.Context) {
-	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
-
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	jpnicID, err := strconv.Atoi(c.Param("jpnic_id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	if err = dbService.DeleteJPNICTech(uint(id), uint(jpnicID)); err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, common.Result{})
-}
-
-func UpdateAdmin(c *gin.Context) {
+func UpdateByAdmin(c *gin.Context) {
 	var input core.Service
 
 	id, err := strconv.Atoi(c.Param("id"))
@@ -436,13 +202,11 @@ func UpdateAdmin(c *gin.Context) {
 		return
 	}
 
-	resultService := dbService.Get(service.ID, &core.Service{Model: gorm.Model{ID: uint(id)}})
-	if resultService.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultService.Err.Error()})
+	before := dbService.Get(service.ID, &core.Service{Model: gorm.Model{ID: uint(id)}})
+	if before.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: before.Err.Error()})
 		return
 	}
-
-	noticeSlackAdmin(resultService.Service[0], input)
 
 	input.ID = uint(id)
 
@@ -450,169 +214,11 @@ func UpdateAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
+	noticeSlackUpdate(before.Service[0], input)
 	c.JSON(http.StatusOK, service.Result{})
 }
 
-func UpdateIPAdmin(c *gin.Context) {
-	var input service.IPInput
-
-	_, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	ipID, err := strconv.Atoi(c.Param("ip_id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	err = c.BindJSON(&input)
-	if err != nil {
-		log.Println(err)
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
-
-	resultIP, err := ipProcess(true, false, []service.IPInput{input})
-	if err != nil {
-		log.Println(err)
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-	resultIP[0].ID = uint(ipID)
-	log.Println(input)
-
-	if err = dbIP.Update(ip.UpdateAll, resultIP[0]); err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, service.Result{})
-}
-
-func UpdatePlanAdmin(c *gin.Context) {
-	var input core.Plan
-
-	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
-
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	err = c.BindJSON(&input)
-	if err != nil {
-		log.Println(err)
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	input.ID = uint(id)
-
-	if err = dbPlan.Update(input); err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, common.Result{})
-}
-
-func UpdateJPNICAdminAdmin(c *gin.Context) {
-	var input core.JPNICAdmin
-
-	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
-
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	err = c.BindJSON(&input)
-	if err != nil {
-		log.Println(err)
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	if err = dbService.UpdateJPNICAdmin(uint(id), input); err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, common.Result{})
-}
-
-func UpdateJPNICTechAdmin(c *gin.Context) {
-	var input core.JPNICTech
-
-	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
-
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	jpnicID, err := strconv.Atoi(c.Param("jpnic_id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	err = c.BindJSON(&input)
-	if err != nil {
-		log.Println(err)
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	ok := false
-
-	resultJPNICTech := dbService.Get(service.ID, &core.Service{Model: gorm.Model{ID: uint(id)}})
-	if resultJPNICTech.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: resultJPNICTech.Err.Error()})
-		return
-	}
-
-	for _, tmp := range resultJPNICTech.Service[0].JPNICTech {
-		if tmp.ID == uint(jpnicID) {
-			ok = true
-			input.Model = tmp.Model
-			break
-		}
-	}
-
-	if ok {
-		if err = dbJPNICTech.Update(jpnicTech.UpdateAll, input); err != nil {
-			c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
-			return
-		}
-		c.JSON(http.StatusOK, common.Result{})
-	} else {
-		c.JSON(http.StatusBadRequest, common.Error{Error: "Not Found GroupID"})
-	}
-}
-
-func GetAdmin(c *gin.Context) {
+func GetByAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
@@ -633,7 +239,7 @@ func GetAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, service.Result{Service: result.Service})
 }
 
-func GetAllAdmin(c *gin.Context) {
+func GetAllByAdmin(c *gin.Context) {
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})

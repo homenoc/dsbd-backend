@@ -1,16 +1,18 @@
 package core
 
 import (
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"time"
 )
 
 type User struct {
 	gorm.Model
 	Tokens        []*Token  `json:"tokens"`
-	Notice        []*Notice `json:"notice"`
+	Notice        []*Notice `json:"notice" gorm:"many2many:user_notice;"`
+	Ticket        []Ticket  `json:"tickets"`
 	Group         *Group    `json:"group"`
-	GroupID       uint      `json:"group_id"`
+	Payment       []Payment `json:"payment_membership"`
+	GroupID       *uint     `json:"group_id"`
 	Name          string    `json:"name"`
 	NameEn        string    `json:"name_en"`
 	Email         string    `json:"email"`
@@ -21,33 +23,59 @@ type User struct {
 	MailToken     string    `json:"mail_token"`
 }
 
+type Payment struct {
+	gorm.Model
+	User            *User  `json:"user"`
+	Group           *Group `json:"group"`
+	UserID          uint   `json:"user_id"`
+	GroupID         *uint  `json:"group_id"`
+	PaymentIntentID string `json:"payment_intent_id"`
+	IsMembership    *bool  `json:"is_membership"`
+	Paid            *bool  `json:"paid"`
+	Refund          *bool  `json:"refund"`
+	Fee             uint   `json:"fee"`
+	Comment         string `json:"comment"`
+}
+
 type Group struct {
 	gorm.Model
-	Users          []User        `json:"users"`
-	Services       []Service     `json:"services"`
-	Tickets        []Ticket      `json:"tickets"`
-	Notice         []*Notice     `json:"notice"`
-	JPNICAdmin     []*JPNICAdmin `json:"jpnic_admin"`
-	JPNICTech      []*JPNICTech  `json:"jpnic_tech"`
-	Agree          *bool         `json:"agree"`
-	Question       string        `json:"question"  gorm:"size:65535"`
-	Org            string        `json:"org"`
-	OrgEn          string        `json:"org_en"`
-	PostCode       string        `json:"postcode"`
-	Address        string        `json:"address"`
-	AddressEn      string        `json:"address_en"`
-	Tel            string        `json:"tel"`
-	Country        string        `json:"country"`
-	Status         *uint         `json:"status"`
-	Contract       string        `json:"contract"`
-	Student        *bool         `json:"student"`
-	StudentExpired *time.Time    `json:"student_expired"`
-	Fee            *uint         `json:"fee"`
-	Comment        string        `json:"comment"`
-	Open           *bool         `json:"open"`
-	Pass           *bool         `json:"pass"`
-	Lock           *bool         `json:"lock"`
-	ExpiredStatus  *uint         `json:"expired_status"`
+	Users                       []User                    `json:"users"`
+	Payment                     []Payment                 `json:"payment_membership"`
+	Services                    []Service                 `json:"services"`
+	Tickets                     []Ticket                  `json:"tickets"`
+	Memos                       []Memo                    `json:"memos"`
+	PaymentMembershipTemplateID *uint                     `json:"payment_membership_template_id"`
+	PaymentCouponTemplateID     *uint                     `json:"payment_coupon_template_id"`
+	PaymentMembershipTemplate   PaymentMembershipTemplate `json:"payment_membership_template"`
+	PaymentCouponTemplate       PaymentCouponTemplate     `json:"payment_coupon_template"`
+	StripeCustomerID            *string                   `json:"stripe_customer_id"`
+	StripeSubscriptionID        *string                   `json:"stripe_subscription_id"`
+	Agree                       *bool                     `json:"agree"`
+	Question                    string                    `json:"question" gorm:"size:10000"`
+	Org                         string                    `json:"org"`
+	OrgEn                       string                    `json:"org_en"`
+	PostCode                    string                    `json:"postcode"`
+	Address                     string                    `json:"address"`
+	AddressEn                   string                    `json:"address_en"`
+	Tel                         string                    `json:"tel"`
+	Country                     string                    `json:"country"`
+	Contract                    string                    `json:"contract"`
+	MemberExpired               *time.Time                `json:"member_expired"`
+	Student                     *bool                     `json:"student"`
+	Comment                     string                    `json:"comment"`
+	Open                        *bool                     `json:"open"`
+	Pass                        *bool                     `json:"pass"`
+	ExpiredStatus               *uint                     `json:"expired_status"`
+	AddAllow                    *bool                     `json:"add_allow"`
+}
+
+// Memo Type 1:Important(Red) 2:Comment1(Blue) 3:Comment2(Gray)
+type Memo struct {
+	gorm.Model
+	GroupID uint   `json:"group_id"`
+	Type    uint   `json:"type"`
+	Title   string `json:"title" gorm:"size:10"`
+	Message string `json:"message"`
 }
 
 type Service struct {
@@ -63,23 +91,21 @@ type Service struct {
 	Address           string           `json:"address"`
 	AddressEn         string           `json:"address_en"`
 	ASN               *uint            `json:"asn"`
-	RouteV4           string           `json:"route_v4"`
-	RouteV6           string           `json:"route_v6"`
 	V4Name            string           `json:"v4_name"`
 	V6Name            string           `json:"v6_name"`
 	AveUpstream       uint             `json:"avg_upstream"`
 	MaxUpstream       uint             `json:"max_upstream"`
 	AveDownstream     uint             `json:"avg_downstream"`
 	MaxDownstream     uint             `json:"max_downstream"`
-	MaxBandWidthAS    uint             `json:"max_bandwidth_as"`
-	Fee               *uint            `json:"fee"`
+	MaxBandWidthAS    string           `json:"max_bandwidth_as"`
 	IP                []IP             `json:"ip"`
 	Connection        []*Connection    `json:"connections"`
-	JPNICAdminID      uint             `json:"jpnic_admin_id"`
 	JPNICAdmin        JPNICAdmin       `json:"jpnic_admin"`
-	JPNICTech         []JPNICTech      `json:"jpnic_tech" gorm:"many2many:service_jpnic_tech;"`
-	Open              *bool            `json:"open"`
-	Lock              *bool            `json:"lock"`
+	JPNICTech         []JPNICTech      `json:"jpnic_tech"`
+	StartDate         time.Time        `json:"start_date"`
+	EndDate           *time.Time       `json:"end_date"`
+	Pass              *bool            `json:"pass"`
+	Enable            *bool            `json:"enable"`
 	AddAllow          *bool            `json:"add_allow"`
 	Group             Group            `json:"group"`
 }
@@ -94,6 +120,8 @@ type Connection struct {
 	ConnectionComment        string                 `json:"connection_comment"` // ServiceがETCの時や補足説明で必要
 	ConnectionNumber         uint                   `json:"connection_number"`
 	NTTTemplateID            *uint                  `json:"ntt_template_id"`
+	IPv4RouteTemplateID      *uint                  `json:"ipv4_route_template_id"`
+	IPv6RouteTemplateID      *uint                  `json:"ipv6_route_template_id"`
 	NOCID                    *uint                  `json:"noc_id"`
 	TermIP                   string                 `json:"term_ip"`
 	Monitor                  *bool                  `json:"monitor"`
@@ -103,8 +131,10 @@ type Connection struct {
 	LinkV6Our                string                 `json:"link_v6_our"`
 	LinkV6Your               string                 `json:"link_v6_your"`
 	Open                     *bool                  `json:"open"`
-	Lock                     *bool                  `json:"lock"`
+	Enable                   *bool                  `json:"enable"`
 	Comment                  string                 `json:"comment"`
+	IPv4RouteTemplate        *IPv4RouteTemplate     `json:"ipv4_route_template"`
+	IPv6RouteTemplate        *IPv6RouteTemplate     `json:"ipv6_route_template"`
 	NTTTemplate              *NTTTemplate           `json:"ntt_template"`
 	NOC                      *NOC                   `json:"noc"`
 	BGPRouter                BGPRouter              `json:"bgp_router"`
@@ -114,7 +144,6 @@ type Connection struct {
 
 type NOC struct {
 	gorm.Model
-	Notice               []*Notice               `json:"notice"`
 	BGPRouter            []*BGPRouter            `json:"bgp_router"`
 	TunnelEndPointRouter []*TunnelEndPointRouter `json:"tunnel_endpoint_router"`
 	Name                 string                  `json:"name"`
@@ -126,19 +155,17 @@ type NOC struct {
 
 type BGPRouter struct {
 	gorm.Model
-	NOCID        uint                    `json:"noc_id"`
-	NOC          NOC                     `json:"noc"`
-	Connection   []Connection            `json:"connection"`
-	HostName     string                  `json:"hostname"`
-	Address      string                  `json:"address"`
-	TunnelRouter []*TunnelEndPointRouter `json:"tunnel_endpoint_router"`
-	Enable       *bool                   `json:"enable"`
-	Comment      string                  `json:"comment"`
+	NOCID    uint   `json:"noc_id"`
+	NOC      NOC    `json:"noc"`
+	HostName string `json:"hostname"`
+	Address  string `json:"address"`
+	Enable   *bool  `json:"enable"`
+	Comment  string `json:"comment"`
 }
 
 type TunnelEndPointRouter struct {
 	gorm.Model
-	NOCID                  uint                      `json:"noc_id"`
+	NOCID                  *uint                     `json:"noc_id"`
 	TunnelEndPointRouterIP []*TunnelEndPointRouterIP `json:"tunnel_endpoint_router_ip"`
 	HostName               string                    `json:"hostname"`
 	Capacity               uint                      `json:"capacity"`
@@ -149,7 +176,7 @@ type TunnelEndPointRouter struct {
 type TunnelEndPointRouterIP struct {
 	gorm.Model
 	TunnelEndPointRouter   TunnelEndPointRouter `json:"tunnel_endpoint_router"`
-	TunnelEndPointRouterID uint                 `json:"tunnel_endpoint_router_id"`
+	TunnelEndPointRouterID *uint                `json:"tunnel_endpoint_router_id"`
 	IP                     string               `json:"ip"`
 	Enable                 *bool                `json:"enable"`
 	Comment                string               `json:"comment"`
@@ -162,7 +189,7 @@ type IP struct {
 	Name      string     `json:"name"`
 	IP        string     `json:"ip"`
 	Plan      []*Plan    `json:"plan" `
-	PlanJPNIC *string    `json:"" gorm:"size:65535"`
+	PlanJPNIC *string    `json:"" gorm:"size:15000"` //いらんかも
 	StartDate time.Time  `json:"start_date"`
 	EndDate   *time.Time `json:"end_date"`
 	UseCase   string     `json:"use_case"`
@@ -180,42 +207,66 @@ type Plan struct {
 
 type JPNICAdmin struct {
 	gorm.Model
-	Service     []Service `gorm:"foreignkey:JPNICAdminID"`
-	JPNICHandle string    `json:"jpnic_handle"`
-	Name        string    `json:"name"`
-	NameEn      string    `json:"name_en"`
-	Mail        string    `json:"mail"`
-	Org         string    `json:"org"`
-	OrgEn       string    `json:"org_en"`
-	PostCode    string    `json:"postcode"`
-	Address     string    `json:"address"`
-	AddressEn   string    `json:"address_en"`
-	Dept        string    `json:"dept"`
-	DeptEn      string    `json:"dept_en"`
-	Tel         string    `json:"tel"`
-	Fax         string    `json:"fax"`
-	Country     string    `json:"country"`
-	Lock        *bool     `json:"lock"`
+	ServiceID   uint   `json:"service_id"`
+	JPNICHandle string `json:"jpnic_handle"`
+	Name        string `json:"name"`
+	NameEn      string `json:"name_en"`
+	Mail        string `json:"mail"`
+	Org         string `json:"org"`
+	OrgEn       string `json:"org_en"`
+	PostCode    string `json:"postcode"`
+	Address     string `json:"address"`
+	AddressEn   string `json:"address_en"`
+	Dept        string `json:"dept"`
+	DeptEn      string `json:"dept_en"`
+	Tel         string `json:"tel"`
+	Fax         string `json:"fax"`
+	Country     string `json:"country"`
 }
 
 type JPNICTech struct {
 	gorm.Model
-	Service     []Service `json:"service" gorm:"many2many:service_jpnic_tech;"`
-	JPNICHandle string    `json:"jpnic_handle"`
-	Name        string    `json:"name"`
-	NameEn      string    `json:"name_en"`
-	Mail        string    `json:"mail"`
-	Org         string    `json:"org"`
-	OrgEn       string    `json:"org_en"`
-	PostCode    string    `json:"postcode"`
-	Address     string    `json:"address"`
-	AddressEn   string    `json:"address_en"`
-	Dept        string    `json:"dept"`
-	DeptEn      string    `json:"dept_en"`
-	Tel         string    `json:"tel"`
-	Fax         string    `json:"fax"`
-	Country     string    `json:"country"`
-	Lock        *bool     `json:"lock"`
+	ServiceID   uint   `json:"service_id"`
+	JPNICHandle string `json:"jpnic_handle"`
+	Name        string `json:"name"`
+	NameEn      string `json:"name_en"`
+	Mail        string `json:"mail"`
+	Org         string `json:"org"`
+	OrgEn       string `json:"org_en"`
+	PostCode    string `json:"postcode"`
+	Address     string `json:"address"`
+	AddressEn   string `json:"address_en"`
+	Dept        string `json:"dept"`
+	DeptEn      string `json:"dept_en"`
+	Tel         string `json:"tel"`
+	Fax         string `json:"fax"`
+	Country     string `json:"country"`
+}
+
+type PaymentMembershipTemplate struct {
+	gorm.Model
+	PriceID string `json:"price_id"`
+	Title   string `json:"title"`
+	Plan    string `json:"plan"`
+	Monthly bool   `json:"monthly"`
+	Yearly  bool   `json:"yearly"`
+	Fee     uint   `json:"fee"`
+	Comment string `json:"comment"`
+}
+
+type PaymentCouponTemplate struct {
+	gorm.Model
+	StripeCouponID string `json:"stripe_coupon_id"`
+	Title          string `json:"title"`
+	DiscountRate   uint   `json:"discount_rate"`
+	Comment        string `json:"comment"`
+}
+
+type PaymentDonateTemplate struct {
+	gorm.Model
+	Name    string `json:"name"`
+	Fee     uint   `json:"fee"`
+	Comment string `json:"comment"`
 }
 
 type ServiceTemplate struct {
@@ -230,6 +281,16 @@ type ServiceTemplate struct {
 	NeedRoute    *bool  `json:"need_route"`
 }
 
+type IPv4RouteTemplate struct {
+	gorm.Model
+	Name string `json:"name"`
+}
+
+type IPv6RouteTemplate struct {
+	gorm.Model
+	Name string `json:"name"`
+}
+
 type ConnectionTemplate struct {
 	gorm.Model
 	Hidden           bool   `json:"hidden"`
@@ -239,6 +300,8 @@ type ConnectionTemplate struct {
 	NeedInternet     *bool  `json:"need_internet"`
 	NeedComment      *bool  `json:"need_comment"`
 	NeedCrossConnect *bool  `json:"need_cross_connect"`
+	L2               *bool  `json:"l2"`
+	L3               *bool  `json:"l3"`
 }
 
 type NTTTemplate struct {
@@ -248,30 +311,34 @@ type NTTTemplate struct {
 	Comment string `json:"comment"`
 }
 
+// 申請中/承諾済み/却下
 type Ticket struct {
 	gorm.Model
-	GroupID uint   `json:"group_id"`
-	UserID  uint   `json:"user_id"`
-	Chat    []Chat `json:"chat"`
-	Solved  *bool  `json:"solved"`
-	Title   string `json:"title"`
-	Group   Group  `json:"group"`
-	User    User   `json:"user"`
+	GroupID       *uint  `json:"group_id"`
+	UserID        *uint  `json:"user_id"`
+	Chat          []Chat `json:"chat"`
+	Request       *bool  `json:"request"`
+	RequestReject *bool  `json:"request_reject"`
+	Solved        *bool  `json:"solved"`
+	Admin         *bool  `json:"admin"`
+	Title         string `json:"title"`
+	Group         Group  `json:"group"`
+	User          User   `json:"user"`
 }
 
 type Chat struct {
 	gorm.Model
 	TicketID uint   `json:"ticket_id"`
-	UserID   uint   `json:"user_id"`
+	UserID   *uint  `json:"user_id"`
 	Admin    bool   `json:"admin"`
-	Data     string `json:"data" gorm:"size:65535"`
+	Data     string `json:"data" gorm:"size:10000"`
 	User     User   `json:"user"`
 }
 
 type Token struct {
 	gorm.Model
 	ExpiredAt   time.Time `json:"expired_at"`
-	UserID      uint      `json:"user_id"`
+	UserID      *uint     `json:"user_id"`
 	User        User      `json:"user"`
 	Status      uint      `json:"status"` //0: initToken(30m) 1: 30m 2:6h 3: 12h 10: 30d 11:180d
 	Admin       *bool     `json:"admin"`
@@ -283,9 +350,7 @@ type Token struct {
 
 type Notice struct {
 	gorm.Model
-	UserID    uint      `json:"user_id"`
-	GroupID   uint      `json:"group_id"`
-	NOCID     uint      `json:"noc_id"`
+	User      []User    `json:"user" gorm:"many2many:notice_user;"`
 	Everyone  *bool     `json:"everyone"`
 	StartTime time.Time `json:"start_time"`
 	EndTime   time.Time `json:"end_time"`
@@ -293,7 +358,7 @@ type Notice struct {
 	Fault     *bool     `json:"fault"`
 	Info      *bool     `json:"info"`
 	Title     string    `json:"title"`
-	Data      string    `json:"data" gorm:"size:65535"`
+	Data      string    `json:"data" gorm:"size:15000"`
 }
 
 type Request struct {

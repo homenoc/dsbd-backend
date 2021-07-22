@@ -6,7 +6,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/auth"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	dbToken "github.com/homenoc/dsbd-backend/pkg/api/store/token/v0"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"log"
 	"time"
 )
@@ -43,7 +43,7 @@ func GroupAuthentication(errorType uint, data core.Token) auth.GroupResult {
 		return auth.GroupResult{Err: fmt.Errorf("deleted this user")}
 	}
 
-	if resultToken.Token[0].User.GroupID == 0 {
+	if resultToken.Token[0].User.GroupID == nil {
 		return auth.GroupResult{Err: fmt.Errorf("no group")}
 	}
 

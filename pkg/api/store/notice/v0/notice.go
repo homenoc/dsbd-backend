@@ -5,7 +5,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/notice"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"log"
 	"time"
 )
@@ -20,7 +20,12 @@ func Create(notice *core.Notice) (*core.Notice, error) {
 		log.Println("database connection error")
 		return notice, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return nil, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	err = db.Create(&notice).Error
 	return notice, err
@@ -32,7 +37,12 @@ func Delete(notice *core.Notice) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	return db.Delete(notice).Error
 }
@@ -43,15 +53,17 @@ func Update(base int, data core.Notice) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
-	var result *gorm.DB
+	err = nil
 
 	if notice.UpdateAll == base {
-		result = db.Model(&core.Notice{Model: gorm.Model{ID: data.ID}}).Update(core.Notice{
-			UserID:    data.UserID,
-			GroupID:   data.GroupID,
-			NOCID:     data.NOCID,
+		err = db.Model(&core.Notice{Model: gorm.Model{ID: data.ID}}).Updates(core.Notice{
 			StartTime: data.StartTime,
 			EndTime:   data.EndTime,
 			Important: data.Important,
@@ -60,12 +72,12 @@ func Update(base int, data core.Notice) error {
 			Info:      data.Info,
 			Title:     data.Title,
 			Data:      data.Data,
-		})
+		}).Error
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
 	}
-	return result.Error
+	return err
 }
 
 func Get(base int, data *core.Notice) notice.ResultDatabase {
@@ -74,7 +86,12 @@ func Get(base int, data *core.Notice) notice.ResultDatabase {
 		log.Println("database connection error")
 		return notice.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return notice.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+	}
+	defer dbSQL.Close()
 
 	var noticeStruct []core.Notice
 
@@ -84,19 +101,22 @@ func Get(base int, data *core.Notice) notice.ResultDatabase {
 	if base == notice.ID { //ID
 		err = db.First(&noticeStruct, data.ID).Error
 	} else if base == notice.UIDOrAll { //UserID Or All
-		err = db.Where("user_id = ? AND start_time < ? AND ? < end_time", data.UserID, dateTime, dateTime).
+		err = db.Where("start_time < ? AND ? < end_time", dateTime, dateTime).
+			Joins("left outer join notice_user on notices.id = notice_user.notice_id").
+			Where("notice_user.user_id = ?", data.User[0].ID).
 			Or("everyone = ? AND start_time < ? AND ? < end_time", true, dateTime, dateTime).
 			Order("id asc").Find(&noticeStruct).Error
 	} else if base == notice.UIDOrGIDOrAll { //UserID Or GroupID Or All
-		err = db.Where("user_id = ? AND start_time < ? AND ? < end_time", data.UserID, dateTime, dateTime).
-			Or("group_id = ? AND start_time < ? AND ? < end_time", data.GroupID, dateTime, dateTime).
+		err = db.Where("start_time < ? AND ? < end_time", dateTime, dateTime).
+			Joins("left outer join user on notice.id = notice_user.notice_id").
+			Where("user_id = ?", data.User[0].Model.ID).
 			Or("everyone = ? AND start_time < ? AND ? < end_time", true, dateTime, dateTime).
 			Order("id asc").Find(&noticeStruct).Error
 	} else if base == notice.UIDOrGIDOrNOCAllOrAll { //UserID Or GroupID Or NOCAll Or All
-		err = db.Where("user_id = ? AND start_time < ? AND ? < end_time", data.UserID, dateTime, dateTime).
-			Or("group_id = ? AND start_time < ? AND ? < end_time", data.GroupID, dateTime, dateTime).
-			Or("everyone = ? AND start_time < ? AND ? < end_time", true, dateTime, dateTime).
-			Or("noc_id != ? AND start_time < ? AND ? < end_time", 0, dateTime, dateTime).
+		err = db.Where("start_time < ? AND ? < end_time", dateTime, dateTime).
+			Joins("left outer join user on notice.id = notice_user.notice_id").
+			Where("user_id = ?", data.User[0].Model.ID).
+			Or("start_time < ? AND ? < end_time AND everyone = ?", dateTime, dateTime, true).
 			Order("id asc").Find(&noticeStruct).Error
 	} else if base == notice.NOCAll { //UserID Or GroupID Or NOCAll Or All
 		err = db.Where("user_id = ? AND user_id = ? AND noc_id != ? AND start_time < ? AND ? < end_time ",
@@ -115,39 +135,18 @@ func Get(base int, data *core.Notice) notice.ResultDatabase {
 	return notice.ResultDatabase{Notice: noticeStruct, Err: err}
 }
 
-func GetArray(base int, data *core.Notice, array []string) notice.ResultDatabase {
-	db, err := store.ConnectDB()
-	if err != nil {
-		log.Println("database connection error")
-		return notice.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
-	}
-	defer db.Close()
-
-	var noticeStruct []core.Notice
-
-	dateTime := time.Now()
-
-	if base == notice.UIDOrGIDOrNOCAllOrAll { //UserID Or GroupID Or NOCAll Or All
-		err = db.Where("user_id = ? AND start_time < ? AND ? < end_time ", data.UserID, dateTime, dateTime).
-			Or("group_id = ? AND start_time < ? AND ? < end_time", data.GroupID, dateTime, dateTime).
-			Or("everyone = ? AND start_time < ? AND ? < end_time", true, dateTime, dateTime).
-			Or("noc_id IN (?) AND start_time < ? AND ? < end_time", array, dateTime, dateTime).
-			Order("id desc").
-			Find(&noticeStruct).Error
-	} else {
-		log.Println("base select error")
-		return notice.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
-	}
-	return notice.ResultDatabase{Notice: noticeStruct, Err: err}
-}
-
 func GetAll() notice.ResultDatabase {
 	db, err := store.ConnectDB()
 	if err != nil {
 		log.Println("database connection error")
 		return notice.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return notice.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+	}
+	defer dbSQL.Close()
 
 	var notices []core.Notice
 	err = db.Find(&notices).Error

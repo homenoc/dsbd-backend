@@ -16,19 +16,11 @@ import (
 	"time"
 )
 
-func SendChatAdmin(data controller.Chat) {
+func SendChatByAdmin(data controller.Chat) {
 	client := &http.Client{}
 	client.Timeout = time.Second * 5
 
-	body, _ := json.Marshal(controller.Chat{
-		Err:       data.Err,
-		CreatedAt: data.CreatedAt,
-		UserID:    data.UserID,
-		UserName:  data.UserName,
-		GroupID:   data.GroupID,
-		Admin:     data.Admin,
-		Message:   data.Message,
-	})
+	body, _ := json.Marshal(data)
 
 	//Header部分
 	header := http.Header{}
@@ -60,12 +52,13 @@ func SendChatAdmin(data controller.Chat) {
 	}
 }
 
-func ReceiveChatAdmin(c *gin.Context) {
+func ReceiveChatByAdmin(c *gin.Context) {
 	token1 := c.Request.Header.Get("TOKEN_1")
 	token2 := c.Request.Header.Get("TOKEN_2")
 
 	if err := auth.ControllerAuthentication(controller.Controller{Token1: token1, Token2: token2}); err != nil {
 		log.Println(err)
+		return
 	}
 
 	var input controller.Chat
@@ -73,7 +66,9 @@ func ReceiveChatAdmin(c *gin.Context) {
 
 	support.Broadcast <- support.WebSocketResult{
 		CreatedAt: time.Now(),
+		TicketID:  input.TicketID,
 		UserID:    input.UserID,
+		UserName:  input.UserName,
 		GroupID:   input.GroupID,
 		Admin:     input.Admin,
 		Message:   input.Message,

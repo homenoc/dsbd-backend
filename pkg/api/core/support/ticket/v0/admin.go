@@ -17,14 +17,14 @@ import (
 	dbChat "github.com/homenoc/dsbd-backend/pkg/api/store/support/chat/v0"
 	dbTicket "github.com/homenoc/dsbd-backend/pkg/api/store/support/ticket/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"strconv"
 	"time"
 )
 
-func CreateAdmin(c *gin.Context) {
+func CreateByAdmin(c *gin.Context) {
 	var input support.FirstInput
 
 	// Admin authentication
@@ -42,18 +42,39 @@ func CreateAdmin(c *gin.Context) {
 	}
 
 	// input check
-	if err = checkAdmin(input); err != nil {
+	if err = checkByAdmin(input); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-
-	// Tickets DBに登録
-	ticketResult, err := dbTicket.Create(&core.Ticket{
-		GroupID: input.GroupID,
-		UserID:  0,
+	resultTicket := &core.Ticket{
 		Solved:  &[]bool{false}[0],
 		Title:   input.Title,
-	})
+		Admin:   &[]bool{true}[0],
+		Request: &[]bool{false}[0],
+	}
+
+	// isn't group
+	if !input.IsGroup {
+		if input.UserID == 0 {
+			c.JSON(http.StatusBadRequest, common.Error{Error: "UserID is wrong"})
+			return
+		}
+
+		resultTicket.GroupID = nil
+		resultTicket.UserID = &input.UserID
+	} else {
+		//is group
+		if input.UserID == 0 {
+			c.JSON(http.StatusBadRequest, common.Error{Error: "GroupID is wrong"})
+			return
+		}
+
+		resultTicket.GroupID = &input.GroupID
+		resultTicket.UserID = nil
+	}
+
+	// Tickets DBに登録
+	ticketResult, err := dbTicket.Create(resultTicket)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
@@ -61,7 +82,7 @@ func CreateAdmin(c *gin.Context) {
 
 	// Chat DBに登録
 	chatResult, err := dbChat.Create(&core.Chat{
-		UserID:   0,
+		UserID:   nil,
 		Admin:    true,
 		Data:     input.Data,
 		TicketID: ticketResult.ID,
@@ -77,7 +98,7 @@ func CreateAdmin(c *gin.Context) {
 	})
 }
 
-func UpdateAdmin(c *gin.Context) {
+func UpdateByAdmin(c *gin.Context) {
 	var input core.Ticket
 	// Admin authentication
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
@@ -122,7 +143,7 @@ func UpdateAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, support.Result{})
 }
 
-func GetAdmin(c *gin.Context) {
+func GetByAdmin(c *gin.Context) {
 	// Admin authentication
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
@@ -145,7 +166,7 @@ func GetAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, support.Result{Ticket: resultTicket.Tickets})
 }
 
-func GetAllAdmin(c *gin.Context) {
+func GetAllByAdmin(c *gin.Context) {
 	// Admin authentication
 	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
@@ -198,12 +219,18 @@ func GetAdminWebSocket(c *gin.Context) {
 		return
 	}
 
+	var groupID uint = 0
+
+	if ticketResult.Tickets[0].GroupID != nil {
+		groupID = *ticketResult.Tickets[0].GroupID
+	}
+
 	// WebSocket送信
 	support.Clients[&support.WebSocket{
 		TicketID: uint(id),
 		UserID:   resultAdmin.AdminID,
 		UserName: "HomeNOC",
-		GroupID:  ticketResult.Tickets[0].GroupID,
+		GroupID:  groupID,
 		Socket:   conn,
 	}] = true
 
@@ -217,7 +244,7 @@ func GetAdminWebSocket(c *gin.Context) {
 				TicketID: uint(id),
 				UserID:   resultAdmin.AdminID,
 				UserName: "HomeNOC(運営)",
-				GroupID:  ticketResult.Tickets[0].GroupID,
+				GroupID:  groupID,
 				Socket:   conn,
 			})
 			break
@@ -225,15 +252,16 @@ func GetAdminWebSocket(c *gin.Context) {
 
 		_, err = dbChat.Create(&core.Chat{
 			TicketID: ticketResult.Tickets[0].ID,
-			UserID:   resultAdmin.AdminID,
+			UserID:   nil,
 			Admin:    true,
 			Data:     msg.Message,
 		})
 		if err != nil {
 			conn.WriteJSON(&support.WebSocketResult{Err: "db write error"})
 		} else {
+			msg.TicketID = uint(id)
 			msg.UserID = resultAdmin.AdminID
-			msg.GroupID = ticketResult.Tickets[0].GroupID
+			msg.GroupID = groupID
 			msg.UserName = "HomeNOC(運営)"
 			msg.Admin = true
 			// Token関連の初期化
@@ -241,12 +269,13 @@ func GetAdminWebSocket(c *gin.Context) {
 			msg.UserToken = ""
 
 			//Admin側に送信
-			controller.SendChatAdmin(controllerInterface.Chat{
+			controller.SendChatByAdmin(controllerInterface.Chat{
+				TicketID:  uint(id),
 				CreatedAt: msg.CreatedAt,
 				Admin:     msg.Admin,
 				UserID:    resultAdmin.AdminID,
 				UserName:  msg.UserName,
-				GroupID:   ticketResult.Tickets[0].GroupID,
+				GroupID:   groupID,
 				Message:   msg.Message,
 			})
 
@@ -280,30 +309,46 @@ func GetAdminWebSocket(c *gin.Context) {
 	}
 }
 
-func HandleMessagesAdmin() {
+func HandleMessagesByAdmin() {
 	for {
 		msg := <-support.Broadcast
+
 		//登録されているクライアント宛にデータ送信する
 		for client := range support.Clients {
 			// ユーザのみの場合
-			if client.GroupID == 0 {
-				return
-			} else if client.GroupID == msg.GroupID {
-				err := client.Socket.WriteJSON(support.WebSocketChatResponse{
-					Time:     time.Now().UTC().Add(9 * time.Hour).Format(timeLayout),
-					UserID:   msg.UserID,
-					UserName: msg.UserName,
-					GroupID:  msg.GroupID,
-					Admin:    msg.Admin,
-					Message:  msg.Message,
-				})
-				if err != nil {
-					log.Printf("error: %v", err)
-					client.Socket.Close()
-					delete(support.Clients, client)
+			log.Println(msg)
+			if client.TicketID == msg.TicketID {
+				if msg.GroupID == 0 {
+					err := client.Socket.WriteJSON(support.WebSocketChatResponse{
+						Time:     time.Now().UTC().Add(9 * time.Hour).Format(timeLayout),
+						UserID:   msg.UserID,
+						UserName: msg.UserName,
+						GroupID:  0,
+						Admin:    msg.Admin,
+						Message:  msg.Message,
+					})
+					if err != nil {
+						log.Printf("error: %v", err)
+						client.Socket.Close()
+						delete(support.Clients, client)
+					}
+				} else if client.GroupID == msg.GroupID {
+					err := client.Socket.WriteJSON(support.WebSocketChatResponse{
+						Time:     time.Now().UTC().Add(9 * time.Hour).Format(timeLayout),
+						UserID:   msg.UserID,
+						UserName: msg.UserName,
+						GroupID:  msg.GroupID,
+						Admin:    msg.Admin,
+						Message:  msg.Message,
+					})
+					if err != nil {
+						log.Printf("error: %v", err)
+						client.Socket.Close()
+						delete(support.Clients, client)
+					}
+				} else {
+					// 認証失敗時の処理
 				}
-			} else {
-				// 認証失敗時の処理
 			}
 		}
 	}

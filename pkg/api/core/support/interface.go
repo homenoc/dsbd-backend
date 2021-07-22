@@ -3,7 +3,7 @@ package support
 import (
 	"github.com/gorilla/websocket"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -16,6 +16,7 @@ type WebSocketResult struct {
 	ID          uint      `json:"id"`
 	Err         string    `json:"error"`
 	CreatedAt   time.Time `json:"created_at"`
+	TicketID    uint      `json:"ticket_id"`
 	UserToken   string    `json:"user_token"`
 	AccessToken string    `json:"access_token"`
 	UserID      uint      `json:"user_id"`
@@ -45,9 +46,11 @@ type WebSocket struct {
 
 type FirstInput struct {
 	gorm.Model
+	IsGroup  bool   `json:"is_group"`
 	TicketID uint   `json:"ticket_id"`
 	Title    string `json:"title"`
 	Data     string `json:"data"`
+	UserID   uint   `json:"user_id"`
 	GroupID  uint   `json:"group_id"`
 }
 

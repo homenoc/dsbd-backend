@@ -43,13 +43,11 @@ type Input struct {
 	Postcode          string           `json:"postcode"`
 	Address           string           `json:"address"`
 	AddressEn         string           `json:"address_en"`
-	RouteV4           string           `json:"route_v4"`
-	RouteV6           string           `json:"route_v6"`
 	AveUpstream       uint             `json:"avg_upstream"`
 	MaxUpstream       uint             `json:"max_upstream"`
 	AveDownstream     uint             `json:"avg_downstream"`
 	MaxDownstream     uint             `json:"max_downstream"`
-	MaxBandWidthAS    uint             `json:"max_bandwidth_as"`
+	MaxBandWidthAS    string           `json:"max_bandwidth_as"`
 	ASN               uint             `json:"asn"`
 	IP                []IPInput        `json:"ip"`
 	Lock              bool             `json:"lock"`
@@ -93,7 +91,7 @@ type Service struct {
 	MaxUpstream         uint                     `json:"max_upstream"`
 	AveDownstream       uint                     `json:"avg_downstream"`
 	MaxDownstream       uint                     `json:"max_downstream"`
-	MaxBandWidthAS      uint                     `json:"max_bandwidth_as"`
+	MaxBandWidthAS      string                   `json:"max_bandwidth_as"`
 	Fee                 *uint                    `json:"fee"`
 	IP                  []core.IP                `json:"ip"`
 	Connections         *[]connection.Connection `json:"connections"`

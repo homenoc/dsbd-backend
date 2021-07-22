@@ -5,7 +5,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	ipv6 "github.com/homenoc/dsbd-backend/pkg/api/core/template/ipv6"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"log"
 	"time"
 )
@@ -16,7 +16,12 @@ func Create(ipv4 *core.IPv6Template) (*core.IPv6Template, error) {
 		log.Println("database ipv6 error")
 		return ipv4, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return nil, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	err = db.Create(&ipv4).Error
 	return ipv4, err
@@ -28,7 +33,12 @@ func Delete(ipv4 *core.IPv6Template) error {
 		log.Println("database ipv6 error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	return db.Delete(ipv4).Error
 }
@@ -39,18 +49,23 @@ func Update(base int, c core.IPv6Template) error {
 		log.Println("database ipv6 error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
-	var result *gorm.DB
+	err = nil
 
 	if base == ipv6.UpdateAll {
-		result = db.Model(&core.IPv6Template{Model: gorm.Model{ID: c.ID}}).Update(c)
+		err = db.Model(&core.IPv6Template{Model: gorm.Model{ID: c.ID}}).Updates(c).Error
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
 	}
 
-	return result.Error
+	return err
 }
 
 func Get(base int, data *core.IPv6Template) ipv6.ResultDatabase {
@@ -59,7 +74,12 @@ func Get(base int, data *core.IPv6Template) ipv6.ResultDatabase {
 		log.Println("database ipv6 error")
 		return ipv6.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return ipv6.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+	}
+	defer dbSQL.Close()
 
 	var ipv6Struct []core.IPv6Template
 
@@ -80,7 +100,12 @@ func GetAll() ipv6.ResultDatabase {
 		log.Println("database ipv6 error")
 		return ipv6.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return ipv6.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+	}
+	defer dbSQL.Close()
 
 	var ipv6s []core.IPv6Template
 	err = db.Find(&ipv6s).Error

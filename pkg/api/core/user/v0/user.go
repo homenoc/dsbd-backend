@@ -18,7 +18,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"strconv"
@@ -50,7 +50,7 @@ func Add(c *gin.Context) {
 	}
 
 	data = core.User{
-		GroupID:       0,
+		GroupID:       nil,
 		Name:          input.Name,
 		NameEn:        input.NameEn,
 		Email:         input.Email,
@@ -64,11 +64,10 @@ func Add(c *gin.Context) {
 	//check exist for database
 	result := dbUser.Get(user.Email, &core.User{Email: input.Email})
 	if result.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
-		return
+		log.Println(result.Err)
 	}
 
-	if len(result.User) != 0 {
+	if len(result.User) != 0 && result.Err == nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: "this email is already registered: \" + u.Email"})
 		return
 	}
@@ -148,7 +147,12 @@ func AddGroup(c *gin.Context) {
 		return
 	}
 
-	if resultAuth.User.GroupID != uint(id) {
+	if resultAuth.User.GroupID == nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: "error: group is not found"})
+		return
+	}
+
+	if *resultAuth.User.GroupID != uint(id) {
 		c.JSON(http.StatusBadRequest, common.Error{Error: "error: group id is invalid"})
 		return
 	}
@@ -310,7 +314,7 @@ func Update(c *gin.Context) {
 	if authResult.User.ID == uint(id) || id == 0 {
 		serverData = authResult.User
 	} else {
-		if authResult.User.GroupID == 0 {
+		if authResult.User.GroupID == nil {
 			c.JSON(http.StatusForbidden, common.Error{Error: "error: Group ID = 0"})
 			return
 		}
@@ -343,139 +347,4 @@ func Update(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusOK, user.Result{})
 	}
-}
-
-func Get(c *gin.Context) {
-	userToken := c.Request.Header.Get("USER_TOKEN")
-	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
-
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: fmt.Sprintf("id error")})
-		return
-	}
-
-	authResult := auth.UserAuthentication(core.Token{UserToken: userToken, AccessToken: accessToken})
-	authResult.User.Pass = ""
-	authResult.User.MailToken = ""
-	if authResult.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: authResult.Err.Error()})
-		return
-	}
-
-	var tmpUser core.User
-
-	if authResult.User.ID == uint(id) {
-		tmpUser = authResult.User
-	} else if authResult.User.GroupID != 0 {
-		if authResult.User.Level >= 3 {
-			c.JSON(http.StatusForbidden, common.Error{Error: "You don't have the authority."})
-			return
-		}
-
-		resultUser := dbUser.Get(user.ID, &core.User{Model: gorm.Model{ID: uint(id)}})
-		if resultUser.Err != nil {
-			c.JSON(http.StatusUnauthorized, common.Error{Error: resultUser.Err.Error()})
-			return
-		}
-
-		if resultUser.User[0].GroupID != authResult.User.GroupID {
-			c.JSON(http.StatusBadRequest, common.Error{Error: "GroupID is not match."})
-			return
-		}
-		tmpUser = resultUser.User[0]
-	}
-
-	c.JSON(http.StatusOK, user.ResultOne{
-		ID:         tmpUser.ID,
-		GroupID:    tmpUser.GroupID,
-		Name:       tmpUser.Name,
-		NameEn:     tmpUser.NameEn,
-		Email:      tmpUser.Email,
-		Level:      tmpUser.Level,
-		MailVerify: tmpUser.MailVerify,
-	})
-}
-
-func GetOwn(c *gin.Context) {
-	userToken := c.Request.Header.Get("USER_TOKEN")
-	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
-
-	authResult := auth.UserAuthentication(core.Token{UserToken: userToken, AccessToken: accessToken})
-	authResult.User.Pass = ""
-	authResult.User.MailToken = ""
-
-	var simpleGroup *user.SimpleGroup = nil
-
-	if authResult.User.Group != nil {
-		simpleGroup = &user.SimpleGroup{
-			ID:            authResult.User.Group.ID,
-			Student:       authResult.User.Group.Student,
-			Pass:          authResult.User.Group.Pass,
-			Lock:          authResult.User.Group.Lock,
-			ExpiredStatus: authResult.User.Group.ExpiredStatus,
-			Status:        authResult.User.Group.Status,
-		}
-	}
-
-	if authResult.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: authResult.Err.Error()})
-	} else {
-		c.JSON(http.StatusOK, user.ResultOne{
-			ID:         authResult.User.ID,
-			GroupID:    authResult.User.GroupID,
-			Name:       authResult.User.Name,
-			NameEn:     authResult.User.NameEn,
-			Email:      authResult.User.Email,
-			Level:      authResult.User.Level,
-			MailVerify: authResult.User.MailVerify,
-			Group:      simpleGroup,
-		})
-	}
-}
-
-func GetGroup(c *gin.Context) {
-	userToken := c.Request.Header.Get("USER_TOKEN")
-	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
-
-	authUserResult := auth.UserAuthentication(core.Token{UserToken: userToken, AccessToken: accessToken})
-	if authUserResult.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: authUserResult.Err.Error()})
-		return
-	}
-
-	var data user.Result
-
-	if authUserResult.User.GroupID != 0 && authUserResult.User.Level < 3 {
-		resultGroupUser := dbUser.Get(user.GID, &core.User{GroupID: authUserResult.User.GroupID})
-		if resultGroupUser.Err != nil {
-			c.JSON(http.StatusInternalServerError, common.Error{Error: resultGroupUser.Err.Error()})
-			return
-		}
-
-		for _, grp := range resultGroupUser.User {
-			data.User = append(data.User, user.ResultOne{
-				ID:         grp.ID,
-				GroupID:    grp.GroupID,
-				Name:       grp.Name,
-				NameEn:     grp.NameEn,
-				Email:      grp.Email,
-				Level:      grp.Level,
-				MailVerify: grp.MailVerify,
-			})
-		}
-	} else {
-		// User権限がLevel=2の時、又はユーザのGroupIDが0の時（グループ未登録時）
-		data.User = append(data.User, user.ResultOne{
-			ID:         authUserResult.User.ID,
-			GroupID:    authUserResult.User.GroupID,
-			Name:       authUserResult.User.Name,
-			NameEn:     authUserResult.User.NameEn,
-			Email:      authUserResult.User.Email,
-			Level:      authUserResult.User.Level,
-			MailVerify: authUserResult.User.MailVerify,
-		})
-	}
-
-	c.JSON(http.StatusOK, data)
 }

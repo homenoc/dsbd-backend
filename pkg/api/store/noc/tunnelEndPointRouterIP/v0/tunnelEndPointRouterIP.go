@@ -5,7 +5,7 @@ import (
 	core "github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/noc/tunnelEndPointRouterIP"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"log"
 	"time"
 )
@@ -16,7 +16,12 @@ func Create(router *core.TunnelEndPointRouterIP) (*core.TunnelEndPointRouterIP, 
 		log.Println("database connection error")
 		return router, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return nil, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	err = db.Create(&router).Error
 	return router, err
@@ -28,7 +33,12 @@ func Delete(router *core.TunnelEndPointRouterIP) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
 	return db.Delete(router).Error
 }
@@ -39,21 +49,26 @@ func Update(base int, data core.TunnelEndPointRouterIP) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	}
+	defer dbSQL.Close()
 
-	var result *gorm.DB
+	err = nil
 
 	if tunnelEndPointRouterIP.UpdateAll == base {
-		result = db.Model(&core.TunnelEndPointRouterIP{Model: gorm.Model{ID: data.ID}}).Update(core.TunnelEndPointRouterIP{
+		err = db.Model(&core.TunnelEndPointRouterIP{Model: gorm.Model{ID: data.ID}}).Updates(core.TunnelEndPointRouterIP{
 			IP:      data.IP,
 			Comment: data.Comment,
 			Enable:  data.Enable,
-		})
+		}).Error
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
 	}
-	return result.Error
+	return err
 }
 
 func Get(base int, data *core.TunnelEndPointRouterIP) tunnelEndPointRouterIP.ResultDatabase {
@@ -62,7 +77,12 @@ func Get(base int, data *core.TunnelEndPointRouterIP) tunnelEndPointRouterIP.Res
 		log.Println("database connection error")
 		return tunnelEndPointRouterIP.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return tunnelEndPointRouterIP.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+	}
+	defer dbSQL.Close()
 
 	var routerStruct []core.TunnelEndPointRouterIP
 
@@ -84,9 +104,14 @@ func GetAll() tunnelEndPointRouterIP.ResultDatabase {
 		log.Println("database connection error")
 		return tunnelEndPointRouterIP.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	defer db.Close()
+	dbSQL, err := db.DB()
+	if err != nil {
+		log.Printf("database error: %v", err)
+		return tunnelEndPointRouterIP.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
+	}
+	defer dbSQL.Close()
 
 	var routers []core.TunnelEndPointRouterIP
-	err = db.Find(&routers).Error
+	err = db.Preload("TunnelEndPointRouter").Find(&routers).Error
 	return tunnelEndPointRouterIP.ResultDatabase{TunnelEndPointRouterIP: routers, Err: err}
 }
