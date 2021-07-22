@@ -161,11 +161,16 @@ func Get(c *gin.Context) {
 			}
 
 			if !*tmpTicket.Request {
+				var groupIDTicket uint = 0
+				if tmpTicket.GroupID != nil {
+					groupIDTicket = *tmpTicket.GroupID
+				}
+
 				// Ticket
 				resultTicket = append(resultTicket, info.Ticket{
 					ID:        tmpTicket.ID,
 					CreatedAt: tmpTicket.CreatedAt,
-					GroupID:   *tmpTicket.GroupID,
+					GroupID:   groupIDTicket,
 					UserID:    *tmpTicket.UserID,
 					Chat:      resultChat,
 					Solved:    tmpTicket.Solved,
@@ -205,15 +210,11 @@ func Get(c *gin.Context) {
 						Data:      tmpChat.Data,
 					})
 				}
-				groupID = 0
-				if authResult.User.GroupID != nil {
-					groupID = *authResult.User.GroupID
-				}
 
 				resultTicket = append(resultTicket, info.Ticket{
 					ID:        tmpTicket.ID,
 					CreatedAt: tmpTicket.CreatedAt,
-					GroupID:   groupID,
+					GroupID:   0,
 					UserID:    authResult.User.ID,
 					Chat:      resultChat,
 					Solved:    tmpTicket.Solved,
