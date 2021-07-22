@@ -67,7 +67,7 @@ func Add(c *gin.Context) {
 		log.Println(result.Err)
 	}
 
-	if len(result.User) != 0 && result.Err != nil {
+	if len(result.User) != 0 && result.Err == nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: "this email is already registered: \" + u.Email"})
 		return
 	}
