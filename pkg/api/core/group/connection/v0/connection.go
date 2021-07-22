@@ -148,8 +148,6 @@ func Add(c *gin.Context) {
 			}
 		}
 
-		log.Println(input.IPv4RouteTemplateID)
-		log.Println(input.IPv6RouteTemplateID)
 		if ipv4Enable {
 			_, err = dbIPv4RouteTemplate.Get(input.IPv4RouteTemplateID)
 			if err != nil {
