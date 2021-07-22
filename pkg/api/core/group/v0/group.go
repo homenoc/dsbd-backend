@@ -73,7 +73,7 @@ func Add(c *gin.Context) {
 		log.Println("Error: " + err.Error())
 	}
 
-	result, err := dbGroup.Create(&core.Group{
+	groupData := core.Group{
 		Agree:            &[]bool{*input.Agree}[0],
 		StripeCustomerID: &cus.ID,
 		Question:         input.Question,
@@ -91,7 +91,9 @@ func Add(c *gin.Context) {
 		Open:             &[]bool{false}[0],
 		Pass:             &[]bool{false}[0],
 		AddAllow:         &[]bool{true}[0],
-	})
+	}
+
+	_, err = dbGroup.Create(&groupData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
@@ -107,8 +109,8 @@ func Add(c *gin.Context) {
 
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 
-	if err = dbUser.Update(user.UpdateGID, &core.User{Model: gorm.Model{ID: userResult.User.ID}, GroupID: &result.Model.ID}); err != nil {
-		log.Println(dbGroup.Delete(&core.Group{Model: gorm.Model{ID: result.ID}}))
+	if err = dbUser.Update(user.UpdateGID, &core.User{Model: gorm.Model{ID: userResult.User.ID}, GroupID: &groupData.ID}); err != nil {
+		log.Println(dbGroup.Delete(&core.Group{Model: gorm.Model{ID: groupData.ID}}))
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 	} else {
 		c.JSON(http.StatusOK, common.Result{})
