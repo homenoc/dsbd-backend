@@ -48,20 +48,24 @@ func AddByAdmin(c *gin.Context) {
 	}
 
 	var userIDArray []uint
+	var userArray []core.User
 
-	for _, tmpID := range userExtraction(input.UserID, input.GroupID, input.NOCID) {
-		userIDArray = append(userIDArray, tmpID)
-	}
+	if !*input.Everyone {
+		for _, tmpID := range userExtraction(input.UserID, input.GroupID, input.NOCID) {
+			userIDArray = append(userIDArray, tmpID)
+		}
 
-	resultUser := dbUser.GetArray(userIDArray)
-	if resultUser.Err != nil {
-		log.Println(resultUser.Err.Error())
-		c.JSON(http.StatusInternalServerError, common.Error{Error: resultUser.Err.Error()})
-		return
+		resultUser := dbUser.GetArray(userIDArray)
+		if resultUser.Err != nil {
+			log.Println(resultUser.Err.Error())
+			c.JSON(http.StatusInternalServerError, common.Error{Error: resultUser.Err.Error()})
+			return
+		}
+		userArray = resultUser.User
 	}
 
 	if _, err = dbNotice.Create(&core.Notice{
-		User:      resultUser.User,
+		User:      userArray,
 		Everyone:  input.Everyone,
 		StartTime: startTime,
 		EndTime:   endTime,
