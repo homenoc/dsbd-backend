@@ -284,31 +284,53 @@ func GetAdminWebSocket(c *gin.Context) {
 			if resultTicket.Err != nil {
 				log.Println(resultTicket.Err)
 			}
-			if len(resultTicket.Tickets) != 0 {
-				resultUser := dbUser.Get(user.GIDAndLevel, &core.User{
-					GroupID: resultTicket.Tickets[0].GroupID,
-					Level:   1,
-				})
-				if resultUser.Err != nil {
-					log.Println(resultUser.Err)
-				}
+			mailTemplate := core.MailTemplate{ProcessID: "signature"}
+			err = dbMailTemplate.Get(&mailTemplate)
+			if err != nil {
+				log.Println(err)
+			}
 
-				mailTemplate := core.MailTemplate{ProcessID: "signature"}
-				err = dbMailTemplate.Get(&mailTemplate)
-				if err != nil {
-					log.Println(err)
-				}
-				if len(resultUser.User) != 0 {
-					for _, userTmp := range resultUser.User {
+			if len(resultTicket.Tickets) != 0 {
+				if groupID != 0 {
+
+					resultUser := dbUser.Get(user.GIDAndLevel, &core.User{
+						GroupID: resultTicket.Tickets[0].GroupID,
+						Level:   1,
+					})
+					if resultUser.Err != nil {
+						log.Println(resultUser.Err)
+					}
+
+					if len(resultUser.User) != 0 {
+						for _, userTmp := range resultUser.User {
+							//グループ側にメール送信
+							v0.SendMail(mail.Mail{
+								ToMail:  userTmp.Email,
+								Subject: "Supportより新着メッセージ",
+								Content: " " + userTmp.Name + "様\n\n" + "チャットより新着メッセージがあります\n" +
+									"Webシステムよりご覧いただけます。" + mailTemplate.Message,
+							})
+						}
+					}
+				} else {
+					resultUser := dbUser.Get(user.ID, &core.User{
+						Model: gorm.Model{ID: *resultTicket.Tickets[0].UserID},
+					})
+					if resultUser.Err != nil {
+						log.Println(resultUser.Err)
+					}
+
+					if len(resultUser.User) != 0 {
 						//グループ側にメール送信
 						v0.SendMail(mail.Mail{
-							ToMail:  userTmp.Email,
+							ToMail:  resultUser.User[0].Email,
 							Subject: "Supportより新着メッセージ",
-							Content: " " + userTmp.Name + "様\n\n" + "チャットより新着メッセージがあります\n" +
+							Content: " " + resultUser.User[0].Name + "様\n\n" + "チャットより新着メッセージがあります\n" +
 								"Webシステムよりご覧いただけます。" + mailTemplate.Message,
 						})
 					}
 				}
+
 			}
 
 			support.Broadcast <- msg
