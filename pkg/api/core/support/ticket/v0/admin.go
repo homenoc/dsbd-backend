@@ -16,6 +16,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbChat "github.com/homenoc/dsbd-backend/pkg/api/store/support/chat/v0"
 	dbTicket "github.com/homenoc/dsbd-backend/pkg/api/store/support/ticket/v0"
+	dbMailTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/mail/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"gorm.io/gorm"
 	"log"
@@ -291,6 +292,12 @@ func GetAdminWebSocket(c *gin.Context) {
 				if resultUser.Err != nil {
 					log.Println(resultUser.Err)
 				}
+
+				mailTemplate := core.MailTemplate{ProcessID: "signature"}
+				err = dbMailTemplate.Get(&mailTemplate)
+				if err != nil {
+					log.Println(err)
+				}
 				if len(resultUser.User) != 0 {
 					for _, userTmp := range resultUser.User {
 						//グループ側にメール送信
@@ -298,7 +305,7 @@ func GetAdminWebSocket(c *gin.Context) {
 							ToMail:  userTmp.Email,
 							Subject: "Supportより新着メッセージ",
 							Content: " " + userTmp.Name + "様\n\n" + "チャットより新着メッセージがあります\n" +
-								"Webシステムよりご覧いただけます。\n",
+								"Webシステムよりご覧いただけます。" + mailTemplate.Message,
 						})
 					}
 				}

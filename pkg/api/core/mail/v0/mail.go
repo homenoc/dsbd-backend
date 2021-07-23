@@ -52,7 +52,7 @@ func SendMail(d mailStruct.Mail) error {
 		"From:" + from.String() + "\r\n" +
 		"To:" + to.String() + "\r\n" +
 		encodeSubject(d.Subject) + "\r\n" +
-		"\r\n" + d.Content + config.Conf.Mail.Contract + "\r\n"
+		"\r\n" + d.Content + "\r\n"
 
 	auth := smtp.PlainAuth("", config.Conf.Mail.User, config.Conf.Mail.Pass, config.Conf.Mail.Host)
 	err := smtp.SendMail(config.Conf.Mail.Host+":"+strconv.Itoa(config.Conf.Mail.Port), auth,
