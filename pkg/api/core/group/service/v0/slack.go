@@ -4,6 +4,7 @@ import (
 	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
 	serviceTemplate "github.com/homenoc/dsbd-backend/pkg/api/core/template/service"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
@@ -36,7 +37,7 @@ func noticeSlackAddJPNICByAdmin(serviceID int, input core.JPNICAdmin) {
 	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
 		AddField(slack.Field{Title: "Service", Value: strconv.Itoa(serviceID)}).
 		AddField(slack.Field{Title: "Name", Value: input.Name + " (" + input.NameEn + ")"}).
-		AddField(slack.Field{Title: "Org", Value: input.Org + " (" + input.OrgEn + ")"})
+		AddField(slack.Field{Title: "追加状況", Value: changeTextJPNICByAdmin(core.JPNICAdmin{}, input)})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 }
 
@@ -47,18 +48,19 @@ func noticeSlackAddJPNICTech(serviceID int, input core.JPNICTech) {
 	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
 		AddField(slack.Field{Title: "Service", Value: strconv.Itoa(serviceID)}).
 		AddField(slack.Field{Title: "Name", Value: input.Name + " (" + input.NameEn + ")"}).
-		AddField(slack.Field{Title: "Org", Value: input.Org + " (" + input.OrgEn + ")"})
+		AddField(slack.Field{Title: "追加状況", Value: changeTextJPNICTech(core.JPNICTech{}, input)})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 }
 
-func noticeSlackAddIP(serviceID int, inputName string) {
+func noticeSlackAddIP(serviceID int, input service.IPInput) {
 	// 審査ステータスのSlack通知
 	attachment := slack.Attachment{}
 
 	attachment.Text = &[]string{"IPの追加"}[0]
 	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
 		AddField(slack.Field{Title: "Service", Value: strconv.Itoa(serviceID)}).
-		AddField(slack.Field{Title: "Name", Value: inputName})
+		AddField(slack.Field{Title: "Name", Value: input.Name}).
+		AddField(slack.Field{Title: "IP", Value: input.IP})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 }
 
