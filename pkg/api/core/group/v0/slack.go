@@ -77,12 +77,13 @@ func changeText(before core.Group, after group.Input) string {
 
 func changeTextByAdmin(before, after core.Group) string {
 	data := ""
-	if after.Open != nil {
-		if *before.Open != *after.Open {
-			if *after.Open {
-				data += "開通: 未開通 => 開通済み\n"
+
+	if after.AddAllow != nil {
+		if *before.AddAllow != *after.AddAllow {
+			if *after.AddAllow {
+				data += "サービス新規申請: 禁止 => 許可\n"
 			} else {
-				data += "開通: 開通 => 未開通\n"
+				data += "サービス新規申請: 許可 => 禁止\n"
 			}
 		}
 	}
