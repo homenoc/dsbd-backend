@@ -180,9 +180,9 @@ func AdminRestAPI() {
 			//
 			// JPNIC ByAdmin
 			//
-			v1.POST("/service/:id/jpnic_ByAdmin", service.AddJPNICAdminByAdmin)
-			v1.DELETE("/jpnic_ByAdmin/:id", service.DeleteJPNICAdminByAdmin)
-			v1.PUT("/jpnic_ByAdmin/:id", service.UpdateJPNICAdminByAdmin)
+			v1.POST("/service/:id/jpnic_admin", service.AddJPNICAdminByAdmin)
+			v1.DELETE("/jpnic_admin/:id", service.DeleteJPNICAdminByAdmin)
+			v1.PUT("/jpnic_admin/:id", service.UpdateJPNICAdminByAdmin)
 
 			//
 			// JPNIC Tech
