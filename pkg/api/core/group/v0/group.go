@@ -88,7 +88,6 @@ func Add(c *gin.Context) {
 		Contract:         input.Contract,
 		Student:          input.Student,
 		MemberExpired:    studentExpired,
-		Open:             &[]bool{false}[0],
 		Pass:             &[]bool{false}[0],
 		AddAllow:         &[]bool{true}[0],
 	}
