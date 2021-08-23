@@ -116,6 +116,9 @@ func Get(c *gin.Context) {
 				})
 			}
 		}
+	} else {
+		// GroupID == 0
+		resultUserList = append(resultUserList, resultUser)
 	}
 
 	// Notice
