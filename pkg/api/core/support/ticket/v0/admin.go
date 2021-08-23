@@ -65,7 +65,7 @@ func CreateByAdmin(c *gin.Context) {
 		resultTicket.UserID = &input.UserID
 	} else {
 		//is group
-		if input.UserID == 0 {
+		if input.GroupID == 0 {
 			c.JSON(http.StatusBadRequest, common.Error{Error: "GroupID is wrong"})
 			return
 		}
