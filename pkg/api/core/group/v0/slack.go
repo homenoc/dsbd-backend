@@ -89,7 +89,7 @@ func changeTextByAdmin(before, after core.Group) string {
 
 	if after.AddAllow != nil {
 		if *before.AddAllow != *after.AddAllow {
-			if *after.Open {
+			if *after.AddAllow {
 				data += "サービス新規申請: 禁止 => 許可\n"
 			} else {
 				data += "サービス新規申請: 許可 => 禁止\n"
