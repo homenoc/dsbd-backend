@@ -13,8 +13,8 @@ func noticeSlack(loginUser, before core.User, after user.Input) {
 	attachment := slack.Attachment{}
 
 	groupStr := "なし"
-	if loginUser.Group != nil {
-		groupStr = strconv.Itoa(int(*loginUser.GroupID)) + "-" + before.Group.Org
+	if loginUser.GroupID != nil {
+		groupStr = strconv.Itoa(int(*loginUser.GroupID)) + "-" + loginUser.Group.Org
 	}
 
 	attachment.Text = &[]string{"User情報の更新"}[0]
