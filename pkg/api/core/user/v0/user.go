@@ -292,6 +292,59 @@ func MailVerify(c *gin.Context) {
 	}
 }
 
+func Delete(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: fmt.Sprintf("id error")})
+		return
+	}
+
+	if id == 0 {
+		c.JSON(http.StatusBadRequest, common.Error{Error: "error: This GroupID is bad request (0)"})
+		return
+	}
+
+	userToken := c.Request.Header.Get("USER_TOKEN")
+	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
+
+	authResult := auth.GroupAuthentication(0, core.Token{UserToken: userToken, AccessToken: accessToken})
+	if authResult.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: authResult.Err.Error()})
+		return
+	}
+
+	if authResult.User.Level > 3 {
+		c.JSON(http.StatusForbidden, common.Error{Error: "error: failed user level"})
+		return
+	}
+
+	u := dbUser.Get(user.ID, &core.User{Model: gorm.Model{ID: uint(id)}})
+	if u.Err != nil {
+		log.Println(u.Err)
+		c.JSON(http.StatusInternalServerError, common.Error{Error: "error: database error"})
+		return
+	}
+
+	if u.User[0].GroupID == nil || *u.User[0].GroupID != *authResult.User.GroupID {
+		c.JSON(http.StatusBadRequest, common.Error{Error: "error: This user does not belong to your group."})
+		return
+	}
+
+	if u.User[0].Level < 2 {
+		c.JSON(http.StatusForbidden, common.Error{Error: "error: The master user cannot be deleted."})
+		return
+	}
+
+	err = dbUser.Delete(&core.User{Model: gorm.Model{ID: uint(id)}})
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, common.Error{Error: "error: delete error. "})
+		return
+	}
+
+	c.JSON(http.StatusOK, common.Result{})
+}
+
 func Update(c *gin.Context) {
 	var input user.Input
 
