@@ -18,6 +18,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 func Add(c *gin.Context) {
@@ -106,6 +107,21 @@ func Add(c *gin.Context) {
 		return
 	}
 
+	startDate, err := time.Parse("2006-01-02", input.StartDate)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: "invalid data: start date"})
+		return
+	}
+	var endDate *time.Time = nil
+	if input.EndDate != nil {
+		tmpEndDate, err := time.Parse("2006-01-02", *input.EndDate)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, common.Error{Error: "invalid data: end date"})
+			return
+		}
+		endDate = &tmpEndDate
+	}
+
 	if *resultServiceTemplate.Services[0].NeedGlobalAS {
 		if input.ASN == 0 {
 			c.JSON(http.StatusBadRequest, common.Error{Error: "no data: ASN"})
@@ -151,6 +167,8 @@ func Add(c *gin.Context) {
 		MaxUpstream:       input.MaxUpstream,
 		AveDownstream:     input.AveDownstream,
 		MaxDownstream:     input.MaxDownstream,
+		StartDate:         startDate,
+		EndDate:           endDate,
 		ASN:               &[]uint{input.ASN}[0],
 		IP:                grpIP,
 		JPNICAdmin:        input.JPNICAdmin,
