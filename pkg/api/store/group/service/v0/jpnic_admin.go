@@ -24,7 +24,7 @@ func JoinJPNICByAdmin(serviceID uint, input core.JPNICAdmin) error {
 
 	return db.Model(&core.Service{Model: gorm.Model{ID: serviceID}}).
 		Association("JPNICAdmin").
-		Append(input)
+		Append(&input)
 }
 
 func DeleteJPNICByAdmin(id uint) error {
