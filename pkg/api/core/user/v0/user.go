@@ -396,10 +396,12 @@ func Update(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, common.Error{Error: userResult.Err.Error()})
 			return
 		}
-		if userResult.User[0].GroupID != authResult.User.GroupID {
-			c.JSON(http.StatusInternalServerError, common.Error{Error: fmt.Sprintf("failed group authentication")})
+
+		if userResult.User[0].GroupID == nil || *userResult.User[0].GroupID != *authResult.User.GroupID {
+			c.JSON(http.StatusBadRequest, common.Error{Error: "error: This user does not belong to your group."})
 			return
 		}
+
 		serverData = userResult.User[0]
 	}
 
