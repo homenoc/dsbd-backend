@@ -259,6 +259,8 @@ func UserRestAPI() {
 			v1.POST("/group/:id/user", user.AddGroup)
 			// User Update
 			v1.PUT("/user/:id", user.Update)
+			// User Delete
+			v1.DELETE("/user/:id", user.Delete)
 
 			//
 			// Info
