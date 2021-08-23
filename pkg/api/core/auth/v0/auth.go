@@ -29,7 +29,7 @@ func UserAuthentication(data core.Token) auth.UserResult {
 	return auth.UserResult{User: resultToken.Token[0].User, Err: nil}
 }
 
-// errorType 0: 未審査の場合でもエラーを返す　1: 未審査の場合エラーを返さない
+// errorType 0: 未審査の場合はエラーを返す(厳格)　1: 未審査の場合エラーを返さない
 func GroupAuthentication(errorType uint, data core.Token) auth.GroupResult {
 	resultToken := dbToken.Get(token.UserTokenAndAccessToken, &data)
 	if len(resultToken.Token) == 0 {
