@@ -22,8 +22,8 @@ func noticeSlackByAdmin(before, after core.Connection) {
 	// 審査ステータスのSlack通知
 	attachment := slack.Attachment{}
 
-	attachment.AddField(slack.Field{Title: "Title", Value: "Connection情報の更新"}).
-		AddField(slack.Field{Title: "申請者", Value: "管理者"}).
+	attachment.Text = &[]string{"接続情報の更新"}[0]
+	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
 		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(before.ID)) + "-" + before.Service.Group.Org}).
 		AddField(slack.Field{Title: "更新状況", Value: changeText(before, after)})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})

@@ -11,8 +11,8 @@ func noticeSlack(err error, input mail.Mail) {
 	attachment := slack.Attachment{}
 
 	if err != nil {
-		attachment.AddField(slack.Field{Title: "Title", Value: "メール送信(失敗)"}).
-			AddField(slack.Field{Title: "To", Value: input.ToMail}).
+		attachment.Text = &[]string{"メール送信(失敗)"}[0]
+		attachment.AddField(slack.Field{Title: "To", Value: input.ToMail}).
 			AddField(slack.Field{Title: "Subject", Value: input.Subject}).
 			AddField(slack.Field{Title: "Content", Value: input.Content}).
 			AddField(slack.Field{Title: "Error", Value: err.Error()})

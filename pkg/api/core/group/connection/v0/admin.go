@@ -136,8 +136,8 @@ func AddByAdmin(c *gin.Context) {
 	}
 
 	attachment := slack.Attachment{}
-	attachment.AddField(slack.Field{Title: "Title", Value: "接続情報登録"}).
-		AddField(slack.Field{Title: "申請者", Value: "管理者"}).
+	attachment.Text = &[]string{"接続情報登録"}[0]
+	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
 		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(id)}).
 		AddField(slack.Field{Title: "サービスコード", Value: resultService.Service[0].ServiceTemplate.Type +
 			strconv.Itoa(int(resultService.Service[0].ServiceNumber))}).

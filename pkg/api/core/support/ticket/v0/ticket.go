@@ -95,8 +95,8 @@ func Create(c *gin.Context) {
 
 	//HomeNOC Slackに送信
 	attachment := slack.Attachment{}
-	attachment.AddField(slack.Field{Title: "Title", Value: "新規チケット作成"}).
-		AddField(slack.Field{Title: "発行者", Value: strconv.Itoa(int(*resultTicket.UserID))}).
+	attachment.Text = &[]string{"新規チケット作成"}[0]
+	attachment.AddField(slack.Field{Title: "発行者", Value: strconv.Itoa(int(*resultTicket.UserID))}).
 		AddField(slack.Field{Title: "Group", Value: groupValue}).
 		AddField(slack.Field{Title: "Title", Value: input.Title}).
 		AddField(slack.Field{Title: "Message", Value: input.Data})
@@ -161,8 +161,8 @@ func Request(c *gin.Context) {
 
 	//HomeNOC Slackに送信
 	attachment := slack.Attachment{}
-	attachment.AddField(slack.Field{Title: "Title", Value: "[新規] 追加・変更手続き"}).
-		AddField(slack.Field{Title: "発行者", Value: strconv.Itoa(int(*resultTicket.UserID))}).
+	attachment.Text = &[]string{"[新規] 追加・変更手続き"}[0]
+	attachment.AddField(slack.Field{Title: "発行者", Value: strconv.Itoa(int(*resultTicket.UserID))}).
 		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(*resultTicket.GroupID)) + "-" + result.User.Group.Org}).
 		AddField(slack.Field{Title: "Title", Value: input.Title}).
 		AddField(slack.Field{Title: "Message", Value: input.Data})
@@ -224,6 +224,9 @@ func Update(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
+
+	noticeSlack(ticketResult.Tickets[0], input)
+
 	c.JSON(http.StatusOK, support.Result{})
 }
 
@@ -357,8 +360,9 @@ func GetWebSocket(c *gin.Context) {
 
 				//Slackに送信
 				attachment := slack.Attachment{}
-				attachment.AddField(slack.Field{Title: "Title", Value: "Support(新規メッセージ)"}).
-					AddField(slack.Field{Title: "発行者", Value: strconv.Itoa(int(result.User.ID)) + "-" + result.User.Name}).
+
+				attachment.Text = &[]string{"Support(新規メッセージ)"}[0]
+				attachment.AddField(slack.Field{Title: "発行者", Value: strconv.Itoa(int(result.User.ID)) + "-" + result.User.Name}).
 					AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(*result.User.GroupID)) + "-" + result.User.Group.Org}).
 					AddField(slack.Field{Title: "Title", Value: ticketResult.Tickets[0].Title}).
 					AddField(slack.Field{Title: "Message", Value: msg.Message})

@@ -141,6 +141,9 @@ func UpdateByAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
+
+	noticeSlack(ticketResult.Tickets[0], input)
+
 	c.JSON(http.StatusOK, support.Result{})
 }
 
