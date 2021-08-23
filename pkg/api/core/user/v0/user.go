@@ -387,6 +387,7 @@ func Update(c *gin.Context) {
 			c.JSON(http.StatusForbidden, common.Error{Error: "error: Group ID = 0"})
 			return
 		}
+		// Level = 1　のみ全ユーザの設定を変更可能。権限レベルが2以上は不可
 		if authResult.User.Level > 2 {
 			c.JSON(http.StatusForbidden, common.Error{Error: "error: failed user level"})
 			return
