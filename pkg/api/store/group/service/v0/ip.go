@@ -38,7 +38,7 @@ func DeleteIP(id uint) error {
 	}
 	defer dbSQL.Close()
 
-	return db.Delete(core.IP{Model: gorm.Model{ID: id}}).Error
+	return db.Select("Plan").Delete(&core.IP{Model: gorm.Model{ID: id}}).Error
 }
 
 func UpdateIP(input core.IP) error {
