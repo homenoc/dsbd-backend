@@ -48,6 +48,8 @@ type Input struct {
 	AveDownstream     uint             `json:"avg_downstream"`
 	MaxDownstream     uint             `json:"max_downstream"`
 	MaxBandWidthAS    string           `json:"max_bandwidth_as"`
+	StartDate         string           `json:"start_date"`
+	EndDate           *string          `json:"end_date"`
 	ASN               uint             `json:"asn"`
 	IP                []IPInput        `json:"ip"`
 	Lock              bool             `json:"lock"`
