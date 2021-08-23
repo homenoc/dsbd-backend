@@ -17,8 +17,8 @@ func noticeSlack(loginUser, before core.User, after user.Input) {
 		groupStr = strconv.Itoa(int(*loginUser.GroupID)) + "-" + before.Group.Org
 	}
 
-	attachment.AddField(slack.Field{Title: "Title", Value: "User情報の更新"}).
-		AddField(slack.Field{Title: "申請者", Value: strconv.Itoa(int(loginUser.ID)) + "-" + loginUser.Name}).
+	attachment.Text = &[]string{"User情報の更新"}[0]
+	attachment.AddField(slack.Field{Title: "申請者", Value: strconv.Itoa(int(loginUser.ID)) + "-" + loginUser.Name}).
 		AddField(slack.Field{Title: "Group", Value: groupStr}).
 		AddField(slack.Field{Title: "更新状況", Value: changeText(before, after)})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})

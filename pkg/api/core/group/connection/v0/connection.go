@@ -239,8 +239,8 @@ func Add(c *gin.Context) {
 	}
 
 	attachment := slack.Attachment{}
-	attachment.AddField(slack.Field{Title: "Title", Value: "接続情報登録"}).
-		AddField(slack.Field{Title: "申請者", Value: strconv.Itoa(int(result.User.ID)) + ":" + result.User.Name}).
+	attachment.Text = &[]string{"接続情報登録"}[0]
+	attachment.AddField(slack.Field{Title: "申請者", Value: strconv.Itoa(int(result.User.ID)) + ":" + result.User.Name}).
 		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(result.User.Group.ID)) + ":" + result.User.Group.Org}).
 		AddField(slack.Field{Title: "サービスコード", Value: resultService.Service[0].ServiceTemplate.Type +
 			fmt.Sprintf("%03d", resultService.Service[0].ServiceNumber)}).
@@ -266,8 +266,8 @@ func Add(c *gin.Context) {
 	}
 
 	attachment = slack.Attachment{}
-	attachment.AddField(slack.Field{Title: "Title", Value: "ステータス変更"}).
-		AddField(slack.Field{Title: "申請者", Value: "System"}).
+	attachment.Text = &[]string{"ステータス変更"}[0]
+	attachment.AddField(slack.Field{Title: "申請者", Value: "System"}).
 		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(result.User.Group.ID)) + ":" + result.User.Group.Org}).
 		AddField(slack.Field{Title: "現在ステータス情報", Value: "開通作業中"}).
 		AddField(slack.Field{Title: "ステータス履歴", Value: "3[接続情報記入段階(User)] =>4[開通作業中] "})

@@ -80,8 +80,9 @@ func Add(c *gin.Context) {
 	}
 
 	attachment := slack.Attachment{}
-	attachment.AddField(slack.Field{Title: "Title", Value: "新規ユーザ登録"}).
-		AddField(slack.Field{Title: "メールアドレス", Value: input.Email}).
+
+	attachment.Text = &[]string{"新規ユーザ登録"}[0]
+	attachment.AddField(slack.Field{Title: "メールアドレス", Value: input.Email}).
 		AddField(slack.Field{Title: "Name", Value: input.Name}).
 		AddField(slack.Field{Title: "Name(English)", Value: input.NameEn})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
@@ -202,6 +203,8 @@ func AddGroup(c *gin.Context) {
 	}
 
 	attachment := slack.Attachment{}
+
+	attachment.Text = &[]string{"新規ユーザ登録"}[0]
 	attachment.AddField(slack.Field{Title: "Title", Value: "新規ユーザ登録"}).
 		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(id) + "-" + resultAuth.User.Group.Org}).
 		AddField(slack.Field{Title: "メールアドレス", Value: input.Email}).

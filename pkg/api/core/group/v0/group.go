@@ -100,8 +100,9 @@ func Add(c *gin.Context) {
 	}
 
 	attachment := slack.Attachment{}
-	attachment.AddField(slack.Field{Title: "Title", Value: "グループ登録"}).
-		AddField(slack.Field{Title: "Question", Value: input.Question}).
+
+	attachment.Text = &[]string{"グループ登録"}[0]
+	attachment.AddField(slack.Field{Title: "Question", Value: input.Question}).
 		AddField(slack.Field{Title: "Org", Value: input.Org + "(" + input.OrgEn + ")"}).
 		AddField(slack.Field{Title: "Country", Value: input.Country}).
 		AddField(slack.Field{Title: "Student", Value: strconv.FormatBool(*input.Student)}).
