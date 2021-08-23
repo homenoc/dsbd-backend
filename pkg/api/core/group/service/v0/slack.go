@@ -21,8 +21,8 @@ func noticeSlackAdd(groupID int, serviceCode, serviceCodeComment string) {
 	grpInfo := getGroupInfo(uint(groupID))
 	attachment := slack.Attachment{}
 
-	attachment.AddField(slack.Field{Title: "Title", Value: "Service情報登録(管理者実行)"}).
-		AddField(slack.Field{Title: "申請者", Value: "管理者"}).
+	attachment.Text = &[]string{"Service情報登録(管理者実行)"}[0]
+	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
 		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(groupID) + "-" + grpInfo.Org}).
 		AddField(slack.Field{Title: "サービスコード（新規発番）", Value: serviceCode}).
 		AddField(slack.Field{Title: "サービスコード（補足情報）", Value: serviceCodeComment})
@@ -32,8 +32,8 @@ func noticeSlackAdd(groupID int, serviceCode, serviceCodeComment string) {
 func noticeSlackAddJPNICByAdmin(serviceID int, input core.JPNICAdmin) {
 	attachment := slack.Attachment{}
 
-	attachment.AddField(slack.Field{Title: "Title", Value: "JPNIC管理者連絡窓口の追加"}).
-		AddField(slack.Field{Title: "申請者", Value: "管理者"}).
+	attachment.Text = &[]string{"JPNIC管理者連絡窓口の追加"}[0]
+	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
 		AddField(slack.Field{Title: "Service", Value: strconv.Itoa(serviceID)}).
 		AddField(slack.Field{Title: "Name", Value: input.Name + " (" + input.NameEn + ")"}).
 		AddField(slack.Field{Title: "Org", Value: input.Org + " (" + input.OrgEn + ")"})
@@ -43,8 +43,8 @@ func noticeSlackAddJPNICByAdmin(serviceID int, input core.JPNICAdmin) {
 func noticeSlackAddJPNICTech(serviceID int, input core.JPNICTech) {
 	attachment := slack.Attachment{}
 
-	attachment.AddField(slack.Field{Title: "Title", Value: "JPNIC技術連絡担当者の追加"}).
-		AddField(slack.Field{Title: "申請者", Value: "管理者"}).
+	attachment.Text = &[]string{"JPNIC技術連絡担当者の追加"}[0]
+	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
 		AddField(slack.Field{Title: "Service", Value: strconv.Itoa(serviceID)}).
 		AddField(slack.Field{Title: "Name", Value: input.Name + " (" + input.NameEn + ")"}).
 		AddField(slack.Field{Title: "Org", Value: input.Org + " (" + input.OrgEn + ")"})
@@ -55,8 +55,8 @@ func noticeSlackAddIP(serviceID int, inputName string) {
 	// 審査ステータスのSlack通知
 	attachment := slack.Attachment{}
 
-	attachment.AddField(slack.Field{Title: "Title", Value: "IPの追加"}).
-		AddField(slack.Field{Title: "申請者", Value: "管理者"}).
+	attachment.Text = &[]string{"IPの追加"}[0]
+	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
 		AddField(slack.Field{Title: "Service", Value: strconv.Itoa(serviceID)}).
 		AddField(slack.Field{Title: "Name", Value: inputName})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
@@ -65,8 +65,8 @@ func noticeSlackAddIP(serviceID int, inputName string) {
 func noticeSlackAddPlan(ipID int, input core.Plan) {
 	attachment := slack.Attachment{}
 
-	attachment.AddField(slack.Field{Title: "Title", Value: "Planの追加"}).
-		AddField(slack.Field{Title: "申請者", Value: "管理者"}).
+	attachment.Text = &[]string{"Planの追加"}[0]
+	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
 		AddField(slack.Field{Title: "IP", Value: strconv.Itoa(ipID)}).
 		AddField(slack.Field{Title: "Name", Value: input.Name}).
 		AddField(slack.Field{Title: "Plan", Value: strconv.Itoa(int(input.After)) + "/" +
@@ -87,8 +87,8 @@ func noticeSlackDelete(str string, id uint) {
 func noticeSlackUpdate(before, after core.Service) {
 	attachment := slack.Attachment{}
 
-	attachment.AddField(slack.Field{Title: "Title", Value: "Service情報の更新"}).
-		AddField(slack.Field{Title: "申請者", Value: "管理者"}).
+	attachment.Text = &[]string{"Service情報の更新"}[0]
+	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
 		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(before.ID)) + "-" + before.Group.Org}).
 		AddField(slack.Field{Title: "更新状況", Value: changeText(before, after)})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
@@ -97,8 +97,8 @@ func noticeSlackUpdate(before, after core.Service) {
 func noticeSlackUpdateJPNICByAdmin(before, after core.JPNICAdmin) {
 	attachment := slack.Attachment{}
 
-	attachment.AddField(slack.Field{Title: "Title", Value: "JPNIC管理者連絡窓口の更新"}).
-		AddField(slack.Field{Title: "申請者", Value: "管理者"}).
+	attachment.Text = &[]string{"JPNIC管理者連絡窓口の更新"}[0]
+	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
 		AddField(slack.Field{Title: "JPNICAdmin", Value: strconv.Itoa(int(before.ID))}).
 		AddField(slack.Field{Title: "更新状況", Value: changeTextJPNICByAdmin(before, after)})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
@@ -107,8 +107,8 @@ func noticeSlackUpdateJPNICByAdmin(before, after core.JPNICAdmin) {
 func noticeSlackUpdateJPNICTech(before, after core.JPNICTech) {
 	attachment := slack.Attachment{}
 
-	attachment.AddField(slack.Field{Title: "Title", Value: "JPNIC技術連絡担当者の更新"}).
-		AddField(slack.Field{Title: "申請者", Value: "管理者"}).
+	attachment.Text = &[]string{"JPNIC技術連絡担当者の更新"}[0]
+	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
 		AddField(slack.Field{Title: "JPNICTech", Value: strconv.Itoa(int(before.ID))}).
 		AddField(slack.Field{Title: "更新状況", Value: changeTextJPNICTech(before, after)})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
@@ -117,8 +117,8 @@ func noticeSlackUpdateJPNICTech(before, after core.JPNICTech) {
 func noticeSlackUpdateIP(before, after core.IP) {
 	attachment := slack.Attachment{}
 
-	attachment.AddField(slack.Field{Title: "Title", Value: "IPの更新"}).
-		AddField(slack.Field{Title: "申請者", Value: "管理者"}).
+	attachment.Text = &[]string{"IPの更新"}[0]
+	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
 		AddField(slack.Field{Title: "IP", Value: strconv.Itoa(int(before.ID))}).
 		AddField(slack.Field{Title: "更新状況", Value: changeTextIP(before, after)})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
@@ -127,8 +127,8 @@ func noticeSlackUpdateIP(before, after core.IP) {
 func noticeSlackUpdatePlan(before, after core.Plan) {
 	attachment := slack.Attachment{}
 
-	attachment.AddField(slack.Field{Title: "Title", Value: "Planの更新"}).
-		AddField(slack.Field{Title: "申請者", Value: "管理者"}).
+	attachment.Text = &[]string{"Planの更新"}[0]
+	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
 		AddField(slack.Field{Title: "Plan", Value: strconv.Itoa(int(before.ID))}).
 		AddField(slack.Field{Title: "更新状況", Value: changeTextPlan(before, after)})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})

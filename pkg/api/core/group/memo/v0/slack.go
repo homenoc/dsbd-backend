@@ -11,8 +11,8 @@ func noticeSlackAdd(memo *core.Memo) {
 	// 審査ステータスのSlack通知
 	attachment := slack.Attachment{}
 
-	attachment.AddField(slack.Field{Title: "Title", Value: "Memoの登録"}).
-		AddField(slack.Field{Title: "申請者", Value: "管理者"}).
+	attachment.Text = &[]string{"Memoの登録"}[0]
+	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
 		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(memo.GroupID))}).
 		AddField(slack.Field{Title: "Type", Value: strconv.Itoa(int(memo.Type))}).
 		AddField(slack.Field{Title: "Title", Value: memo.Title}).
@@ -24,8 +24,8 @@ func noticeSlackDelete(id int) {
 	// 審査ステータスのSlack通知
 	attachment := slack.Attachment{}
 
-	attachment.AddField(slack.Field{Title: "Title", Value: "Memoの削除"}).
-		AddField(slack.Field{Title: "申請者", Value: "管理者"}).
+	attachment.Text = &[]string{"Memoの削除"}[0]
+	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
 		AddField(slack.Field{Title: "ID", Value: strconv.Itoa(id)})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 }

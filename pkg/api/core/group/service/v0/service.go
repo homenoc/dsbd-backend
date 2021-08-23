@@ -165,8 +165,8 @@ func Add(c *gin.Context) {
 	}
 
 	attachment := slack.Attachment{}
-	attachment.AddField(slack.Field{Title: "Title", Value: "ネットワーク情報登録"}).
-		AddField(slack.Field{Title: "申請者", Value: strconv.Itoa(int(result.User.ID)) + ":" + result.User.Name}).
+	attachment.Text = &[]string{"ネットワーク情報登録"}[0]
+	attachment.AddField(slack.Field{Title: "申請者", Value: strconv.Itoa(int(result.User.ID)) + ":" + result.User.Name}).
 		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(result.User.Group.ID)) + ":" + result.User.Group.Org}).
 		AddField(slack.Field{Title: "サービスコード（新規発番）", Value: resultServiceTemplate.Services[0].Type + fmt.Sprintf("%03d", number)}).
 		AddField(slack.Field{Title: "サービスコード（補足情報）", Value: input.ServiceComment})

@@ -12,8 +12,8 @@ func noticeSlack(loginUser core.User, before core.Group, after group.Input) {
 	// 審査ステータスのSlack通知
 	attachment := slack.Attachment{}
 
-	attachment.AddField(slack.Field{Title: "Title", Value: "Group情報の更新"}).
-		AddField(slack.Field{Title: "申請者", Value: strconv.Itoa(int(loginUser.ID)) + "-" + loginUser.Name}).
+	attachment.Text = &[]string{"Group情報の更新"}[0]
+	attachment.AddField(slack.Field{Title: "申請者", Value: strconv.Itoa(int(loginUser.ID)) + "-" + loginUser.Name}).
 		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(before.ID)) + ":" + before.Org}).
 		AddField(slack.Field{Title: "更新状況", Value: changeText(before, after)})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
@@ -23,8 +23,8 @@ func noticeSlackByAdmin(before, after core.Group) {
 	// 審査ステータスのSlack通知
 	attachment := slack.Attachment{}
 
-	attachment.AddField(slack.Field{Title: "Title", Value: "Group情報の更新"}).
-		AddField(slack.Field{Title: "申請者", Value: "管理者"}).
+	attachment.Text = &[]string{"Group情報の更新"}[0]
+	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
 		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(before.ID)) + ":" + before.Org}).
 		AddField(slack.Field{Title: "更新状況", Value: changeTextByAdmin(before, after)})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
@@ -34,8 +34,8 @@ func noticeSlackCancelSubscriptionByAdmin(group core.Group) {
 	// 審査ステータスのSlack通知
 	attachment := slack.Attachment{}
 
-	attachment.AddField(slack.Field{Title: "Title", Value: "Cancel Subscription"}).
-		AddField(slack.Field{Title: "申請者", Value: "管理者"}).
+	attachment.Text = &[]string{"Cancel Subscription"}[0]
+	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
 		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(group.ID)) + ":" + group.Org})
 
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: false})

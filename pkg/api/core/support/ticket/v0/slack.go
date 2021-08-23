@@ -15,8 +15,8 @@ func noticeSlack(before, after core.Ticket) {
 		title = "Request"
 	}
 
-	attachment.AddField(slack.Field{Title: "Title", Value: title}).
-		AddField(slack.Field{Title: "申請者", Value: "管理者"}).
+	attachment.Text = &[]string{title + " 更新"}[0]
+	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
 		AddField(slack.Field{Title: title, Value: strconv.Itoa(int(before.ID)) + ": " + before.Title}).
 		AddField(slack.Field{Title: "更新状況", Value: changeText(before, after)})
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
