@@ -50,7 +50,7 @@ func AddIPByAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	noticeSlackAddIP(id, input.Name)
+	noticeSlackAddIP(id, input)
 	c.JSON(http.StatusOK, service.Result{})
 }
 
