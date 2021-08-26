@@ -31,14 +31,9 @@ func ManualRegistration(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 		return
 	}
-	log.Println(input)
-
-	input.Network.KindID = "10"
-
 	if input.Network.KindID == strconv.Itoa(jpnicTransaction.IPv4Register) ||
 		input.Network.KindID == strconv.Itoa(jpnicTransaction.IPv4Edit) {
 		// IPv4の場合
-		log.Println(config.Conf.JPNIC.V4KeyFilePath)
 		conf.KeyFilePath = config.Conf.JPNIC.V4KeyFilePath
 		conf.CertFilePath = config.Conf.JPNIC.V4CertFilePath
 	} else if input.Network.KindID == strconv.Itoa(jpnicTransaction.IPv6Register) ||
