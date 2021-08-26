@@ -11,10 +11,10 @@ func success(data jpnicTransaction.Result) {
 
 	attachment.Text = &[]string{"JPNIC登録(手動実行)"}[0]
 	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
-		AddField(slack.Field{Title: "RecepNo", Value: data.RecepNo}).
-		AddField(slack.Field{Title: "AdmJPNICHdl（新規発番）", Value: data.AdmJPNICHdl}).
-		AddField(slack.Field{Title: "Tech1JPNICHdl（補足情報）", Value: data.Tech1JPNICHdl}).
-		AddField(slack.Field{Title: "Tech2JPNICHdl（補足情報）", Value: data.Tech2JPNICHdl})
+		AddField(slack.Field{Title: "受付番号", Value: data.RecepNo}).
+		AddField(slack.Field{Title: "管理者連絡窓口(JPNICHandle)", Value: data.AdmJPNICHdl}).
+		AddField(slack.Field{Title: "技術連絡窓口1(JPNICHandle)", Value: data.Tech1JPNICHdl}).
+		AddField(slack.Field{Title: "技術連絡窓口2(JPNICHandle)", Value: data.Tech2JPNICHdl})
 
 	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
 }

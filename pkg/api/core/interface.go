@@ -206,40 +206,42 @@ type Plan struct {
 
 type JPNICAdmin struct {
 	gorm.Model
-	ServiceID   uint   `json:"service_id"`
-	JPNICHandle string `json:"jpnic_handle"`
-	Name        string `json:"name"`
-	NameEn      string `json:"name_en"`
-	Mail        string `json:"mail"`
-	Org         string `json:"org"`
-	OrgEn       string `json:"org_en"`
-	PostCode    string `json:"postcode"`
-	Address     string `json:"address"`
-	AddressEn   string `json:"address_en"`
-	Dept        string `json:"dept"`
-	DeptEn      string `json:"dept_en"`
-	Tel         string `json:"tel"`
-	Fax         string `json:"fax"`
-	Country     string `json:"country"`
+	ServiceID     uint   `json:"service_id"`
+	V4JPNICHandle string `json:"v4_jpnic_handle"`
+	V6JPNICHandle string `json:"v6_jpnic_handle"`
+	Name          string `json:"name"`
+	NameEn        string `json:"name_en"`
+	Mail          string `json:"mail"`
+	Org           string `json:"org"`
+	OrgEn         string `json:"org_en"`
+	PostCode      string `json:"postcode"`
+	Address       string `json:"address"`
+	AddressEn     string `json:"address_en"`
+	Dept          string `json:"dept"`
+	DeptEn        string `json:"dept_en"`
+	Tel           string `json:"tel"`
+	Fax           string `json:"fax"`
+	Country       string `json:"country"`
 }
 
 type JPNICTech struct {
 	gorm.Model
-	ServiceID   uint   `json:"service_id"`
-	JPNICHandle string `json:"jpnic_handle"`
-	Name        string `json:"name"`
-	NameEn      string `json:"name_en"`
-	Mail        string `json:"mail"`
-	Org         string `json:"org"`
-	OrgEn       string `json:"org_en"`
-	PostCode    string `json:"postcode"`
-	Address     string `json:"address"`
-	AddressEn   string `json:"address_en"`
-	Dept        string `json:"dept"`
-	DeptEn      string `json:"dept_en"`
-	Tel         string `json:"tel"`
-	Fax         string `json:"fax"`
-	Country     string `json:"country"`
+	ServiceID     uint   `json:"service_id"`
+	V4JPNICHandle string `json:"v4_jpnic_handle"`
+	V6JPNICHandle string `json:"v6_jpnic_handle"`
+	Name          string `json:"name"`
+	NameEn        string `json:"name_en"`
+	Mail          string `json:"mail"`
+	Org           string `json:"org"`
+	OrgEn         string `json:"org_en"`
+	PostCode      string `json:"postcode"`
+	Address       string `json:"address"`
+	AddressEn     string `json:"address_en"`
+	Dept          string `json:"dept"`
+	DeptEn        string `json:"dept_en"`
+	Tel           string `json:"tel"`
+	Fax           string `json:"fax"`
+	Country       string `json:"country"`
 }
 
 type PaymentMembershipTemplate struct {

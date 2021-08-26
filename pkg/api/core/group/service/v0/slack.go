@@ -225,8 +225,12 @@ func changeText(before, after core.Service) string {
 func changeTextJPNICByAdmin(before, after core.JPNICAdmin) string {
 	data := ""
 
-	if before.JPNICHandle != after.JPNICHandle {
-		data += "JPNICHandle: " + before.JPNICHandle + "=>" + after.JPNICHandle + "\n"
+	if before.V4JPNICHandle != after.V4JPNICHandle {
+		data += "JPNICHandle(IPv4): " + before.V4JPNICHandle + "=>" + after.V4JPNICHandle + "\n"
+	}
+
+	if before.V6JPNICHandle != after.V6JPNICHandle {
+		data += "JPNICHandle(IPv6): " + before.V6JPNICHandle + "=>" + after.V6JPNICHandle + "\n"
 	}
 
 	if before.Name != after.Name {
@@ -287,8 +291,12 @@ func changeTextJPNICByAdmin(before, after core.JPNICAdmin) string {
 func changeTextJPNICTech(before, after core.JPNICTech) string {
 	data := ""
 
-	if before.JPNICHandle != after.JPNICHandle {
-		data += "JPNICHandle: " + before.JPNICHandle + "=>" + after.JPNICHandle + "\n"
+	if before.V4JPNICHandle != after.V4JPNICHandle {
+		data += "JPNICHandle(IPv4): " + before.V4JPNICHandle + "=>" + after.V4JPNICHandle + "\n"
+	}
+
+	if before.V6JPNICHandle != after.V6JPNICHandle {
+		data += "JPNICHandle(IPv6): " + before.V6JPNICHandle + "=>" + after.V6JPNICHandle + "\n"
 	}
 
 	if before.Name != after.Name {
