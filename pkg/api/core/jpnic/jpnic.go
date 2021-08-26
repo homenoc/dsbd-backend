@@ -33,14 +33,17 @@ func ManualRegistration(c *gin.Context) {
 	}
 	log.Println(input)
 
-	if input.Network.KindID == strconv.Itoa(jpnicTransaction.IPv4Register) &&
-		// IPv4の場合
+	input.Network.KindID = "10"
+
+	if input.Network.KindID == strconv.Itoa(jpnicTransaction.IPv4Register) ||
 		input.Network.KindID == strconv.Itoa(jpnicTransaction.IPv4Edit) {
+		// IPv4の場合
+		log.Println(config.Conf.JPNIC.V4KeyFilePath)
 		conf.KeyFilePath = config.Conf.JPNIC.V4KeyFilePath
 		conf.CertFilePath = config.Conf.JPNIC.V4CertFilePath
-	} else if input.Network.KindID == strconv.Itoa(jpnicTransaction.IPv6Register) &&
-		// IPv6の場合
+	} else if input.Network.KindID == strconv.Itoa(jpnicTransaction.IPv6Register) ||
 		input.Network.KindID == strconv.Itoa(jpnicTransaction.IPv6Edit) {
+		// IPv6の場合
 		conf.KeyFilePath = config.Conf.JPNIC.V6KeyFilePath
 		conf.CertFilePath = config.Conf.JPNIC.V6CertFilePath
 	} else {
@@ -48,9 +51,9 @@ func ManualRegistration(c *gin.Context) {
 	}
 
 	result := conf.Send(input)
-	if result.ResultErr != nil {
+	if result.Err != nil {
 		bad(result)
-		c.JSON(http.StatusNotModified, result)
+		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 	} else {
 		success(result)
 		c.JSON(http.StatusOK, common.Result{})
