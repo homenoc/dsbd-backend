@@ -8,6 +8,7 @@ import (
 	memo "github.com/homenoc/dsbd-backend/pkg/api/core/group/memo/v0"
 	service "github.com/homenoc/dsbd-backend/pkg/api/core/group/service/v0"
 	group "github.com/homenoc/dsbd-backend/pkg/api/core/group/v0"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/jpnic"
 	mail "github.com/homenoc/dsbd-backend/pkg/api/core/mail/v0"
 	bgpRouter "github.com/homenoc/dsbd-backend/pkg/api/core/noc/bgpRouter/v0"
 	tunnelEndPointRouter "github.com/homenoc/dsbd-backend/pkg/api/core/noc/tunnelEndPointRouter/v0"
@@ -142,6 +143,11 @@ func AdminRestAPI() {
 			//v1.POST("/support/:id", chat.AddByAdmin)
 			v1.GET("/support/:id", ticket.GetByAdmin)
 			v1.PUT("/support/:id", ticket.UpdateByAdmin)
+
+			//
+			// JPNIC Web Transaction
+			//
+			v1.POST("/jpnic", jpnic.ManualRegistration)
 
 			////
 			//// Connection

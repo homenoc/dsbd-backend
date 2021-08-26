@@ -8,6 +8,7 @@ require (
 	github.com/gin-gonic/gin v1.7.2
 	github.com/google/uuid v1.2.0
 	github.com/gorilla/websocket v1.4.2
+	github.com/homenoc/jpnic v0.0.0-20210826150208-b9870042fd7c
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/parnurzeal/gorequest v0.2.16 // indirect
 	github.com/spf13/cobra v1.2.1

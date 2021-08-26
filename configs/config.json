@@ -39,6 +39,14 @@
     "Pass": "pass",
     "Contract": "contract"
   },
+  "jpnic": {
+    "url": "",
+    "v4_cert_file_path": "",
+    "v6_cert_file_path": "",
+    "v4_key_file_path": "",
+    "v6_key_file_path": "",
+    "ca_file_path": ""
+  },
   "slack": [
     {
       "id": "main",
