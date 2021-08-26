@@ -11,6 +11,7 @@ type Config struct {
 	DB         DB         `json:"db"`
 	Stripe     Stripe     `json:"stripe"`
 	Mail       Mail       `json:"mail"`
+	JPNIC      JPNIC      `json:"jpnic"`
 	Radius     Radius     `json:"radius"`
 	Slack      []Slack    `json:"slack"`
 	Log        Log        `json:"log"`
@@ -71,6 +72,15 @@ type Mail struct {
 	Contract string `json:"contract"`
 	User     string `json:"user"`
 	Pass     string `json:"pass"`
+}
+
+type JPNIC struct {
+	URL            string `json:"url"`
+	V4CertFilePath string `json:"v4_cert_file_path"`
+	V4KeyFilePath  string `json:"v4_key_file_path"`
+	V6CertFilePath string `json:"v6_cert_file_path"`
+	V6KeyFilePath  string `json:"v6_key_file_path"`
+	CAFilePath     string `json:"ca_file_path"`
 }
 
 type Radius struct {
