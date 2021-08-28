@@ -105,6 +105,54 @@ func Get(c *gin.Context) {
 	}
 }
 
+func GetHandle(c *gin.Context) {
+	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	if resultAdmin.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
+		return
+	}
+
+	handle := c.Param("handle")
+
+	if handle == "" {
+		c.JSON(http.StatusBadRequest, common.Error{Error: "invalid url"})
+		return
+	}
+
+	conf := jpnicTransaction.Config{
+		URL:        config.Conf.JPNIC.URL,
+		CAFilePath: config.Conf.JPNIC.CAFilePath,
+	}
+
+	if handle[0:1] == "4" {
+		// IPv4の場合
+		conf.KeyFilePath = config.Conf.JPNIC.V4KeyFilePath
+		conf.CertFilePath = config.Conf.JPNIC.V4CertFilePath
+
+		result, err := conf.GetJPNICHandle(handle[1:])
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+			return
+		}
+		log.Println(result)
+		c.JSON(http.StatusOK, result)
+	} else if handle[0:1] == "6" {
+		// IPv6の場合
+		conf.KeyFilePath = config.Conf.JPNIC.V6KeyFilePath
+		conf.CertFilePath = config.Conf.JPNIC.V6CertFilePath
+
+		result, err := conf.GetJPNICHandle(handle[1:])
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, result)
+	} else {
+		c.JSON(http.StatusBadRequest, common.Error{Error: "Kind ID is invalid."})
+	}
+}
+
 func GetAll(c *gin.Context) {
 	var input GetAllInput
 
