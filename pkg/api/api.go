@@ -148,6 +148,8 @@ func AdminRestAPI() {
 			// JPNIC Web Transaction
 			//
 			v1.POST("/jpnic", jpnic.ManualRegistration)
+			v1.POST("/jpnic/search", jpnic.GetAll)
+			v1.GET("/jpnic/:url", jpnic.Get)
 
 			////
 			//// Connection
