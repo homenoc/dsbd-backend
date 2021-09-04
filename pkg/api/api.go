@@ -151,6 +151,7 @@ func AdminRestAPI() {
 			v1.POST("/jpnic/search", jpnic.GetAll)
 			v1.GET("/jpnic/:url", jpnic.Get)
 			v1.GET("/jpnic/handle/:handle", jpnic.GetHandle)
+			v1.POST("/jpnic/return", jpnic.Return)
 
 			////
 			//// Connection
