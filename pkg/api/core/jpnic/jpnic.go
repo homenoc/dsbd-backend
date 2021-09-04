@@ -47,10 +47,10 @@ func ManualRegistration(c *gin.Context) {
 
 	result := conf.Send(input)
 	if result.Err != nil {
-		bad(result)
+		registrationBad(result)
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 	} else {
-		success(result)
+		registrationSuccess(result)
 		c.JSON(http.StatusOK, common.Result{})
 	}
 }
@@ -202,5 +202,50 @@ func GetAll(c *gin.Context) {
 		c.JSON(http.StatusOK, result)
 	} else {
 		c.JSON(http.StatusBadRequest, common.Error{Error: "Kind ID is invalid."})
+	}
+}
+
+func Return(c *gin.Context) {
+	var input ReturnInput
+
+	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	if resultAdmin.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
+		return
+	}
+
+	conf := jpnicTransaction.Config{
+		URL:        config.Conf.JPNIC.URL,
+		CAFilePath: config.Conf.JPNIC.CAFilePath,
+	}
+
+	err := c.BindJSON(&input)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	var result string
+
+	if input.Version == 4 {
+		// IPv4の場合
+		conf.KeyFilePath = config.Conf.JPNIC.V4KeyFilePath
+		conf.CertFilePath = config.Conf.JPNIC.V4CertFilePath
+		result, err = conf.ReturnIPv4(input.Address[0], input.NetworkName, input.ReturnDate, input.NotifyEMail)
+	} else if input.Version == 6 {
+		// IPv6の場合
+		conf.KeyFilePath = config.Conf.JPNIC.V6KeyFilePath
+		conf.CertFilePath = config.Conf.JPNIC.V6CertFilePath
+	} else {
+		c.JSON(http.StatusBadRequest, common.Error{Error: "Version is invalid."})
+	}
+
+	if err != nil {
+		returnBad(input, result)
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+	} else {
+		returnSuccess(input, result)
+		c.JSON(http.StatusOK, common.Result{})
 	}
 }
