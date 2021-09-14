@@ -162,19 +162,22 @@ func Get(c *gin.Context) {
 					Data:      tmpChat.Data,
 				})
 			}
+			var groupIDTicketAndRequest uint = 0
+			if tmpTicket.GroupID != nil {
+				groupIDTicketAndRequest = *tmpTicket.GroupID
+			}
+			var userIDTicketAndRequest uint = 0
+			if tmpTicket.UserID != nil {
+				userIDTicketAndRequest = *tmpTicket.UserID
+			}
 
 			if !*tmpTicket.Request {
-				var groupIDTicket uint = 0
-				if tmpTicket.GroupID != nil {
-					groupIDTicket = *tmpTicket.GroupID
-				}
-
 				// Ticket
 				resultTicket = append(resultTicket, info.Ticket{
 					ID:        tmpTicket.ID,
 					CreatedAt: tmpTicket.CreatedAt,
-					GroupID:   groupIDTicket,
-					UserID:    *tmpTicket.UserID,
+					GroupID:   groupIDTicketAndRequest,
+					UserID:    userIDTicketAndRequest,
 					Chat:      resultChat,
 					Solved:    tmpTicket.Solved,
 					Admin:     tmpTicket.Admin,
@@ -185,8 +188,8 @@ func Get(c *gin.Context) {
 				resultRequest = append(resultRequest, info.Request{
 					ID:        tmpTicket.ID,
 					CreatedAt: tmpTicket.CreatedAt,
-					GroupID:   *tmpTicket.GroupID,
-					UserID:    *tmpTicket.UserID,
+					GroupID:   groupIDTicketAndRequest,
+					UserID:    userIDTicketAndRequest,
 					Chat:      resultChat,
 					Reject:    tmpTicket.RequestReject,
 					Solved:    tmpTicket.Solved,
@@ -369,11 +372,16 @@ func Get(c *gin.Context) {
 					}
 
 					if *tmpConnection.Open && *tmpConnection.Enable {
+						var asn uint = 0
+						if tmpService.ASN != nil {
+							asn = *tmpService.ASN
+						}
+
 						resultInfo = append(resultInfo, info.Info{
 							ServiceID:  serviceID,
 							Service:    tmpService.ServiceTemplate.Name,
 							Assign:     *tmpService.ServiceTemplate.NeedJPNIC,
-							ASN:        *tmpService.ASN,
+							ASN:        asn,
 							V4:         v4,
 							V6:         v6,
 							Fee:        "Free",
