@@ -140,6 +140,7 @@ func GetAll() connection.ResultDatabase {
 		Preload("NTTTemplate").
 		Preload("NOC").
 		Preload("BGPRouter").
+		Preload("BGPRouter.NOC").
 		Preload("TunnelEndPointRouterIP").
 		Preload("Service").
 		Preload("Service.ServiceTemplate").
