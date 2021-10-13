@@ -4,49 +4,81 @@
       "type": "2000",
       "hidden": false,
       "name": "L2",
-      "comment": "L2接続"
+      "comment": "L2接続",
+      "need_jpnic": true,
+      "need_global_as": false,
+      "need_comment": false,
+      "need_route": false
     },
     {
       "type": "3S00",
       "hidden": false,
       "name": "L3 Static",
-      "comment": "Staticにて接続"
+      "comment": "Staticにて接続",
+      "need_jpnic": true,
+      "need_global_as": false,
+      "need_comment": false,
+      "need_route": false
     },
     {
       "type": "3B00",
       "hidden": false,
       "name": "L3 BGP",
-      "comment": "BGPにて接続"
+      "comment": "BGPにて接続",
+      "need_jpnic": true,
+      "need_global_as": false,
+      "need_comment": false,
+      "need_route": true
     },
     {
       "type": "IP3B",
       "hidden": false,
       "name": "トランジット提供",
-      "comment": "グローバルASのユーザに対するトランジット提供(L3 BGP)"
+      "comment": "グローバルASのユーザに対するトランジット提供(L3 BGP)",
+      "need_jpnic": false,
+      "need_global_as": true,
+      "need_comment": false,
+      "need_route": true
     },
     {
       "type": "CL20",
       "hidden": true,
       "name": "CoLocation",
-      "comment": "団体所有のラックにおけるコロケーションサービス(L2)"
+      "comment": "団体所有のラックにおけるコロケーションサービス(L2)",
+      "need_jpnic": true,
+      "need_global_as": false,
+      "need_comment": false,
+      "need_route": false
     },
     {
       "type": "CL3S",
       "hidden": true,
       "name": "CoLocation",
-      "comment": "団体所有のラックにおけるコロケーションサービス(L3 Static)"
+      "comment": "団体所有のラックにおけるコロケーションサービス(L3 Static)",
+      "need_jpnic": true,
+      "need_global_as": false,
+      "need_comment": false,
+      "need_route": true
     },
     {
       "type": "CL3B",
       "hidden": true,
       "name": "CoLocation",
-      "comment": "団体所有のラックにおけるコロケーションサービス(L3 BGP)"
+      "comment": "団体所有のラックにおけるコロケーションサービス(L3 BGP)",
+      "need_jpnic": true,
+      "need_global_as": false,
+      "need_comment": false,
+      "need_route": true
     },
     {
       "type": "ET00",
       "hidden": true,
       "name": "その他",
-      "comment": "その他"
+      "comment": "その他",
+      "need_jpnic": false,
+      "need_global_as": false,
+      "need_comment": true,
+      "need_route": false
     }
   ],
   "connection": [
@@ -54,25 +86,56 @@
       "type": "EIP",
       "hidden": false,
       "name": "Ether IP",
-      "comment": "EtherIP上で提供"
+      "comment": "EtherIP上で提供",
+      "need_internet": true,
+      "need_comment": false,
+      "need_cross_connect": false,
+      "l2": true,
+      "l3": false
+    },
+    {
+      "type": "GRE",
+      "hidden": false,
+      "name": "GREトンネル",
+      "comment": "GREトンネル上で/30のP2P接続を行う",
+      "need_internet": true,
+      "need_comment": false,
+      "need_cross_connect": false,
+      "l2": false,
+      "l3": true
     },
     {
       "type": "IPT",
       "hidden": false,
       "name": "IPトンネル",
-      "comment": "IP-IP又はGREトンネル上で/30のP2P接続を行う"
+      "comment": "IP-IPトンネル上で/30のP2P接続を行う",
+      "need_internet": true,
+      "need_comment": false,
+      "need_cross_connect": false,
+      "l2": false,
+      "l3": true
     },
     {
       "type": "CC0",
       "hidden": false,
       "name": "Cross Connect",
-      "comment": "校内接続、構内線、キャリア専用線上で提供\n"
+      "comment": "校内接続、構内線、キャリア専用線上で提供\n",
+      "need_internet": false,
+      "need_comment": true,
+      "need_cross_connect": true,
+      "l2": true,
+      "l3": true
     },
     {
       "type": "ETC",
       "hidden": false,
       "name": "その他",
-      "comment": "その他の接続方式"
+      "comment": "その他の接続方式",
+      "need_internet": false,
+      "need_comment": true,
+      "need_cross_connect": false,
+      "l2": true,
+      "l3": true
     }
   ],
   "ntt": [
