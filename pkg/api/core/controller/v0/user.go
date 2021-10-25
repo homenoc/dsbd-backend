@@ -56,7 +56,7 @@ func ReceiveChatUser(c *gin.Context) {
 	token1 := c.Request.Header.Get("TOKEN_1")
 	token2 := c.Request.Header.Get("TOKEN_2")
 
-	if err := auth.ControllerAuthentication(controller.Controller{Token1: token1, Token2: token2}); err != nil {
+	if err := auth.ControllerAuthorization(controller.Controller{Token1: token1, Token2: token2}); err != nil {
 		log.Println(err)
 		return
 	}

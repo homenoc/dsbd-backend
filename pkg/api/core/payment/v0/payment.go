@@ -35,7 +35,7 @@ func MembershipPayment(c *gin.Context) {
 		return
 	}
 
-	result := auth.GroupAuthentication(0, core.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthorization(0, core.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
@@ -118,7 +118,7 @@ func DonatePayment(c *gin.Context) {
 		return
 	}
 
-	result := auth.UserAuthentication(core.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.UserAuthorization(core.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
@@ -172,7 +172,7 @@ func ChangeCardPayment(c *gin.Context) {
 		return
 	}
 
-	result := auth.GroupAuthentication(0, core.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthorization(0, core.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
@@ -232,7 +232,7 @@ func ChangeCardPaymentInit(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	result := auth.UserAuthentication(core.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.UserAuthorization(core.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return

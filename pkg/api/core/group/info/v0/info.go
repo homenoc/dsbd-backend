@@ -22,7 +22,7 @@ func Get(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	authResult := auth.UserAuthentication(core.Token{UserToken: userToken, AccessToken: accessToken})
+	authResult := auth.UserAuthorization(core.Token{UserToken: userToken, AccessToken: accessToken})
 	if authResult.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: authResult.Err.Error()})
 		return

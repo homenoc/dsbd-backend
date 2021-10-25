@@ -9,7 +9,7 @@ import (
 	dbToken "github.com/homenoc/dsbd-backend/pkg/api/store/token/v0"
 )
 
-func AdminRadiusAuthentication(data auth.AdminStruct) auth.AdminResult {
+func AdminRadiusAuthorization(data auth.AdminStruct) auth.AdminResult {
 
 	if config.Conf.Controller.Admin.AdminAuth.User == data.User && config.Conf.Controller.Admin.AdminAuth.Pass == data.Pass {
 		return auth.AdminResult{AdminID: 0, Err: nil}
@@ -18,7 +18,7 @@ func AdminRadiusAuthentication(data auth.AdminStruct) auth.AdminResult {
 	return auth.AdminResult{Err: fmt.Errorf("failed")}
 }
 
-func AdminAuthentication(accessToken string) auth.AdminResult {
+func AdminAuthorization(accessToken string) auth.AdminResult {
 	tokenResult := dbToken.Get(token.AdminToken, &core.Token{AccessToken: accessToken})
 	if tokenResult.Err != nil {
 		return auth.AdminResult{Err: tokenResult.Err}

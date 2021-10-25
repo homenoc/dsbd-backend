@@ -28,7 +28,7 @@ func AddPlanByAdmin(c *gin.Context) {
 		return
 	}
 
-	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
 		return
@@ -45,7 +45,7 @@ func AddPlanByAdmin(c *gin.Context) {
 }
 
 func DeletePlanByAdmin(c *gin.Context) {
-	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
 		return
@@ -68,7 +68,7 @@ func DeletePlanByAdmin(c *gin.Context) {
 func UpdatePlanByAdmin(c *gin.Context) {
 	var input core.Plan
 
-	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
 		return

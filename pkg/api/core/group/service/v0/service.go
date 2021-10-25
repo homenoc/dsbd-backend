@@ -34,7 +34,7 @@ func Add(c *gin.Context) {
 	}
 
 	// group authentication
-	result := auth.GroupAuthentication(0, core.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthorization(0, core.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
@@ -224,7 +224,7 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	result := auth.GroupAuthentication(0, core.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthorization(0, core.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
@@ -246,7 +246,7 @@ func Update(c *gin.Context) {
 		return
 	}
 	if resultNetwork.Service[0].GroupID != result.User.Group.ID {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: "Authentication failure"})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: "Authorization failure"})
 		return
 	}
 
@@ -264,7 +264,7 @@ func GetAddAllow(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	result := auth.GroupAuthentication(0, core.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthorization(0, core.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return

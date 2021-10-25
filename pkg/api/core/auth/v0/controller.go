@@ -7,7 +7,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/hash"
 )
 
-func ControllerAuthentication(con controller.Controller) error {
+func ControllerAuthorization(con controller.Controller) error {
 	if con.Token1 != config.Conf.Controller.Auth.Token1 {
 		return fmt.Errorf("auth error! ")
 	}
