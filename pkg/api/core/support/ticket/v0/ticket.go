@@ -53,7 +53,7 @@ func Create(c *gin.Context) {
 
 	// isn't group
 	if !input.IsGroup {
-		result := auth.UserAuthentication(core.Token{UserToken: userToken, AccessToken: accessToken})
+		result := auth.UserAuthorization(core.Token{UserToken: userToken, AccessToken: accessToken})
 		if result.Err != nil {
 			c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 			return
@@ -64,7 +64,7 @@ func Create(c *gin.Context) {
 	} else {
 		//is group
 		// Group authentication
-		result := auth.GroupAuthentication(1, core.Token{UserToken: userToken, AccessToken: accessToken})
+		result := auth.GroupAuthorization(1, core.Token{UserToken: userToken, AccessToken: accessToken})
 		if result.Err != nil {
 			c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 			return
@@ -118,7 +118,7 @@ func Request(c *gin.Context) {
 	}
 
 	// Group authentication
-	result := auth.GroupAuthentication(1, core.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.GroupAuthorization(1, core.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 		return
@@ -201,7 +201,7 @@ func Update(c *gin.Context) {
 
 	// isn't group
 	if ticketResult.Tickets[0].GroupID == nil {
-		result := auth.UserAuthentication(core.Token{UserToken: userToken, AccessToken: accessToken})
+		result := auth.UserAuthorization(core.Token{UserToken: userToken, AccessToken: accessToken})
 		if result.Err != nil {
 			c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 			return
@@ -209,7 +209,7 @@ func Update(c *gin.Context) {
 	} else {
 		//is group
 		// Group authentication
-		result := auth.GroupAuthentication(1, core.Token{UserToken: userToken, AccessToken: accessToken})
+		result := auth.GroupAuthorization(1, core.Token{UserToken: userToken, AccessToken: accessToken})
 		if result.Err != nil {
 			c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 			return
@@ -252,7 +252,7 @@ func GetWebSocket(c *gin.Context) {
 
 	defer conn.Close()
 
-	result := auth.UserAuthentication(core.Token{UserToken: userToken, AccessToken: accessToken})
+	result := auth.UserAuthorization(core.Token{UserToken: userToken, AccessToken: accessToken})
 	if result.Err != nil {
 		log.Println("ws:// support error:Auth error")
 		conn.WriteMessage(websocket.TextMessage, []byte("error: auth error"))
@@ -314,7 +314,7 @@ func GetWebSocket(c *gin.Context) {
 			break
 		}
 		// 入力されたデータをTokenにて認証
-		resultAuth := auth.UserAuthentication(core.Token{
+		resultAuth := auth.UserAuthorization(core.Token{
 			UserToken:   msg.UserToken,
 			AccessToken: msg.AccessToken,
 		})

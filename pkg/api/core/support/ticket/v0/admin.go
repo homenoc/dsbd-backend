@@ -29,7 +29,7 @@ func CreateByAdmin(c *gin.Context) {
 	var input support.FirstInput
 
 	// Admin authentication
-	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
 		return
@@ -102,7 +102,7 @@ func CreateByAdmin(c *gin.Context) {
 func UpdateByAdmin(c *gin.Context) {
 	var input core.Ticket
 	// Admin authentication
-	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
 		return
@@ -149,7 +149,7 @@ func UpdateByAdmin(c *gin.Context) {
 
 func GetByAdmin(c *gin.Context) {
 	// Admin authentication
-	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
 		return
@@ -172,7 +172,7 @@ func GetByAdmin(c *gin.Context) {
 
 func GetAllByAdmin(c *gin.Context) {
 	// Admin authentication
-	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: resultAdmin.Err.Error()})
 		return
@@ -210,7 +210,7 @@ func GetAdminWebSocket(c *gin.Context) {
 	defer conn.Close()
 
 	// Admin authentication
-	resultAdmin := auth.AdminAuthentication(accessToken)
+	resultAdmin := auth.AdminAuthorization(accessToken)
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
 		return
