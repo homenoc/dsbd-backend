@@ -1,17 +1,13 @@
 package gen
 
 import (
-	"fmt"
-	"github.com/google/uuid"
+	uuidLib "github.com/google/uuid"
 )
 
-func GenerateUUID() string {
-	u, err := uuid.NewRandom()
+func GenerateUUIDString() (string, error) {
+	uuid, err := uuidLib.NewRandom()
 	if err != nil {
-		fmt.Println(err)
-		//return ""
+		return "", err
 	}
-	uu := u.String()
-
-	return uu
+	return uuid.String(), nil
 }
