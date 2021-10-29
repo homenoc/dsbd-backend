@@ -8,7 +8,6 @@ import (
 	dbNTTTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ntt/v0"
 	dbServiceTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/service/v0"
 	"io/ioutil"
-	"log"
 )
 
 type Template struct {
@@ -30,32 +29,36 @@ func RegisterTemplateConfig(inputTemplatePath string) error {
 		return err
 	}
 	var data Template
-	json.Unmarshal(file, &data)
+	err = json.Unmarshal(file, &data)
+	if err != nil {
+		return err
+	}
+
 	for _, tmp := range data.Service {
 		_, err = dbServiceTemplate.Create(&tmp)
 		if err != nil {
-			log.Println(err)
+			return err
 		}
 	}
 
 	for _, tmp := range data.Connection {
 		_, err = dbConnectionTemplate.Create(&tmp)
 		if err != nil {
-			log.Println(err)
+			return err
 		}
 	}
 
 	for _, tmp := range data.NTT {
 		_, err = dbNTTTemplate.Create(&tmp)
 		if err != nil {
-			log.Println(err)
+			return err
 		}
 	}
 
 	for _, tmp := range data.NOC {
 		_, err = dbNOCTemplate.Create(&tmp)
 		if err != nil {
-			log.Println(err)
+			return err
 		}
 	}
 
