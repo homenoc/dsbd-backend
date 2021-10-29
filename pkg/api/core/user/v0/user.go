@@ -170,7 +170,11 @@ func AddGroup(c *gin.Context) {
 		return
 	}
 
-	pass = gen.GenerateUUID()
+	pass, err = gen.GenerateUUIDString()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: "error: Failed to generate uuid. "})
+		return
+	}
 
 	data = core.User{
 		GroupID:       resultAuth.User.GroupID,
