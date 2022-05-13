@@ -138,7 +138,7 @@ func AddGroup(c *gin.Context) {
 	pass := ""
 
 	// グループ所属ユーザの登録
-	resultAuth := auth.GroupAuthentication(0, core.Token{UserToken: userToken, AccessToken: accessToken})
+	resultAuth := auth.GroupAuthorization(0, core.Token{UserToken: userToken, AccessToken: accessToken})
 	if resultAuth.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAuth.Err.Error()})
 		return
@@ -170,7 +170,11 @@ func AddGroup(c *gin.Context) {
 		return
 	}
 
-	pass = gen.GenerateUUID()
+	pass, err = gen.GenerateUUIDString()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: "error: Failed to generate uuid. "})
+		return
+	}
 
 	data = core.User{
 		GroupID:       resultAuth.User.GroupID,
@@ -310,7 +314,7 @@ func Delete(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	authResult := auth.GroupAuthentication(0, core.Token{UserToken: userToken, AccessToken: accessToken})
+	authResult := auth.GroupAuthorization(0, core.Token{UserToken: userToken, AccessToken: accessToken})
 	if authResult.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: authResult.Err.Error()})
 		return
@@ -372,7 +376,7 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	authResult := auth.UserAuthentication(core.Token{UserToken: userToken, AccessToken: accessToken})
+	authResult := auth.UserAuthorization(core.Token{UserToken: userToken, AccessToken: accessToken})
 	if authResult.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: authResult.Err.Error()})
 		return

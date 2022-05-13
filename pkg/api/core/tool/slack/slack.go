@@ -5,7 +5,7 @@ func NoticeSlackType(slackType uint) string {
 		return "追加"
 	} else if slackType == 1 {
 		return "削除"
-	} else if slackType == 1 {
+	} else if slackType == 2 {
 		return "更新"
 	} else {
 		return ""

@@ -132,6 +132,7 @@ type Connection struct {
 	Open                     *bool                  `json:"open"`
 	Enable                   *bool                  `json:"enable"`
 	Comment                  string                 `json:"comment"`
+	BgpComment               string                 `json:"bgp_comment"`
 	IPv4RouteTemplate        *IPv4RouteTemplate     `json:"ipv4_route_template"`
 	IPv6RouteTemplate        *IPv6RouteTemplate     `json:"ipv6_route_template"`
 	NTTTemplate              *NTTTemplate           `json:"ntt_template"`
@@ -207,6 +208,8 @@ type Plan struct {
 type JPNICAdmin struct {
 	gorm.Model
 	ServiceID     uint   `json:"service_id"`
+	Hidden        bool   `json:"hidden"`
+	IsGroup       bool   `json:"is_group"`
 	V4JPNICHandle string `json:"v4_jpnic_handle"`
 	V6JPNICHandle string `json:"v6_jpnic_handle"`
 	Name          string `json:"name"`
@@ -219,6 +222,8 @@ type JPNICAdmin struct {
 	AddressEn     string `json:"address_en"`
 	Dept          string `json:"dept"`
 	DeptEn        string `json:"dept_en"`
+	Title         string `json:"title"`
+	TitleEn       string `json:"title_en"`
 	Tel           string `json:"tel"`
 	Fax           string `json:"fax"`
 	Country       string `json:"country"`
@@ -227,6 +232,8 @@ type JPNICAdmin struct {
 type JPNICTech struct {
 	gorm.Model
 	ServiceID     uint   `json:"service_id"`
+	Hidden        bool   `json:"hidden"`
+	IsGroup       bool   `json:"is_group"`
 	V4JPNICHandle string `json:"v4_jpnic_handle"`
 	V6JPNICHandle string `json:"v6_jpnic_handle"`
 	Name          string `json:"name"`
@@ -239,6 +246,8 @@ type JPNICTech struct {
 	AddressEn     string `json:"address_en"`
 	Dept          string `json:"dept"`
 	DeptEn        string `json:"dept_en"`
+	Title         string `json:"title"`
+	TitleEn       string `json:"title_en"`
 	Tel           string `json:"tel"`
 	Fax           string `json:"fax"`
 	Country       string `json:"country"`

@@ -17,7 +17,7 @@ import (
 func AddJPNICTechByAdmin(c *gin.Context) {
 	var input core.JPNICTech
 
-	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
 		return
@@ -48,7 +48,7 @@ func AddJPNICTechByAdmin(c *gin.Context) {
 }
 
 func DeleteJPNICTechByAdmin(c *gin.Context) {
-	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
 		return
@@ -71,7 +71,7 @@ func DeleteJPNICTechByAdmin(c *gin.Context) {
 func UpdateJPNICTechByAdmin(c *gin.Context) {
 	var input core.JPNICTech
 
-	resultAdmin := auth.AdminAuthentication(c.Request.Header.Get("ACCESS_TOKEN"))
+	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
 	if resultAdmin.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
 		return

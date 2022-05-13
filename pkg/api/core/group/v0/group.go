@@ -34,7 +34,7 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	userResult := auth.UserAuthentication(core.Token{UserToken: userToken, AccessToken: accessToken})
+	userResult := auth.UserAuthorization(core.Token{UserToken: userToken, AccessToken: accessToken})
 	if userResult.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: userResult.Err.Error()})
 		return

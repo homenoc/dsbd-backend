@@ -9,6 +9,13 @@
 * Slack通知
 * 各システムとの連携
 
+## 初回実行時
+```
+cd cmd/backend
+go run . init database --config config.json
+go run . init database 
+```
+
 ## MySQL
 ```
 "Error 1406: Data too long for column 'question' at row 1"

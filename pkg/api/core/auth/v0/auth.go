@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func UserAuthentication(data core.Token) auth.UserResult {
+func UserAuthorization(data core.Token) auth.UserResult {
 	resultToken := dbToken.Get(token.UserTokenAndAccessToken, &data)
 	if len(resultToken.Token) == 0 {
 		return auth.UserResult{Err: fmt.Errorf("auth failed")}
@@ -30,7 +30,7 @@ func UserAuthentication(data core.Token) auth.UserResult {
 }
 
 // errorType 0: 未審査の場合はエラーを返す(厳格)　1: 未審査の場合エラーを返さない
-func GroupAuthentication(errorType uint, data core.Token) auth.GroupResult {
+func GroupAuthorization(errorType uint, data core.Token) auth.GroupResult {
 	resultToken := dbToken.Get(token.UserTokenAndAccessToken, &data)
 	if len(resultToken.Token) == 0 {
 		return auth.GroupResult{Err: fmt.Errorf("auth failed")}
