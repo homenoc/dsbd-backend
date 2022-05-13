@@ -53,7 +53,7 @@ func DeleteByAdmin(c *gin.Context) {
 		return
 	}
 
-	if err := dbGroup.Delete(&core.Group{Model: gorm.Model{ID: uint(id)}}); err != nil {
+	if err = dbGroup.Delete(&core.Group{Model: gorm.Model{ID: uint(id)}}); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
