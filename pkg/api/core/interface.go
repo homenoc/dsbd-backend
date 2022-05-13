@@ -132,6 +132,7 @@ type Connection struct {
 	Open                     *bool                  `json:"open"`
 	Enable                   *bool                  `json:"enable"`
 	Comment                  string                 `json:"comment"`
+	BgpComment               string                 `json:"bgp_comment"`
 	IPv4RouteTemplate        *IPv4RouteTemplate     `json:"ipv4_route_template"`
 	IPv6RouteTemplate        *IPv6RouteTemplate     `json:"ipv6_route_template"`
 	NTTTemplate              *NTTTemplate           `json:"ntt_template"`
