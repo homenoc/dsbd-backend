@@ -85,10 +85,13 @@ func AddByAdmin(c *gin.Context) {
 			}
 		}
 
-		grpIP, err = ipProcess(true, true, input.IP)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-			return
+		// IPトランジット以外
+		if input.ServiceTemplateID != 4 {
+			grpIP, err = ipProcess(true, true, input.IP)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+				return
+			}
 		}
 	}
 
@@ -103,10 +106,13 @@ func AddByAdmin(c *gin.Context) {
 			return
 		}
 
-		grpIP, err = ipProcess(true, false, input.IP)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-			return
+		// IPトランジット以外
+		if input.ServiceTemplateID != 4 {
+			grpIP, err = ipProcess(true, false, input.IP)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+				return
+			}
 		}
 	}
 
