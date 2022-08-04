@@ -1,32 +1,86 @@
 package v0
 
 import (
-	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/noc"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/noc/bgpRouter"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/noc/tunnelEndPointRouterIP"
 	connectionTemplate "github.com/homenoc/dsbd-backend/pkg/api/core/template/connection"
 	ntt "github.com/homenoc/dsbd-backend/pkg/api/core/template/ntt"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	dbBGPRouter "github.com/homenoc/dsbd-backend/pkg/api/store/noc/bgpRouter/v0"
 	dbTunnelEndPointRouterIP "github.com/homenoc/dsbd-backend/pkg/api/store/noc/tunnelEndPointRouterIP/v0"
 	dbNOC "github.com/homenoc/dsbd-backend/pkg/api/store/noc/v0"
 	dbConnectionTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/connection/v0"
 	dbNTTTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ntt/v0"
+	"github.com/slack-go/slack"
 	"gorm.io/gorm"
 	"strconv"
 )
 
-func noticeSlackByAdmin(before, after core.Connection) {
+func noticeAdd(applicant, groupID, serviceCode, connectionCodeNew, connectionCodeComment string) {
+	if applicant == "" {
+		applicant = "管理者"
+	}
 	// 審査ステータスのSlack通知
-	attachment := slack.Attachment{}
+	notification.Notification.Slack.PostMessage(config.Conf.Slack.Channels.Main, slack.MsgOptionBlocks(
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTHeader,
+			Text: &slack.TextBlockObject{Type: "plain_text", Text: "接続情報登録"},
+		},
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*申請者* " + applicant},
+			},
+		},
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*GroupID* " + groupID},
+				{Type: "mrkdwn", Text: "*サービスコード* " + serviceCode},
+				{Type: "mrkdwn", Text: "*接続コード（新規発番）* " + connectionCodeNew},
+				{Type: "mrkdwn", Text: "*接続コード（補足情報）* " + connectionCodeComment},
+			},
+		},
+		slack.NewDividerBlock(),
+	))
+}
 
-	attachment.Text = &[]string{"接続情報の更新"}[0]
-	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
-		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(before.ID)) + "-" + before.Service.Group.Org}).
-		AddField(slack.Field{Title: "更新状況", Value: changeText(before, after)})
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+func noticeUpdateByAdmin(before, after core.Connection) {
+	// 審査ステータスのSlack通知
+	notification.Notification.Slack.PostMessage(config.Conf.Slack.Channels.Main, slack.MsgOptionBlocks(
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTHeader,
+			Text: &slack.TextBlockObject{Type: "plain_text", Text: "接続情報の更新"},
+		},
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*申請者* 管理者"},
+			},
+		},
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*Group* [" + strconv.Itoa(int(before.ID)) + "] " + before.Service.Group.Org + "(" + before.Service.Group.OrgEn + ")"},
+			},
+		},
+		slack.NewSectionBlock(slack.NewTextBlockObject("mrkdwn", "*更新状況*", false, false), nil, nil),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Text: &slack.TextBlockObject{
+				Type: "mrkdwn",
+				Text: changeText(before, after),
+			},
+		},
+		slack.NewDividerBlock(),
+	))
 }
 
 func changeText(before, after core.Connection) string {

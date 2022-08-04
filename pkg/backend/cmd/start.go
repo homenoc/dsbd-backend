@@ -3,7 +3,8 @@ package cmd
 import (
 	"github.com/homenoc/dsbd-backend/pkg/api"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
-	logging "github.com/homenoc/dsbd-backend/pkg/api/core/tool/log"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
+	"github.com/slack-go/slack"
 	"github.com/spf13/cobra"
 	"log"
 )
@@ -27,8 +28,18 @@ var startUserCmd = &cobra.Command{
 		if config.GetConfig(confPath) != nil {
 			log.Fatalf("error config process |%v", err)
 		}
+		notification.NewNotification()
 
-		logging.WriteLog("", "------Application Start(User)------")
+		notification.Notification.Slack.PostMessage(config.Conf.Slack.Channels.Log, slack.MsgOptionAttachments(
+			slack.Attachment{
+				Color: "good",
+				Title: "System",
+				Text:  "error: \n" + err.Error(),
+				Fields: []slack.AttachmentField{
+					{Title: "Status", Value: "User側 API起動"},
+				},
+			},
+		))
 
 		api.UserRestAPI()
 		log.Println("end")
@@ -47,6 +58,18 @@ var startAdminCmd = &cobra.Command{
 		if config.GetConfig(confPath) != nil {
 			log.Fatalf("error config process |%v", err)
 		}
+		notification.NewNotification()
+
+		notification.Notification.Slack.PostMessage(config.Conf.Slack.Channels.Log, slack.MsgOptionAttachments(
+			slack.Attachment{
+				Color: "good",
+				Title: "System",
+				Text:  "error: \n" + err.Error(),
+				Fields: []slack.AttachmentField{
+					{Title: "Status", Value: "Admin側 API起動"},
+				},
+			},
+		))
 
 		api.AdminRestAPI()
 		log.Println("end")

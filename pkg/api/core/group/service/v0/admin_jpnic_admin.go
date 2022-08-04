@@ -40,7 +40,7 @@ func AddJPNICAdminByAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	noticeSlackAddJPNICByAdmin(id, input)
+	noticeAddJPNICByAdmin(id, input)
 	c.JSON(http.StatusOK, common.Result{})
 }
 
@@ -61,7 +61,7 @@ func DeleteJPNICAdminByAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	noticeSlackDelete("JPNIC管理者連絡窓口", uint(id))
+	noticeDelete("JPNIC管理者連絡窓口", uint(id))
 	c.JSON(http.StatusOK, common.Result{})
 }
 
@@ -99,6 +99,6 @@ func UpdateJPNICAdminByAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	noticeSlackUpdateJPNICByAdmin(before.Admins[0], input)
+	noticeUpdateJPNICByAdmin(before.Admins[0], input)
 	c.JSON(http.StatusOK, common.Result{})
 }

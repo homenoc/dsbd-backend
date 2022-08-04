@@ -96,8 +96,6 @@ func MembershipPayment(c *gin.Context) {
 		PaymentMembershipTemplateID: &resultTemplate.ID,
 	})
 
-	go noticeSlackPaymentMembershipPayment(*result.User.GroupID, resultTemplate.Plan, pi.LatestInvoice.PaymentIntent.ID)
-
 	c.JSON(http.StatusOK, payment.ResultByUser{
 		ClientSecret: pi.LatestInvoice.PaymentIntent.ClientSecret,
 	})
@@ -166,7 +164,6 @@ func ChangeCardPayment(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: "payment_membership system error"})
 		return
 	}
-	go noticeSlackPaymentMembershipChangeCardPayment(result.User.Group.ID)
 
 	c.JSON(http.StatusOK, common.Result{})
 }

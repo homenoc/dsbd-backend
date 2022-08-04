@@ -1,31 +1,68 @@
 package v0
 
 import (
-	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
+	"github.com/slack-go/slack"
 	"strconv"
 )
 
 func noticeSlackAdd(memo *core.Memo) {
 	// 審査ステータスのSlack通知
-	attachment := slack.Attachment{}
-
-	attachment.Text = &[]string{"Memoの登録"}[0]
-	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
-		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(memo.GroupID))}).
-		AddField(slack.Field{Title: "Type", Value: strconv.Itoa(int(memo.Type))}).
-		AddField(slack.Field{Title: "Title", Value: memo.Title}).
-		AddField(slack.Field{Title: "Message", Value: memo.Message})
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+	notification.Notification.Slack.PostMessage(config.Conf.Slack.Channels.Main, slack.MsgOptionBlocks(
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTHeader,
+			Text: &slack.TextBlockObject{Type: "plain_text", Text: "Memo登録"},
+		},
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*申請者* 管理者"},
+			},
+		},
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*GroupID* " + strconv.Itoa(int(memo.GroupID))},
+				{Type: "mrkdwn", Text: "*Type* " + strconv.Itoa(int(memo.Type))},
+			},
+		},
+		slack.NewSectionBlock(slack.NewTextBlockObject("mrkdwn", "*"+memo.Title+"*", false, false), nil, nil),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Text: &slack.TextBlockObject{
+				Type: "mrkdwn",
+				Text: memo.Message,
+			},
+		},
+		slack.NewDividerBlock(),
+	))
 }
 
 func noticeSlackDelete(id int) {
 	// 審査ステータスのSlack通知
-	attachment := slack.Attachment{}
-
-	attachment.Text = &[]string{"Memoの削除"}[0]
-	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
-		AddField(slack.Field{Title: "ID", Value: strconv.Itoa(id)})
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+	notification.Notification.Slack.PostMessage(config.Conf.Slack.Channels.Main, slack.MsgOptionBlocks(
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTHeader,
+			Text: &slack.TextBlockObject{Type: "plain_text", Text: "Memo削除"},
+		},
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*申請者* 管理者"},
+			},
+		},
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*MemoID* " + strconv.Itoa(id)},
+			},
+		},
+		slack.NewDividerBlock(),
+	))
 }

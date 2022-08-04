@@ -1,38 +1,38 @@
 package notification
 
 import (
-	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
-	"log"
+	"github.com/slack-go/slack"
 )
 
-type Slack struct {
-	ID         string
-	Status     bool
-	Attachment slack.Attachment
-}
-
-func SendSlack(data Slack) {
-	for _, tmp := range config.Conf.Slack {
-		if tmp.ID == data.ID {
-			var color string
-			if data.Status {
-				color = "good"
-			} else {
-				color = "danger"
-			}
-			data.Attachment.Color = &color
-			payload := slack.Payload{
-				Username:    tmp.Name,
-				Channel:     tmp.Channel,
-				Attachments: []slack.Attachment{data.Attachment},
-				Markdown:    true,
-			}
-			err := slack.Send(tmp.WebHookUrl, "", payload)
-			if err != nil {
-				log.Println(err)
-			}
-			return
-		}
-	}
+func NoticeUpdateStatus(groupID, info, history string) {
+	// 審査ステータスのSlack通知
+	Notification.Slack.PostMessage(config.Conf.Slack.Channels.Main, slack.MsgOptionBlocks(
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTHeader,
+			Text: &slack.TextBlockObject{Type: "plain_text", Text: "接続情報登録"},
+		},
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*申請者* System"},
+			},
+		},
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*GroupID* " + groupID},
+			},
+		},
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*現在ステータス情報* " + info},
+				{Type: "mrkdwn", Text: "*ステータス履歴* " + history},
+			},
+		},
+		slack.NewDividerBlock(),
+	))
 }

@@ -1,14 +1,12 @@
 package v0
 
 import (
-	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/gin-gonic/gin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
@@ -17,7 +15,6 @@ import (
 	"gorm.io/gorm"
 	"log"
 	"net/http"
-	"strconv"
 	"time"
 )
 
@@ -109,16 +106,7 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	attachment := slack.Attachment{}
-
-	attachment.Text = &[]string{"グループ登録"}[0]
-	attachment.AddField(slack.Field{Title: "Question", Value: input.Question}).
-		AddField(slack.Field{Title: "Org", Value: input.Org + "(" + input.OrgEn + ")"}).
-		AddField(slack.Field{Title: "Country", Value: input.Country}).
-		AddField(slack.Field{Title: "Student", Value: strconv.FormatBool(*input.Student)}).
-		AddField(slack.Field{Title: "Contract", Value: input.Contract})
-
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+	noticeAddGroup(userResult.User, input)
 
 	if err = dbUser.Update(user.UpdateGID, &core.User{Model: gorm.Model{ID: userResult.User.ID}, GroupID: &groupData.ID}); err != nil {
 		log.Println(dbGroup.Delete(&core.Group{Model: gorm.Model{ID: groupData.ID}}))

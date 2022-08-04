@@ -3,6 +3,7 @@ package cmd
 import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	initFunction "github.com/homenoc/dsbd-backend/pkg/api/core/tool/init"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
 	"github.com/spf13/cobra"
 	"log"
@@ -26,6 +27,7 @@ var initDatabaseCmd = &cobra.Command{
 		if config.GetConfig(confPath) != nil {
 			log.Fatalf("error config process |%v", err)
 		}
+		notification.NewNotification()
 
 		store.InitDB()
 
@@ -50,6 +52,7 @@ var initRegisterCmd = &cobra.Command{
 		if config.GetConfig(confPath) != nil {
 			log.Fatalf("error config process |%v", err)
 		}
+		notification.NewNotification()
 
 		if err = initFunction.RegisterTemplateConfig(template); err != nil {
 			log.Fatalf("error config process |%v", err)

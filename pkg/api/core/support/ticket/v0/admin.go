@@ -142,7 +142,7 @@ func UpdateByAdmin(c *gin.Context) {
 		return
 	}
 
-	noticeSlack(ticketResult.Tickets[0], input)
+	noticeUpdateByAdmin(ticketResult.Tickets[0], input)
 
 	c.JSON(http.StatusOK, support.Result{})
 }
@@ -295,7 +295,6 @@ func GetAdminWebSocket(c *gin.Context) {
 
 			if len(resultTicket.Tickets) != 0 {
 				if groupID != 0 {
-
 					resultUser := dbUser.Get(user.GIDAndLevel, &core.User{
 						GroupID: resultTicket.Tickets[0].GroupID,
 						Level:   1,
@@ -333,8 +332,11 @@ func GetAdminWebSocket(c *gin.Context) {
 						})
 					}
 				}
-
 			}
+
+			//Slackに送信
+			groupValue := "[" + strconv.Itoa(int(resultTicket.Tickets[0].Group.ID)) + "] " + resultTicket.Tickets[0].Group.Org + "(" + resultTicket.Tickets[0].Group.OrgEn + ")"
+			noticeNewMessage(true, "", groupValue, ticketResult.Tickets[0], msg.Message)
 
 			support.Broadcast <- msg
 		}

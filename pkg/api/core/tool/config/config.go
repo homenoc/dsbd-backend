@@ -17,7 +17,7 @@ type Config struct {
 	Mail       Mail       `json:"mail"`
 	JPNIC      JPNIC      `json:"jpnic"`
 	Radius     Radius     `json:"radius"`
-	Slack      []Slack    `json:"slack"`
+	Slack      Slack      `json:"slack"`
 	Log        Log        `json:"log"`
 }
 
@@ -95,10 +95,15 @@ type Radius struct {
 }
 
 type Slack struct {
-	ID         string `json:"id"`
-	WebHookUrl string `json:"url"`
-	Channel    string `json:"channel"`
-	Name       string `json:"name"`
+	Token    string        `json:"token"`
+	Channels SlackChannels `json:"channels"`
+}
+
+type SlackChannels struct {
+	Main       string `json:"main"`
+	Log        string `json:"log"`
+	Payment    string `json:"payment"`
+	PaymentLog string `json:"payment_log"`
 }
 
 type Log struct {

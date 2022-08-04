@@ -1,55 +1,37 @@
 package v0
 
 import (
-	"github.com/ashwanthkumar/slack-go-webhook"
-	"github.com/homenoc/dsbd-backend/pkg/api/core"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
-	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
-	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
-	"gorm.io/gorm"
+	"github.com/slack-go/slack"
+	"github.com/stripe/stripe-go/v72"
 	"strconv"
 )
 
-func noticeSlackPaymentMembershipPayment(groupID uint, plan, paymentIntentID string) {
-	attachment := slack.Attachment{}
-
-	result := dbGroup.Get(group.ID, &core.Group{Model: gorm.Model{ID: groupID}})
-
-	attachment.Text = &[]string{"会費支払い"}[0]
-	attachment.AddField(slack.Field{Title: "申請者", Value: strconv.Itoa(int(groupID)) + ": " + result.Group[0].Org + "(" + result.Group[0].OrgEn + ")"}).
-		AddField(slack.Field{Title: "Plan", Value: plan}).
-		AddField(slack.Field{Title: "PaymentIntentID", Value: paymentIntentID})
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+func noticePaymentLog(event stripe.Event) {
+	notification.Notification.Slack.PostMessage(config.Conf.Slack.Channels.PaymentLog, slack.MsgOptionAttachments(
+		slack.Attachment{
+			Color: "good",
+			Title: event.Type,
+			Fields: []slack.AttachmentField{
+				{Title: "ID", Value: event.ID},
+				{Title: "Created", Value: strconv.FormatInt(event.Created, 10)},
+			},
+		},
+	))
 }
 
-func noticeSlackPaymentDonatePayment(userID, money uint, paymentIntentID string) {
-	attachment := slack.Attachment{}
+func noticePayment(keyValue map[string]string) {
+	var slackAttachField []slack.AttachmentField
+	for key, value := range keyValue {
+		slackAttachField = append(slackAttachField, slack.AttachmentField{Title: key, Value: value})
+	}
 
-	result := dbUser.Get(user.ID, &core.User{Model: gorm.Model{ID: userID}})
-
-	attachment.Text = &[]string{"寄付"}[0]
-	attachment.AddField(slack.Field{Title: "申請者", Value: strconv.Itoa(int(userID)) + ": " + result.User[0].Name + "(" + result.User[0].NameEn + ")"}).
-		AddField(slack.Field{Title: "金額", Value: strconv.Itoa(int(money)) + "円"}).
-		AddField(slack.Field{Title: "PaymentIntentID", Value: paymentIntentID})
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
-}
-
-func noticeSlackPaymentMembershipChangeCardPayment(groupID uint) {
-	attachment := slack.Attachment{}
-
-	result := dbGroup.Get(group.ID, &core.Group{Model: gorm.Model{ID: groupID}})
-
-	attachment.Text = &[]string{"会費支払い(カードの変更)"}[0]
-	attachment.AddField(slack.Field{Title: "申請者", Value: strconv.Itoa(int(groupID)) + ": " + result.Group[0].Org + "(" + result.Group[0].OrgEn + ")"})
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
-}
-
-func noticeSlackPaymentPaid(paymentIntentID string) {
-	attachment := slack.Attachment{}
-
-	attachment.Text = &[]string{"支払い完了"}[0]
-	attachment.AddField(slack.Field{Title: "PaymentIntentID", Value: paymentIntentID})
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+	notification.Notification.Slack.PostMessage(config.Conf.Slack.Channels.PaymentLog, slack.MsgOptionAttachments(
+		slack.Attachment{
+			Color:  "good",
+			Title:  "支払い処理",
+			Fields: slackAttachField,
+		},
+	))
 }

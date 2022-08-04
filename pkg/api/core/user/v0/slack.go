@@ -1,27 +1,104 @@
 package v0
 
 import (
-	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
+	"github.com/slack-go/slack"
 	"strconv"
 )
 
-func noticeSlack(loginUser, before core.User, after user.Input) {
+func noticeAdd(input user.Input) {
 	// 審査ステータスのSlack通知
-	attachment := slack.Attachment{}
+	notification.Notification.Slack.PostMessage(config.Conf.Slack.Channels.Main, slack.MsgOptionBlocks(
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTHeader,
+			Text: &slack.TextBlockObject{Type: "plain_text", Text: "新規ユーザ登録"},
+		},
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*申請者* ユーザ"},
+			},
+		},
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*Name* " + input.Name + " (" + input.NameEn + ")"},
+				{Type: "mrkdwn", Text: "*E-Mail* " + input.Email},
+			},
+		},
+		slack.NewDividerBlock(),
+	))
+}
 
+func noticeAddFromGroup(user user.Input, group core.Group) {
+	// 審査ステータスのSlack通知
+	notification.Notification.Slack.PostMessage(config.Conf.Slack.Channels.Main, slack.MsgOptionBlocks(
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTHeader,
+			Text: &slack.TextBlockObject{Type: "plain_text", Text: "追加ユーザ登録"},
+		},
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*申請者* ユーザ"},
+				{Type: "mrkdwn", Text: "*Group* " + "(" + strconv.Itoa(int(group.ID)) + ")" + group.Org + " (" + group.OrgEn + ")"},
+			},
+		},
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*Name* " + user.Name + " (" + user.NameEn + ")"},
+				{Type: "mrkdwn", Text: "*E-Mail* " + user.Email},
+			},
+		},
+		slack.NewDividerBlock(),
+	))
+}
+
+func noticeRenew(loginUser, before core.User, after user.Input) {
+	// 審査ステータスのSlack通知
 	groupStr := "なし"
 	if loginUser.GroupID != nil {
 		groupStr = strconv.Itoa(int(*loginUser.GroupID)) + "-" + loginUser.Group.Org
 	}
 
-	attachment.Text = &[]string{"User情報の更新"}[0]
-	attachment.AddField(slack.Field{Title: "申請者", Value: strconv.Itoa(int(loginUser.ID)) + "-" + loginUser.Name}).
-		AddField(slack.Field{Title: "Group", Value: groupStr}).
-		AddField(slack.Field{Title: "更新状況", Value: changeText(before, after)})
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+	notification.Notification.Slack.PostMessage(config.Conf.Slack.Channels.Main, slack.MsgOptionBlocks(
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTHeader,
+			Text: &slack.TextBlockObject{Type: "plain_text", Text: "User情報更新"},
+		},
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*申請者* ユーザ"},
+			},
+		},
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*GroupID* " + groupStr},
+				{Type: "mrkdwn", Text: "*User* " + strconv.Itoa(int(loginUser.ID)) + "-" + loginUser.Name},
+			},
+		},
+		slack.NewSectionBlock(slack.NewTextBlockObject("mrkdwn", "*更新状況*", false, false), nil, nil),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Text: &slack.TextBlockObject{
+				Type: "mrkdwn",
+				Text: changeText(before, after),
+			},
+		},
+		slack.NewDividerBlock(),
+	))
 }
 
 func changeText(before core.User, after user.Input) string {

@@ -1,14 +1,15 @@
 package v0
 
 import (
-	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
 	serviceTemplate "github.com/homenoc/dsbd-backend/pkg/api/core/template/service"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	dbServiceTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/service/v0"
+	"github.com/slack-go/slack"
 	"gorm.io/gorm"
 	"strconv"
 )
@@ -18,122 +19,338 @@ func getGroupInfo(groupID uint) core.Group {
 	return result.Group[0]
 }
 
-func noticeSlackAdd(groupID int, serviceCode, serviceCodeComment string) {
-	grpInfo := getGroupInfo(uint(groupID))
-	attachment := slack.Attachment{}
-
-	attachment.Text = &[]string{"Service情報登録(管理者実行)"}[0]
-	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
-		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(groupID) + "-" + grpInfo.Org}).
-		AddField(slack.Field{Title: "サービスコード（新規発番）", Value: serviceCode}).
-		AddField(slack.Field{Title: "サービスコード（補足情報）", Value: serviceCodeComment})
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
-}
-
-func noticeSlackAddJPNICByAdmin(serviceID int, input core.JPNICAdmin) {
-	attachment := slack.Attachment{}
-
-	attachment.Text = &[]string{"JPNIC管理者連絡窓口の追加"}[0]
-	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
-		AddField(slack.Field{Title: "Service", Value: strconv.Itoa(serviceID)}).
-		AddField(slack.Field{Title: "Name", Value: input.Name + " (" + input.NameEn + ")"}).
-		AddField(slack.Field{Title: "追加状況", Value: changeTextJPNICByAdmin(core.JPNICAdmin{}, input)})
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
-}
-
-func noticeSlackAddJPNICTech(serviceID int, input core.JPNICTech) {
-	attachment := slack.Attachment{}
-
-	attachment.Text = &[]string{"JPNIC技術連絡担当者の追加"}[0]
-	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
-		AddField(slack.Field{Title: "Service", Value: strconv.Itoa(serviceID)}).
-		AddField(slack.Field{Title: "Name", Value: input.Name + " (" + input.NameEn + ")"}).
-		AddField(slack.Field{Title: "追加状況", Value: changeTextJPNICTech(core.JPNICTech{}, input)})
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
-}
-
-func noticeSlackAddIP(serviceID int, input service.IPInput) {
+func noticeAdd(applicant, groupID, serviceCodeNew, serviceCodeComment string) {
+	if applicant == "" {
+		applicant = "管理者"
+	}
 	// 審査ステータスのSlack通知
-	attachment := slack.Attachment{}
-
-	attachment.Text = &[]string{"IPの追加"}[0]
-	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
-		AddField(slack.Field{Title: "Service", Value: strconv.Itoa(serviceID)}).
-		AddField(slack.Field{Title: "Name", Value: input.Name}).
-		AddField(slack.Field{Title: "IP", Value: input.IP})
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+	notification.Notification.Slack.PostMessage(config.Conf.Slack.Channels.Main, slack.MsgOptionBlocks(
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTHeader,
+			Text: &slack.TextBlockObject{Type: "plain_text", Text: "接続情報登録"},
+		},
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*申請者* " + applicant},
+			},
+		},
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*GroupID* " + groupID},
+				{Type: "mrkdwn", Text: "*サービスコード（新規発番）* " + serviceCodeNew},
+				{Type: "mrkdwn", Text: "*サービスコード（補足情報）* " + serviceCodeComment},
+			},
+		},
+		slack.NewDividerBlock(),
+	))
 }
 
-func noticeSlackAddPlan(ipID int, input core.Plan) {
-	attachment := slack.Attachment{}
-
-	attachment.Text = &[]string{"Planの追加"}[0]
-	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
-		AddField(slack.Field{Title: "IP", Value: strconv.Itoa(ipID)}).
-		AddField(slack.Field{Title: "Name", Value: input.Name}).
-		AddField(slack.Field{Title: "Plan", Value: strconv.Itoa(int(input.After)) + "/" +
-			strconv.Itoa(int(input.HalfYear)) + "/" + strconv.Itoa(int(input.OneYear))})
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+func noticeDelete(title string, id uint) {
+	notification.Notification.Slack.PostMessage(config.Conf.Slack.Channels.Main, slack.MsgOptionBlocks(
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTHeader,
+			Text: &slack.TextBlockObject{Type: "plain_text", Text: title + "削除"},
+		},
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*申請者* 管理者"},
+			},
+		},
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*削除処理 ID* " + strconv.Itoa(int(id))},
+			},
+		},
+		slack.NewDividerBlock(),
+	))
 }
 
-func noticeSlackDelete(str string, id uint) {
-	color := "warning"
-	attachment := slack.Attachment{Color: &color}
-
-	attachment.AddField(slack.Field{Title: "Title", Value: str + "の削除"}).
-		AddField(slack.Field{Title: "申請者", Value: "管理者"}).
-		AddField(slack.Field{Title: "削除処理", Value: "ID: " + strconv.Itoa(int(id))})
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+func noticeUpdate(before, after core.Service) {
+	notification.Notification.Slack.PostMessage(config.Conf.Slack.Channels.Main, slack.MsgOptionBlocks(
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTHeader,
+			Text: &slack.TextBlockObject{Type: "plain_text", Text: "Service情報更新"},
+		},
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*申請者* 管理者"},
+			},
+		},
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*Group* " + "[" + strconv.Itoa(int(before.ID)) + "] " + before.Group.Org + "(" + before.Group.OrgEn + ")"},
+			},
+		},
+		slack.NewSectionBlock(slack.NewTextBlockObject("mrkdwn", "*更新状況*", false, false), nil, nil),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Text: &slack.TextBlockObject{
+				Type: "mrkdwn",
+				Text: changeText(before, after),
+			},
+		},
+		slack.NewDividerBlock(),
+	))
 }
 
-func noticeSlackUpdate(before, after core.Service) {
-	attachment := slack.Attachment{}
-
-	attachment.Text = &[]string{"Service情報の更新"}[0]
-	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
-		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(before.ID)) + "-" + before.Group.Org}).
-		AddField(slack.Field{Title: "更新状況", Value: changeText(before, after)})
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+func noticeAddJPNICByAdmin(serviceID int, input core.JPNICAdmin) {
+	notification.Notification.Slack.PostMessage(config.Conf.Slack.Channels.Main, slack.MsgOptionBlocks(
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTHeader,
+			Text: &slack.TextBlockObject{Type: "plain_text", Text: "JPNIC管理者連絡窓口の追加"},
+		},
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*申請者* 管理者"},
+			},
+		},
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*Service* " + strconv.Itoa(serviceID)},
+				{Type: "mrkdwn", Text: "*Name* " + input.Name + " (" + input.NameEn + ")"},
+			},
+		},
+		slack.NewSectionBlock(slack.NewTextBlockObject("mrkdwn", "*追加状況*", false, false), nil, nil),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Text: &slack.TextBlockObject{
+				Type: "mrkdwn",
+				Text: changeTextJPNICByAdmin(core.JPNICAdmin{}, input),
+			},
+		},
+		slack.NewDividerBlock(),
+	))
 }
 
-func noticeSlackUpdateJPNICByAdmin(before, after core.JPNICAdmin) {
-	attachment := slack.Attachment{}
-
-	attachment.Text = &[]string{"JPNIC管理者連絡窓口の更新"}[0]
-	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
-		AddField(slack.Field{Title: "JPNICAdmin", Value: strconv.Itoa(int(before.ID))}).
-		AddField(slack.Field{Title: "更新状況", Value: changeTextJPNICByAdmin(before, after)})
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+func noticeAddJPNICTechByAdmin(serviceID int, input core.JPNICTech) {
+	notification.Notification.Slack.PostMessage(config.Conf.Slack.Channels.Main, slack.MsgOptionBlocks(
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTHeader,
+			Text: &slack.TextBlockObject{Type: "plain_text", Text: "JPNIC技術連絡担当者の追加"},
+		},
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*申請者* 管理者"},
+			},
+		},
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*Service* " + strconv.Itoa(serviceID)},
+				{Type: "mrkdwn", Text: "*Name* " + input.Name + " (" + input.NameEn + ")"},
+			},
+		},
+		slack.NewSectionBlock(slack.NewTextBlockObject("mrkdwn", "*追加状況*", false, false), nil, nil),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Text: &slack.TextBlockObject{
+				Type: "mrkdwn",
+				Text: changeTextJPNICTech(core.JPNICTech{}, input),
+			},
+		},
+		slack.NewDividerBlock(),
+	))
 }
 
-func noticeSlackUpdateJPNICTech(before, after core.JPNICTech) {
-	attachment := slack.Attachment{}
-
-	attachment.Text = &[]string{"JPNIC技術連絡担当者の更新"}[0]
-	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
-		AddField(slack.Field{Title: "JPNICTech", Value: strconv.Itoa(int(before.ID))}).
-		AddField(slack.Field{Title: "更新状況", Value: changeTextJPNICTech(before, after)})
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+func noticeAddIPByAdmin(serviceID int, input service.IPInput) {
+	notification.Notification.Slack.PostMessage(config.Conf.Slack.Channels.Main, slack.MsgOptionBlocks(
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTHeader,
+			Text: &slack.TextBlockObject{Type: "plain_text", Text: "IPの追加"},
+		},
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*申請者* 管理者"},
+			},
+		},
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*Service* " + strconv.Itoa(serviceID)},
+				{Type: "mrkdwn", Text: "*Name* " + input.Name},
+				{Type: "mrkdwn", Text: "*IP* " + input.IP},
+			},
+		},
+		slack.NewDividerBlock(),
+	))
 }
 
-func noticeSlackUpdateIP(before, after core.IP) {
-	attachment := slack.Attachment{}
+func noticeAddPlanByAdmin(ipID int, input core.Plan) {
 
-	attachment.Text = &[]string{"IPの更新"}[0]
-	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
-		AddField(slack.Field{Title: "IP", Value: strconv.Itoa(int(before.ID))}).
-		AddField(slack.Field{Title: "更新状況", Value: changeTextIP(before, after)})
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+	notification.Notification.Slack.PostMessage(config.Conf.Slack.Channels.Main, slack.MsgOptionBlocks(
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTHeader,
+			Text: &slack.TextBlockObject{Type: "plain_text", Text: "Planの追加"},
+		},
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*申請者* 管理者"},
+			},
+		},
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*IP* " + strconv.Itoa(ipID)},
+				{Type: "mrkdwn", Text: "*Name* " + input.Name},
+				{Type: "mrkdwn", Text: "*Plan* " + strconv.Itoa(int(input.After)) + "/" +
+					strconv.Itoa(int(input.HalfYear)) + "/" + strconv.Itoa(int(input.OneYear))},
+			},
+		},
+		slack.NewDividerBlock(),
+	))
 }
 
-func noticeSlackUpdatePlan(before, after core.Plan) {
-	attachment := slack.Attachment{}
+func noticeUpdateJPNICByAdmin(before, after core.JPNICAdmin) {
+	notification.Notification.Slack.PostMessage(config.Conf.Slack.Channels.Main, slack.MsgOptionBlocks(
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTHeader,
+			Text: &slack.TextBlockObject{Type: "plain_text", Text: "JPNIC管理者連絡窓口の更新"},
+		},
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*申請者* 管理者"},
+			},
+		},
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*JPNICAdmin* " + strconv.Itoa(int(before.ID))},
+			},
+		},
+		slack.NewSectionBlock(slack.NewTextBlockObject("mrkdwn", "*更新状況*", false, false), nil, nil),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Text: &slack.TextBlockObject{
+				Type: "mrkdwn",
+				Text: changeTextJPNICByAdmin(before, after),
+			},
+		},
+		slack.NewDividerBlock(),
+	))
+}
 
-	attachment.Text = &[]string{"Planの更新"}[0]
-	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
-		AddField(slack.Field{Title: "Plan", Value: strconv.Itoa(int(before.ID))}).
-		AddField(slack.Field{Title: "更新状況", Value: changeTextPlan(before, after)})
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+func noticeUpdateJPNICTechByAdmin(before, after core.JPNICTech) {
+	notification.Notification.Slack.PostMessage(config.Conf.Slack.Channels.Main, slack.MsgOptionBlocks(
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTHeader,
+			Text: &slack.TextBlockObject{Type: "plain_text", Text: "JPNIC技術連絡担当者の更新"},
+		},
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*申請者* 管理者"},
+			},
+		},
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*JPNICTech* " + strconv.Itoa(int(before.ID))},
+			},
+		},
+		slack.NewSectionBlock(slack.NewTextBlockObject("mrkdwn", "*更新状況*", false, false), nil, nil),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Text: &slack.TextBlockObject{
+				Type: "mrkdwn",
+				Text: changeTextJPNICTech(before, after),
+			},
+		},
+		slack.NewDividerBlock(),
+	))
+}
+
+func noticeUpdateIPByAdmin(before, after core.IP) {
+	notification.Notification.Slack.PostMessage(config.Conf.Slack.Channels.Main, slack.MsgOptionBlocks(
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTHeader,
+			Text: &slack.TextBlockObject{Type: "plain_text", Text: "IPの更新"},
+		},
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*申請者* 管理者"},
+			},
+		},
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*IP* " + strconv.Itoa(int(before.ID))},
+			},
+		},
+		slack.NewSectionBlock(slack.NewTextBlockObject("mrkdwn", "*更新状況*", false, false), nil, nil),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Text: &slack.TextBlockObject{
+				Type: "mrkdwn",
+				Text: changeTextIP(before, after),
+			},
+		},
+		slack.NewDividerBlock(),
+	))
+}
+
+func noticeUpdatePlanByAdmin(before, after core.Plan) {
+	notification.Notification.Slack.PostMessage(config.Conf.Slack.Channels.Main, slack.MsgOptionBlocks(
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTHeader,
+			Text: &slack.TextBlockObject{Type: "plain_text", Text: "Planの更新"},
+		},
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*申請者* 管理者"},
+			},
+		},
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*Plan* " + strconv.Itoa(int(before.ID))},
+			},
+		},
+		slack.NewSectionBlock(slack.NewTextBlockObject("mrkdwn", "*更新状況*", false, false), nil, nil),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Text: &slack.TextBlockObject{
+				Type: "mrkdwn",
+				Text: changeTextPlan(before, after),
+			},
+		},
+		slack.NewDividerBlock(),
+	))
 }
 
 func changeText(before, after core.Service) string {

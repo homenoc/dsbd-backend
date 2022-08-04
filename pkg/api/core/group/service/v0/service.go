@@ -2,7 +2,6 @@ package v0
 
 import (
 	"fmt"
-	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/gin-gonic/gin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
@@ -188,13 +187,11 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	attachment := slack.Attachment{}
-	attachment.Text = &[]string{"ネットワーク情報登録"}[0]
-	attachment.AddField(slack.Field{Title: "申請者", Value: strconv.Itoa(int(result.User.ID)) + ":" + result.User.Name}).
-		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(result.User.Group.ID)) + ":" + result.User.Group.Org}).
-		AddField(slack.Field{Title: "サービスコード（新規発番）", Value: resultServiceTemplate.Services[0].Type + fmt.Sprintf("%03d", number)}).
-		AddField(slack.Field{Title: "サービスコード（補足情報）", Value: input.ServiceComment})
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+	applicant := "[" + strconv.Itoa(int(result.User.ID)) + "] " + result.User.Name + "(" + result.User.NameEn + ")"
+	groupName := "[" + strconv.Itoa(int(result.User.Group.ID)) + "] " + result.User.Group.Org + "(" + result.User.Group.OrgEn + ")"
+	connectionCodeNew := resultServiceTemplate.Services[0].Type + fmt.Sprintf("%03d", number)
+	connectionCodeComment := input.ServiceComment
+	noticeAdd(applicant, groupName, connectionCodeNew, connectionCodeComment)
 
 	// ---------ここまで処理が通っている場合、DBへの書き込みにすべて成功している
 	// GroupのStatusをAfterStatusにする
@@ -206,13 +203,7 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	attachment = slack.Attachment{}
-	attachment.AddField(slack.Field{Title: "Title", Value: "ステータス変更"}).
-		AddField(slack.Field{Title: "申請者", Value: "System"}).
-		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(result.User.Group.ID)) + ":" + result.User.Group.Org}).
-		AddField(slack.Field{Title: "現在ステータス情報", Value: "審査中"}).
-		AddField(slack.Field{Title: "ステータス履歴", Value: "1[ネットワーク情報記入段階(User)] =>2[審査中] "})
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+	notification.NoticeUpdateStatus(groupName, "審査中", "1[ネットワーク情報記入段階(User)] =>2[審査中]")
 
 	c.JSON(http.StatusOK, service.ResultOne{Service: *net})
 }

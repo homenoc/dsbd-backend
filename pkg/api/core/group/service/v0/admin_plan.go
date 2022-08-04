@@ -40,7 +40,7 @@ func AddPlanByAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	noticeSlackAddPlan(id, input)
+	noticeAddPlanByAdmin(id, input)
 	c.JSON(http.StatusOK, common.Result{})
 }
 
@@ -61,7 +61,7 @@ func DeletePlanByAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	noticeSlackDelete("Plan情報", uint(id))
+	noticeDelete("Plan情報", uint(id))
 	c.JSON(http.StatusOK, common.Result{})
 }
 
@@ -99,6 +99,6 @@ func UpdatePlanByAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	noticeSlackUpdatePlan(before, input)
+	noticeUpdatePlanByAdmin(before, input)
 	c.JSON(http.StatusOK, common.Result{})
 }

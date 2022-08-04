@@ -2,7 +2,6 @@ package v0
 
 import (
 	"fmt"
-	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/gin-gonic/gin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
@@ -238,16 +237,13 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	attachment := slack.Attachment{}
-	attachment.Text = &[]string{"接続情報登録"}[0]
-	attachment.AddField(slack.Field{Title: "申請者", Value: strconv.Itoa(int(result.User.ID)) + ":" + result.User.Name}).
-		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(result.User.Group.ID)) + ":" + result.User.Group.Org}).
-		AddField(slack.Field{Title: "サービスコード", Value: resultService.Service[0].ServiceTemplate.Type +
-			fmt.Sprintf("%03d", resultService.Service[0].ServiceNumber)}).
-		AddField(slack.Field{Title: "接続コード（新規発番）", Value: resultConnectionTemplate.Connections[0].Type +
-			fmt.Sprintf("%03d", number)}).
-		AddField(slack.Field{Title: "接続コード（補足情報）", Value: input.ConnectionComment})
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+	applicant := "[" + strconv.Itoa(int(result.User.ID)) + "] " + result.User.Name + "(" + result.User.NameEn + ")"
+	groupName := "[" + strconv.Itoa(int(result.User.Group.ID)) + "] " + result.User.Group.Org + "(" + result.User.Group.OrgEn + ")"
+	serviceCode := resultService.Service[0].ServiceTemplate.Type + strconv.Itoa(int(resultService.Service[0].ServiceNumber))
+	connectionCodeNew := resultConnectionTemplate.Connections[0].Type + fmt.Sprintf("%03d", number)
+	connectionCodeComment := input.ConnectionComment
+
+	noticeAdd(applicant, groupName, serviceCode, connectionCodeNew, connectionCodeComment)
 
 	//if err = dbGroup.Update(group.UpdateStatus, core.Group{
 	//	Model:  gorm.Model{ID: result.User.Group.ID},
@@ -265,13 +261,7 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	attachment = slack.Attachment{}
-	attachment.Text = &[]string{"ステータス変更"}[0]
-	attachment.AddField(slack.Field{Title: "申請者", Value: "System"}).
-		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(int(result.User.Group.ID)) + ":" + result.User.Group.Org}).
-		AddField(slack.Field{Title: "現在ステータス情報", Value: "開通作業中"}).
-		AddField(slack.Field{Title: "ステータス履歴", Value: "3[接続情報記入段階(User)] =>4[開通作業中] "})
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+	notification.NoticeUpdateStatus(groupName, "開通作業中", "3[接続情報記入段階(User)] =>4[開通作業中]")
 
 	c.JSON(http.StatusOK, common.Result{})
 }

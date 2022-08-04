@@ -2,7 +2,6 @@ package v0
 
 import (
 	"fmt"
-	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
@@ -12,7 +11,6 @@ import (
 	controller "github.com/homenoc/dsbd-backend/pkg/api/core/controller/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support/ticket"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	dbChat "github.com/homenoc/dsbd-backend/pkg/api/store/support/chat/v0"
 	dbTicket "github.com/homenoc/dsbd-backend/pkg/api/store/support/ticket/v0"
 	"gorm.io/gorm"
@@ -49,7 +47,7 @@ func Create(c *gin.Context) {
 		Request:       &[]bool{false}[0],
 		RequestReject: &[]bool{false}[0],
 	}
-	var groupValue string
+	var userValue, groupValue string
 
 	// isn't group
 	if !input.IsGroup {
@@ -60,6 +58,7 @@ func Create(c *gin.Context) {
 		}
 		resultTicket.GroupID = nil
 		resultTicket.UserID = &result.User.ID
+		userValue = "[" + strconv.Itoa(int(result.User.ID)) + "] " + result.User.Name + " (" + result.User.NameEn + ")"
 		groupValue = "個人ユーザ"
 	} else {
 		//is group
@@ -71,7 +70,8 @@ func Create(c *gin.Context) {
 		}
 		resultTicket.GroupID = result.User.GroupID
 		resultTicket.UserID = &result.User.ID
-		groupValue = strconv.Itoa(int(*resultTicket.GroupID)) + "-" + result.User.Group.Org
+		userValue = "[" + strconv.Itoa(int(result.User.ID)) + "] " + result.User.Name + "(" + result.User.NameEn + ")"
+		groupValue = "[" + strconv.Itoa(int(result.User.Group.ID)) + "] " + result.User.Group.Org + "(" + result.User.Group.OrgEn + ")"
 	}
 
 	// Tickets DBに登録
@@ -94,13 +94,7 @@ func Create(c *gin.Context) {
 	}
 
 	//HomeNOC Slackに送信
-	attachment := slack.Attachment{}
-	attachment.Text = &[]string{"新規チケット作成"}[0]
-	attachment.AddField(slack.Field{Title: "発行者", Value: strconv.Itoa(int(*resultTicket.UserID))}).
-		AddField(slack.Field{Title: "Group", Value: groupValue}).
-		AddField(slack.Field{Title: "Title", Value: input.Title}).
-		AddField(slack.Field{Title: "Message", Value: input.Data})
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+	noticeAdd("新規チケット作成", userValue, groupValue, input)
 
 	c.JSON(http.StatusOK, ticket.Ticket{ID: ticketResult.ID})
 }
@@ -159,14 +153,11 @@ func Request(c *gin.Context) {
 		return
 	}
 
+	userValue := "[" + strconv.Itoa(int(result.User.ID)) + "] " + result.User.Name + "(" + result.User.NameEn + ")"
+	groupValue := "[" + strconv.Itoa(int(result.User.Group.ID)) + "] " + result.User.Group.Org + "(" + result.User.Group.OrgEn + ")"
+
 	//HomeNOC Slackに送信
-	attachment := slack.Attachment{}
-	attachment.Text = &[]string{"[新規] 追加・変更手続き"}[0]
-	attachment.AddField(slack.Field{Title: "発行者", Value: strconv.Itoa(int(*resultTicket.UserID))}).
-		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(*resultTicket.GroupID)) + "-" + result.User.Group.Org}).
-		AddField(slack.Field{Title: "Title", Value: input.Title}).
-		AddField(slack.Field{Title: "Message", Value: input.Data})
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+	noticeAdd("[新規] 追加・変更手続き", userValue, groupValue, input)
 
 	c.JSON(http.StatusOK, ticket.Ticket{ID: ticketResult.ID})
 }
@@ -198,6 +189,7 @@ func Update(c *gin.Context) {
 	}
 
 	updateTicketData := ticketResult.Tickets[0]
+	var userValue, groupValue string
 
 	// isn't group
 	if ticketResult.Tickets[0].GroupID == nil {
@@ -206,6 +198,7 @@ func Update(c *gin.Context) {
 			c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 			return
 		}
+		userValue = "[" + strconv.Itoa(int(result.User.ID)) + "] " + result.User.Name + "(" + result.User.NameEn + ")"
 	} else {
 		//is group
 		// Group authentication
@@ -214,6 +207,8 @@ func Update(c *gin.Context) {
 			c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
 			return
 		}
+		userValue = "[" + strconv.Itoa(int(result.User.ID)) + "] " + result.User.Name + "(" + result.User.NameEn + ")"
+		groupValue = "[" + strconv.Itoa(int(result.User.Group.ID)) + "] " + result.User.Group.Org + "(" + result.User.Group.OrgEn + ")"
 	}
 
 	updateTicketData.Solved = input.Solved
@@ -225,7 +220,7 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	noticeSlack(ticketResult.Tickets[0], input)
+	noticeUpdate(ticketResult.Tickets[0], input, userValue, groupValue)
 
 	c.JSON(http.StatusOK, support.Result{})
 }
@@ -359,14 +354,9 @@ func GetWebSocket(c *gin.Context) {
 				})
 
 				//Slackに送信
-				attachment := slack.Attachment{}
-
-				attachment.Text = &[]string{"Support(新規メッセージ)"}[0]
-				attachment.AddField(slack.Field{Title: "発行者", Value: strconv.Itoa(int(result.User.ID)) + "-" + result.User.Name}).
-					AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(*result.User.GroupID)) + "-" + result.User.Group.Org}).
-					AddField(slack.Field{Title: "Title", Value: ticketResult.Tickets[0].Title}).
-					AddField(slack.Field{Title: "Message", Value: msg.Message})
-				notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+				userValue := "[" + strconv.Itoa(int(result.User.ID)) + "] " + result.User.Name + "(" + result.User.NameEn + ")"
+				groupValue := "[" + strconv.Itoa(int(result.User.Group.ID)) + "] " + result.User.Group.Org + "(" + result.User.Group.OrgEn + ")"
+				noticeNewMessage(false, userValue, groupValue, ticketResult.Tickets[0], msg.Message)
 
 				support.Broadcast <- msg
 			}
