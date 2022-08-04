@@ -1,6 +1,7 @@
 package notification
 
 import (
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/slack-go/slack"
 )
 
@@ -12,6 +13,6 @@ var Notification NotifyStruct
 
 func NewNotification() {
 	// slack
-	slackToken := "xoxb-5041561262-3888879509782-BmR612XtlEObOzKRB95bGUMM"
+	slackToken := config.Conf.Slack.Token
 	Notification.Slack = slack.New(slackToken)
 }
