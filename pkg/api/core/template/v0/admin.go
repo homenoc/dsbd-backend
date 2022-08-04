@@ -17,7 +17,6 @@ import (
 	dbMailTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/mail/v0"
 	dbNTTTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ntt/v0"
 	dbPaymentCouponTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/payment_coupon/v0"
-	dbPaymentDonateTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/payment_donate/v0"
 	dbPaymentMembershipTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/payment_membership/v0"
 	dbServiceTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/service/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
@@ -104,11 +103,6 @@ func GetByAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	resultDonateMembership, err := dbPaymentDonateTemplate.GetAll()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
-		return
-	}
 	resultPaymentCoupon, err := dbPaymentCouponTemplate.GetAll()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
@@ -135,7 +129,6 @@ func GetByAdmin(c *gin.Context) {
 		User:                      resultUser.User,
 		Group:                     resultGroup.Group,
 		PaymentMembershipTemplate: resultPaymentMembership,
-		PaymentDonateTemplate:     resultDonateMembership,
 		PaymentCouponTemplate:     resultPaymentCoupon,
 		MailTemplate:              resultMailTemplate,
 	})

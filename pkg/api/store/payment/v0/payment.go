@@ -59,7 +59,7 @@ func Update(base int, input *core.Payment) error {
 	err = nil
 
 	if payment.UpdatePaid == base {
-		err = db.Model(&core.Payment{PaymentIntentID: input.PaymentIntentID}).Updates(core.Payment{Paid: input.Paid}).Error
+		err = db.Model(&core.Payment{PaymentIntentID: input.PaymentIntentID}).Where("payment_intent_id", input.PaymentIntentID).Update("paid", input.Paid).Error
 	} else if payment.UpdateAll == base {
 		err = db.Model(&core.Payment{Model: gorm.Model{ID: input.ID}}).Updates(&input).Error
 	} else {

@@ -298,7 +298,6 @@ func UserRestAPI() {
 			// Payment
 			//
 			v1.POST("/payment/membership", payment.MembershipPayment)
-			v1.POST("/payment/donate", payment.DonatePayment)
 			v1.PUT("/payment/card", payment.ChangeCardPayment)
 			v1.GET("/payment/card", payment.ChangeCardPaymentInit)
 
@@ -309,15 +308,17 @@ func UserRestAPI() {
 			v1.POST("/request", ticket.Request)
 			v1.PUT("/support/:id", ticket.Update)
 
-			// User Delete
-			// User ID Get
-
 			// Group Delete
 			//v1.DELETE("/group", group.Delete)
 
 			//v1.POST("/support/:id", chat.Add)
 		}
 	}
+
+	//
+	// Stripe
+	//
+	router.POST("/stripe", payment.GetStripeWebHook)
 
 	ws := router.Group("/ws")
 	{

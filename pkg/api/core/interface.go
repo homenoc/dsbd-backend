@@ -5,13 +5,16 @@ import (
 	"time"
 )
 
+// Payment Type
+const PaymentMembership = 1
+const PaymentDonate = 2
+
 type User struct {
 	gorm.Model
 	Tokens        []*Token  `json:"tokens"`
 	Notice        []*Notice `json:"notice" gorm:"many2many:user_notice;"`
 	Ticket        []Ticket  `json:"tickets"`
 	Group         *Group    `json:"group"`
-	Payment       []Payment `json:"payment_membership"`
 	GroupID       *uint     `json:"group_id"`
 	Name          string    `json:"name"`
 	NameEn        string    `json:"name_en"`
@@ -25,12 +28,10 @@ type User struct {
 
 type Payment struct {
 	gorm.Model
-	User            *User  `json:"user"`
 	Group           *Group `json:"group"`
-	UserID          uint   `json:"user_id"`
 	GroupID         *uint  `json:"group_id"`
 	PaymentIntentID string `json:"payment_intent_id"`
-	IsMembership    *bool  `json:"is_membership"`
+	Type            uint   `json:"type"`
 	Paid            *bool  `json:"paid"`
 	Refund          *bool  `json:"refund"`
 	Fee             uint   `json:"fee"`
@@ -40,7 +41,7 @@ type Payment struct {
 type Group struct {
 	gorm.Model
 	Users                       []User                    `json:"users"`
-	Payment                     []Payment                 `json:"payment_membership"`
+	Payment                     Payment                   `json:"payment_membership"`
 	Services                    []Service                 `json:"services"`
 	Tickets                     []Ticket                  `json:"tickets"`
 	Memos                       []Memo                    `json:"memos"`
@@ -270,13 +271,6 @@ type PaymentCouponTemplate struct {
 	Title          string `json:"title"`
 	DiscountRate   uint   `json:"discount_rate"`
 	Comment        string `json:"comment"`
-}
-
-type PaymentDonateTemplate struct {
-	gorm.Model
-	Name    string `json:"name"`
-	Fee     uint   `json:"fee"`
-	Comment string `json:"comment"`
 }
 
 type ServiceTemplate struct {
