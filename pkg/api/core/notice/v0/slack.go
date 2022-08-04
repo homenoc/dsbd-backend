@@ -1,10 +1,11 @@
 package v0
 
 import (
-	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/notice"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
+	"github.com/slack-go/slack"
 	"strconv"
 	"time"
 )
@@ -13,29 +14,67 @@ const layoutInput = "2006-01-02 15:04:05"
 
 func noticeSlackAddByAdmin(input notice.Input) {
 	// 審査ステータスのSlack通知
-	attachment := slack.Attachment{}
-
 	endTime := "無期限(9999年12月31日 23:59:59.59)"
 	if input.EndTime != nil {
 		endTime = *input.EndTime
 	}
 
-	attachment.Text = &[]string{"通知の追加"}[0]
-	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
-		AddField(slack.Field{Title: "通知時期", Value: input.StartTime + " => " + endTime}).
-		AddField(slack.Field{Title: "title", Value: input.Title}).
-		AddField(slack.Field{Title: "data", Value: input.Data})
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+	notification.Notification.Slack.PostMessage(config.Conf.Slack.Channels.Main, slack.MsgOptionBlocks(
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTHeader,
+			Text: &slack.TextBlockObject{Type: "plain_text", Text: "通知追加"},
+		},
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*申請者* 管理者"},
+			},
+		},
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*通知時期* " + input.StartTime + " => " + endTime},
+			},
+		},
+		slack.NewSectionBlock(slack.NewTextBlockObject("mrkdwn", "*"+input.Title+"*", false, false), nil, nil),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Text: &slack.TextBlockObject{
+				Type: "mrkdwn",
+				Text: input.Data,
+			},
+		},
+		slack.NewDividerBlock(),
+	))
 }
 
 func noticeSlackReplaceByAdmin(before core.Notice, after notice.Input) {
 	// 審査ステータスのSlack通知
-	attachment := slack.Attachment{}
-
-	attachment.Text = &[]string{"通知の変更"}[0]
-	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
-		AddField(slack.Field{Title: "更新状況", Value: changeText(before, after)})
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+	notification.Notification.Slack.PostMessage(config.Conf.Slack.Channels.Main, slack.MsgOptionBlocks(
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTHeader,
+			Text: &slack.TextBlockObject{Type: "plain_text", Text: "通知変更"},
+		},
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*申請者* 管理者"},
+			},
+		},
+		slack.NewDividerBlock(),
+		slack.NewSectionBlock(slack.NewTextBlockObject("mrkdwn", "*更新状況*", false, false), nil, nil),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Text: &slack.TextBlockObject{
+				Type: "mrkdwn",
+				Text: changeText(before, after),
+			},
+		},
+		slack.NewDividerBlock(),
+	))
 }
 
 func changeText(before core.Notice, after notice.Input) string {

@@ -3,12 +3,10 @@ package v0
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/gin-gonic/gin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	dbPayment "github.com/homenoc/dsbd-backend/pkg/api/store/payment/v0"
 	"github.com/stripe/stripe-go/v72"
 	"github.com/stripe/stripe-go/v72/webhook"
@@ -46,15 +44,8 @@ func GetStripeWebHook(c *gin.Context) {
 		return
 	}
 
-	log.Println(event.Type)
-
 	// slack notify(payment log)
-	attachment := slack.Attachment{}
-	attachment.Text = &[]string{"Payment Log"}[0]
-	attachment.AddField(slack.Field{Title: "Type", Value: event.Type}).
-		AddField(slack.Field{Title: "ID", Value: event.ID}).
-		AddField(slack.Field{Title: "Created", Value: strconv.FormatInt(event.Created, 10)})
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: config.ToPaymentLogSlackNotify, Status: true})
+	noticePaymentLog(event)
 
 	if event.Type == "checkout.session.completed" {
 		// meta
@@ -79,14 +70,14 @@ func GetStripeWebHook(c *gin.Context) {
 		}
 
 		// slack notify(payment log)
-		attachment = slack.Attachment{}
-		attachment.Text = &[]string{"Payment"}[0]
-		attachment.AddField(slack.Field{Title: "Type", Value: dataType}).
-			AddField(slack.Field{Title: "ID", Value: event.ID}).
-			AddField(slack.Field{Title: "PaymentIntent", Value: paymentIntent}).
-			AddField(slack.Field{Title: "Etc", Value: etc}).
-			AddField(slack.Field{Title: "Fee", Value: strconv.Itoa(int(uint(amountTotal))) + "円"})
-		notification.SendSlack(notification.Slack{Attachment: attachment, ID: config.ToPaymentSlackNotify, Status: true})
+		field := map[string]string{
+			"Type":          dataType,
+			"ID":            event.ID,
+			"PaymentIntent": paymentIntent,
+			"Etc":           etc,
+			"Fee":           strconv.Itoa(int(uint(amountTotal))) + "円",
+		}
+		noticePayment(field)
 
 		//log.Println("user", event.Data.Object["metadata"].(map[string]interface{})["user"].(string))
 		//} else if event.Type == "customer.subscription.updated" {

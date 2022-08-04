@@ -1,44 +1,105 @@
 package v0
 
 import (
-	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
+	"github.com/slack-go/slack"
 	"strconv"
 )
 
-func noticeSlack(loginUser core.User, before core.Group, after group.Input) {
+func noticeAddGroup(user core.User, group group.Input) {
 	// 審査ステータスのSlack通知
-	attachment := slack.Attachment{}
-
-	attachment.Text = &[]string{"Group情報の更新"}[0]
-	attachment.AddField(slack.Field{Title: "申請者", Value: strconv.Itoa(int(loginUser.ID)) + "-" + loginUser.Name}).
-		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(before.ID)) + ":" + before.Org}).
-		AddField(slack.Field{Title: "更新状況", Value: changeText(before, after)})
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+	notification.Notification.Slack.PostMessage(config.Conf.Slack.Channels.Main, slack.MsgOptionBlocks(
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTHeader,
+			Text: &slack.TextBlockObject{Type: "plain_text", Text: "新規Group登録"},
+		},
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*申請者* ユーザ"},
+			},
+		},
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*User* " + strconv.Itoa(int(user.ID)) + "-" + user.Name},
+				{Type: "mrkdwn", Text: "*Group* " + group.Org + " (" + group.OrgEn + ")"},
+			},
+		},
+		slack.NewSectionBlock(slack.NewTextBlockObject("mrkdwn", "*状況*", false, false), nil, nil),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Text: &slack.TextBlockObject{
+				Type: "mrkdwn",
+				Text: "*Question*\n" + group.Question + "\n*Country*\n" + group.Country + "*Contract*\n" + group.Contract,
+			},
+		},
+		slack.NewDividerBlock(),
+	))
 }
 
-func noticeSlackByAdmin(before, after core.Group) {
+func noticeByAdmin(before, after core.Group) {
 	// 審査ステータスのSlack通知
-	attachment := slack.Attachment{}
-
-	attachment.Text = &[]string{"Group情報の更新"}[0]
-	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
-		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(before.ID)) + ":" + before.Org}).
-		AddField(slack.Field{Title: "更新状況", Value: changeTextByAdmin(before, after)})
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+	notification.Notification.Slack.PostMessage(config.Conf.Slack.Channels.Main, slack.MsgOptionBlocks(
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTHeader,
+			Text: &slack.TextBlockObject{Type: "plain_text", Text: "Group情報更新"},
+		},
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*Group情報更新*"},
+				{Type: "mrkdwn", Text: "*申請者* 管理者"},
+			},
+		},
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*GroupID* " + strconv.Itoa(int(before.ID)) + ":" + before.Org},
+			},
+		},
+		slack.NewSectionBlock(slack.NewTextBlockObject("mrkdwn", "*Title*　Test Title", false, false), nil, nil),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Text: &slack.TextBlockObject{
+				Type: "mrkdwn",
+				Text: "*更新状況*\n" + changeTextByAdmin(before, after),
+			},
+		},
+		slack.NewDividerBlock(),
+	))
 }
 
-func noticeSlackCancelSubscriptionByAdmin(group core.Group) {
+func noticeCancelSubscriptionByAdmin(group core.Group) {
 	// 審査ステータスのSlack通知
-	attachment := slack.Attachment{}
-
-	attachment.Text = &[]string{"Cancel Subscription"}[0]
-	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
-		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(int(group.ID)) + ":" + group.Org})
-
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: false})
+	notification.Notification.Slack.PostMessage(config.Conf.Slack.Channels.Main, slack.MsgOptionBlocks(
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTHeader,
+			Text: &slack.TextBlockObject{Type: "plain_text", Text: "Cancel Subscription"},
+		},
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*申請者* 管理者"},
+			},
+		},
+		slack.NewDividerBlock(),
+		&slack.SectionBlock{
+			Type: slack.MBTSection,
+			Fields: []*slack.TextBlockObject{
+				{Type: "mrkdwn", Text: "*GroupID* " + strconv.Itoa(int(group.ID)) + ":" + group.Org},
+			},
+		},
+		slack.NewDividerBlock(),
+	))
 }
 
 func changeText(before core.Group, after group.Input) string {

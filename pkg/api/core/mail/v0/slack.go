@@ -1,27 +1,36 @@
 package v0
 
 import (
-	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/mail"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
+	"github.com/slack-go/slack"
 )
 
 func noticeSlack(err error, input mail.Mail) {
 	// 審査ステータスのSlack通知
-	attachment := slack.Attachment{}
-
 	if err != nil {
-		attachment.Text = &[]string{"メール送信(失敗)"}[0]
-		attachment.AddField(slack.Field{Title: "To", Value: input.ToMail}).
-			AddField(slack.Field{Title: "Subject", Value: input.Subject}).
-			AddField(slack.Field{Title: "Content", Value: input.Content}).
-			AddField(slack.Field{Title: "Error", Value: err.Error()})
-		notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: false})
+		notification.Notification.Slack.PostMessage(config.Conf.Slack.Channels.Log, slack.MsgOptionAttachments(
+			slack.Attachment{
+				Color: "danger",
+				Title: "メール送信(失敗)",
+				Text:  "error: \n" + err.Error(),
+				Fields: []slack.AttachmentField{
+					{Title: "Subject", Value: input.Subject},
+					{Title: "Content", Value: input.Content},
+				},
+			},
+		))
 	} else {
-		//attachment.AddField(slack.Field{Title: "Title", Value: "メール送信"}).
-		//	AddField(slack.Field{Title: "To", Value: input.ToMail}).
-		//	AddField(slack.Field{Title: "Subject", Value: input.Subject}).
-		//	AddField(slack.Field{Title: "Content", Value: input.Content})
-		//notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+		notification.Notification.Slack.PostMessage(config.Conf.Slack.Channels.Log, slack.MsgOptionAttachments(
+			slack.Attachment{
+				Color: "good",
+				Title: "メール送信",
+				Fields: []slack.AttachmentField{
+					{Title: "Subject", Value: input.Subject},
+					{Title: "Content", Value: input.Content},
+				},
+			},
+		))
 	}
 }

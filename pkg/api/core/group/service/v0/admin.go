@@ -161,7 +161,13 @@ func AddByAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	noticeSlackAdd(id, resultServiceTemplate.Services[0].Type+fmt.Sprintf("%03d", number), input.ServiceComment)
+
+	grp := getGroupInfo(uint(id))
+	groupValue := "[" + strconv.Itoa(int(grp.ID)) + "] " + grp.Org + "(" + grp.OrgEn + ")"
+	serviceCodeNew := resultServiceTemplate.Services[0].Type + fmt.Sprintf("%03d", number)
+	serviceCodeComment := input.ServiceComment
+	noticeAdd("", groupValue, serviceCodeNew, serviceCodeComment)
+
 	c.JSON(http.StatusOK, service.Result{})
 }
 
@@ -182,7 +188,7 @@ func DeleteByAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	noticeSlackDelete("Service情報", uint(id))
+	noticeDelete("Service情報", uint(id))
 	c.JSON(http.StatusOK, service.Result{})
 }
 
@@ -220,7 +226,7 @@ func UpdateByAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	noticeSlackUpdate(before.Service[0], input)
+	noticeUpdate(before.Service[0], input)
 	c.JSON(http.StatusOK, service.Result{})
 }
 

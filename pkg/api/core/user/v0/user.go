@@ -2,7 +2,6 @@ package v0
 
 import (
 	"fmt"
-	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/gin-gonic/gin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
@@ -13,7 +12,6 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/gen"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/hash"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	toolToken "github.com/homenoc/dsbd-backend/pkg/api/core/tool/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
@@ -79,13 +77,7 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	attachment := slack.Attachment{}
-
-	attachment.Text = &[]string{"新規ユーザ登録"}[0]
-	attachment.AddField(slack.Field{Title: "メールアドレス", Value: input.Email}).
-		AddField(slack.Field{Title: "Name", Value: input.Name}).
-		AddField(slack.Field{Title: "Name(English)", Value: input.NameEn})
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+	noticeAdd(input)
 
 	mailTemplate := core.MailTemplate{ProcessID: "signature"}
 	err = dbMailTemplate.Get(&mailTemplate)
@@ -206,15 +198,7 @@ func AddGroup(c *gin.Context) {
 		return
 	}
 
-	attachment := slack.Attachment{}
-
-	attachment.Text = &[]string{"新規ユーザ登録"}[0]
-	attachment.AddField(slack.Field{Title: "Title", Value: "新規ユーザ登録"}).
-		AddField(slack.Field{Title: "Group", Value: strconv.Itoa(id) + "-" + resultAuth.User.Group.Org}).
-		AddField(slack.Field{Title: "メールアドレス", Value: input.Email}).
-		AddField(slack.Field{Title: "Name", Value: input.Name}).
-		AddField(slack.Field{Title: "Name(English)", Value: input.NameEn})
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+	noticeAddFromGroup(input, *resultAuth.User.Group)
 
 	mailTemplate := core.MailTemplate{ProcessID: "signature"}
 	err = dbMailTemplate.Get(&mailTemplate)
@@ -416,7 +400,7 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	noticeSlack(authResult.User, serverData, input)
+	noticeRenew(authResult.User, serverData, input)
 
 	if err = dbUser.Update(user.UpdateAll, &u); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})

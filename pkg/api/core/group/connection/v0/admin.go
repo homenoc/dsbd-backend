@@ -2,7 +2,6 @@ package v0
 
 import (
 	"fmt"
-	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/gin-gonic/gin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
@@ -11,7 +10,6 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/noc"
 	connectionTemplate "github.com/homenoc/dsbd-backend/pkg/api/core/template/connection"
 	ntt "github.com/homenoc/dsbd-backend/pkg/api/core/template/ntt"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	dbConnection "github.com/homenoc/dsbd-backend/pkg/api/store/group/connection/v0"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
 	dbNOC "github.com/homenoc/dsbd-backend/pkg/api/store/noc/v0"
@@ -135,16 +133,10 @@ func AddByAdmin(c *gin.Context) {
 		return
 	}
 
-	attachment := slack.Attachment{}
-	attachment.Text = &[]string{"接続情報登録"}[0]
-	attachment.AddField(slack.Field{Title: "申請者", Value: "管理者"}).
-		AddField(slack.Field{Title: "GroupID", Value: strconv.Itoa(id)}).
-		AddField(slack.Field{Title: "サービスコード", Value: resultService.Service[0].ServiceTemplate.Type +
-			strconv.Itoa(int(resultService.Service[0].ServiceNumber))}).
-		AddField(slack.Field{Title: "接続コード（新規発番）", Value: resultConnectionTemplate.Connections[0].Type +
-			fmt.Sprintf("%03d", number)}).
-		AddField(slack.Field{Title: "接続コード（補足情報）", Value: input.ConnectionComment})
-	notification.SendSlack(notification.Slack{Attachment: attachment, ID: "main", Status: true})
+	serviceCode := resultService.Service[0].ServiceTemplate.Type + strconv.Itoa(int(resultService.Service[0].ServiceNumber))
+	connectionCodeNew := resultConnectionTemplate.Connections[0].Type + fmt.Sprintf("%03d", number)
+	connectionCodeComment := input.ConnectionComment
+	noticeAdd("", strconv.Itoa(id), serviceCode, connectionCodeNew, connectionCodeComment)
 
 	c.JSON(http.StatusOK, connection.Result{})
 }
@@ -197,7 +189,7 @@ func UpdateByAdmin(c *gin.Context) {
 		return
 	}
 
-	noticeSlackByAdmin(tmp.Connection[0], input)
+	noticeUpdateByAdmin(tmp.Connection[0], input)
 
 	input.ID = uint(id)
 

@@ -95,7 +95,7 @@ func UpdateByAdmin(c *gin.Context) {
 		return
 	}
 
-	noticeSlackByAdmin(tmp.Group[0], input)
+	noticeByAdmin(tmp.Group[0], input)
 
 	input.ID = uint(id)
 	if input.PaymentCouponTemplateID != nil && *input.PaymentCouponTemplateID == 0 {
@@ -180,7 +180,7 @@ func CancelSubscription(c *gin.Context) {
 		return
 	}
 
-	noticeSlackCancelSubscriptionByAdmin(resultGroup.Group[0])
+	noticeCancelSubscriptionByAdmin(resultGroup.Group[0])
 
 	stripe.Key = config.Conf.Stripe.SecretKey
 

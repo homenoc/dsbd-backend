@@ -50,7 +50,7 @@ func AddIPByAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	noticeSlackAddIP(id, input)
+	noticeAddIPByAdmin(id, input)
 	c.JSON(http.StatusOK, service.Result{})
 }
 
@@ -72,7 +72,7 @@ func DeleteIPByAdmin(c *gin.Context) {
 		return
 	}
 
-	noticeSlackDelete("IP情報", uint(id))
+	noticeDelete("IP情報", uint(id))
 
 	c.JSON(http.StatusOK, common.Result{})
 }
@@ -111,6 +111,6 @@ func UpdateIPByAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	noticeSlackUpdateIP(before.IP[0], input)
+	noticeUpdateIPByAdmin(before.IP[0], input)
 	c.JSON(http.StatusOK, service.Result{})
 }
