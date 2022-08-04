@@ -34,7 +34,6 @@ var startUserCmd = &cobra.Command{
 			slack.Attachment{
 				Color: "good",
 				Title: "System",
-				Text:  "error: \n" + err.Error(),
 				Fields: []slack.AttachmentField{
 					{Title: "Status", Value: "User側 API起動"},
 				},
@@ -64,7 +63,6 @@ var startAdminCmd = &cobra.Command{
 			slack.Attachment{
 				Color: "good",
 				Title: "System",
-				Text:  "error: \n" + err.Error(),
 				Fields: []slack.AttachmentField{
 					{Title: "Status", Value: "Admin側 API起動"},
 				},
