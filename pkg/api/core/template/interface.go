@@ -26,7 +26,6 @@ type Result struct {
 	IPv4Route                 []core.IPv4RouteTemplate         `json:"ipv4_route"`
 	IPv6Route                 []core.IPv6RouteTemplate         `json:"ipv6_route"`
 	PaymentMembershipTemplate []core.PaymentMembershipTemplate `json:"payment_membership_template"`
-	PaymentDonateTemplate     []core.PaymentDonateTemplate     `json:"payment_donate_template"`
 	PaymentCouponTemplate     []core.PaymentCouponTemplate     `json:"payment_coupon_template"`
 }
 
@@ -45,7 +44,6 @@ type ResultAdmin struct {
 	User                      []core.User                      `json:"user"`
 	Group                     []core.Group                     `json:"group"`
 	PaymentMembershipTemplate []core.PaymentMembershipTemplate `json:"payment_membership_template"`
-	PaymentDonateTemplate     []core.PaymentDonateTemplate     `json:"payment_donate_template"`
 	PaymentCouponTemplate     []core.PaymentCouponTemplate     `json:"payment_coupon_template"`
 	MailTemplate              []core.MailTemplate              `json:"mail_template"`
 }

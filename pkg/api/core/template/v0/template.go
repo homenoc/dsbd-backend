@@ -14,7 +14,6 @@ import (
 	dbIPv6RouteTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ipv6_route/v0"
 	dbNTTTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ntt/v0"
 	dbPaymentCouponTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/payment_coupon/v0"
-	dbPaymentDonateTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/payment_donate/v0"
 	dbPaymentMembershipTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/payment_membership/v0"
 	dbServiceTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/service/v0"
 	"net/http"
@@ -78,11 +77,6 @@ func Get(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	resultDonateMembership, err := dbPaymentDonateTemplate.GetAll()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
-		return
-	}
 	resultPaymentCoupon, err := dbPaymentCouponTemplate.GetAll()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
@@ -99,7 +93,6 @@ func Get(c *gin.Context) {
 		IPv4Route:                 resultIPv4Route,
 		IPv6Route:                 resultIPv6Route,
 		PaymentMembershipTemplate: resultPaymentMembership,
-		PaymentDonateTemplate:     resultDonateMembership,
 		PaymentCouponTemplate:     resultPaymentCoupon,
 	})
 }

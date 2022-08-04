@@ -5,6 +5,10 @@ import (
 	"io/ioutil"
 )
 
+const ToMainSlackNotify = "main"
+const ToPaymentSlackNotify = "payment"
+const ToPaymentLogSlackNotify = "payment_log"
+
 type Config struct {
 	Controller Controller `json:"controller"`
 	Web        Web        `json:"web"`

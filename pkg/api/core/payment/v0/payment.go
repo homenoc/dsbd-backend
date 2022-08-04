@@ -10,11 +10,9 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	dbPayment "github.com/homenoc/dsbd-backend/pkg/api/store/payment/v0"
-	dbPaymentDonateTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/payment_donate/v0"
 	dbPaymentMembershipTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/payment_membership/v0"
 	"github.com/stripe/stripe-go/v72"
 	"github.com/stripe/stripe-go/v72/customer"
-	"github.com/stripe/stripe-go/v72/paymentintent"
 	"github.com/stripe/stripe-go/v72/paymentmethod"
 	"github.com/stripe/stripe-go/v72/setupintent"
 	"github.com/stripe/stripe-go/v72/sub"
@@ -84,10 +82,9 @@ func MembershipPayment(c *gin.Context) {
 	}
 
 	dbPayment.Create(&core.Payment{
-		UserID:          result.User.ID,
 		GroupID:         result.User.GroupID,
 		PaymentIntentID: pi.LatestInvoice.PaymentIntent.ID,
-		IsMembership:    &[]bool{true}[0],
+		Type:            core.PaymentMembership,
 		Paid:            &[]bool{false}[0],
 		Fee:             resultTemplate.Fee,
 	})
@@ -103,60 +100,6 @@ func MembershipPayment(c *gin.Context) {
 
 	c.JSON(http.StatusOK, payment.ResultByUser{
 		ClientSecret: pi.LatestInvoice.PaymentIntent.ClientSecret,
-	})
-}
-
-func DonatePayment(c *gin.Context) {
-	var input payment.Input
-	userToken := c.Request.Header.Get("USER_TOKEN")
-	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
-
-	err := c.BindJSON(&input)
-	if err != nil {
-		log.Println(err)
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	result := auth.UserAuthorization(core.Token{UserToken: userToken, AccessToken: accessToken})
-	if result.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
-		return
-	}
-
-	resultTemplate, err := dbPaymentDonateTemplate.Get(input.ItemID)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: "template is not found..."})
-		return
-	}
-
-	stripe.Key = config.Conf.Stripe.SecretKey
-
-	params := &stripe.PaymentIntentParams{
-		Amount:   stripe.Int64(int64(resultTemplate.Fee)),
-		Currency: stripe.String(string(stripe.CurrencyJPY)),
-	}
-
-	pi, err := paymentintent.New(params)
-	log.Printf("pi.New: %v\n", pi.ClientSecret)
-	if err != nil {
-		log.Printf("pi.New: %v", err)
-		c.JSON(http.StatusInternalServerError, common.Error{Error: "payment_membership system error"})
-		return
-	}
-
-	dbPayment.Create(&core.Payment{
-		UserID:          result.User.ID,
-		PaymentIntentID: pi.ID,
-		IsMembership:    &[]bool{false}[0],
-		Paid:            &[]bool{false}[0],
-		Fee:             resultTemplate.Fee,
-	})
-
-	go noticeSlackPaymentDonatePayment(result.User.ID, resultTemplate.Fee, pi.ID)
-
-	c.JSON(http.StatusOK, payment.ResultByUser{
-		ClientSecret: pi.ClientSecret,
 	})
 }
 
