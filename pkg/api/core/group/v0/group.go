@@ -51,6 +51,17 @@ func Add(c *gin.Context) {
 		return
 	}
 
+	// double check
+	resultDB := dbGroup.Get(group.Org, &core.Group{Org: input.Org})
+	if resultDB.Err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: "error: can't get data from db."})
+		return
+	}
+	if len(resultDB.Group) != 0 {
+		c.JSON(http.StatusBadRequest, common.Error{Error: "error: Change to a different group name."})
+		return
+	}
+
 	if err = check(input); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
