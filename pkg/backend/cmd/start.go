@@ -4,7 +4,6 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
-	"github.com/slack-go/slack"
 	"github.com/spf13/cobra"
 	"log"
 )
@@ -29,16 +28,9 @@ var startUserCmd = &cobra.Command{
 			log.Fatalf("error config process |%v", err)
 		}
 		notification.NewNotification()
-
-		notification.Notification.Slack.PostMessage(config.Conf.Slack.Channels.Log, slack.MsgOptionAttachments(
-			slack.Attachment{
-				Color: "good",
-				Title: "System",
-				Fields: []slack.AttachmentField{
-					{Title: "Status", Value: "User側 API起動"},
-				},
-			},
-		))
+		notification.NoticeLog("good", map[string]string{
+			"Status": "User側 API起動",
+		})
 
 		api.UserRestAPI()
 		log.Println("end")
@@ -58,16 +50,9 @@ var startAdminCmd = &cobra.Command{
 			log.Fatalf("error config process |%v", err)
 		}
 		notification.NewNotification()
-
-		notification.Notification.Slack.PostMessage(config.Conf.Slack.Channels.Log, slack.MsgOptionAttachments(
-			slack.Attachment{
-				Color: "good",
-				Title: "System",
-				Fields: []slack.AttachmentField{
-					{Title: "Status", Value: "Admin側 API起動"},
-				},
-			},
-		))
+		notification.NoticeLog("good", map[string]string{
+			"Status": "Admin側 API起動",
+		})
 
 		api.AdminRestAPI()
 		log.Println("end")
