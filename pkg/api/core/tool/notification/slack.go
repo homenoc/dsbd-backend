@@ -36,3 +36,18 @@ func NoticeUpdateStatus(groupID, info, history string) {
 		slack.NewDividerBlock(),
 	))
 }
+
+func NoticeLog(color string, keyValue map[string]string) {
+	var attachmentField []slack.AttachmentField
+	for key, value := range keyValue {
+		attachmentField = append(attachmentField, slack.AttachmentField{Title: key, Value: value})
+	}
+
+	Notification.Slack.PostMessage(config.Conf.Slack.Channels.Log, slack.MsgOptionAttachments(
+		slack.Attachment{
+			Color:  color,
+			Title:  "System",
+			Fields: attachmentField,
+		},
+	))
+}

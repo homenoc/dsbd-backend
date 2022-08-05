@@ -36,7 +36,7 @@ func noticeAddGroup(user core.User, group group.Input) {
 			Type: slack.MBTSection,
 			Text: &slack.TextBlockObject{
 				Type: "mrkdwn",
-				Text: "*Question*\n" + group.Question + "\n*Country*\n" + group.Country + "*Contract*\n" + group.Contract,
+				Text: "*Question*\n" + group.Question + "\n*Country*\n" + group.Country + "\n*Contract*\n" + group.Contract,
 			},
 		},
 		slack.NewDividerBlock(),
