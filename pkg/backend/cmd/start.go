@@ -28,8 +28,8 @@ var startUserCmd = &cobra.Command{
 			log.Fatalf("error config process |%v", err)
 		}
 		notification.NewNotification()
-		notification.NoticeLog("good", map[string]string{
-			"Status": "User側 API起動",
+		notification.NoticeLog("good", []string{
+			"Status: User側 API起動",
 		})
 
 		api.UserRestAPI()
@@ -50,8 +50,8 @@ var startAdminCmd = &cobra.Command{
 			log.Fatalf("error config process |%v", err)
 		}
 		notification.NewNotification()
-		notification.NoticeLog("good", map[string]string{
-			"Status": "Admin側 API起動",
+		notification.NoticeLog("good", []string{
+			"Status: Admin側 API起動",
 		})
 
 		api.AdminRestAPI()
