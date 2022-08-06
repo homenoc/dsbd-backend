@@ -3,6 +3,7 @@ package notification
 import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/slack-go/slack"
+	"strings"
 )
 
 func NoticeUpdateStatus(groupID, info, history string) {
@@ -37,17 +38,18 @@ func NoticeUpdateStatus(groupID, info, history string) {
 	))
 }
 
-func NoticeLog(color string, keyValue map[string]string) {
-	var attachmentField []slack.AttachmentField
-	for key, value := range keyValue {
-		attachmentField = append(attachmentField, slack.AttachmentField{Title: key, Value: value})
+func NoticeLog(color string, baseKeyValue []string) {
+	var slackAttachField []slack.AttachmentField
+	for _, keyValue := range baseKeyValue {
+		splitKeyValue := strings.Split(keyValue, ":")
+		slackAttachField = append(slackAttachField, slack.AttachmentField{Title: splitKeyValue[0], Value: keyValue[len(splitKeyValue[0])+1:]})
 	}
 
 	Notification.Slack.PostMessage(config.Conf.Slack.Channels.Log, slack.MsgOptionAttachments(
 		slack.Attachment{
 			Color:  color,
 			Title:  "System",
-			Fields: attachmentField,
+			Fields: slackAttachField,
 		},
 	))
 }
