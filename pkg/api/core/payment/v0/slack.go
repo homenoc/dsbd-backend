@@ -6,6 +6,7 @@ import (
 	"github.com/slack-go/slack"
 	"github.com/stripe/stripe-go/v72"
 	"strconv"
+	"strings"
 )
 
 func noticePaymentLog(event stripe.Event) {
@@ -21,13 +22,14 @@ func noticePaymentLog(event stripe.Event) {
 	))
 }
 
-func noticePayment(keyValue map[string]string) {
+func noticePayment(baseKeyValue []string) {
 	var slackAttachField []slack.AttachmentField
-	for key, value := range keyValue {
-		slackAttachField = append(slackAttachField, slack.AttachmentField{Title: key, Value: value})
+	for _, keyValue := range baseKeyValue {
+		splitKeyValue := strings.Split(keyValue, ":")
+		slackAttachField = append(slackAttachField, slack.AttachmentField{Title: splitKeyValue[0], Value: keyValue[len(splitKeyValue[0])+1:]})
 	}
 
-	notification.Notification.Slack.PostMessage(config.Conf.Slack.Channels.PaymentLog, slack.MsgOptionAttachments(
+	notification.Notification.Slack.PostMessage(config.Conf.Slack.Channels.Payment, slack.MsgOptionAttachments(
 		slack.Attachment{
 			Color:  "good",
 			Title:  "支払い処理",
