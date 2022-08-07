@@ -24,13 +24,7 @@ func replaceUser(serverData core.User, input user.Input) (core.User, error) {
 		serverData.NameEn = input.NameEn
 	}
 
-	var signatureMessage string
-	for _, mailTemplate := range config.Conf.Template.Mail {
-		if mailTemplate.ID == "signature" {
-			signatureMessage = mailTemplate.Message
-			break
-		}
-	}
+	mailTemplate, _ := config.GetMailTemplate("signature")
 
 	//E-Mail
 	if input.Email != "" {
@@ -56,7 +50,7 @@ func replaceUser(serverData core.User, input user.Input) (core.User, error) {
 			Subject: "本人確認のメールにつきまして",
 			Content: " " + serverData.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
 				config.Conf.Controller.User.Url + "/api/v1/verify/" + mailToken + "\n" +
-				"本人確認が完了次第、ログイン可能になります。" + signatureMessage,
+				"本人確認が完了次第、ログイン可能になります。" + mailTemplate.Message,
 		})
 	}
 
@@ -67,7 +61,7 @@ func replaceUser(serverData core.User, input user.Input) (core.User, error) {
 		v0.SendMail(mail.Mail{
 			ToMail:  serverData.Email,
 			Subject: "[通知] パスワード変更",
-			Content: " " + serverData.Name + "様\n\n" + "パスワードが変更されました。" + signatureMessage,
+			Content: " " + serverData.Name + "様\n\n" + "パスワードが変更されました。" + mailTemplate.Message,
 		})
 	}
 

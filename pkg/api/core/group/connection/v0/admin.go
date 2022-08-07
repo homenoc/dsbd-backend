@@ -59,14 +59,9 @@ func AddByAdmin(c *gin.Context) {
 	}
 
 	// check NTT(Internet)
-	isOkNTT := false
-	for _, ntt := range config.Conf.Template.NTT {
-		if ntt == "etc" || ntt == input.NTT {
-			isOkNTT = true
-		}
-	}
-	if !isOkNTT {
-		c.JSON(http.StatusBadRequest, common.Error{Error: "error: invalid ntt."})
+	err = config.CheckIncludeNTTTemplate(input.NTT)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 		return
 	}
 
@@ -97,25 +92,15 @@ func AddByAdmin(c *gin.Context) {
 
 	// if need_route is true
 	if resultServiceWithTemplate.NeedRoute {
-		isOkV4Route := false
-		for _, v4Route := range config.Conf.Template.V4Route {
-			if v4Route == "etc" || v4Route == input.NTT {
-				isOkV4Route = true
-			}
-		}
-		if !isOkV4Route {
-			c.JSON(http.StatusBadRequest, common.Error{Error: "error: invalid ipv4 route template."})
+		err = config.CheckIncludeV4RouteTemplate(input.IPv4Route)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 			return
 		}
 
-		isOkV6Route := false
-		for _, v6Route := range config.Conf.Template.V6Route {
-			if v6Route == "etc" || v6Route == input.NTT {
-				isOkV6Route = true
-			}
-		}
-		if !isOkV6Route {
-			c.JSON(http.StatusBadRequest, common.Error{Error: "error: invalid ipv4 route template."})
+		err = config.CheckIncludeV6RouteTemplate(input.IPv6Route)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 			return
 		}
 	}
