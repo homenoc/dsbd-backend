@@ -110,23 +110,23 @@ type SlackChannels struct {
 }
 
 type Template struct {
-	Membership []Membership `json:"membership"`
-	NTT        []string     `json:"NTT"`
-	V4         []string     `json:"v4"`
-	V6         []string     `json:"v6"`
-	V4Route    []string     `json:"v4_route"`
-	V6Route    []string     `json:"v6_route"`
-	Mail       []Mail       `json:"mail"`
+	Membership []MembershipTemplate `json:"membership"`
+	NTT        []string             `json:"NTT"`
+	V4         []string             `json:"v4"`
+	V6         []string             `json:"v6"`
+	V4Route    []string             `json:"v4_route"`
+	V6Route    []string             `json:"v6_route"`
+	Mail       []MailTemplate       `json:"mail"`
 }
 
-type Membership struct {
+type MembershipTemplate struct {
 	Title   string `json:"title"`
 	Plan    string `json:"plan"`
 	PriceID string `json:"price_id"`
 	Fee     string `json:"fee"`
 }
 
-type Mail struct {
+type MailTemplate struct {
 	ID      string `json:"id"`
 	Title   string `json:"title"`
 	Message string `json:"message"`
