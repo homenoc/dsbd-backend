@@ -28,7 +28,7 @@ type Result struct {
 	IPv6                      []string                      `json:"ipv6"`
 	IPv4Route                 []string                      `json:"ipv4_route"`
 	IPv6Route                 []string                      `json:"ipv6_route"`
-	PaymentMembershipTemplate []config.Membership           `json:"payment_membership_template"`
+	PaymentMembershipTemplate []config.MembershipTemplate   `json:"payment_membership_template"`
 }
 
 type ResultAdmin struct {
@@ -45,8 +45,8 @@ type ResultAdmin struct {
 	IPv6Route                 []string                      `json:"ipv6_route"`
 	User                      []core.User                   `json:"user"`
 	Group                     []core.Group                  `json:"group"`
-	PaymentMembershipTemplate []config.Membership           `json:"payment_membership_template"`
-	MailTemplate              []config.Mail                 `json:"mail_template"`
+	PaymentMembershipTemplate []config.MembershipTemplate   `json:"payment_membership_template"`
+	MailTemplate              []config.MailTemplate         `json:"mail_template"`
 }
 
 type ResultDatabase struct {
