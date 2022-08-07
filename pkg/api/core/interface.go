@@ -77,34 +77,33 @@ type Memo struct {
 
 type Service struct {
 	gorm.Model
-	GroupID           uint             `json:"group_id"`
-	ServiceTemplateID *uint            `json:"service_template_id"`
-	ServiceTemplate   *ServiceTemplate `json:"service_template"`
-	ServiceComment    string           `json:"service_comment"`
-	ServiceNumber     uint             `json:"service_number"`
-	Org               string           `json:"org"`
-	OrgEn             string           `json:"org_en"`
-	PostCode          string           `json:"postcode"`
-	Address           string           `json:"address"`
-	AddressEn         string           `json:"address_en"`
-	ASN               *uint            `json:"asn"`
-	V4Name            string           `json:"v4_name"`
-	V6Name            string           `json:"v6_name"`
-	AveUpstream       uint             `json:"avg_upstream"`
-	MaxUpstream       uint             `json:"max_upstream"`
-	AveDownstream     uint             `json:"avg_downstream"`
-	MaxDownstream     uint             `json:"max_downstream"`
-	MaxBandWidthAS    string           `json:"max_bandwidth_as"`
-	IP                []IP             `json:"ip"`
-	Connection        []*Connection    `json:"connections"`
-	JPNICAdmin        JPNICAdmin       `json:"jpnic_admin"`
-	JPNICTech         []JPNICTech      `json:"jpnic_tech"`
-	StartDate         time.Time        `json:"start_date"`
-	EndDate           *time.Time       `json:"end_date"`
-	Pass              *bool            `json:"pass"`
-	Enable            *bool            `json:"enable"`
-	AddAllow          *bool            `json:"add_allow"`
-	Group             Group            `json:"group"`
+	GroupID        uint          `json:"group_id"`
+	ServiceType    string        `json:"service_type"`
+	ServiceComment string        `json:"service_comment"`
+	ServiceNumber  uint          `json:"service_number"`
+	Org            string        `json:"org"`
+	OrgEn          string        `json:"org_en"`
+	PostCode       string        `json:"postcode"`
+	Address        string        `json:"address"`
+	AddressEn      string        `json:"address_en"`
+	ASN            *uint         `json:"asn"`
+	V4Name         string        `json:"v4_name"`
+	V6Name         string        `json:"v6_name"`
+	AveUpstream    uint          `json:"avg_upstream"`
+	MaxUpstream    uint          `json:"max_upstream"`
+	AveDownstream  uint          `json:"avg_downstream"`
+	MaxDownstream  uint          `json:"max_downstream"`
+	MaxBandWidthAS string        `json:"max_bandwidth_as"`
+	IP             []IP          `json:"ip"`
+	Connection     []*Connection `json:"connections"`
+	JPNICAdmin     JPNICAdmin    `json:"jpnic_admin"`
+	JPNICTech      []JPNICTech   `json:"jpnic_tech"`
+	StartDate      time.Time     `json:"start_date"`
+	EndDate        *time.Time    `json:"end_date"`
+	Pass           *bool         `json:"pass"`
+	Enable         *bool         `json:"enable"`
+	AddAllow       *bool         `json:"add_allow"`
+	Group          Group         `json:"group"`
 }
 
 type Connection struct {
@@ -112,8 +111,7 @@ type Connection struct {
 	ServiceID                uint                   `json:"service_id"`
 	BGPRouterID              *uint                  `json:"bgp_router_id"`                //使用RouterのID
 	TunnelEndPointRouterIPID *uint                  `json:"tunnel_endpoint_router_ip_id"` //使用エンドポイントルータのID
-	ConnectionTemplateID     *uint                  `json:"connection_template_id"`
-	ConnectionTemplate       *ConnectionTemplate    `json:"connection_template"`
+	ConnectionType           string                 `json:"connection_type"`
 	ConnectionComment        string                 `json:"connection_comment"` // ServiceがETCの時や補足説明で必要
 	ConnectionNumber         uint                   `json:"connection_number"`
 	IPv4Route                string                 `json:"ipv4_route"`
@@ -246,31 +244,6 @@ type JPNICTech struct {
 	Tel           string `json:"tel"`
 	Fax           string `json:"fax"`
 	Country       string `json:"country"`
-}
-
-type ServiceTemplate struct {
-	gorm.Model
-	Hidden       *bool  `json:"hidden"`
-	Name         string `json:"name"`
-	Type         string `json:"type"`
-	Comment      string `json:"comment"`
-	NeedJPNIC    *bool  `json:"need_jpnic"`
-	NeedGlobalAS *bool  `json:"need_global_as"`
-	NeedComment  *bool  `json:"need_comment"`
-	NeedRoute    *bool  `json:"need_route"`
-}
-
-type ConnectionTemplate struct {
-	gorm.Model
-	Hidden           bool   `json:"hidden"`
-	Name             string `json:"name"`
-	Type             string `json:"type"`
-	Comment          string `json:"comment"`
-	NeedInternet     *bool  `json:"need_internet"`
-	NeedComment      *bool  `json:"need_comment"`
-	NeedCrossConnect *bool  `json:"need_cross_connect"`
-	L2               *bool  `json:"l2"`
-	L3               *bool  `json:"l3"`
 }
 
 // 申請中/承諾済み/却下

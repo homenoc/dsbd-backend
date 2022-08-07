@@ -9,13 +9,11 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/noc"
-	connectionTemplate "github.com/homenoc/dsbd-backend/pkg/api/core/template/connection"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	dbConnection "github.com/homenoc/dsbd-backend/pkg/api/store/group/connection/v0"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
 	dbNOC "github.com/homenoc/dsbd-backend/pkg/api/store/noc/v0"
-	dbConnectionTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/connection/v0"
 	"gorm.io/gorm"
 	"log"
 	"net/http"
@@ -74,14 +72,14 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	resultConnectionTemplate := dbConnectionTemplate.Get(connectionTemplate.ID,
-		&core.ConnectionTemplate{Model: gorm.Model{ID: input.ConnectionTemplateID}})
-	if resultConnectionTemplate.Err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: resultConnectionTemplate.Err.Error()})
+	// check input.ConnectionType and getting connection template
+	connectionTemplate, err := config.GetConnectionTemplate(input.ConnectionType)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 		return
 	}
 
-	if *resultConnectionTemplate.Connections[0].NeedInternet {
+	if connectionTemplate.NeedInternet {
 		isOkNTT := false
 		for _, ntt := range config.Conf.Template.NTT {
 			if ntt == "etc" || ntt == input.NTT {
@@ -133,8 +131,15 @@ func Add(c *gin.Context) {
 		return
 	}
 
+	// getting service with template
+	resultServiceWithTemplate, err := config.GetServiceTemplate(resultService.Service[0].ServiceType)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		return
+	}
+
 	// if need_route is true
-	if *resultService.Service[0].ServiceTemplate.NeedRoute {
+	if resultServiceWithTemplate.NeedRoute {
 		ipv4Enable := false
 		ipv6Enable := false
 
@@ -193,13 +198,6 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	var connectonTemplateID *uint
-	if input.ConnectionTemplateID == 0 {
-		connectonTemplateID = nil
-	} else {
-		connectonTemplateID = &[]uint{input.ConnectionTemplateID}[0]
-	}
-
 	var NOCID *uint
 	if input.NOCID == 0 {
 		NOCID = nil
@@ -209,7 +207,7 @@ func Add(c *gin.Context) {
 
 	_, err = dbConnection.Create(&core.Connection{
 		ServiceID:                resultService.Service[0].ID,
-		ConnectionTemplateID:     connectonTemplateID,
+		ConnectionType:           input.ConnectionType,
 		ConnectionComment:        input.ConnectionComment,
 		ConnectionNumber:         number,
 		IPv4Route:                input.IPv4Route,
@@ -231,8 +229,8 @@ func Add(c *gin.Context) {
 
 	applicant := "[" + strconv.Itoa(int(result.User.ID)) + "] " + result.User.Name + "(" + result.User.NameEn + ")"
 	groupName := "[" + strconv.Itoa(int(result.User.Group.ID)) + "] " + result.User.Group.Org + "(" + result.User.Group.OrgEn + ")"
-	serviceCode := resultService.Service[0].ServiceTemplate.Type + strconv.Itoa(int(resultService.Service[0].ServiceNumber))
-	connectionCodeNew := resultConnectionTemplate.Connections[0].Type + fmt.Sprintf("%03d", number)
+	serviceCode := resultServiceWithTemplate.Type + strconv.Itoa(int(resultService.Service[0].ServiceNumber))
+	connectionCodeNew := connectionTemplate.Type + fmt.Sprintf("%03d", number)
 	connectionCodeComment := input.ConnectionComment
 
 	noticeAdd(applicant, groupName, serviceCode, connectionCodeNew, connectionCodeComment)

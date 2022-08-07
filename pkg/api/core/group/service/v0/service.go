@@ -8,11 +8,10 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
-	serviceTemplate "github.com/homenoc/dsbd-backend/pkg/api/core/template/service"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
-	dbServiceTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/service/v0"
 	"gorm.io/gorm"
 	"log"
 	"net/http"
@@ -65,13 +64,14 @@ func Add(c *gin.Context) {
 
 	var grpIP []core.IP = nil
 
-	resultServiceTemplate := dbServiceTemplate.Get(serviceTemplate.ID, &core.ServiceTemplate{Model: gorm.Model{ID: input.ServiceTemplateID}})
-	if resultServiceTemplate.Err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: resultServiceTemplate.Err.Error()})
+	// check input.ConnectionType and getting connection template
+	resultServiceTemplate, err := config.GetServiceTemplate(input.ServiceType)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 		return
 	}
 
-	if *resultServiceTemplate.Services[0].NeedJPNIC {
+	if resultServiceTemplate.NeedJPNIC {
 		if err = checkJPNIC(input); err != nil {
 			c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 			return
@@ -95,7 +95,7 @@ func Add(c *gin.Context) {
 		}
 
 		// IPトランジット以外
-		if input.ServiceTemplateID != 4 {
+		if !resultServiceTemplate.NeedGlobalAS {
 			grpIP, err = ipProcess(false, true, input.IP)
 			if err != nil {
 				c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
@@ -104,7 +104,7 @@ func Add(c *gin.Context) {
 		}
 	}
 
-	if *resultServiceTemplate.Services[0].NeedComment && input.ServiceComment == "" {
+	if resultServiceTemplate.NeedComment && input.ServiceComment == "" {
 		c.JSON(http.StatusBadRequest, common.Error{Error: "no data: comment"})
 		return
 	}
@@ -124,19 +124,16 @@ func Add(c *gin.Context) {
 		endDate = &tmpEndDate
 	}
 
-	if *resultServiceTemplate.Services[0].NeedGlobalAS {
+	// pattern check: IP Transit
+	if resultServiceTemplate.NeedGlobalAS {
 		if input.ASN == 0 {
 			c.JSON(http.StatusBadRequest, common.Error{Error: "no data: ASN"})
 			return
 		}
-
-		// IPトランジット以外
-		if input.ServiceTemplateID != 4 {
-			grpIP, err = ipProcess(false, false, input.IP)
-			if err != nil {
-				c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-				return
-			}
+		grpIP, err = ipProcess(false, false, input.IP)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+			return
 		}
 	}
 
@@ -159,28 +156,28 @@ func Add(c *gin.Context) {
 
 	// db create for network
 	net, err := dbService.Create(&core.Service{
-		GroupID:           result.User.Group.ID,
-		ServiceTemplateID: &input.ServiceTemplateID,
-		ServiceComment:    input.ServiceComment,
-		ServiceNumber:     number,
-		Org:               input.Org,
-		OrgEn:             input.OrgEn,
-		PostCode:          input.Postcode,
-		Address:           input.Address,
-		AddressEn:         input.AddressEn,
-		AveUpstream:       input.AveUpstream,
-		MaxUpstream:       input.MaxUpstream,
-		AveDownstream:     input.AveDownstream,
-		MaxDownstream:     input.MaxDownstream,
-		StartDate:         startDate,
-		EndDate:           endDate,
-		ASN:               &[]uint{input.ASN}[0],
-		IP:                grpIP,
-		JPNICAdmin:        input.JPNICAdmin,
-		JPNICTech:         input.JPNICTech,
-		Enable:            &[]bool{true}[0],
-		Pass:              &[]bool{false}[0],
-		AddAllow:          &[]bool{true}[0],
+		GroupID:        result.User.Group.ID,
+		ServiceType:    input.ServiceType,
+		ServiceComment: input.ServiceComment,
+		ServiceNumber:  number,
+		Org:            input.Org,
+		OrgEn:          input.OrgEn,
+		PostCode:       input.Postcode,
+		Address:        input.Address,
+		AddressEn:      input.AddressEn,
+		AveUpstream:    input.AveUpstream,
+		MaxUpstream:    input.MaxUpstream,
+		AveDownstream:  input.AveDownstream,
+		MaxDownstream:  input.MaxDownstream,
+		StartDate:      startDate,
+		EndDate:        endDate,
+		ASN:            &[]uint{input.ASN}[0],
+		IP:             grpIP,
+		JPNICAdmin:     input.JPNICAdmin,
+		JPNICTech:      input.JPNICTech,
+		Enable:         &[]bool{true}[0],
+		Pass:           &[]bool{false}[0],
+		AddAllow:       &[]bool{true}[0],
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
@@ -189,9 +186,9 @@ func Add(c *gin.Context) {
 
 	applicant := "[" + strconv.Itoa(int(result.User.ID)) + "] " + result.User.Name + "(" + result.User.NameEn + ")"
 	groupName := "[" + strconv.Itoa(int(result.User.Group.ID)) + "] " + result.User.Group.Org + "(" + result.User.Group.OrgEn + ")"
-	connectionCodeNew := resultServiceTemplate.Services[0].Type + fmt.Sprintf("%03d", number)
-	connectionCodeComment := input.ServiceComment
-	noticeAdd(applicant, groupName, connectionCodeNew, connectionCodeComment)
+	serviceCodeNew := resultServiceTemplate.Type + fmt.Sprintf("%03d", number)
+	serviceCodeComment := input.ServiceComment
+	noticeAdd(applicant, groupName, serviceCodeNew, serviceCodeComment)
 
 	// ---------ここまで処理が通っている場合、DBへの書き込みにすべて成功している
 	// GroupのStatusをAfterStatusにする

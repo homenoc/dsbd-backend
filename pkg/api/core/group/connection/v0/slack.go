@@ -5,13 +5,11 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/noc"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/noc/bgpRouter"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/noc/tunnelEndPointRouterIP"
-	connectionTemplate "github.com/homenoc/dsbd-backend/pkg/api/core/template/connection"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	dbBGPRouter "github.com/homenoc/dsbd-backend/pkg/api/store/noc/bgpRouter/v0"
 	dbTunnelEndPointRouterIP "github.com/homenoc/dsbd-backend/pkg/api/store/noc/tunnelEndPointRouterIP/v0"
 	dbNOC "github.com/homenoc/dsbd-backend/pkg/api/store/noc/v0"
-	dbConnectionTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/connection/v0"
 	"github.com/slack-go/slack"
 	"gorm.io/gorm"
 	"strconv"
@@ -93,10 +91,9 @@ func changeText(before, after core.Connection) string {
 		}
 	}
 
-	if after.ConnectionTemplateID != nil {
-		if *before.ConnectionTemplateID != *after.ConnectionTemplateID {
-			data += "接続ID: " + before.ConnectionTemplate.Type + " => " +
-				connectionTemplateText(*after.ConnectionTemplateID) + "\n"
+	if after.ConnectionType != "" {
+		if before.ConnectionType != after.ConnectionType {
+			data += "接続ID: " + before.ConnectionType + " => " + after.ConnectionType + "\n"
 		}
 	}
 
@@ -146,11 +143,6 @@ func changeText(before, after core.Connection) string {
 	}
 
 	return data
-}
-
-func connectionTemplateText(status uint) string {
-	result := dbConnectionTemplate.Get(connectionTemplate.ID, &core.ConnectionTemplate{Model: gorm.Model{ID: status}})
-	return result.Connections[0].Type
 }
 
 func bgpRouterText(status uint) string {
