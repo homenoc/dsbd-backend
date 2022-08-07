@@ -17,8 +17,8 @@ type Input struct {
 }
 
 type Result struct {
-	Services                  []core.ServiceTemplate        `json:"services"`
-	Connections               []core.ConnectionTemplate     `json:"connections"`
+	Services                  []config.ServiceTemplate      `json:"services"`
+	Connections               []config.ConnectionTemplate   `json:"connections"`
 	NTTs                      []string                      `json:"ntts"`
 	NOC                       []core.NOC                    `json:"nocs"`
 	BGPRouter                 []core.BGPRouter              `json:"bgp_router"`
@@ -32,8 +32,8 @@ type Result struct {
 }
 
 type ResultAdmin struct {
-	Services                  []core.ServiceTemplate        `json:"services"`
-	Connections               []core.ConnectionTemplate     `json:"connections"`
+	Services                  []config.ServiceTemplate      `json:"services"`
+	Connections               []config.ConnectionTemplate   `json:"connections"`
 	NTTs                      []string                      `json:"ntts"`
 	NOC                       []core.NOC                    `json:"nocs"`
 	BGPRouter                 []core.BGPRouter              `json:"bgp_router"`
@@ -47,9 +47,4 @@ type ResultAdmin struct {
 	Group                     []core.Group                  `json:"group"`
 	PaymentMembershipTemplate []config.MembershipTemplate   `json:"payment_membership_template"`
 	MailTemplate              []config.MailTemplate         `json:"mail_template"`
-}
-
-type ResultDatabase struct {
-	Err      error
-	Services []core.ServiceTemplate
 }

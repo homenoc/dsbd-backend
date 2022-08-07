@@ -8,6 +8,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/info"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/notice"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbNotice "github.com/homenoc/dsbd-backend/pkg/api/store/notice/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
@@ -234,6 +235,13 @@ func Get(c *gin.Context) {
 		}
 
 		for _, tmpService := range dbUserResult.User[0].Group.Services {
+			// getting service detail info
+			resultServiceWithTemplate, err := config.GetServiceTemplate(tmpService.ServiceType)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, common.Error{Error: dbUserResult.Err.Error()})
+				return
+			}
+
 			// Service
 			if *tmpService.Enable {
 				var resultServiceJPNICAdmin info.JPNIC
@@ -305,11 +313,11 @@ func Get(c *gin.Context) {
 
 				resultService = append(resultService, info.Service{
 					ID: tmpService.ID,
-					ServiceID: strconv.Itoa(int(tmpService.GroupID)) + "-" + tmpService.ServiceTemplate.Type +
+					ServiceID: strconv.Itoa(int(tmpService.GroupID)) + "-" + tmpService.ServiceType +
 						fmt.Sprintf("%03d", tmpService.ServiceNumber),
-					ServiceType:    tmpService.ServiceTemplate.Type,
-					NeedRoute:      *tmpService.ServiceTemplate.NeedRoute,
-					NeedJPNIC:      *tmpService.ServiceTemplate.NeedJPNIC,
+					ServiceType:    tmpService.ServiceType,
+					NeedRoute:      resultServiceWithTemplate.NeedRoute,
+					NeedJPNIC:      resultServiceWithTemplate.NeedJPNIC,
 					AddAllow:       *tmpService.AddAllow,
 					Pass:           *tmpService.Pass,
 					Org:            tmpService.Org,
@@ -329,8 +337,8 @@ func Get(c *gin.Context) {
 				})
 			}
 			for _, tmpConnection := range tmpService.Connection {
-				serviceID := strconv.Itoa(int(tmpService.GroupID)) + "-" + tmpService.ServiceTemplate.Type +
-					fmt.Sprintf("%03d", tmpService.ServiceNumber) + "-" + tmpConnection.ConnectionTemplate.Type +
+				serviceID := strconv.Itoa(int(tmpService.GroupID)) + "-" + tmpService.ServiceType +
+					fmt.Sprintf("%03d", tmpService.ServiceNumber) + "-" + tmpConnection.ConnectionType +
 					fmt.Sprintf("%03d", tmpConnection.ConnectionNumber)
 
 				// Connection
@@ -363,8 +371,8 @@ func Get(c *gin.Context) {
 
 						resultInfo = append(resultInfo, info.Info{
 							ServiceID:  serviceID,
-							Service:    tmpService.ServiceTemplate.Name,
-							Assign:     *tmpService.ServiceTemplate.NeedJPNIC,
+							Service:    resultServiceWithTemplate.Name,
+							Assign:     resultServiceWithTemplate.NeedJPNIC,
 							ASN:        asn,
 							V4:         v4,
 							V6:         v6,

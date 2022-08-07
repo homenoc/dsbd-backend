@@ -22,15 +22,15 @@ const (
 )
 
 type Input struct {
-	ConnectionTemplateID uint   `json:"connection_template_id"`
-	ConnectionComment    string `json:"connection_comment"` // ServiceがETCの時や補足説明で必要
-	NTT                  string `json:"ntt"`
-	Address              string `json:"address"`
-	IPv4Route            string `json:"ipv4_route"`
-	IPv6Route            string `json:"ipv6_route"`
-	NOCID                uint   `json:"noc_id"`
-	TermIP               string `json:"term_ip"`
-	Monitor              bool   `json:"monitor"`
+	ConnectionType    string `json:"connection_type"`
+	ConnectionComment string `json:"connection_comment"` // ServiceがETCの時や補足説明で必要
+	NTT               string `json:"ntt"`
+	Address           string `json:"address"`
+	IPv4Route         string `json:"ipv4_route"`
+	IPv6Route         string `json:"ipv6_route"`
+	NOCID             uint   `json:"noc_id"`
+	TermIP            string `json:"term_ip"`
+	Monitor           bool   `json:"monitor"`
 }
 
 type Connection struct {

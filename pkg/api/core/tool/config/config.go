@@ -110,6 +110,8 @@ type SlackChannels struct {
 }
 
 type Template struct {
+	Service    []ServiceTemplate    `json:"service"`
+	Connection []ConnectionTemplate `json:"connection"`
 	Membership []MembershipTemplate `json:"membership"`
 	NTT        []string             `json:"NTT"`
 	V4         []string             `json:"v4"`
@@ -130,6 +132,28 @@ type MailTemplate struct {
 	ID      string `json:"id"`
 	Title   string `json:"title"`
 	Message string `json:"message"`
+}
+
+type ServiceTemplate struct {
+	Hidden       bool   `json:"hidden"`
+	Name         string `json:"name"`
+	Type         string `json:"type"`
+	Comment      string `json:"comment"`
+	NeedJPNIC    bool   `json:"need_jpnic"`
+	NeedGlobalAS bool   `json:"need_global_as"`
+	NeedComment  bool   `json:"need_comment"`
+	NeedRoute    bool   `json:"need_route"`
+}
+
+type ConnectionTemplate struct {
+	Name             string `json:"name"`
+	Type             string `json:"type"`
+	Comment          string `json:"comment"`
+	NeedInternet     bool   `json:"need_internet"`
+	NeedComment      bool   `json:"need_comment"`
+	NeedCrossConnect bool   `json:"need_cross_connect"`
+	IsL2             bool   `json:"is_l2"`
+	IsL3             bool   `json:"is_l3"`
 }
 
 type Log struct {

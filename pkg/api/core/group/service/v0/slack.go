@@ -4,11 +4,9 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
-	serviceTemplate "github.com/homenoc/dsbd-backend/pkg/api/core/template/service"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
-	dbServiceTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/service/v0"
 	"github.com/slack-go/slack"
 	"gorm.io/gorm"
 	"strconv"
@@ -375,10 +373,9 @@ func changeText(before, after core.Service) string {
 		}
 	}
 
-	if after.ServiceTemplateID != nil {
-		if *before.ServiceTemplateID != *after.ServiceTemplateID {
-			data += "ServiceID: " + before.ServiceTemplate.Type + " => " +
-				serviceTemplateText(*after.ServiceTemplateID) + "\n"
+	if after.ServiceType != "" {
+		if before.ServiceType != after.ServiceType {
+			data += "ServiceID: " + before.ServiceType + " => " + after.ServiceType + "\n"
 		}
 	}
 
@@ -617,9 +614,4 @@ func changeTextPlan(before, after core.Plan) string {
 	}
 
 	return data
-}
-
-func serviceTemplateText(status uint) string {
-	result := dbServiceTemplate.Get(serviceTemplate.ID, &core.ServiceTemplate{Model: gorm.Model{ID: status}})
-	return result.Services[0].Type
 }

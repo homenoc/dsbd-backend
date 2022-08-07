@@ -37,7 +37,7 @@ func updateAdminConnection(input, replace core.Connection) core.Connection {
 	replace.Monitor = input.Monitor
 
 	//ServiceType
-	replace.ConnectionTemplateID = input.ConnectionTemplateID
+	replace.ConnectionType = input.ConnectionType
 
 	//NTT
 	replace.NTT = input.NTT

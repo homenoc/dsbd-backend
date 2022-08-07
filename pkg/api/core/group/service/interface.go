@@ -34,25 +34,25 @@ const (
 )
 
 type Input struct {
-	JPNICAdmin        core.JPNICAdmin  `json:"jpnic_admin"`
-	JPNICTech         []core.JPNICTech `json:"jpnic_tech"`
-	ServiceTemplateID uint             `json:"service_template_id"`
-	ServiceComment    string           `json:"service_comment"`
-	Org               string           `json:"org"`
-	OrgEn             string           `json:"org_en"`
-	Postcode          string           `json:"postcode"`
-	Address           string           `json:"address"`
-	AddressEn         string           `json:"address_en"`
-	AveUpstream       uint             `json:"avg_upstream"`
-	MaxUpstream       uint             `json:"max_upstream"`
-	AveDownstream     uint             `json:"avg_downstream"`
-	MaxDownstream     uint             `json:"max_downstream"`
-	MaxBandWidthAS    string           `json:"max_bandwidth_as"`
-	StartDate         string           `json:"start_date"`
-	EndDate           *string          `json:"end_date"`
-	ASN               uint             `json:"asn"`
-	IP                []IPInput        `json:"ip"`
-	Lock              bool             `json:"lock"`
+	JPNICAdmin     core.JPNICAdmin  `json:"jpnic_admin"`
+	JPNICTech      []core.JPNICTech `json:"jpnic_tech"`
+	ServiceType    string           `json:"service_type"`
+	ServiceComment string           `json:"service_comment"`
+	Org            string           `json:"org"`
+	OrgEn          string           `json:"org_en"`
+	Postcode       string           `json:"postcode"`
+	Address        string           `json:"address"`
+	AddressEn      string           `json:"address_en"`
+	AveUpstream    uint             `json:"avg_upstream"`
+	MaxUpstream    uint             `json:"max_upstream"`
+	AveDownstream  uint             `json:"avg_downstream"`
+	MaxDownstream  uint             `json:"max_downstream"`
+	MaxBandWidthAS string           `json:"max_bandwidth_as"`
+	StartDate      string           `json:"start_date"`
+	EndDate        *string          `json:"end_date"`
+	ASN            uint             `json:"asn"`
+	IP             []IPInput        `json:"ip"`
+	Lock           bool             `json:"lock"`
 }
 
 type JPNIC struct {

@@ -41,8 +41,6 @@ func InitDB() {
 		&core.Plan{},
 		&core.JPNICAdmin{},
 		&core.JPNICTech{},
-		&core.ServiceTemplate{},
-		&core.ConnectionTemplate{},
 		&core.Ticket{},
 		&core.Chat{},
 		&core.Token{},

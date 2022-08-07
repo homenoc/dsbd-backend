@@ -7,9 +7,8 @@ import (
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
-	serviceTemplate "github.com/homenoc/dsbd-backend/pkg/api/core/template/service"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
-	dbServiceTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/service/v0"
 	"gorm.io/gorm"
 	"log"
 	"net/http"
@@ -54,14 +53,14 @@ func AddByAdmin(c *gin.Context) {
 
 	var grpIP []core.IP = nil
 
-	// get service template
-	resultServiceTemplate := dbServiceTemplate.Get(serviceTemplate.ID, &core.ServiceTemplate{Model: gorm.Model{ID: input.ServiceTemplateID}})
-	if resultServiceTemplate.Err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: resultServiceTemplate.Err.Error()})
+	// check input.ConnectionType and getting connection template
+	resultServiceTemplate, err := config.GetServiceTemplate(input.ServiceType)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 		return
 	}
 
-	if *resultServiceTemplate.Services[0].NeedJPNIC {
+	if resultServiceTemplate.NeedJPNIC {
 		if err = checkJPNIC(input); err != nil {
 			c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 			return
@@ -86,7 +85,7 @@ func AddByAdmin(c *gin.Context) {
 		}
 
 		// IPトランジット以外
-		if input.ServiceTemplateID != 4 {
+		if !resultServiceTemplate.NeedGlobalAS {
 			grpIP, err = ipProcess(true, true, input.IP)
 			if err != nil {
 				c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
@@ -95,24 +94,21 @@ func AddByAdmin(c *gin.Context) {
 		}
 	}
 
-	if *resultServiceTemplate.Services[0].NeedComment && input.ServiceComment == "" {
+	if resultServiceTemplate.NeedComment && input.ServiceComment == "" {
 		c.JSON(http.StatusBadRequest, common.Error{Error: "no data: comment"})
 		return
 	}
 
-	if *resultServiceTemplate.Services[0].NeedGlobalAS {
+	// pattern check: IP Transit
+	if resultServiceTemplate.NeedGlobalAS {
 		if input.ASN == 0 {
 			c.JSON(http.StatusBadRequest, common.Error{Error: "no data: ASN"})
 			return
 		}
-
-		// IPトランジット以外
-		if input.ServiceTemplateID != 4 {
-			grpIP, err = ipProcess(true, false, input.IP)
-			if err != nil {
-				c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-				return
-			}
+		grpIP, err = ipProcess(true, false, input.IP)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+			return
 		}
 	}
 
@@ -135,27 +131,27 @@ func AddByAdmin(c *gin.Context) {
 
 	//db create for network
 	_, err = dbService.Create(&core.Service{
-		GroupID:           uint(id),
-		ServiceTemplateID: &input.ServiceTemplateID,
-		ServiceComment:    input.ServiceComment,
-		ServiceNumber:     number,
-		Org:               input.Org,
-		OrgEn:             input.OrgEn,
-		PostCode:          input.Postcode,
-		Address:           input.Address,
-		AddressEn:         input.AddressEn,
-		AveUpstream:       input.AveUpstream,
-		MaxUpstream:       input.MaxUpstream,
-		AveDownstream:     input.AveDownstream,
-		MaxDownstream:     input.MaxDownstream,
-		MaxBandWidthAS:    input.MaxBandWidthAS,
-		ASN:               &[]uint{input.ASN}[0],
-		IP:                grpIP,
-		JPNICAdmin:        input.JPNICAdmin,
-		JPNICTech:         input.JPNICTech,
-		Enable:            &[]bool{true}[0],
-		Pass:              &[]bool{false}[0],
-		AddAllow:          &[]bool{false}[0],
+		GroupID:        uint(id),
+		ServiceType:    input.ServiceType,
+		ServiceComment: input.ServiceComment,
+		ServiceNumber:  number,
+		Org:            input.Org,
+		OrgEn:          input.OrgEn,
+		PostCode:       input.Postcode,
+		Address:        input.Address,
+		AddressEn:      input.AddressEn,
+		AveUpstream:    input.AveUpstream,
+		MaxUpstream:    input.MaxUpstream,
+		AveDownstream:  input.AveDownstream,
+		MaxDownstream:  input.MaxDownstream,
+		MaxBandWidthAS: input.MaxBandWidthAS,
+		ASN:            &[]uint{input.ASN}[0],
+		IP:             grpIP,
+		JPNICAdmin:     input.JPNICAdmin,
+		JPNICTech:      input.JPNICTech,
+		Enable:         &[]bool{true}[0],
+		Pass:           &[]bool{false}[0],
+		AddAllow:       &[]bool{false}[0],
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
@@ -164,7 +160,7 @@ func AddByAdmin(c *gin.Context) {
 
 	grp := getGroupInfo(uint(id))
 	groupValue := "[" + strconv.Itoa(int(grp.ID)) + "] " + grp.Org + "(" + grp.OrgEn + ")"
-	serviceCodeNew := resultServiceTemplate.Services[0].Type + fmt.Sprintf("%03d", number)
+	serviceCodeNew := resultServiceTemplate.Type + fmt.Sprintf("%03d", number)
 	serviceCodeComment := input.ServiceComment
 	noticeAdd("", groupValue, serviceCodeNew, serviceCodeComment)
 

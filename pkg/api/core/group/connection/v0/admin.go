@@ -8,12 +8,10 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/noc"
-	connectionTemplate "github.com/homenoc/dsbd-backend/pkg/api/core/template/connection"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	dbConnection "github.com/homenoc/dsbd-backend/pkg/api/store/group/connection/v0"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
 	dbNOC "github.com/homenoc/dsbd-backend/pkg/api/store/noc/v0"
-	dbConnectionTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/connection/v0"
 	"gorm.io/gorm"
 	"log"
 	"net/http"
@@ -53,13 +51,14 @@ func AddByAdmin(c *gin.Context) {
 		return
 	}
 
-	resultConnectionTemplate := dbConnectionTemplate.Get(connectionTemplate.ID,
-		&core.ConnectionTemplate{Model: gorm.Model{ID: input.ConnectionTemplateID}})
-	if resultConnectionTemplate.Err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: resultConnectionTemplate.Err.Error()})
+	// check input.ConnectionType and getting connection template
+	connectionTemplate, err := config.GetConnectionTemplate(input.ConnectionType)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 		return
 	}
 
+	// check NTT(Internet)
 	isOkNTT := false
 	for _, ntt := range config.Conf.Template.NTT {
 		if ntt == "etc" || ntt == input.NTT {
@@ -89,8 +88,15 @@ func AddByAdmin(c *gin.Context) {
 		return
 	}
 
+	// getting service with template
+	resultServiceWithTemplate, err := config.GetServiceTemplate(resultService.Service[0].ServiceType)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		return
+	}
+
 	// if need_route is true
-	if *resultService.Service[0].ServiceTemplate.NeedRoute {
+	if resultServiceWithTemplate.NeedRoute {
 		isOkV4Route := false
 		for _, v4Route := range config.Conf.Template.V4Route {
 			if v4Route == "etc" || v4Route == input.NTT {
@@ -127,27 +133,27 @@ func AddByAdmin(c *gin.Context) {
 	}
 
 	_, err = dbConnection.Create(&core.Connection{
-		ServiceID:            resultService.Service[0].ID,
-		ConnectionTemplateID: &[]uint{input.ConnectionTemplateID}[0],
-		ConnectionComment:    input.ConnectionComment,
-		ConnectionNumber:     number,
-		IPv4Route:            input.IPv4Route,
-		IPv6Route:            input.IPv6Route,
-		NTT:                  input.NTT,
-		NOCID:                &[]uint{input.NOCID}[0],
-		TermIP:               input.TermIP,
-		Address:              input.Address,
-		Monitor:              &[]bool{input.Monitor}[0],
-		Enable:               &[]bool{true}[0],
-		Open:                 &[]bool{false}[0],
+		ServiceID:         resultService.Service[0].ID,
+		ConnectionType:    input.ConnectionType,
+		ConnectionComment: input.ConnectionComment,
+		ConnectionNumber:  number,
+		IPv4Route:         input.IPv4Route,
+		IPv6Route:         input.IPv6Route,
+		NTT:               input.NTT,
+		NOCID:             &[]uint{input.NOCID}[0],
+		TermIP:            input.TermIP,
+		Address:           input.Address,
+		Monitor:           &[]bool{input.Monitor}[0],
+		Enable:            &[]bool{true}[0],
+		Open:              &[]bool{false}[0],
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
 
-	serviceCode := resultService.Service[0].ServiceTemplate.Type + strconv.Itoa(int(resultService.Service[0].ServiceNumber))
-	connectionCodeNew := resultConnectionTemplate.Connections[0].Type + fmt.Sprintf("%03d", number)
+	serviceCode := resultServiceWithTemplate.Type + strconv.Itoa(int(resultService.Service[0].ServiceNumber))
+	connectionCodeNew := connectionTemplate.Type + fmt.Sprintf("%03d", number)
 	connectionCodeComment := input.ConnectionComment
 	noticeAdd("", strconv.Itoa(id), serviceCode, connectionCodeNew, connectionCodeComment)
 
