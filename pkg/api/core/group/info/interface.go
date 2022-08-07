@@ -30,8 +30,6 @@ type Group struct {
 	Country                   string     `json:"country"`
 	Contract                  string     `json:"contract"`
 	Paid                      *bool      `json:"paid"`
-	AutomaticUpdate           bool       `json:"automatic_update"`
-	DiscountRate              uint       `json:"discount_rate"`
 	MemberInfo                string     `json:"member_info"`
 	MemberExpired             *time.Time `json:"member_expired"`
 	Student                   *bool      `json:"student"`

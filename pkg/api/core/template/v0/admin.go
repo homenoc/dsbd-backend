@@ -11,8 +11,6 @@ import (
 	dbTunnelEndPointRouterIP "github.com/homenoc/dsbd-backend/pkg/api/store/noc/tunnelEndPointRouterIP/v0"
 	dbNOC "github.com/homenoc/dsbd-backend/pkg/api/store/noc/v0"
 	dbConnectionTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/connection/v0"
-	dbPaymentCouponTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/payment_coupon/v0"
-	dbPaymentMembershipTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/payment_membership/v0"
 	dbServiceTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/service/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"net/http"
@@ -66,17 +64,6 @@ func GetByAdmin(c *gin.Context) {
 		return
 	}
 
-	resultPaymentMembership, err := dbPaymentMembershipTemplate.GetAll()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
-		return
-	}
-	resultPaymentCoupon, err := dbPaymentCouponTemplate.GetAll()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
-		return
-	}
-
 	c.JSON(http.StatusOK, template.ResultAdmin{
 		Services:                  resultService.Services,
 		Connections:               resultConnection.Connections,
@@ -90,8 +77,7 @@ func GetByAdmin(c *gin.Context) {
 		IPv6Route:                 config.Conf.Template.V6Route,
 		User:                      resultUser.User,
 		Group:                     resultGroup.Group,
-		PaymentMembershipTemplate: resultPaymentMembership,
-		PaymentCouponTemplate:     resultPaymentCoupon,
+		PaymentMembershipTemplate: config.Conf.Template.Membership,
 		MailTemplate:              config.Conf.Template.Mail,
 	})
 }

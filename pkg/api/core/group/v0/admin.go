@@ -98,12 +98,6 @@ func UpdateByAdmin(c *gin.Context) {
 	noticeByAdmin(tmp.Group[0], input)
 
 	input.ID = uint(id)
-	if input.PaymentCouponTemplateID != nil && *input.PaymentCouponTemplateID == 0 {
-		input.PaymentCouponTemplateID = nil
-	}
-	if input.PaymentMembershipTemplateID != nil && *input.PaymentMembershipTemplateID == 0 {
-		input.PaymentMembershipTemplateID = nil
-	}
 
 	if err = dbGroup.Update(group.UpdateAll, input); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
@@ -192,8 +186,7 @@ func CancelSubscription(c *gin.Context) {
 	}
 
 	err = dbGroup.Update(group.UpdateAll, core.Group{
-		StripeSubscriptionID:        &[]string{""}[0],
-		PaymentMembershipTemplateID: &[]uint{0}[0],
+		StripeSubscriptionID: &[]string{""}[0],
 	})
 	if err != nil {
 		log.Printf("Error: %v", err)
