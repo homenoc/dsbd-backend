@@ -48,8 +48,6 @@ func InitDB() {
 		&core.Token{},
 		&core.Notice{},
 		&core.Payment{},
-		&core.PaymentCouponTemplate{},
-		&core.PaymentMembershipTemplate{},
 	)
 	log.Println(result)
 }

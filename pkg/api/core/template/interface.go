@@ -17,38 +17,36 @@ type Input struct {
 }
 
 type Result struct {
-	Services                  []core.ServiceTemplate           `json:"services"`
-	Connections               []core.ConnectionTemplate        `json:"connections"`
-	NTTs                      []string                         `json:"ntts"`
-	NOC                       []core.NOC                       `json:"nocs"`
-	BGPRouter                 []core.BGPRouter                 `json:"bgp_router"`
-	TunnelEndPointRouter      []core.TunnelEndPointRouter      `json:"tunnel_endpoint_router"`
-	TunnelEndPointRouterIP    []core.TunnelEndPointRouterIP    `json:"tunnel_endpoint_router_ip"`
-	IPv4                      []string                         `json:"ipv4"`
-	IPv6                      []string                         `json:"ipv6"`
-	IPv4Route                 []string                         `json:"ipv4_route"`
-	IPv6Route                 []string                         `json:"ipv6_route"`
-	PaymentMembershipTemplate []core.PaymentMembershipTemplate `json:"payment_membership_template"`
-	PaymentCouponTemplate     []core.PaymentCouponTemplate     `json:"payment_coupon_template"`
+	Services                  []core.ServiceTemplate        `json:"services"`
+	Connections               []core.ConnectionTemplate     `json:"connections"`
+	NTTs                      []string                      `json:"ntts"`
+	NOC                       []core.NOC                    `json:"nocs"`
+	BGPRouter                 []core.BGPRouter              `json:"bgp_router"`
+	TunnelEndPointRouter      []core.TunnelEndPointRouter   `json:"tunnel_endpoint_router"`
+	TunnelEndPointRouterIP    []core.TunnelEndPointRouterIP `json:"tunnel_endpoint_router_ip"`
+	IPv4                      []string                      `json:"ipv4"`
+	IPv6                      []string                      `json:"ipv6"`
+	IPv4Route                 []string                      `json:"ipv4_route"`
+	IPv6Route                 []string                      `json:"ipv6_route"`
+	PaymentMembershipTemplate []config.Membership           `json:"payment_membership_template"`
 }
 
 type ResultAdmin struct {
-	Services                  []core.ServiceTemplate           `json:"services"`
-	Connections               []core.ConnectionTemplate        `json:"connections"`
-	NTTs                      []string                         `json:"ntts"`
-	NOC                       []core.NOC                       `json:"nocs"`
-	BGPRouter                 []core.BGPRouter                 `json:"bgp_router"`
-	TunnelEndPointRouter      []core.TunnelEndPointRouter      `json:"tunnel_endpoint_router"`
-	TunnelEndPointRouterIP    []core.TunnelEndPointRouterIP    `json:"tunnel_endpoint_router_ip"`
-	IPv4                      []string                         `json:"ipv4"`
-	IPv6                      []string                         `json:"ipv6"`
-	IPv4Route                 []string                         `json:"ipv4_route"`
-	IPv6Route                 []string                         `json:"ipv6_route"`
-	User                      []core.User                      `json:"user"`
-	Group                     []core.Group                     `json:"group"`
-	PaymentMembershipTemplate []core.PaymentMembershipTemplate `json:"payment_membership_template"`
-	PaymentCouponTemplate     []core.PaymentCouponTemplate     `json:"payment_coupon_template"`
-	MailTemplate              []config.Mail                    `json:"mail_template"`
+	Services                  []core.ServiceTemplate        `json:"services"`
+	Connections               []core.ConnectionTemplate     `json:"connections"`
+	NTTs                      []string                      `json:"ntts"`
+	NOC                       []core.NOC                    `json:"nocs"`
+	BGPRouter                 []core.BGPRouter              `json:"bgp_router"`
+	TunnelEndPointRouter      []core.TunnelEndPointRouter   `json:"tunnel_endpoint_router"`
+	TunnelEndPointRouterIP    []core.TunnelEndPointRouterIP `json:"tunnel_endpoint_router_ip"`
+	IPv4                      []string                      `json:"ipv4"`
+	IPv6                      []string                      `json:"ipv6"`
+	IPv4Route                 []string                      `json:"ipv4_route"`
+	IPv6Route                 []string                      `json:"ipv6_route"`
+	User                      []core.User                   `json:"user"`
+	Group                     []core.Group                  `json:"group"`
+	PaymentMembershipTemplate []config.Membership           `json:"payment_membership_template"`
+	MailTemplate              []config.Mail                 `json:"mail_template"`
 }
 
 type ResultDatabase struct {

@@ -40,33 +40,30 @@ type Payment struct {
 
 type Group struct {
 	gorm.Model
-	Users                       []User                    `json:"users"`
-	Payment                     Payment                   `json:"payment_membership"`
-	Services                    []Service                 `json:"services"`
-	Tickets                     []Ticket                  `json:"tickets"`
-	Memos                       []Memo                    `json:"memos"`
-	PaymentMembershipTemplateID *uint                     `json:"payment_membership_template_id"`
-	PaymentCouponTemplateID     *uint                     `json:"payment_coupon_template_id"`
-	PaymentMembershipTemplate   PaymentMembershipTemplate `json:"payment_membership_template"`
-	PaymentCouponTemplate       PaymentCouponTemplate     `json:"payment_coupon_template"`
-	StripeCustomerID            *string                   `json:"stripe_customer_id"`
-	StripeSubscriptionID        *string                   `json:"stripe_subscription_id"`
-	Agree                       *bool                     `json:"agree"`
-	Question                    string                    `json:"question" gorm:"size:10000"`
-	Org                         string                    `json:"org"`
-	OrgEn                       string                    `json:"org_en"`
-	PostCode                    string                    `json:"postcode"`
-	Address                     string                    `json:"address"`
-	AddressEn                   string                    `json:"address_en"`
-	Tel                         string                    `json:"tel"`
-	Country                     string                    `json:"country"`
-	Contract                    string                    `json:"contract"`
-	MemberExpired               *time.Time                `json:"member_expired"`
-	Student                     *bool                     `json:"student"`
-	Comment                     string                    `json:"comment"`
-	Pass                        *bool                     `json:"pass"`
-	ExpiredStatus               *uint                     `json:"expired_status"`
-	AddAllow                    *bool                     `json:"add_allow"`
+	Users                []User     `json:"users"`
+	Payment              Payment    `json:"payment_membership"`
+	Services             []Service  `json:"services"`
+	Tickets              []Ticket   `json:"tickets"`
+	Memos                []Memo     `json:"memos"`
+	StripeCustomerID     *string    `json:"stripe_customer_id"`
+	StripeSubscriptionID *string    `json:"stripe_subscription_id"`
+	CouponID             *string    `json:"coupon_id"`
+	Agree                *bool      `json:"agree"`
+	Question             string     `json:"question" gorm:"size:10000"`
+	Org                  string     `json:"org"`
+	OrgEn                string     `json:"org_en"`
+	PostCode             string     `json:"postcode"`
+	Address              string     `json:"address"`
+	AddressEn            string     `json:"address_en"`
+	Tel                  string     `json:"tel"`
+	Country              string     `json:"country"`
+	Contract             string     `json:"contract"`
+	MemberExpired        *time.Time `json:"member_expired"`
+	Student              *bool      `json:"student"`
+	Comment              string     `json:"comment"`
+	Pass                 *bool      `json:"pass"`
+	ExpiredStatus        *uint      `json:"expired_status"`
+	AddAllow             *bool      `json:"add_allow"`
 }
 
 // Memo Type 1:Important(Red) 2:Comment1(Blue) 3:Comment2(Gray)
@@ -249,25 +246,6 @@ type JPNICTech struct {
 	Tel           string `json:"tel"`
 	Fax           string `json:"fax"`
 	Country       string `json:"country"`
-}
-
-type PaymentMembershipTemplate struct {
-	gorm.Model
-	PriceID string `json:"price_id"`
-	Title   string `json:"title"`
-	Plan    string `json:"plan"`
-	Monthly bool   `json:"monthly"`
-	Yearly  bool   `json:"yearly"`
-	Fee     uint   `json:"fee"`
-	Comment string `json:"comment"`
-}
-
-type PaymentCouponTemplate struct {
-	gorm.Model
-	StripeCouponID string `json:"stripe_coupon_id"`
-	Title          string `json:"title"`
-	DiscountRate   uint   `json:"discount_rate"`
-	Comment        string `json:"comment"`
 }
 
 type ServiceTemplate struct {

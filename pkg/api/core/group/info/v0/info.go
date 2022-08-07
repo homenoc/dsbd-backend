@@ -15,7 +15,6 @@ import (
 	"net/http"
 	"sort"
 	"strconv"
-	"time"
 )
 
 func Get(c *gin.Context) {
@@ -63,19 +62,6 @@ func Get(c *gin.Context) {
 		membershipInfo := "一般会員"
 		membershipPlan := "未設定"
 		paid := false
-		automaticUpdate := false
-		var discountRate uint = 0
-		if authResult.User.Group.PaymentCouponTemplateID != nil && *authResult.User.Group.PaymentCouponTemplateID != 0 {
-			membershipInfo = dbUserResult.User[0].Group.PaymentCouponTemplate.Title
-			discountRate = dbUserResult.User[0].Group.PaymentCouponTemplate.DiscountRate
-		}
-		if authResult.User.Group.PaymentMembershipTemplateID != nil && *authResult.User.Group.PaymentMembershipTemplateID != 0 {
-			membershipPlan = dbUserResult.User[0].Group.PaymentMembershipTemplate.Plan
-			automaticUpdate = true
-		}
-		if dbUserResult.User[0].Group.MemberExpired != nil && dbUserResult.User[0].Group.MemberExpired.Unix() > time.Now().Unix() {
-			paid = true
-		}
 
 		resultGroup = info.Group{
 			ID:                        authResult.User.Group.ID,
@@ -83,9 +69,7 @@ func Get(c *gin.Context) {
 			Pass:                      authResult.User.Group.Pass,
 			ExpiredStatus:             authResult.User.Group.ExpiredStatus,
 			MemberInfo:                membershipInfo,
-			AutomaticUpdate:           automaticUpdate,
 			Paid:                      &paid,
-			DiscountRate:              discountRate,
 			PaymentMembershipTemplate: membershipPlan,
 			MemberExpired:             authResult.User.Group.MemberExpired,
 		}
