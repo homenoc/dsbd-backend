@@ -15,7 +15,6 @@ import (
 	toolToken "github.com/homenoc/dsbd-backend/pkg/api/core/tool/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
-	dbMailTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/mail/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"gorm.io/gorm"
 	"log"
@@ -79,10 +78,12 @@ func Add(c *gin.Context) {
 
 	noticeAdd(input)
 
-	mailTemplate := core.MailTemplate{ProcessID: "signature"}
-	err = dbMailTemplate.Get(&mailTemplate)
-	if err != nil {
-		log.Println(err)
+	var signatureMessage string
+	for _, mailTemplate := range config.Conf.Template.Mail {
+		if mailTemplate.ID == "signature" {
+			signatureMessage = mailTemplate.Message
+			break
+		}
 	}
 
 	v0.SendMail(mail.Mail{
@@ -90,7 +91,7 @@ func Add(c *gin.Context) {
 		Subject: "本人確認のメールにつきまして",
 		Content: " " + input.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
 			config.Conf.Controller.User.Url + "/api/v1/verify/" + mailToken + "\n" +
-			"本人確認が完了次第、ログイン可能になります。" + mailTemplate.Message,
+			"本人確認が完了次第、ログイン可能になります。" + signatureMessage,
 	})
 
 	c.JSON(http.StatusOK, user.Result{})
@@ -200,10 +201,12 @@ func AddGroup(c *gin.Context) {
 
 	noticeAddFromGroup(input, *resultAuth.User.Group)
 
-	mailTemplate := core.MailTemplate{ProcessID: "signature"}
-	err = dbMailTemplate.Get(&mailTemplate)
-	if err != nil {
-		log.Println(err)
+	var signatureMessage string
+	for _, mailTemplate := range config.Conf.Template.Mail {
+		if mailTemplate.ID == "signature" {
+			signatureMessage = mailTemplate.Message
+			break
+		}
 	}
 
 	v0.SendMail(mail.Mail{
@@ -211,7 +214,7 @@ func AddGroup(c *gin.Context) {
 		Subject: "本人確認メールにつきまして",
 		Content: " " + input.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
 			config.Conf.Controller.User.Url + "/api/v1/verify/" + mailToken + "\n" +
-			"本人確認が完了次第、ログイン可能になります。\n" + "仮パスワード: " + pass + mailTemplate.Message,
+			"本人確認が完了次第、ログイン可能になります。\n" + "仮パスワード: " + pass + signatureMessage,
 	})
 
 	c.JSON(http.StatusOK, user.Result{})

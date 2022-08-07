@@ -24,10 +24,10 @@ const (
 type Input struct {
 	ConnectionTemplateID uint   `json:"connection_template_id"`
 	ConnectionComment    string `json:"connection_comment"` // ServiceがETCの時や補足説明で必要
-	NTTTemplateID        uint   `json:"ntt_template_id"`
+	NTT                  string `json:"ntt"`
 	Address              string `json:"address"`
-	IPv4RouteTemplateID  uint   `json:"ipv4_route_template_id"`
-	IPv6RouteTemplateID  uint   `json:"ipv6_route_template_id"`
+	IPv4Route            string `json:"ipv4_route"`
+	IPv6Route            string `json:"ipv6_route"`
 	NOCID                uint   `json:"noc_id"`
 	TermIP               string `json:"term_ip"`
 	Monitor              bool   `json:"monitor"`
@@ -43,8 +43,7 @@ type Connection struct {
 	ConnectionTemplateName       string `json:"connection_template_name"`
 	ConnectionComment            string `json:"connection_comment"` // ServiceがETCの時や補足説明で必要
 	ConnectionNumber             uint   `json:"connection_number"`
-	NTTTemplateID                *uint  `json:"ntt_template_id"`
-	NTTTemplateName              string `json:"ntt_template_name"`
+	NTT                          string `json:"ntt"`
 	NOCID                        *uint  `json:"noc_id"`
 	NOCName                      string `json:"noc_name"`
 	TermIP                       string `json:"term_ip"`

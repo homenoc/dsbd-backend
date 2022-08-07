@@ -60,10 +60,10 @@ func Update(base int, c core.Connection) error {
 
 	if connection.UpdateInfo == base {
 		err = db.Model(&core.Connection{Model: gorm.Model{ID: c.ID}}).Updates(core.Connection{
-			NTTTemplateID: c.NTTTemplateID,
-			NOC:           c.NOC,
-			TermIP:        c.TermIP,
-			Monitor:       c.Monitor,
+			NTT:     c.NTT,
+			NOC:     c.NOC,
+			TermIP:  c.TermIP,
+			Monitor: c.Monitor,
 		}).Error
 	} else if connection.UpdateServiceID == base {
 		err = db.Model(&core.Connection{Model: gorm.Model{ID: c.ID}}).Updates(core.Connection{ServiceID: c.ServiceID}).Error

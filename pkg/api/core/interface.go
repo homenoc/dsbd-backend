@@ -119,9 +119,9 @@ type Connection struct {
 	ConnectionTemplate       *ConnectionTemplate    `json:"connection_template"`
 	ConnectionComment        string                 `json:"connection_comment"` // ServiceがETCの時や補足説明で必要
 	ConnectionNumber         uint                   `json:"connection_number"`
-	NTTTemplateID            *uint                  `json:"ntt_template_id"`
-	IPv4RouteTemplateID      *uint                  `json:"ipv4_route_template_id"`
-	IPv6RouteTemplateID      *uint                  `json:"ipv6_route_template_id"`
+	IPv4Route                string                 `json:"ipv4_route"`
+	IPv6Route                string                 `json:"ipv6_route"`
+	NTT                      string                 `json:"ntt"`
 	NOCID                    *uint                  `json:"noc_id"`
 	TermIP                   string                 `json:"term_ip"`
 	Monitor                  *bool                  `json:"monitor"`
@@ -134,9 +134,6 @@ type Connection struct {
 	Enable                   *bool                  `json:"enable"`
 	Comment                  string                 `json:"comment"`
 	BgpComment               string                 `json:"bgp_comment"`
-	IPv4RouteTemplate        *IPv4RouteTemplate     `json:"ipv4_route_template"`
-	IPv6RouteTemplate        *IPv6RouteTemplate     `json:"ipv6_route_template"`
-	NTTTemplate              *NTTTemplate           `json:"ntt_template"`
 	NOC                      *NOC                   `json:"noc"`
 	BGPRouter                BGPRouter              `json:"bgp_router"`
 	TunnelEndPointRouterIP   TunnelEndPointRouterIP `json:"tunnel_endpoint_router_ip"`
@@ -285,16 +282,6 @@ type ServiceTemplate struct {
 	NeedRoute    *bool  `json:"need_route"`
 }
 
-type IPv4RouteTemplate struct {
-	gorm.Model
-	Name string `json:"name"`
-}
-
-type IPv6RouteTemplate struct {
-	gorm.Model
-	Name string `json:"name"`
-}
-
 type ConnectionTemplate struct {
 	gorm.Model
 	Hidden           bool   `json:"hidden"`
@@ -306,13 +293,6 @@ type ConnectionTemplate struct {
 	NeedCrossConnect *bool  `json:"need_cross_connect"`
 	L2               *bool  `json:"l2"`
 	L3               *bool  `json:"l3"`
-}
-
-type NTTTemplate struct {
-	gorm.Model
-	Hidden  bool   `json:"hidden"`
-	Name    string `json:"name"`
-	Comment string `json:"comment"`
 }
 
 // 申請中/承諾済み/却下
@@ -377,24 +357,6 @@ type Request struct {
 	Group             Group           `json:"group"`
 }
 
-type IPv4Template struct {
-	gorm.Model
-	Title    string `json:"title"`
-	Subnet   string `json:"subnet"`
-	Quantity uint   `json:"quantity"`
-	Hide     *bool  `json:"hide"`
-	Comment  string `json:"comment"`
-}
-
-type IPv6Template struct {
-	gorm.Model
-	Title    string `json:"title"`
-	Subnet   string `json:"subnet"`
-	Quantity uint   `json:"quantity"`
-	Hide     *bool  `json:"hide"`
-	Comment  string `json:"comment"`
-}
-
 // Type 1:追加 2:修正 3:削除
 // InfoType 1:グループ情報 2:サービス情報 3:IP 4:JPNICAdmin 5:JPNICTech 6:接続情報
 type RequestTemplate struct {
@@ -404,10 +366,4 @@ type RequestTemplate struct {
 	RequestType uint   `json:"request_type"`
 	InfoType    uint   `json:"info_type"`
 	Comment     string `json:"comment"`
-}
-
-type MailTemplate struct {
-	ProcessID string `json:"process_id" gorm:"primaryKey" gorm:"size:100"`
-	Subject   string `json:"subject" gorm:"size:100"`
-	Message   string `json:"message" gorm:"size:10000"`
 }

@@ -9,14 +9,11 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/noc"
 	connectionTemplate "github.com/homenoc/dsbd-backend/pkg/api/core/template/connection"
-	ntt "github.com/homenoc/dsbd-backend/pkg/api/core/template/ntt"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	dbConnection "github.com/homenoc/dsbd-backend/pkg/api/store/group/connection/v0"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
 	dbNOC "github.com/homenoc/dsbd-backend/pkg/api/store/noc/v0"
 	dbConnectionTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/connection/v0"
-	dbIPv4RouteTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ipv4_route/v0"
-	dbIPv6RouteTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ipv6_route/v0"
-	dbNTTTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ntt/v0"
 	"gorm.io/gorm"
 	"log"
 	"net/http"
@@ -63,9 +60,14 @@ func AddByAdmin(c *gin.Context) {
 		return
 	}
 
-	resultNTT := dbNTTTemplate.Get(ntt.ID, &core.NTTTemplate{Model: gorm.Model{ID: input.NOCID}})
-	if resultNTT.Err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: resultNTT.Err.Error()})
+	isOkNTT := false
+	for _, ntt := range config.Conf.Template.NTT {
+		if ntt == "etc" || ntt == input.NTT {
+			isOkNTT = true
+		}
+	}
+	if !isOkNTT {
+		c.JSON(http.StatusBadRequest, common.Error{Error: "error: invalid ntt."})
 		return
 	}
 
@@ -89,13 +91,24 @@ func AddByAdmin(c *gin.Context) {
 
 	// if need_route is true
 	if *resultService.Service[0].ServiceTemplate.NeedRoute {
-		_, err = dbIPv4RouteTemplate.Get(input.IPv4RouteTemplateID)
-		if err != nil {
+		isOkV4Route := false
+		for _, v4Route := range config.Conf.Template.V4Route {
+			if v4Route == "etc" || v4Route == input.NTT {
+				isOkV4Route = true
+			}
+		}
+		if !isOkV4Route {
 			c.JSON(http.StatusBadRequest, common.Error{Error: "error: invalid ipv4 route template."})
 			return
 		}
-		_, err = dbIPv6RouteTemplate.Get(input.IPv6RouteTemplateID)
-		if err != nil {
+
+		isOkV6Route := false
+		for _, v6Route := range config.Conf.Template.V6Route {
+			if v6Route == "etc" || v6Route == input.NTT {
+				isOkV6Route = true
+			}
+		}
+		if !isOkV6Route {
 			c.JSON(http.StatusBadRequest, common.Error{Error: "error: invalid ipv4 route template."})
 			return
 		}
@@ -118,9 +131,9 @@ func AddByAdmin(c *gin.Context) {
 		ConnectionTemplateID: &[]uint{input.ConnectionTemplateID}[0],
 		ConnectionComment:    input.ConnectionComment,
 		ConnectionNumber:     number,
-		IPv4RouteTemplateID:  &[]uint{input.IPv4RouteTemplateID}[0],
-		IPv6RouteTemplateID:  &[]uint{input.IPv6RouteTemplateID}[0],
-		NTTTemplateID:        &[]uint{input.NTTTemplateID}[0],
+		IPv4Route:            input.IPv4Route,
+		IPv6Route:            input.IPv6Route,
+		NTT:                  input.NTT,
 		NOCID:                &[]uint{input.NOCID}[0],
 		TermIP:               input.TermIP,
 		Address:              input.Address,

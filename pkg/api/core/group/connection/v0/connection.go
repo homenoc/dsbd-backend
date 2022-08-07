@@ -10,15 +10,12 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/noc"
 	connectionTemplate "github.com/homenoc/dsbd-backend/pkg/api/core/template/connection"
-	ntt "github.com/homenoc/dsbd-backend/pkg/api/core/template/ntt"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	dbConnection "github.com/homenoc/dsbd-backend/pkg/api/store/group/connection/v0"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
 	dbNOC "github.com/homenoc/dsbd-backend/pkg/api/store/noc/v0"
 	dbConnectionTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/connection/v0"
-	dbIPv4RouteTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ipv4_route/v0"
-	dbIPv6RouteTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ipv6_route/v0"
-	dbNTTTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ntt/v0"
 	"gorm.io/gorm"
 	"log"
 	"net/http"
@@ -85,9 +82,14 @@ func Add(c *gin.Context) {
 	}
 
 	if *resultConnectionTemplate.Connections[0].NeedInternet {
-		resultNTT := dbNTTTemplate.Get(ntt.ID, &core.NTTTemplate{Model: gorm.Model{ID: input.NTTTemplateID}})
-		if resultNTT.Err != nil {
-			c.JSON(http.StatusBadRequest, common.Error{Error: resultNTT.Err.Error()})
+		isOkNTT := false
+		for _, ntt := range config.Conf.Template.NTT {
+			if ntt == "etc" || ntt == input.NTT {
+				isOkNTT = true
+			}
+		}
+		if !isOkNTT {
+			c.JSON(http.StatusBadRequest, common.Error{Error: "error: invalid ntt."})
 			return
 		}
 	}
@@ -148,15 +150,26 @@ func Add(c *gin.Context) {
 		}
 
 		if ipv4Enable {
-			_, err = dbIPv4RouteTemplate.Get(input.IPv4RouteTemplateID)
-			if err != nil {
+			isOkV4Route := false
+			for _, v4Route := range config.Conf.Template.V4Route {
+				if v4Route == "etc" || v4Route == input.NTT {
+					isOkV4Route = true
+				}
+			}
+			if !isOkV4Route {
 				c.JSON(http.StatusBadRequest, common.Error{Error: "error: invalid ipv4 route template."})
 				return
 			}
 		}
+
 		if ipv6Enable {
-			_, err = dbIPv6RouteTemplate.Get(input.IPv6RouteTemplateID)
-			if err != nil {
+			isOkV6Route := false
+			for _, v6Route := range config.Conf.Template.V6Route {
+				if v6Route == "etc" || v6Route == input.NTT {
+					isOkV6Route = true
+				}
+			}
+			if !isOkV6Route {
 				c.JSON(http.StatusBadRequest, common.Error{Error: "error: invalid ipv4 route template."})
 				return
 			}
@@ -187,27 +200,6 @@ func Add(c *gin.Context) {
 		connectonTemplateID = &[]uint{input.ConnectionTemplateID}[0]
 	}
 
-	var IPv4RouteTemplateID *uint
-	if input.IPv4RouteTemplateID == 0 {
-		IPv4RouteTemplateID = nil
-	} else {
-		IPv4RouteTemplateID = &[]uint{input.IPv4RouteTemplateID}[0]
-	}
-
-	var IPv6RouteTemplateID *uint
-	if input.IPv6RouteTemplateID == 0 {
-		IPv6RouteTemplateID = nil
-	} else {
-		IPv6RouteTemplateID = &[]uint{input.IPv6RouteTemplateID}[0]
-	}
-
-	var NTTTemplateID *uint
-	if input.NTTTemplateID == 0 {
-		NTTTemplateID = nil
-	} else {
-		NTTTemplateID = &[]uint{input.NTTTemplateID}[0]
-	}
-
 	var NOCID *uint
 	if input.NOCID == 0 {
 		NOCID = nil
@@ -220,9 +212,9 @@ func Add(c *gin.Context) {
 		ConnectionTemplateID:     connectonTemplateID,
 		ConnectionComment:        input.ConnectionComment,
 		ConnectionNumber:         number,
-		IPv4RouteTemplateID:      IPv4RouteTemplateID,
-		IPv6RouteTemplateID:      IPv6RouteTemplateID,
-		NTTTemplateID:            NTTTemplateID,
+		IPv4Route:                input.IPv4Route,
+		IPv6Route:                input.IPv6Route,
+		NTT:                      input.NTT,
 		NOCID:                    NOCID,
 		BGPRouterID:              nil,
 		TunnelEndPointRouterIPID: nil,
