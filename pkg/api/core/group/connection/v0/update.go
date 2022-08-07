@@ -40,7 +40,7 @@ func updateAdminConnection(input, replace core.Connection) core.Connection {
 	replace.ConnectionTemplateID = input.ConnectionTemplateID
 
 	//NTT
-	replace.NTTTemplateID = input.NTTTemplateID
+	replace.NTT = input.NTT
 
 	//NOC
 	replace.NOCID = input.NOCID

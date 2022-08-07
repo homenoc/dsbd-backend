@@ -8,7 +8,6 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	toolToken "github.com/homenoc/dsbd-backend/pkg/api/core/tool/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
-	dbMailTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/mail/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"log"
 	"strings"
@@ -25,10 +24,12 @@ func replaceUser(serverData core.User, input user.Input) (core.User, error) {
 		serverData.NameEn = input.NameEn
 	}
 
-	mailTemplate := core.MailTemplate{ProcessID: "signature"}
-	err := dbMailTemplate.Get(&mailTemplate)
-	if err != nil {
-		log.Println(err)
+	var signatureMessage string
+	for _, mailTemplate := range config.Conf.Template.Mail {
+		if mailTemplate.ID == "signature" {
+			signatureMessage = mailTemplate.Message
+			break
+		}
 	}
 
 	//E-Mail
@@ -55,7 +56,7 @@ func replaceUser(serverData core.User, input user.Input) (core.User, error) {
 			Subject: "本人確認のメールにつきまして",
 			Content: " " + serverData.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
 				config.Conf.Controller.User.Url + "/api/v1/verify/" + mailToken + "\n" +
-				"本人確認が完了次第、ログイン可能になります。" + mailTemplate.Message,
+				"本人確認が完了次第、ログイン可能になります。" + signatureMessage,
 		})
 	}
 
@@ -66,7 +67,7 @@ func replaceUser(serverData core.User, input user.Input) (core.User, error) {
 		v0.SendMail(mail.Mail{
 			ToMail:  serverData.Email,
 			Subject: "[通知] パスワード変更",
-			Content: " " + serverData.Name + "様\n\n" + "パスワードが変更されました。" + mailTemplate.Message,
+			Content: " " + serverData.Name + "様\n\n" + "パスワードが変更されました。" + signatureMessage,
 		})
 	}
 

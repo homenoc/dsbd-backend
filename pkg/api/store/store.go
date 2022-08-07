@@ -43,19 +43,13 @@ func InitDB() {
 		&core.JPNICTech{},
 		&core.ServiceTemplate{},
 		&core.ConnectionTemplate{},
-		&core.NTTTemplate{},
 		&core.Ticket{},
 		&core.Chat{},
 		&core.Token{},
 		&core.Notice{},
-		&core.IPv4Template{},
-		&core.IPv6Template{},
-		&core.IPv4RouteTemplate{},
-		&core.IPv6RouteTemplate{},
 		&core.Payment{},
 		&core.PaymentCouponTemplate{},
 		&core.PaymentMembershipTemplate{},
-		&core.MailTemplate{},
 	)
 	log.Println(result)
 }

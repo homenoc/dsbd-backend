@@ -13,10 +13,10 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/mail/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support/ticket"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbChat "github.com/homenoc/dsbd-backend/pkg/api/store/support/chat/v0"
 	dbTicket "github.com/homenoc/dsbd-backend/pkg/api/store/support/ticket/v0"
-	dbMailTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/mail/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"gorm.io/gorm"
 	"log"
@@ -287,10 +287,13 @@ func GetAdminWebSocket(c *gin.Context) {
 			if resultTicket.Err != nil {
 				log.Println(resultTicket.Err)
 			}
-			mailTemplate := core.MailTemplate{ProcessID: "signature"}
-			err = dbMailTemplate.Get(&mailTemplate)
-			if err != nil {
-				log.Println(err)
+
+			var signatureMessage string
+			for _, mailTemplate := range config.Conf.Template.Mail {
+				if mailTemplate.ID == "signature" {
+					signatureMessage = mailTemplate.Message
+					break
+				}
 			}
 
 			if len(resultTicket.Tickets) != 0 {
@@ -310,7 +313,7 @@ func GetAdminWebSocket(c *gin.Context) {
 								ToMail:  userTmp.Email,
 								Subject: "Supportより新着メッセージ",
 								Content: " " + userTmp.Name + "様\n\n" + "チャットより新着メッセージがあります\n" +
-									"Webシステムよりご覧いただけます。" + mailTemplate.Message,
+									"Webシステムよりご覧いただけます。" + signatureMessage,
 							})
 						}
 					}
@@ -328,7 +331,7 @@ func GetAdminWebSocket(c *gin.Context) {
 							ToMail:  resultUser.User[0].Email,
 							Subject: "Supportより新着メッセージ",
 							Content: " " + resultUser.User[0].Name + "様\n\n" + "チャットより新着メッセージがあります\n" +
-								"Webシステムよりご覧いただけます。" + mailTemplate.Message,
+								"Webシステムよりご覧いただけます。" + signatureMessage,
 						})
 					}
 				}

@@ -6,14 +6,12 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/noc/bgpRouter"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/noc/tunnelEndPointRouterIP"
 	connectionTemplate "github.com/homenoc/dsbd-backend/pkg/api/core/template/connection"
-	ntt "github.com/homenoc/dsbd-backend/pkg/api/core/template/ntt"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	dbBGPRouter "github.com/homenoc/dsbd-backend/pkg/api/store/noc/bgpRouter/v0"
 	dbTunnelEndPointRouterIP "github.com/homenoc/dsbd-backend/pkg/api/store/noc/tunnelEndPointRouterIP/v0"
 	dbNOC "github.com/homenoc/dsbd-backend/pkg/api/store/noc/v0"
 	dbConnectionTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/connection/v0"
-	dbNTTTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/ntt/v0"
 	"github.com/slack-go/slack"
 	"gorm.io/gorm"
 	"strconv"
@@ -116,10 +114,9 @@ func changeText(before, after core.Connection) string {
 		}
 	}
 
-	if after.NTTTemplateID != nil {
-		if *before.NTTTemplateID != *after.NTTTemplateID {
-			data += "インターネット接続: " + before.NTTTemplate.Name + " => " + nttTemplateText(*after.NTTTemplateID) + "\n"
-		}
+	if after.NTT != "" {
+		data += "インターネット接続: " + before.NTT + " => " + after.NTT + "\n"
+
 	}
 
 	if after.NOCID != nil {
@@ -163,11 +160,6 @@ func bgpRouterText(status uint) string {
 	} else {
 		return "なし"
 	}
-}
-
-func nttTemplateText(status uint) string {
-	result := dbNTTTemplate.Get(ntt.ID, &core.NTTTemplate{Model: gorm.Model{ID: status}})
-	return result.NTTs[0].Name
 }
 
 func tunnelEndPointRouterIPText(status uint) string {

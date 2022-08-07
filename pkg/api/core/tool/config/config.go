@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/json"
 	"io/ioutil"
+	"log"
 )
 
 const ToMainSlackNotify = "main"
@@ -14,7 +15,7 @@ type Config struct {
 	Web        Web        `json:"web"`
 	DB         DB         `json:"db"`
 	Stripe     Stripe     `json:"stripe"`
-	Mail       Mail       `json:"mail"`
+	Mail       MailServer `json:"mail"`
 	JPNIC      JPNIC      `json:"jpnic"`
 	Radius     Radius     `json:"radius"`
 	Slack      Slack      `json:"slack"`
@@ -70,7 +71,7 @@ type DB struct {
 	DBName string `json:"dbName"`
 }
 
-type Mail struct {
+type MailServer struct {
 	Host     string `json:"host"`
 	Port     int    `json:"port"`
 	From     string `json:"from"`
@@ -115,6 +116,7 @@ type Template struct {
 	V6         []string     `json:"v6"`
 	V4Route    []string     `json:"v4_route"`
 	V6Route    []string     `json:"v6_route"`
+	Mail       []Mail       `json:"mail"`
 }
 
 type Membership struct {
@@ -122,6 +124,12 @@ type Membership struct {
 	Plan    string `json:"plan"`
 	PriceID string `json:"price_id"`
 	Fee     string `json:"fee"`
+}
+
+type Mail struct {
+	ID      string `json:"id"`
+	Title   string `json:"title"`
+	Message string `json:"message"`
 }
 
 type Log struct {
@@ -140,7 +148,10 @@ func GetConfig(inputConfPath string) error {
 		return err
 	}
 	var data Config
-	json.Unmarshal(file, &data)
+	err = json.Unmarshal(file, &data)
+	if err != nil {
+		log.Fatal(err)
+	}
 	Conf = data
 	return nil
 }
