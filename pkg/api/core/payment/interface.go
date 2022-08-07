@@ -10,7 +10,7 @@ const (
 )
 
 type Input struct {
-	ItemID uint `json:"item_id"`
+	Plan string `json:"plan"` // yearly, monthly
 }
 
 type ChangeCardPaymentInit struct {

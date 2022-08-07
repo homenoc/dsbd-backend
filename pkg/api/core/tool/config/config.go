@@ -19,6 +19,7 @@ type Config struct {
 	Radius     Radius     `json:"radius"`
 	Slack      Slack      `json:"slack"`
 	Log        Log        `json:"log"`
+	Template   Template   `json:"template"`
 }
 
 type Controller struct {
@@ -45,8 +46,9 @@ type Web struct {
 }
 
 type Stripe struct {
-	WebhookSecretKey string `json:"webhook_secret_key"`
-	SecretKey        string `json:"secret_key"`
+	WebhookSecretKey        string `json:"webhook_secret_key"`
+	SecretKey               string `json:"secret_key"`
+	MembershipConfiguration string `json:"membership_configuration"`
 }
 
 type AdminAuth struct {
@@ -104,6 +106,22 @@ type SlackChannels struct {
 	Log        string `json:"log"`
 	Payment    string `json:"payment"`
 	PaymentLog string `json:"payment_log"`
+}
+
+type Template struct {
+	Membership []Membership `json:"membership"`
+	NTT        []string     `json:"NTT"`
+	V4         []string     `json:"v4"`
+	V6         []string     `json:"v6"`
+	V4Route    []string     `json:"v4_route"`
+	V6Route    []string     `json:"v6_route"`
+}
+
+type Membership struct {
+	Title   string `json:"title"`
+	Plan    string `json:"plan"`
+	PriceID string `json:"price_id"`
+	Fee     string `json:"fee"`
 }
 
 type Log struct {

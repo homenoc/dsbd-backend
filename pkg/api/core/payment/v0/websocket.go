@@ -8,8 +8,8 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	dbPayment "github.com/homenoc/dsbd-backend/pkg/api/store/payment/v0"
-	"github.com/stripe/stripe-go/v72"
-	"github.com/stripe/stripe-go/v72/webhook"
+	"github.com/stripe/stripe-go/v73"
+	"github.com/stripe/stripe-go/v73/webhook"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -68,7 +68,7 @@ func GetStripeWebHook(c *gin.Context) {
 		paymentIntent := event.Data.Object["payment_intent"].(string)
 		if dataType == "donate" {
 			dbPayment.Create(&core.Payment{
-				Type:            core.PaymentMembership,
+				Type:            core.PaymentDonate,
 				GroupID:         nil,
 				Refund:          &[]bool{false}[0],
 				PaymentIntentID: paymentIntent,

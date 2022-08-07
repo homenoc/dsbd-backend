@@ -4,7 +4,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	"github.com/slack-go/slack"
-	"github.com/stripe/stripe-go/v72"
+	"github.com/stripe/stripe-go/v73"
 	"strconv"
 	"strings"
 )
