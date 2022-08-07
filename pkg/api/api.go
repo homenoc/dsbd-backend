@@ -287,9 +287,8 @@ func UserRestAPI() {
 			//
 			// Payment
 			//
-			v1.POST("/payment/membership", payment.MembershipPayment)
-			v1.PUT("/payment/card", payment.ChangeCardPayment)
-			v1.GET("/payment/card", payment.ChangeCardPaymentInit)
+			v1.POST("/payment/subscribe", payment.PostSubscribeGettingURL)
+			v1.GET("/payment", payment.GetBillingPortalURL)
 
 			//
 			// Support/Request

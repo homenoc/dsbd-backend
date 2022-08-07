@@ -5,197 +5,113 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/payment"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
-	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
-	dbPayment "github.com/homenoc/dsbd-backend/pkg/api/store/payment/v0"
-	dbPaymentMembershipTemplate "github.com/homenoc/dsbd-backend/pkg/api/store/template/payment_membership/v0"
-	"github.com/stripe/stripe-go/v72"
-	"github.com/stripe/stripe-go/v72/customer"
-	"github.com/stripe/stripe-go/v72/paymentmethod"
-	"github.com/stripe/stripe-go/v72/setupintent"
-	"github.com/stripe/stripe-go/v72/sub"
-	"gorm.io/gorm"
-	"log"
+	"github.com/stripe/stripe-go/v73"
+	billingSession "github.com/stripe/stripe-go/v73/billingportal/session"
+	"github.com/stripe/stripe-go/v73/checkout/session"
 	"net/http"
+	"strconv"
+	"time"
 )
 
-func MembershipPayment(c *gin.Context) {
-	var input payment.Input
+func PostSubscribeGettingURL(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
+	var input payment.Input
 	err := c.BindJSON(&input)
 	if err != nil {
-		log.Println(err)
 		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 		return
 	}
 
-	result := auth.GroupAuthorization(0, core.Token{UserToken: userToken, AccessToken: accessToken})
-	if result.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
+	var priceID = ""
+
+	// search plan
+	for _, oneMembership := range config.Conf.Template.Membership {
+		if oneMembership.Plan == input.Plan {
+			priceID = oneMembership.PriceID
+		}
+	}
+	if priceID == "" {
+		c.JSON(http.StatusBadRequest, common.Error{Error: "invalid plan"})
 		return
 	}
 
-	if result.User.Group.StripeSubscriptionID != nil && *result.User.Group.StripeSubscriptionID != "" {
-		c.JSON(http.StatusBadRequest, common.Error{Error: "Error: Subscription."})
+	resultAuth := auth.GroupAuthorization(0, core.Token{UserToken: userToken, AccessToken: accessToken})
+	if resultAuth.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAuth.Err.Error()})
 		return
 	}
 
-	if *result.User.Group.Student {
-		c.JSON(http.StatusBadRequest, common.Error{Error: "Error: You are student."})
+	// exist check: stripeCustomerID
+	if *resultAuth.User.Group.StripeCustomerID == "" {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: "stripe customer id not found..."})
 		return
 	}
 
-	resultTemplate, err := dbPaymentMembershipTemplate.Get(input.ItemID)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: "template is not found..."})
+	// exist check: stripeCustomerID
+	if *resultAuth.User.Group.StripeCustomerID == "" {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: "stripe customer id not found..."})
 		return
 	}
 
-	if result.User.Group.StripeCustomerID == nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: "stripe customerID is not exists."})
-		return
-	}
-
-	stripe.Key = config.Conf.Stripe.SecretKey
-
-	params := &stripe.SubscriptionParams{
-		Items: []*stripe.SubscriptionItemsParams{
+	date := time.Now()
+	params := &stripe.CheckoutSessionParams{
+		Mode:     stripe.String(string(stripe.CheckoutSessionModeSubscription)),
+		Customer: resultAuth.User.Group.StripeCustomerID,
+		LineItems: []*stripe.CheckoutSessionLineItemParams{
 			{
-				Price: stripe.String(resultTemplate.PriceID),
+				Price:    stripe.String(priceID),
+				Quantity: stripe.Int64(1),
 			},
 		},
-		PaymentBehavior: stripe.String("default_incomplete"),
-		Customer:        stripe.String(*result.User.Group.StripeCustomerID),
-	}
-	params.AddExpand("latest_invoice.payment_intent")
-
-	pi, err := sub.New(params)
-	log.Printf("pi.New: %v\n", pi.LatestInvoice.PaymentIntent.ClientSecret)
-	if err != nil {
-		log.Printf("pi.New: %v", err)
-		c.JSON(http.StatusInternalServerError, common.Error{Error: "payment_membership system error"})
-		return
-	}
-
-	dbPayment.Create(&core.Payment{
-		GroupID:         result.User.GroupID,
-		PaymentIntentID: pi.LatestInvoice.PaymentIntent.ID,
-		Type:            core.PaymentMembership,
-		Paid:            &[]bool{false}[0],
-		Fee:             resultTemplate.Fee,
-	})
-
-	dbGroup.Update(group.UpdateMembership, core.Group{
-		Model:                       gorm.Model{ID: *result.User.GroupID},
-		StripeCustomerID:            result.User.Group.StripeCustomerID,
-		StripeSubscriptionID:        &pi.ID,
-		PaymentMembershipTemplateID: &resultTemplate.ID,
-	})
-
-	c.JSON(http.StatusOK, payment.ResultByUser{
-		ClientSecret: pi.LatestInvoice.PaymentIntent.ClientSecret,
-	})
-}
-
-func ChangeCardPayment(c *gin.Context) {
-	var input payment.ChangeCardPaymentInit
-	userToken := c.Request.Header.Get("USER_TOKEN")
-	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
-
-	err := c.BindJSON(&input)
-	if err != nil {
-		log.Println(err)
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	result := auth.GroupAuthorization(0, core.Token{UserToken: userToken, AccessToken: accessToken})
-	if result.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
-		return
-	}
-
-	stripe.Key = config.Conf.Stripe.SecretKey
-
-	if result.User.Group.StripeCustomerID == nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: "stripe customerID is not exists."})
-		return
-	}
-
-	if result.User.Group.StripeSubscriptionID == nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: "stripe subscriptionID is not exists."})
-		return
-	}
-
-	//attach
-	pm, err := paymentmethod.Attach(input.PaymentMethodID, &stripe.PaymentMethodAttachParams{
-		Customer: stripe.String(*result.User.Group.StripeCustomerID),
-	})
-	if err != nil {
-		log.Printf("Error: %v", err)
-		c.JSON(http.StatusInternalServerError, common.Error{Error: "payment_membership system error"})
-		return
-	}
-	log.Println(pm)
-
-	// change card on user
-	cus, err := customer.Update(*result.User.Group.StripeCustomerID, &stripe.CustomerParams{
-		InvoiceSettings: &stripe.CustomerInvoiceSettingsParams{
-			DefaultPaymentMethod: stripe.String(input.PaymentMethodID),
-		},
-	})
-	if err != nil {
-		log.Printf("Error: %v", err)
-		c.JSON(http.StatusInternalServerError, common.Error{Error: "payment_membership system error"})
-		return
-	}
-
-	log.Printf(cus.ID)
-
-	_, err = sub.Update(*result.User.Group.StripeSubscriptionID, &stripe.SubscriptionParams{
-		DefaultPaymentMethod: stripe.String(input.PaymentMethodID),
-	})
-	if err != nil {
-		log.Printf("Error: %v", err)
-		c.JSON(http.StatusInternalServerError, common.Error{Error: "payment_membership system error"})
-		return
-	}
-
-	c.JSON(http.StatusOK, common.Result{})
-}
-
-func ChangeCardPaymentInit(c *gin.Context) {
-	userToken := c.Request.Header.Get("USER_TOKEN")
-	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
-
-	result := auth.UserAuthorization(core.Token{UserToken: userToken, AccessToken: accessToken})
-	if result.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
-		return
-	}
-
-	stripe.Key = config.Conf.Stripe.SecretKey
-
-	// get subscription
-	params := &stripe.SetupIntentParams{
-		PaymentMethodTypes: []*string{
-			stripe.String("card"),
+		SuccessURL: stripe.String(config.Conf.Controller.User.Url),
+		//CancelURL:  stripe.String("https://example.com/cancel"),
+		ExpiresAt: stripe.Int64(date.Add(time.Minute * 30).Unix()),
+		SubscriptionData: &stripe.CheckoutSessionSubscriptionDataParams{
+			Metadata: map[string]string{
+				"type":     "membership",
+				"group_id": strconv.Itoa(int(resultAuth.User.Group.ID)),
+				"name":     "Yuto Yoneda",
+				"log": "[" + strconv.Itoa(int(resultAuth.User.ID)) + "] " + resultAuth.User.Name +
+					"_[" + strconv.Itoa(int(resultAuth.User.Group.ID)) + "] " + resultAuth.User.Group.Org,
+			},
 		},
 	}
 
-	si, err := setupintent.New(params)
-	log.Printf("si.New: %v\n", si.ClientSecret)
+	s, err := session.New(params)
+
 	if err != nil {
-		log.Printf("si.New: %v", err)
-		c.JSON(http.StatusInternalServerError, common.Error{Error: "payment_membership system error"})
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, payment.ResultByUser{
-		ClientSecret: si.ClientSecret,
-	})
+	c.JSON(http.StatusOK, map[string]string{"url": s.URL})
+}
+
+func GetBillingPortalURL(c *gin.Context) {
+	userToken := c.Request.Header.Get("USER_TOKEN")
+	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
+
+	resultAuth := auth.GroupAuthorization(0, core.Token{UserToken: userToken, AccessToken: accessToken})
+	if resultAuth.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAuth.Err.Error()})
+		return
+	}
+
+	params := &stripe.BillingPortalSessionParams{
+		Customer:      stripe.String("cus_MBBRylUHxUQvVc"),
+		Configuration: stripe.String(config.Conf.Stripe.MembershipConfiguration),
+		ReturnURL:     stripe.String(config.Conf.Controller.User.Url),
+	}
+
+	s, err := billingSession.New(params)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, map[string]string{"url": s.URL})
 }
