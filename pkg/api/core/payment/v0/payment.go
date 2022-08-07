@@ -26,15 +26,9 @@ func PostSubscribeGettingURL(c *gin.Context) {
 		return
 	}
 
-	var priceID = ""
-
 	// search plan
-	for _, oneMembership := range config.Conf.Template.Membership {
-		if oneMembership.Plan == input.Plan {
-			priceID = oneMembership.PriceID
-		}
-	}
-	if priceID == "" {
+	membershipWithTemplate, err := config.GetMembershipTemplate(input.Plan)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: "invalid plan"})
 		return
 	}
@@ -63,7 +57,7 @@ func PostSubscribeGettingURL(c *gin.Context) {
 		Customer: resultAuth.User.Group.StripeCustomerID,
 		LineItems: []*stripe.CheckoutSessionLineItemParams{
 			{
-				Price:    stripe.String(priceID),
+				Price:    stripe.String(membershipWithTemplate.PriceID),
 				Quantity: stripe.Int64(1),
 			},
 		},

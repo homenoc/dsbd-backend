@@ -147,14 +147,10 @@ func ipCheck(admin, restrict bool, ip service.IPInput) error {
 			if ip.Plan == nil {
 				return fmt.Errorf("invalid plan data")
 			}
-			isOkV4Route := false
-			for _, v4 := range config.Conf.Template.V4 {
-				if v4 == ip.IP {
-					isOkV4Route = true
-				}
-			}
-			if !isOkV4Route {
-				return fmt.Errorf("Invalid IP subnet. ")
+
+			err := config.CheckIncludeV4Template(ip.IP)
+			if err != nil {
+				return err
 			}
 			subnet, err := strconv.Atoi(ip.IP[1:])
 			if err != nil {
@@ -189,14 +185,9 @@ func ipCheck(admin, restrict bool, ip service.IPInput) error {
 			return fmt.Errorf("invalid ipv6 address")
 		}
 		if restrict {
-			isOkV6Route := false
-			for _, v6 := range config.Conf.Template.V6 {
-				if v6 == ip.IP {
-					isOkV6Route = true
-				}
-			}
-			if !isOkV6Route {
-				return fmt.Errorf("Invalid IPv6 subnet. ")
+			err := config.CheckIncludeV6Template(ip.IP)
+			if err != nil {
+				return err
 			}
 		}
 	} else {

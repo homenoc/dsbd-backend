@@ -78,20 +78,14 @@ func Add(c *gin.Context) {
 
 	noticeAdd(input)
 
-	var signatureMessage string
-	for _, mailTemplate := range config.Conf.Template.Mail {
-		if mailTemplate.ID == "signature" {
-			signatureMessage = mailTemplate.Message
-			break
-		}
-	}
+	mailTemplate, _ := config.GetMailTemplate("signature")
 
 	v0.SendMail(mail.Mail{
 		ToMail:  data.Email,
 		Subject: "本人確認のメールにつきまして",
 		Content: " " + input.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
 			config.Conf.Controller.User.Url + "/api/v1/verify/" + mailToken + "\n" +
-			"本人確認が完了次第、ログイン可能になります。" + signatureMessage,
+			"本人確認が完了次第、ログイン可能になります。" + mailTemplate.Message,
 	})
 
 	c.JSON(http.StatusOK, user.Result{})
@@ -201,20 +195,14 @@ func AddGroup(c *gin.Context) {
 
 	noticeAddFromGroup(input, *resultAuth.User.Group)
 
-	var signatureMessage string
-	for _, mailTemplate := range config.Conf.Template.Mail {
-		if mailTemplate.ID == "signature" {
-			signatureMessage = mailTemplate.Message
-			break
-		}
-	}
+	mailTemplate, _ := config.GetMailTemplate("signature")
 
 	v0.SendMail(mail.Mail{
 		ToMail:  data.Email,
 		Subject: "本人確認メールにつきまして",
 		Content: " " + input.Name + "様\n\n" + "以下のリンクから本人確認を完了してください。\n" +
 			config.Conf.Controller.User.Url + "/api/v1/verify/" + mailToken + "\n" +
-			"本人確認が完了次第、ログイン可能になります。\n" + "仮パスワード: " + pass + signatureMessage,
+			"本人確認が完了次第、ログイン可能になります。\n" + "仮パスワード: " + pass + mailTemplate.Message,
 	})
 
 	c.JSON(http.StatusOK, user.Result{})

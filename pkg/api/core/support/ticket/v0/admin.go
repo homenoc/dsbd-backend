@@ -288,13 +288,7 @@ func GetAdminWebSocket(c *gin.Context) {
 				log.Println(resultTicket.Err)
 			}
 
-			var signatureMessage string
-			for _, mailTemplate := range config.Conf.Template.Mail {
-				if mailTemplate.ID == "signature" {
-					signatureMessage = mailTemplate.Message
-					break
-				}
-			}
+			mailTemplate, _ := config.GetMailTemplate("signature")
 
 			if len(resultTicket.Tickets) != 0 {
 				if groupID != 0 {
@@ -313,7 +307,7 @@ func GetAdminWebSocket(c *gin.Context) {
 								ToMail:  userTmp.Email,
 								Subject: "Supportより新着メッセージ",
 								Content: " " + userTmp.Name + "様\n\n" + "チャットより新着メッセージがあります\n" +
-									"Webシステムよりご覧いただけます。" + signatureMessage,
+									"Webシステムよりご覧いただけます。" + mailTemplate.Message,
 							})
 						}
 					}
@@ -331,7 +325,7 @@ func GetAdminWebSocket(c *gin.Context) {
 							ToMail:  resultUser.User[0].Email,
 							Subject: "Supportより新着メッセージ",
 							Content: " " + resultUser.User[0].Name + "様\n\n" + "チャットより新着メッセージがあります\n" +
-								"Webシステムよりご覧いただけます。" + signatureMessage,
+								"Webシステムよりご覧いただけます。" + mailTemplate.Message,
 						})
 					}
 				}
