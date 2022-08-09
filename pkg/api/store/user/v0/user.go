@@ -117,8 +117,6 @@ func Get(base int, u *core.User) user.ResultDatabase {
 			Preload("Ticket").
 			Preload("Ticket.Chat").
 			Preload("Group").
-			Preload("Group.PaymentMembershipTemplate").
-			Preload("Group.PaymentCouponTemplate").
 			Preload("Group.Users").
 			Preload("Group.Services").
 			Preload("Group.Tickets").
@@ -126,12 +124,10 @@ func Get(base int, u *core.User) user.ResultDatabase {
 			Preload("Group.Services.IP").
 			Preload("Group.Services.IP.Plan").
 			Preload("Group.Services.Connection").
-			Preload("Group.Services.Connection.ConnectionTemplate").
 			Preload("Group.Services.Connection.NOC").
 			Preload("Group.Services.Connection.BGPRouter").
 			Preload("Group.Services.Connection.BGPRouter.NOC").
 			Preload("Group.Services.Connection.TunnelEndPointRouterIP").
-			Preload("Group.Services.ServiceTemplate").
 			Preload("Group.Services.JPNICAdmin").
 			Preload("Group.Services.JPNICTech").Find(&userStruct).Error
 	} else if base == user.GID { //GroupID

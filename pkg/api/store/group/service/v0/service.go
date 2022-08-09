@@ -114,47 +114,39 @@ func Get(base int, data *core.Service) service.ResultDatabase {
 	var serviceStruct []core.Service
 
 	if base == service.ID { //ID
-		err = db.Preload("ServiceTemplate").
-			Preload("IP").
+		err = db.Preload("IP").
 			Preload("IP.Plan").
 			Preload("Connection").
-			Preload("Connection.ConnectionTemplate").
 			Preload("Connection.NOC").
 			Preload("Connection.BGPRouter").
 			Preload("Connection.TunnelEndPointRouterIP").
-			Preload("ServiceTemplate").
 			Preload("JPNICAdmin").
 			Preload("JPNICTech").
 			Preload("Group").
 			First(&serviceStruct, data.ID).Error
 	} else if base == service.Org { //Mail
-		err = db.Preload("ServiceTemplate").
-			Preload("IP").
+		err = db.Preload("IP").
 			Preload("Connection").
 			Preload("JPNICAdmin").
 			Preload("JPNICTech").
 			Where("org = ?", data.Org).Find(&serviceStruct).Error
 	} else if base == service.GID {
-		err = db.Preload("ServiceTemplate").
-			Preload("IP").
+		err = db.Preload("IP").
 			Preload("Connection").
 			Preload("JPNICAdmin").
 			Preload("JPNICTech").
 			Where("group_id = ?", data.GroupID).Find(&serviceStruct).Error
 	} else if base == service.GIDAndAddAllow {
-		err = db.Preload("ServiceTemplate").
-			Where("group_id = ? AND add_allow = ?", data.GroupID, true).Find(&serviceStruct).Error
+		err = db.Where("group_id = ? AND add_allow = ?", data.GroupID, true).Find(&serviceStruct).Error
 	} else if base == service.SearchNewNumber {
 		err = db.Where("group_id = ?", data.GroupID).Find(&serviceStruct).Error
 	} else if base == service.Open {
 		err = db.Where("group_id = ? AND open = ?", data.GroupID, true).
 			Preload("IP", "open = ?", true).
 			Preload("Connection", "open = ?", true).
-			Preload("Connection.ConnectionTemplate").
 			Preload("Connection.NOC").
 			Preload("Connection.BGPRouter").
 			Preload("Connection.TunnelEndPointRouterIP").
-			Preload("ServiceTemplate").
 			Preload("JPNICAdmin").
 			Preload("JPNICTech").
 			Find(&serviceStruct).Error
@@ -181,11 +173,9 @@ func GetAll() service.ResultDatabase {
 	var services []core.Service
 	err = db.Preload("IP").
 		Preload("Connection").
-		Preload("Connection.ConnectionTemplate").
 		Preload("Connection.NOC").
 		Preload("Connection.BGPRouter").
 		Preload("Connection.TunnelEndPointRouterIP").
-		Preload("ServiceTemplate").
 		Preload("JPNICAdmin").
 		Preload("JPNICTech").
 		Find(&services).Error
