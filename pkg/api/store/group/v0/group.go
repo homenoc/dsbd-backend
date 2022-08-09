@@ -100,24 +100,17 @@ func Get(base int, data *core.Group) group.ResultDatabase {
 	var groupStruct []core.Group
 
 	if base == group.ID { //ID
-		err = db.Preload("PaymentMembershipTemplate").
-			Preload("Users").
+		err = db.Preload("Users").
 			Preload("Services").
 			Preload("Tickets").
 			Preload("Memos").
-			Preload("PaymentCouponTemplate").
 			Preload("Services.IP").
 			Preload("Services.IP.Plan").
 			Preload("Services.Connection").
-			Preload("Services.Connection.NTTTemplate").
-			Preload("Services.Connection.ConnectionTemplate").
 			Preload("Services.Connection.NOC").
 			Preload("Services.Connection.BGPRouter").
-			Preload("Services.Connection.IPv4RouteTemplate").
-			Preload("Services.Connection.IPv6RouteTemplate").
 			Preload("Services.Connection.BGPRouter.NOC").
 			Preload("Services.Connection.TunnelEndPointRouterIP").
-			Preload("Services.ServiceTemplate").
 			Preload("Services.JPNICAdmin").
 			Preload("Services.JPNICTech").
 			First(&groupStruct, data.ID).Error
