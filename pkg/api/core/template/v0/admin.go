@@ -2,6 +2,7 @@ package v0
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	template "github.com/homenoc/dsbd-backend/pkg/api/core/template"
@@ -66,5 +67,11 @@ func GetByAdmin(c *gin.Context) {
 		Group:                     resultGroup.Group,
 		PaymentMembershipTemplate: config.Conf.Template.Membership,
 		MailTemplate:              config.Conf.Template.Mail,
+		MemberType: []core.ConstantMembership{
+			core.MemberTypeStandard,
+			core.MemberTypeStudent,
+			core.MemberTypeCommittee,
+			core.MemberTypeDisable,
+		},
 	})
 }

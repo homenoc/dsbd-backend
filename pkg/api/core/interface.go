@@ -5,10 +5,6 @@ import (
 	"time"
 )
 
-// Payment Type
-const PaymentMembership = 1
-const PaymentDonate = 2
-
 type User struct {
 	gorm.Model
 	Tokens        []*Token  `json:"tokens"`
@@ -47,7 +43,6 @@ type Group struct {
 	Memos                []Memo     `json:"memos"`
 	StripeCustomerID     *string    `json:"stripe_customer_id"`
 	StripeSubscriptionID *string    `json:"stripe_subscription_id"`
-	CouponID             *string    `json:"coupon_id"`
 	Agree                *bool      `json:"agree"`
 	Question             string     `json:"question" gorm:"size:10000"`
 	Org                  string     `json:"org"`
@@ -58,8 +53,9 @@ type Group struct {
 	Tel                  string     `json:"tel"`
 	Country              string     `json:"country"`
 	Contract             string     `json:"contract"`
+	CouponID             *string    `json:"coupon_id"`
+	MemberType           uint       `json:"member_type"`
 	MemberExpired        *time.Time `json:"member_expired"`
-	Student              *bool      `json:"student"`
 	Comment              string     `json:"comment"`
 	Pass                 *bool      `json:"pass"`
 	ExpiredStatus        *uint      `json:"expired_status"`

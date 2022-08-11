@@ -66,7 +66,7 @@ func Get(c *gin.Context) {
 
 		resultGroup = info.Group{
 			ID:                        authResult.User.Group.ID,
-			Student:                   authResult.User.Group.Student,
+			Student:                   &[]bool{authResult.User.Group.MemberType == core.MemberTypeStudent.ID}[0],
 			Pass:                      authResult.User.Group.Pass,
 			ExpiredStatus:             authResult.User.Group.ExpiredStatus,
 			MemberInfo:                membershipInfo,
