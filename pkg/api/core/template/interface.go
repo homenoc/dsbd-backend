@@ -47,4 +47,5 @@ type ResultAdmin struct {
 	Group                     []core.Group                  `json:"group"`
 	PaymentMembershipTemplate []config.MembershipTemplate   `json:"payment_membership_template"`
 	MailTemplate              []config.MailTemplate         `json:"mail_template"`
+	MemberType                []core.ConstantMembership     `json:"member_type"`
 }

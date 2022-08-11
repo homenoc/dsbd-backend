@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-//参照関連のエラーが出る可能性あるかもしれない
+// 参照関連のエラーが出る可能性あるかもしれない
 func Add(c *gin.Context) {
 	var input group.Input
 	userToken := c.Request.Header.Get("USER_TOKEN")
@@ -64,10 +64,12 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	var studentExpired *time.Time = nil
+	memberType := core.MemberTypeStandard.ID
+	var memberExpired *time.Time = nil
 	if *input.Student {
-		tmpStudentExpired, _ := time.Parse("2006-01-02", *input.StudentExpired)
-		studentExpired = &tmpStudentExpired
+		tmpMemberExpired, _ := time.Parse("2006-01-02", *input.StudentExpired)
+		memberExpired = &tmpMemberExpired
+		memberType = core.MemberTypeStudent.ID
 	}
 
 	// added customer (stripe)
@@ -94,8 +96,8 @@ func Add(c *gin.Context) {
 		Country:          input.Country,
 		ExpiredStatus:    &[]uint{0}[0],
 		Contract:         input.Contract,
-		Student:          input.Student,
-		MemberExpired:    studentExpired,
+		MemberType:       memberType,
+		MemberExpired:    memberExpired,
 		Pass:             &[]bool{false}[0],
 		AddAllow:         &[]bool{true}[0],
 	}
