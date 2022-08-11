@@ -112,6 +112,6 @@ func GetAll() ([]core.Payment, error) {
 	}
 	defer dbSQL.Close()
 
-	err = db.Preload("User").Preload("Group").Find(&payments).Error
+	err = db.Preload("Group").Find(&payments).Error
 	return payments, err
 }
