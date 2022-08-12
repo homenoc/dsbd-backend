@@ -24,6 +24,7 @@ const (
 type Input struct {
 	ConnectionType    string `json:"connection_type"`
 	ConnectionComment string `json:"connection_comment"` // ServiceがETCの時や補足説明で必要
+	PreferredAP       string `json:"preferred_ap"`
 	NTT               string `json:"ntt"`
 	Address           string `json:"address"`
 	IPv4Route         string `json:"ipv4_route"`

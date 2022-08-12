@@ -67,6 +67,7 @@ func GetByAdmin(c *gin.Context) {
 		Group:                     resultGroup.Group,
 		PaymentMembershipTemplate: config.Conf.Template.Membership,
 		MailTemplate:              config.Conf.Template.Mail,
+		PreferredAP:               config.Conf.Template.PreferredAP,
 		MemberType: []core.ConstantMembership{
 			core.MemberTypeStandard,
 			core.MemberTypeStudent,

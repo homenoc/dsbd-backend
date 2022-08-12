@@ -79,6 +79,14 @@ func Add(c *gin.Context) {
 		return
 	}
 
+	// check preferredAP
+	err = config.CheckIncludePreferredAPTemplate(input.PreferredAP)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	// check NTT (internet)
 	if connectionTemplate.NeedInternet {
 		err = config.CheckIncludeNTTTemplate(input.NTT)
 		if err != nil {
@@ -196,6 +204,7 @@ func Add(c *gin.Context) {
 		IPv4Route:                input.IPv4Route,
 		IPv6Route:                input.IPv6Route,
 		NTT:                      input.NTT,
+		PreferredAP:              input.PreferredAP,
 		NOCID:                    NOCID,
 		BGPRouterID:              nil,
 		TunnelEndPointRouterIPID: nil,

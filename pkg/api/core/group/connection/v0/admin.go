@@ -65,6 +65,13 @@ func AddByAdmin(c *gin.Context) {
 		return
 	}
 
+	// check preferredAP
+	err = config.CheckIncludePreferredAPTemplate(input.PreferredAP)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
 	resultNOC := dbNOC.Get(noc.ID, &core.NOC{Model: gorm.Model{ID: input.NOCID}})
 	if resultNOC.Err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: resultNOC.Err.Error()})
@@ -125,6 +132,7 @@ func AddByAdmin(c *gin.Context) {
 		IPv4Route:         input.IPv4Route,
 		IPv6Route:         input.IPv6Route,
 		NTT:               input.NTT,
+		PreferredAP:       input.PreferredAP,
 		NOCID:             &[]uint{input.NOCID}[0],
 		TermIP:            input.TermIP,
 		Address:           input.Address,

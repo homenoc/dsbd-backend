@@ -114,6 +114,7 @@ type Connection struct {
 	IPv6Route                string                 `json:"ipv6_route"`
 	NTT                      string                 `json:"ntt"`
 	NOCID                    *uint                  `json:"noc_id"`
+	PreferredAP              string                 `json:"preferred_ap"`
 	TermIP                   string                 `json:"term_ip"`
 	Monitor                  *bool                  `json:"monitor"`
 	Address                  string                 `json:"address"` //都道府県　市町村
