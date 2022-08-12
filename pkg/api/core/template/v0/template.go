@@ -23,7 +23,7 @@ func Get(c *gin.Context) {
 
 	var resultService []config.ServiceTemplate
 	for _, serviceTemplate := range config.Conf.Template.Service {
-		if serviceTemplate.Hidden {
+		if !serviceTemplate.Hidden {
 			resultService = append(resultService, serviceTemplate)
 		}
 	}
