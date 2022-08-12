@@ -17,18 +17,15 @@ type Input struct {
 }
 
 type Result struct {
-	Services                  []config.ServiceTemplate      `json:"services"`
-	Connections               []config.ConnectionTemplate   `json:"connections"`
-	NTTs                      []string                      `json:"ntts"`
-	NOC                       []core.NOC                    `json:"nocs"`
-	BGPRouter                 []core.BGPRouter              `json:"bgp_router"`
-	TunnelEndPointRouter      []core.TunnelEndPointRouter   `json:"tunnel_endpoint_router"`
-	TunnelEndPointRouterIP    []core.TunnelEndPointRouterIP `json:"tunnel_endpoint_router_ip"`
-	IPv4                      []string                      `json:"ipv4"`
-	IPv6                      []string                      `json:"ipv6"`
-	IPv4Route                 []string                      `json:"ipv4_route"`
-	IPv6Route                 []string                      `json:"ipv6_route"`
-	PaymentMembershipTemplate []config.MembershipTemplate   `json:"payment_membership_template"`
+	Services                  []config.ServiceTemplate    `json:"services"`
+	Connections               []config.ConnectionTemplate `json:"connections"`
+	NTTs                      []string                    `json:"ntts"`
+	IPv4                      []string                    `json:"ipv4"`
+	IPv6                      []string                    `json:"ipv6"`
+	IPv4Route                 []string                    `json:"ipv4_route"`
+	IPv6Route                 []string                    `json:"ipv6_route"`
+	PreferredAP               []string                    `json:"preferred_ap"`
+	PaymentMembershipTemplate []config.MembershipTemplate `json:"payment_membership_template"`
 }
 
 type ResultAdmin struct {
@@ -43,6 +40,7 @@ type ResultAdmin struct {
 	IPv6                      []string                      `json:"ipv6"`
 	IPv4Route                 []string                      `json:"ipv4_route"`
 	IPv6Route                 []string                      `json:"ipv6_route"`
+	PreferredAP               []string                      `json:"preferred_ap"`
 	User                      []core.User                   `json:"user"`
 	Group                     []core.Group                  `json:"group"`
 	PaymentMembershipTemplate []config.MembershipTemplate   `json:"payment_membership_template"`

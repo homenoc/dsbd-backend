@@ -56,3 +56,13 @@ func CheckIncludeV6Template(data string) error {
 
 	return fmt.Errorf("v6 template is not found")
 }
+
+func CheckIncludePreferredAPTemplate(data string) error {
+	for _, preferredAP := range Conf.Template.PreferredAP {
+		if preferredAP == data {
+			return nil
+		}
+	}
+
+	return fmt.Errorf("preferredAP template is not found")
+}
