@@ -16,6 +16,7 @@ import (
 	"net/http"
 	"sort"
 	"strconv"
+	"time"
 )
 
 func Get(c *gin.Context) {
@@ -60,19 +61,50 @@ func Get(c *gin.Context) {
 
 	if authResult.User.GroupID != nil {
 		// Membership Info
-		membershipInfo := "一般会員"
-		membershipPlan := "未設定"
-		paid := false
+		membership, err := core.GetMembershipTypeID(authResult.User.Group.MemberType)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
+			return
+		}
+
+		// isExpired(課金確認)
+		isExpired := false
+		if authResult.User.Group.MemberType < 50 && authResult.User.Group.MemberExpired != nil {
+			jst, err := time.LoadLocation("Asia/Tokyo")
+			if err != nil {
+				panic(err)
+			}
+			nowJST := time.Now().In(jst)
+			if nowJST.Unix() > authResult.User.Group.MemberExpired.Add(time.Hour*24).Unix() {
+				isExpired = true
+			}
+		} else if authResult.User.Group.MemberType < 50 && authResult.User.Group.MemberExpired == nil {
+			isExpired = true
+		}
+
+		// isStripeID
+		isStripeID := true
+		if authResult.User.Group.StripeCustomerID == nil || *authResult.User.Group.StripeCustomerID == "" ||
+			authResult.User.Group.StripeSubscriptionID == nil || *authResult.User.Group.StripeSubscriptionID == "" {
+			isStripeID = false
+		}
+
+		// coupon
+		couponID := ""
+		if authResult.User.Group.CouponID != nil {
+			couponID = *authResult.User.Group.CouponID
+		}
 
 		resultGroup = info.Group{
-			ID:                        authResult.User.Group.ID,
-			Student:                   &[]bool{authResult.User.Group.MemberType == core.MemberTypeStudent.ID}[0],
-			Pass:                      authResult.User.Group.Pass,
-			ExpiredStatus:             authResult.User.Group.ExpiredStatus,
-			MemberInfo:                membershipInfo,
-			Paid:                      &paid,
-			PaymentMembershipTemplate: membershipPlan,
-			MemberExpired:             authResult.User.Group.MemberExpired,
+			ID:            authResult.User.Group.ID,
+			Pass:          authResult.User.Group.Pass,
+			ExpiredStatus: authResult.User.Group.ExpiredStatus,
+			IsExpired:     isExpired,
+			IsStripeID:    isStripeID,
+			MemberTypeID:  membership.ID,
+			MemberType:    membership.Name,
+			MemberExpired: authResult.User.Group.MemberExpired,
+			CouponID:      couponID,
 		}
 		if authResult.User.Level < 3 {
 			resultGroup.Agree = dbUserResult.User[0].Group.Agree

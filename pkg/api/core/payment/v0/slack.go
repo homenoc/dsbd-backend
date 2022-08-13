@@ -37,3 +37,25 @@ func noticePayment(baseKeyValue []string) {
 		},
 	))
 }
+
+func noticePaymentError(isAdmin bool, baseKeyValue []string) {
+	var title = "エラー"
+	if isAdmin {
+		title += " (管理者)"
+	} else {
+		title += " (ユーザ)"
+	}
+	var slackAttachField []slack.AttachmentField
+	for _, keyValue := range baseKeyValue {
+		splitKeyValue := strings.Split(keyValue, ":")
+		slackAttachField = append(slackAttachField, slack.AttachmentField{Title: splitKeyValue[0], Value: keyValue[len(splitKeyValue[0])+1:]})
+	}
+
+	notification.Notification.Slack.PostMessage(config.Conf.Slack.Channels.Payment, slack.MsgOptionAttachments(
+		slack.Attachment{
+			Color:  "danger",
+			Title:  title,
+			Fields: slackAttachField,
+		},
+	))
+}

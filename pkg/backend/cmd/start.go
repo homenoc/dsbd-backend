@@ -5,6 +5,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	"github.com/spf13/cobra"
+	"github.com/stripe/stripe-go/v73"
 	"log"
 )
 
@@ -31,6 +32,7 @@ var startUserCmd = &cobra.Command{
 		notification.NoticeLog("good", []string{
 			"Status: User側 API起動",
 		})
+		stripe.Key = config.Conf.Stripe.SecretKey
 
 		api.UserRestAPI()
 		log.Println("end")
@@ -53,6 +55,7 @@ var startAdminCmd = &cobra.Command{
 		notification.NoticeLog("good", []string{
 			"Status: Admin側 API起動",
 		})
+		stripe.Key = config.Conf.Stripe.SecretKey
 
 		api.AdminRestAPI()
 		log.Println("end")

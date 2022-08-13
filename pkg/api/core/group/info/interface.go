@@ -17,27 +17,26 @@ type User struct {
 }
 
 type Group struct {
-	ID                        uint       `json:"id"`
-	PaymentMembershipTemplate string     `json:"payment_membership_template"`
-	Agree                     *bool      `json:"agree"`
-	Question                  string     `json:"question"`
-	Org                       string     `json:"org"`
-	OrgEn                     string     `json:"org_en"`
-	PostCode                  string     `json:"postcode"`
-	Address                   string     `json:"address"`
-	AddressEn                 string     `json:"address_en"`
-	Tel                       string     `json:"tel"`
-	Country                   string     `json:"country"`
-	Contract                  string     `json:"contract"`
-	Paid                      *bool      `json:"paid"`
-	MemberInfo                string     `json:"member_info"`
-	MemberExpired             *time.Time `json:"member_expired"`
-	Student                   *bool      `json:"student"`
-	StudentExpired            *time.Time `json:"student_expired"`
-	Pass                      *bool      `json:"pass"`
-	Lock                      *bool      `json:"lock"`
-	ExpiredStatus             *uint      `json:"expired_status"`
-	AddAllow                  *bool      `json:"add_allow"`
+	ID            uint       `json:"id"`
+	Agree         *bool      `json:"agree"`
+	Question      string     `json:"question"`
+	Org           string     `json:"org"`
+	OrgEn         string     `json:"org_en"`
+	PostCode      string     `json:"postcode"`
+	Address       string     `json:"address"`
+	AddressEn     string     `json:"address_en"`
+	Tel           string     `json:"tel"`
+	Country       string     `json:"country"`
+	Contract      string     `json:"contract"`
+	CouponID      string     `json:"coupon_id"`
+	MemberTypeID  uint       `json:"member_type_id"`
+	MemberType    string     `json:"member_type"`
+	MemberExpired *time.Time `json:"member_expired"`
+	IsExpired     bool       `json:"is_expired"`
+	IsStripeID    bool       `json:"is_stripe_id"`
+	Pass          *bool      `json:"pass"`
+	ExpiredStatus *uint      `json:"expired_status"`
+	AddAllow      *bool      `json:"add_allow"`
 }
 
 type Notice struct {

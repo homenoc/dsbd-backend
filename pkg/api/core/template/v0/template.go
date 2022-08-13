@@ -28,14 +28,14 @@ func Get(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, template.Result{
-		Services:                  resultService,
-		Connections:               config.Conf.Template.Connection,
-		NTTs:                      config.Conf.Template.NTT,
-		IPv4:                      config.Conf.Template.V4,
-		IPv6:                      config.Conf.Template.V6,
-		IPv4Route:                 config.Conf.Template.V4Route,
-		IPv6Route:                 config.Conf.Template.V6Route,
-		PreferredAP:               config.Conf.Template.PreferredAP,
-		PaymentMembershipTemplate: config.Conf.Template.Membership,
+		Services:          resultService,
+		Connections:       config.Conf.Template.Connection,
+		NTTs:              config.Conf.Template.NTT,
+		IPv4:              config.Conf.Template.V4,
+		IPv6:              config.Conf.Template.V6,
+		IPv4Route:         config.Conf.Template.V4Route,
+		IPv6Route:         config.Conf.Template.V6Route,
+		PreferredAP:       config.Conf.Template.PreferredAP,
+		PaymentMembership: config.Conf.Template.Membership,
 	})
 }
