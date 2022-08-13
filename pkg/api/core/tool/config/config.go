@@ -32,13 +32,14 @@ type Controller struct {
 
 type User struct {
 	IP   string `json:"ip"`
-	Url  string `json:"url"`
 	Port int    `json:"port"`
+	Url  string `json:"url"`
 }
 
 type Admin struct {
 	IP        string    `json:"ip"`
 	Port      int       `json:"port"`
+	Url       string    `json:"url"`
 	AdminAuth AdminAuth `json:"auth"`
 }
 

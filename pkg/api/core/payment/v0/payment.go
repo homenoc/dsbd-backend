@@ -5,11 +5,16 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/payment"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
+	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	"github.com/stripe/stripe-go/v73"
 	billingSession "github.com/stripe/stripe-go/v73/billingportal/session"
 	"github.com/stripe/stripe-go/v73/checkout/session"
+	"github.com/stripe/stripe-go/v73/customer"
+	"gorm.io/gorm"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -40,15 +45,25 @@ func PostSubscribeGettingURL(c *gin.Context) {
 	}
 
 	// exist check: stripeCustomerID
-	if *resultAuth.User.Group.StripeCustomerID == "" {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: "stripe customer id not found..."})
-		return
-	}
-
-	// exist check: stripeCustomerID
-	if *resultAuth.User.Group.StripeCustomerID == "" {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: "stripe customer id not found..."})
-		return
+	if *resultAuth.User.Group.StripeCustomerID == "" || resultAuth.User.Group.StripeCustomerID == nil {
+		params := &stripe.CustomerParams{
+			Description: stripe.String("[" + strconv.Itoa(int(resultAuth.User.Group.ID)) + "] Org: " + resultAuth.User.Group.Org + "(" + resultAuth.User.Group.OrgEn + ")"),
+		}
+		cus, err := customer.New(params)
+		if err != nil {
+			noticePaymentError(false, []string{
+				"User: [" + strconv.Itoa(int(resultAuth.User.ID)) + "] " + resultAuth.User.Name,
+				"Group: [" + strconv.Itoa(int(resultAuth.User.Group.ID)) + "] " + resultAuth.User.Group.Org,
+				"Type: Create Customer", "Error: " + err.Error()},
+			)
+			log.Println("Error: " + err.Error())
+		}
+		err = dbGroup.Update(group.UpdateAll, core.Group{Model: gorm.Model{ID: resultAuth.User.Group.ID}, StripeCustomerID: &cus.ID})
+		noticePaymentLog(stripe.Event{
+			ID:   cus.ID,
+			Type: "stripe customer追加",
+		})
+		resultAuth.User.Group.StripeCustomerID = &cus.ID
 	}
 
 	date := time.Now()
@@ -62,13 +77,13 @@ func PostSubscribeGettingURL(c *gin.Context) {
 			},
 		},
 		SuccessURL: stripe.String(config.Conf.Controller.User.Url),
-		//CancelURL:  stripe.String("https://example.com/cancel"),
-		ExpiresAt: stripe.Int64(date.Add(time.Minute * 30).Unix()),
+		CancelURL:  stripe.String(config.Conf.Controller.User.Url),
+		ExpiresAt:  stripe.Int64(date.Add(time.Minute * 30).Unix()),
 		SubscriptionData: &stripe.CheckoutSessionSubscriptionDataParams{
 			Metadata: map[string]string{
 				"type":     "membership",
 				"group_id": strconv.Itoa(int(resultAuth.User.Group.ID)),
-				"name":     "Yuto Yoneda",
+				"name":     strconv.Itoa(int(resultAuth.User.ID)),
 				"log": "[" + strconv.Itoa(int(resultAuth.User.ID)) + "] " + resultAuth.User.Name +
 					"_[" + strconv.Itoa(int(resultAuth.User.Group.ID)) + "] " + resultAuth.User.Group.Org,
 			},
@@ -95,8 +110,14 @@ func GetBillingPortalURL(c *gin.Context) {
 		return
 	}
 
+	// exist check: stripeCustomerID
+	if *resultAuth.User.Group.StripeCustomerID == "" || resultAuth.User.Group.StripeCustomerID == nil {
+		c.JSON(http.StatusNotFound, common.Error{Error: "CustomerID is not found..."})
+		return
+	}
+
 	params := &stripe.BillingPortalSessionParams{
-		Customer:      stripe.String("cus_MBBRylUHxUQvVc"),
+		Customer:      stripe.String(*resultAuth.User.Group.StripeCustomerID),
 		Configuration: stripe.String(config.Conf.Stripe.MembershipConfiguration),
 		ReturnURL:     stripe.String(config.Conf.Controller.User.Url),
 	}

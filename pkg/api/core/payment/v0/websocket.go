@@ -6,10 +6,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
+	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	dbPayment "github.com/homenoc/dsbd-backend/pkg/api/store/payment/v0"
 	"github.com/stripe/stripe-go/v73"
 	"github.com/stripe/stripe-go/v73/webhook"
+	"gorm.io/gorm"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -19,8 +22,6 @@ import (
 )
 
 func GetStripeWebHook(c *gin.Context) {
-	stripe.Key = config.Conf.Stripe.SecretKey
-
 	const MaxBodyBytes = int64(65536)
 	body := http.MaxBytesReader(c.Writer, c.Request.Body, MaxBodyBytes)
 
@@ -32,7 +33,6 @@ func GetStripeWebHook(c *gin.Context) {
 
 	event := stripe.Event{}
 	if err := json.Unmarshal(payload, &event); err != nil {
-		fmt.Fprintf(os.Stderr, "⚠️  Webhook error while parsing basic request. %v\n", err.Error())
 		c.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
@@ -60,8 +60,9 @@ func GetStripeWebHook(c *gin.Context) {
 		}
 		dataType := event.Data.Object["metadata"].(map[string]interface{})["type"].(string)
 		name := event.Data.Object["metadata"].(map[string]interface{})["name"].(string)
-		groupID := event.Data.Object["metadata"].(map[string]interface{})["group_id"].(string)
-		etc := "GroupID: " + groupID + ",  UserName: " + name
+		groupIDStr := event.Data.Object["metadata"].(map[string]interface{})["group_id"].(string)
+		etc := "GroupID: " + groupIDStr + ",  UserName: " + name
+		groupID, _ := strconv.Atoi(groupIDStr)
 
 		// stripe standard data
 		amountTotal := event.Data.Object["amount_total"].(float64)
@@ -76,7 +77,14 @@ func GetStripeWebHook(c *gin.Context) {
 			})
 			etc += "UserName: " + name
 		} else if dataType == "membership" {
-			etc += "GroupID: " + groupID
+			dbPayment.Create(&core.Payment{
+				Type:            core.PaymentMembership,
+				GroupID:         &[]uint{uint(groupID)}[0],
+				Refund:          &[]bool{false}[0],
+				PaymentIntentID: paymentIntent,
+				Fee:             uint(amountTotal),
+			})
+			etc += "GroupID: " + groupIDStr
 			break
 		}
 
@@ -91,68 +99,88 @@ func GetStripeWebHook(c *gin.Context) {
 		noticePayment(field)
 	case "customer.subscription.created":
 		// meta
-		var dataType, etc string
+		var dataType, groupIDStr, etc string
+		var groupID int
 		_, ok := event.Data.Object["metadata"].(map[string]interface{})["type"]
 		if !ok {
 			break
 		} else {
 			dataType = event.Data.Object["metadata"].(map[string]interface{})["type"].(string)
 			name := event.Data.Object["metadata"].(map[string]interface{})["name"].(string)
-			groupID := event.Data.Object["metadata"].(map[string]interface{})["group_id"].(string)
-			etc = "GroupID: " + groupID + ",  UserName: " + name
+			groupIDStr = event.Data.Object["metadata"].(map[string]interface{})["group_id"].(string)
+			etc = "GroupID: " + groupIDStr + ",  UserName: " + name
 		}
 
-		// stripe standard data
-		customer := event.Data.Object["customer"].(string)
-		planID := event.Data.Object["plan"].(map[string]interface{})["id"].(string)
-		amount := event.Data.Object["plan"].(map[string]interface{})["amount"].(float64)
-		interval := event.Data.Object["plan"].(map[string]interface{})["interval"].(string)
-		periodStart := event.Data.Object["current_period_start"].(float64)
-		periodEnd := event.Data.Object["current_period_end"].(float64)
-		periodStartTime := time.Unix(int64(periodStart), 0)
-		periodEndTime := time.Unix(int64(periodEnd), 0)
+		if dataType == "membership" {
+			groupID, _ = strconv.Atoi(groupIDStr)
 
-		// slack notify(payment log)
-		field := []string{
-			"Type:" + dataType + "(" + event.Type + ")",
-			"ID:" + event.ID,
-			"CustomerID:" + customer,
-			"PlanID:" + planID,
-			"Start-EndDate:" + fmt.Sprintf(periodStartTime.Format("2006-01-02")+" - "+periodEndTime.Format("2006-01-02")),
-			"Etc:" + etc,
-			"Fee:" + strconv.Itoa(int(uint(amount))) + " 円 (" + interval + ")",
+			// stripe standard data
+			customer := event.Data.Object["customer"].(string)
+			sub := event.Data.Object["id"].(string)
+			planID := event.Data.Object["plan"].(map[string]interface{})["id"].(string)
+			amount := event.Data.Object["plan"].(map[string]interface{})["amount"].(float64)
+			interval := event.Data.Object["plan"].(map[string]interface{})["interval"].(string)
+			periodStart := event.Data.Object["current_period_start"].(float64)
+			periodEnd := event.Data.Object["current_period_end"].(float64)
+			periodStartTime := time.Unix(int64(periodStart), 0)
+			periodEndTime := time.Unix(int64(periodEnd), 0)
+			jst, _ := time.LoadLocation(config.Conf.Controller.TimeZone)
+			timeDate := time.Date(periodEndTime.Year(), periodEndTime.Month(), periodEndTime.Day(), 0, 0, 0, 0, jst)
+			if groupID != 0 {
+				err = dbGroup.Update(group.UpdateAll, core.Group{Model: gorm.Model{ID: uint(groupID)}, StripeSubscriptionID: &sub, MemberExpired: &timeDate})
+			}
+			// slack notify(payment log)
+			field := []string{
+				"Type:" + dataType + "(" + event.Type + ")",
+				"ID:" + event.ID,
+				"CustomerID:" + customer,
+				"PlanID:" + planID,
+				"Start-EndDate:" + fmt.Sprintf(periodStartTime.Format("2006-01-02")+" - "+periodEndTime.Format("2006-01-02")),
+				"Etc:" + etc,
+				"Fee:" + strconv.Itoa(int(uint(amount))) + " 円 (" + interval + ")",
+			}
+			noticePayment(field)
 		}
-		noticePayment(field)
 	case "customer.subscription.updated":
+		var groupID int
+
 		// meta
 		dataType := event.Data.Object["metadata"].(map[string]interface{})["type"].(string)
 		name := event.Data.Object["metadata"].(map[string]interface{})["name"].(string)
-		groupID := event.Data.Object["metadata"].(map[string]interface{})["group_id"].(string)
-		etc := "GroupID: " + groupID + ",  UserName: " + name
+		groupIDStr := event.Data.Object["metadata"].(map[string]interface{})["group_id"].(string)
+		etc := "GroupID: " + groupIDStr + ",  UserName: " + name
+		if dataType == "membership" {
+			groupID, _ = strconv.Atoi(groupIDStr)
 
-		// stripe standard data
-		customer := event.Data.Object["customer"].(string)
-		planID := event.Data.Object["plan"].(map[string]interface{})["id"].(string)
-		amount := event.Data.Object["plan"].(map[string]interface{})["amount"].(float64)
-		interval := event.Data.Object["plan"].(map[string]interface{})["interval"].(string)
-		periodStart := event.Data.Object["current_period_start"].(float64)
-		periodEnd := event.Data.Object["current_period_end"].(float64)
-		periodStartTime := time.Unix(int64(periodStart), 0)
-		periodEndTime := time.Unix(int64(periodEnd), 0)
-		status := event.Data.Object["status"].(string)
+			// stripe standard data
+			customer := event.Data.Object["customer"].(string)
+			planID := event.Data.Object["plan"].(map[string]interface{})["id"].(string)
+			amount := event.Data.Object["plan"].(map[string]interface{})["amount"].(float64)
+			interval := event.Data.Object["plan"].(map[string]interface{})["interval"].(string)
+			periodStart := event.Data.Object["current_period_start"].(float64)
+			periodEnd := event.Data.Object["current_period_end"].(float64)
+			periodStartTime := time.Unix(int64(periodStart), 0)
+			periodEndTime := time.Unix(int64(periodEnd), 0)
+			status := event.Data.Object["status"].(string)
+			jst, _ := time.LoadLocation(config.Conf.Controller.TimeZone)
+			timeDate := time.Date(periodEndTime.Year(), periodEndTime.Month(), periodEndTime.Day(), 0, 0, 0, 0, jst)
+			if groupID != 0 {
+				err = dbGroup.Update(group.UpdateAll, core.Group{Model: gorm.Model{ID: uint(groupID)}, MemberExpired: &timeDate})
+			}
 
-		// slack notify(payment log)
-		field := []string{
-			"Type:" + dataType + "(" + event.Type + ")",
-			"ID:" + event.ID,
-			"CustomerID:" + customer,
-			"PlanID:" + planID,
-			"Start-EndDate:" + fmt.Sprintf(periodStartTime.Format("2006-01-02")+" - "+periodEndTime.Format("2006-01-02")),
-			"Status:" + status,
-			"Etc:" + etc,
-			"Fee:" + strconv.Itoa(int(uint(amount))) + " 円 (" + interval + ")",
+			// slack notify(payment log)
+			field := []string{
+				"Type:" + dataType + "(" + event.Type + ")",
+				"ID:" + event.ID,
+				"CustomerID:" + customer,
+				"PlanID:" + planID,
+				"Start-EndDate:" + fmt.Sprintf(periodStartTime.Format("2006-01-02")+" - "+periodEndTime.Format("2006-01-02")),
+				"Status:" + status,
+				"Etc:" + etc,
+				"Fee:" + strconv.Itoa(int(uint(amount))) + " 円 (" + interval + ")",
+			}
+			noticePayment(field)
 		}
-		noticePayment(field)
 	case "customer.subscription.deleted":
 		// meta
 		dataType := event.Data.Object["metadata"].(map[string]interface{})["type"].(string)

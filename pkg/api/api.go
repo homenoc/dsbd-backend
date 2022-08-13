@@ -85,7 +85,6 @@ func AdminRestAPI() {
 			v1.DELETE("/group", group.DeleteByAdmin)
 			// Group Update
 			v1.PUT("/group/:id", group.UpdateByAdmin)
-			v1.DELETE("/group/:id/subscription", group.CancelSubscription)
 			v1.GET("/group", group.GetAllByAdmin)
 			v1.GET("/group/:id", group.GetByAdmin)
 
@@ -168,7 +167,8 @@ func AdminRestAPI() {
 			//
 			// Payment
 			//
-			//v1.POST("/group/:id/service", service.AddByAdmin)
+			v1.POST("/group/:id/payment/subscribe", payment.PostAdminSubscribeGettingURL)
+			v1.GET("/group/:id/payment", payment.GetAdminBillingPortalURL)
 			// Delete
 			v1.DELETE("/payment/:id", payment.DeleteByAdmin)
 			v1.POST("/payment/:id/refund", payment.RefundByAdmin)

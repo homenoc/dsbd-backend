@@ -10,7 +10,6 @@ require (
 	github.com/slack-go/slack v0.11.2
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/viper v1.12.0
-	github.com/stripe/stripe-go/v72 v72.122.0
 	github.com/stripe/stripe-go/v73 v73.0.1
 	gorm.io/driver/mysql v1.3.5
 	gorm.io/gorm v1.23.8
