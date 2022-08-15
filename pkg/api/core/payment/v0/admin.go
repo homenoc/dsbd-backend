@@ -90,8 +90,8 @@ func PostAdminSubscribeGettingURL(c *gin.Context) {
 				Quantity: stripe.Int64(1),
 			},
 		},
-		SuccessURL: stripe.String(config.Conf.Controller.Admin.Url),
-		CancelURL:  stripe.String(config.Conf.Controller.Admin.Url),
+		SuccessURL: stripe.String(config.Conf.Controller.Admin.ReturnURL),
+		CancelURL:  stripe.String(config.Conf.Controller.Admin.ReturnURL),
 		ExpiresAt:  stripe.Int64(date.Add(time.Minute * 30).Unix()),
 		SubscriptionData: &stripe.CheckoutSessionSubscriptionDataParams{
 			Metadata: map[string]string{
@@ -151,7 +151,7 @@ func GetAdminBillingPortalURL(c *gin.Context) {
 	params := &stripe.BillingPortalSessionParams{
 		Customer:      stripe.String(*result.Group[0].StripeCustomerID),
 		Configuration: stripe.String(config.Conf.Stripe.MembershipConfiguration),
-		ReturnURL:     stripe.String(config.Conf.Controller.Admin.Url),
+		ReturnURL:     stripe.String(config.Conf.Controller.Admin.ReturnURL),
 	}
 
 	s, err := billingSession.New(params)
