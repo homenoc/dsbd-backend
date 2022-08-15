@@ -7,16 +7,13 @@ import (
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/notice"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/payment"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
-	dbPayment "github.com/homenoc/dsbd-backend/pkg/api/store/payment/v0"
 	"github.com/stripe/stripe-go/v73"
 	billingSession "github.com/stripe/stripe-go/v73/billingportal/session"
 	"github.com/stripe/stripe-go/v73/checkout/session"
 	"github.com/stripe/stripe-go/v73/customer"
-	"github.com/stripe/stripe-go/v73/refund"
 	"gorm.io/gorm"
 	"log"
 	"net/http"
@@ -165,87 +162,4 @@ func GetAdminBillingPortalURL(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, map[string]string{"url": s.URL})
-}
-
-func DeleteByAdmin(c *gin.Context) {
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
-
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	if err = dbPayment.Delete(&core.Payment{Model: gorm.Model{ID: uint(id)}}); err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, notice.Result{})
-}
-
-func GetByAdmin(c *gin.Context) {
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	result, err := dbPayment.Get(payment.ID, core.Payment{Model: gorm.Model{ID: uint(id)}})
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, payment.ResultByAdmin{Payment: result})
-}
-
-func GetAllByAdmin(c *gin.Context) {
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
-
-	if result, err := dbPayment.GetAll(); err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
-	} else {
-		c.JSON(http.StatusOK, payment.ResultByAdmin{Payment: result})
-	}
-}
-
-func RefundByAdmin(c *gin.Context) {
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
-
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	result, err := dbPayment.Get(payment.ID, core.Payment{Model: gorm.Model{ID: uint(id)}})
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
-		return
-	}
-
-	_, err = refund.New(&stripe.RefundParams{
-		PaymentIntent: stripe.String(result[0].PaymentIntentID),
-	})
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, common.Result{})
 }
