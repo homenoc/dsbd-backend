@@ -9,7 +9,6 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
-	dbPayment "github.com/homenoc/dsbd-backend/pkg/api/store/payment/v0"
 	"github.com/stripe/stripe-go/v73"
 	"github.com/stripe/stripe-go/v73/webhook"
 	"gorm.io/gorm"
@@ -62,28 +61,13 @@ func GetStripeWebHook(c *gin.Context) {
 		name := event.Data.Object["metadata"].(map[string]interface{})["name"].(string)
 		groupIDStr := event.Data.Object["metadata"].(map[string]interface{})["group_id"].(string)
 		etc := "GroupID: " + groupIDStr + ",  UserName: " + name
-		groupID, _ := strconv.Atoi(groupIDStr)
 
 		// stripe standard data
 		amountTotal := event.Data.Object["amount_total"].(float64)
 		paymentIntent := event.Data.Object["payment_intent"].(string)
 		if dataType == "donate" {
-			dbPayment.Create(&core.Payment{
-				Type:            core.PaymentDonate,
-				GroupID:         nil,
-				Refund:          &[]bool{false}[0],
-				PaymentIntentID: paymentIntent,
-				Fee:             uint(amountTotal),
-			})
 			etc += "UserName: " + name
 		} else if dataType == "membership" {
-			dbPayment.Create(&core.Payment{
-				Type:            core.PaymentMembership,
-				GroupID:         &[]uint{uint(groupID)}[0],
-				Refund:          &[]bool{false}[0],
-				PaymentIntentID: paymentIntent,
-				Fee:             uint(amountTotal),
-			})
 			etc += "GroupID: " + groupIDStr
 			break
 		}

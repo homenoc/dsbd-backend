@@ -169,13 +169,6 @@ func AdminRestAPI() {
 			//
 			v1.POST("/group/:id/payment/subscribe", payment.PostAdminSubscribeGettingURL)
 			v1.GET("/group/:id/payment", payment.GetAdminBillingPortalURL)
-			// Delete
-			v1.DELETE("/payment/:id", payment.DeleteByAdmin)
-			v1.POST("/payment/:id/refund", payment.RefundByAdmin)
-			// Update
-			//v1.PUT("/service/:id", service.UpdateByAdmin)
-			v1.GET("/payment", payment.GetAllByAdmin)
-			//v1.GET("/service/:id", service.GetByAdmin)
 
 			//
 			// JPNIC ByAdmin
