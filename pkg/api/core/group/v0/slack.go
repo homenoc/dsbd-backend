@@ -36,7 +36,10 @@ func noticeAddGroup(user core.User, group group.Input) {
 			Type: slack.MBTSection,
 			Text: &slack.TextBlockObject{
 				Type: "mrkdwn",
-				Text: "*Question*\n" + group.Question + "\n*Country*\n" + group.Country + "\n*Contract*\n" + group.Contract,
+				Text: "*追加状況*\nQuestion: " + group.Question +
+					"\nOrg: " + group.Org + " (" + group.OrgEn + ")" +
+					"\nCountry: " + group.Country +
+					"\nContract: " + group.Contract,
 			},
 		},
 		slack.NewDividerBlock(),
@@ -54,7 +57,6 @@ func noticeByAdmin(before, after core.Group) {
 		&slack.SectionBlock{
 			Type: slack.MBTSection,
 			Fields: []*slack.TextBlockObject{
-				{Type: "mrkdwn", Text: "*Group情報更新*"},
 				{Type: "mrkdwn", Text: "*申請者* 管理者"},
 			},
 		},
@@ -77,65 +79,6 @@ func noticeByAdmin(before, after core.Group) {
 	))
 }
 
-func noticeCancelSubscriptionByAdmin(group core.Group) {
-	// 審査ステータスのSlack通知
-	notification.Notification.Slack.PostMessage(config.Conf.Slack.Channels.Main, slack.MsgOptionBlocks(
-		slack.NewDividerBlock(),
-		&slack.SectionBlock{
-			Type: slack.MBTHeader,
-			Text: &slack.TextBlockObject{Type: "plain_text", Text: "Cancel Subscription"},
-		},
-		&slack.SectionBlock{
-			Type: slack.MBTSection,
-			Fields: []*slack.TextBlockObject{
-				{Type: "mrkdwn", Text: "*申請者* 管理者"},
-			},
-		},
-		slack.NewDividerBlock(),
-		&slack.SectionBlock{
-			Type: slack.MBTSection,
-			Fields: []*slack.TextBlockObject{
-				{Type: "mrkdwn", Text: "*GroupID* " + strconv.Itoa(int(group.ID)) + ":" + group.Org},
-			},
-		},
-		slack.NewDividerBlock(),
-	))
-}
-
-func changeText(before core.Group, after group.Input) string {
-	data := ""
-
-	if after.Org != "" && after.Org != before.Org {
-		data += "Org: " + before.Org + "=>" + after.Org + "\n"
-	}
-
-	if after.OrgEn != "" && after.OrgEn != before.OrgEn {
-		data += "Org(En): " + before.OrgEn + "=>" + after.OrgEn + "\n"
-	}
-
-	if after.PostCode != "" && after.PostCode != before.PostCode {
-		data += "PostCode: " + before.PostCode + "=>" + after.PostCode + "\n"
-	}
-
-	if after.Address != "" && after.Address != before.Address {
-		data += "Address: " + before.Address + "=>" + after.Address + "\n"
-	}
-
-	if after.AddressEn != "" && after.AddressEn != before.AddressEn {
-		data += "Address(En): " + before.AddressEn + "=>" + after.AddressEn + "\n"
-	}
-
-	if after.Tel != "" && after.Tel != before.Tel {
-		data += "Tel: " + before.Tel + "=>" + after.Tel + "\n"
-	}
-
-	if after.Country != "" && after.Country != before.Country {
-		data += "Country: " + before.Country + "=>" + after.Country + "\n"
-	}
-
-	return data
-}
-
 func changeTextByAdmin(before, after core.Group) string {
 	data := ""
 
@@ -146,6 +89,30 @@ func changeTextByAdmin(before, after core.Group) string {
 			} else {
 				data += "サービス新規申請: 許可 => 禁止\n"
 			}
+		}
+	}
+
+	if before.MemberType != after.MemberType {
+		beforeMemberType, _ := core.GetMembershipTypeID(before.MemberType)
+		afterMemberType, _ := core.GetMembershipTypeID(after.MemberType)
+		data += "MemberType: " + beforeMemberType.Name + " => " + afterMemberType.Name + "\n"
+	}
+
+	if after.StripeCustomerID != nil {
+		if *before.StripeCustomerID != *after.StripeCustomerID {
+			data += "StripeCustomerID: " + *before.StripeCustomerID + " => " + *after.StripeCustomerID + "\n"
+		}
+	}
+
+	if after.StripeSubscriptionID != nil {
+		if *before.StripeSubscriptionID != *after.StripeSubscriptionID {
+			data += "StripeSubscriptionID: " + *before.StripeSubscriptionID + " => " + *after.StripeSubscriptionID + "\n"
+		}
+	}
+
+	if after.CouponID != nil {
+		if *before.CouponID != *after.CouponID {
+			data += "CouponID: " + *before.CouponID + " => " + *after.CouponID + "\n"
 		}
 	}
 
