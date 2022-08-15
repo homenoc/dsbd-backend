@@ -45,7 +45,6 @@ func InitDB() {
 		&core.Chat{},
 		&core.Token{},
 		&core.Notice{},
-		&core.Payment{},
 	)
 	log.Println(result)
 }

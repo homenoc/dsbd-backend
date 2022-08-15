@@ -22,22 +22,9 @@ type User struct {
 	MailToken     string    `json:"mail_token"`
 }
 
-type Payment struct {
-	gorm.Model
-	Group           *Group `json:"group"`
-	GroupID         *uint  `json:"group_id"`
-	PaymentIntentID string `json:"payment_intent_id"`
-	Type            uint   `json:"type"`
-	Paid            *bool  `json:"paid"`
-	Refund          *bool  `json:"refund"`
-	Fee             uint   `json:"fee"`
-	Comment         string `json:"comment"`
-}
-
 type Group struct {
 	gorm.Model
 	Users                []User     `json:"users"`
-	Payment              Payment    `json:"payment_membership"`
 	Services             []Service  `json:"services"`
 	Tickets              []Ticket   `json:"tickets"`
 	Memos                []Memo     `json:"memos"`
