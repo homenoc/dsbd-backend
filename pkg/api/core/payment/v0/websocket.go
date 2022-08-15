@@ -67,6 +67,8 @@ func GetStripeWebHook(c *gin.Context) {
 		paymentIntent := event.Data.Object["payment_intent"].(string)
 		if dataType == "donate" {
 			etc += "UserName: " + name
+		} else if dataType == "donate_membership" {
+			etc += "UserName: " + name
 		} else if dataType == "membership" {
 			etc += "GroupID: " + groupIDStr
 			break
@@ -122,6 +124,26 @@ func GetStripeWebHook(c *gin.Context) {
 				"Start-EndDate:" + fmt.Sprintf(periodStartTime.Format("2006-01-02")+" - "+periodEndTime.Format("2006-01-02")),
 				"Etc:" + etc,
 				"Fee:" + strconv.Itoa(int(uint(amount))) + " 円 (" + interval + ")",
+			}
+			noticePayment(field)
+		} else if dataType == "donate_membership" {
+			customer := event.Data.Object["customer"].(string)
+			planID := event.Data.Object["plan"].(map[string]interface{})["id"].(string)
+			amount := event.Data.Object["plan"].(map[string]interface{})["amount"].(float64)
+			periodStart := event.Data.Object["current_period_start"].(float64)
+			periodEnd := event.Data.Object["current_period_end"].(float64)
+			periodStartTime := time.Unix(int64(periodStart), 0)
+			periodEndTime := time.Unix(int64(periodEnd), 0)
+
+			// slack notify(payment log)
+			field := []string{
+				"Type: [寄付]" + dataType + "(" + event.Type + ")",
+				"ID:" + event.ID,
+				"CustomerID:" + customer,
+				"PlanID:" + planID,
+				"Start-EndDate:" + fmt.Sprintf(periodStartTime.Format("2006-01-02")+" - "+periodEndTime.Format("2006-01-02")),
+				"Etc:" + etc,
+				"Fee:" + strconv.Itoa(int(uint(amount))) + " 円",
 			}
 			noticePayment(field)
 		}
