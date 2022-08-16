@@ -13,6 +13,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 func AddByAdmin(c *gin.Context) {
@@ -99,15 +100,25 @@ func AddByAdmin(c *gin.Context) {
 		return
 	}
 
+	startDate, err := time.Parse("2006-01-02", input.StartDate)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: "invalid data: start date"})
+		return
+	}
+	var endDate *time.Time = nil
+	if input.EndDate != nil {
+		tmpEndDate, err := time.Parse("2006-01-02", *input.EndDate)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, common.Error{Error: "invalid data: end date"})
+			return
+		}
+		endDate = &tmpEndDate
+	}
+
 	// pattern check: IP Transit
 	if resultServiceTemplate.NeedGlobalAS {
 		if input.ASN == 0 {
 			c.JSON(http.StatusBadRequest, common.Error{Error: "no data: ASN"})
-			return
-		}
-		grpIP, err = ipProcess(true, false, input.IP)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 			return
 		}
 	}
@@ -145,6 +156,8 @@ func AddByAdmin(c *gin.Context) {
 		AveDownstream:  input.AveDownstream,
 		MaxDownstream:  input.MaxDownstream,
 		MaxBandWidthAS: input.MaxBandWidthAS,
+		StartDate:      startDate,
+		EndDate:        endDate,
 		ASN:            &[]uint{input.ASN}[0],
 		IP:             grpIP,
 		JPNICAdmin:     input.JPNICAdmin,

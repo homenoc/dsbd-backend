@@ -130,11 +130,6 @@ func Add(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, common.Error{Error: "no data: ASN"})
 			return
 		}
-		grpIP, err = ipProcess(false, false, input.IP)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-			return
-		}
 	}
 
 	resultNetwork := dbService.Get(service.SearchNewNumber, &core.Service{GroupID: result.User.Group.ID})
