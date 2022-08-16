@@ -113,7 +113,6 @@ type Connection struct {
 	Open                     *bool                  `json:"open"`
 	Enable                   *bool                  `json:"enable"`
 	Comment                  string                 `json:"comment"`
-	BgpComment               string                 `json:"bgp_comment"`
 	BGPRouter                BGPRouter              `json:"bgp_router"`
 	TunnelEndPointRouterIP   TunnelEndPointRouterIP `json:"tunnel_endpoint_router_ip"`
 	Service                  Service                `json:"service"`
