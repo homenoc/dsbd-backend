@@ -117,7 +117,6 @@ func Get(base int, data *core.Service) service.ResultDatabase {
 		err = db.Preload("IP").
 			Preload("IP.Plan").
 			Preload("Connection").
-			Preload("Connection.NOC").
 			Preload("Connection.BGPRouter").
 			Preload("Connection.TunnelEndPointRouterIP").
 			Preload("JPNICAdmin").
@@ -144,7 +143,6 @@ func Get(base int, data *core.Service) service.ResultDatabase {
 		err = db.Where("group_id = ? AND open = ?", data.GroupID, true).
 			Preload("IP", "open = ?", true).
 			Preload("Connection", "open = ?", true).
-			Preload("Connection.NOC").
 			Preload("Connection.BGPRouter").
 			Preload("Connection.TunnelEndPointRouterIP").
 			Preload("JPNICAdmin").
@@ -173,7 +171,6 @@ func GetAll() service.ResultDatabase {
 	var services []core.Service
 	err = db.Preload("IP").
 		Preload("Connection").
-		Preload("Connection.NOC").
 		Preload("Connection.BGPRouter").
 		Preload("Connection.TunnelEndPointRouterIP").
 		Preload("JPNICAdmin").

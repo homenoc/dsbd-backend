@@ -124,7 +124,6 @@ func Get(base int, u *core.User) user.ResultDatabase {
 			Preload("Group.Services.IP").
 			Preload("Group.Services.IP.Plan").
 			Preload("Group.Services.Connection").
-			Preload("Group.Services.Connection.NOC").
 			Preload("Group.Services.Connection.BGPRouter").
 			Preload("Group.Services.Connection.BGPRouter.NOC").
 			Preload("Group.Services.Connection.TunnelEndPointRouterIP").
