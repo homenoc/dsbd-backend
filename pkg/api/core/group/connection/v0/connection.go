@@ -187,7 +187,6 @@ func Add(c *gin.Context) {
 		IPv6Route:                input.IPv6Route,
 		NTT:                      input.NTT,
 		PreferredAP:              input.PreferredAP,
-		NOCID:                    nil,
 		BGPRouterID:              nil,
 		TunnelEndPointRouterIPID: nil,
 		TermIP:                   input.TermIP,

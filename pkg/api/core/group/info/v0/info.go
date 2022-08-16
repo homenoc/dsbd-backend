@@ -409,7 +409,7 @@ func Get(c *gin.Context) {
 							V4:         v4,
 							V6:         v6,
 							Fee:        "Free",
-							NOC:        tmpConnection.NOC.Name,
+							NOC:        tmpConnection.BGPRouter.NOC.Name,
 							NOCIP:      tmpConnection.TunnelEndPointRouterIP.IP,
 							TermIP:     tmpConnection.TermIP,
 							LinkV4Our:  tmpConnection.LinkV4Our,

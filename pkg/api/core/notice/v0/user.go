@@ -3,8 +3,6 @@ package v0
 import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
-	dbConnection "github.com/homenoc/dsbd-backend/pkg/api/store/group/connection/v0"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	"gorm.io/gorm"
 )
@@ -15,16 +13,7 @@ func userExtraction(inputUser, inputGroup, inputNOC []uint) []uint {
 
 	// if noc length isn't zero value
 	if len(inputNOC) != 0 {
-		for _, tmpNOC := range inputNOC {
-			result := dbConnection.Get(connection.NOCID, &core.Connection{NOCID: &tmpNOC})
-			if result.Err != nil {
-				for _, tmpConnection := range result.Connection {
-					for _, tmpUser := range tmpConnection.Service.Group.Users {
-						userArray = append(userArray, tmpUser.ID)
-					}
-				}
-			}
-		}
+
 	}
 
 	// if group length isn't zero value

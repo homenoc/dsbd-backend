@@ -86,6 +86,8 @@ type Service struct {
 	Pass           *bool         `json:"pass"`
 	Enable         *bool         `json:"enable"`
 	AddAllow       *bool         `json:"add_allow"`
+	Comment        string        `json:"comment"`
+	BGPComment     string        `json:"bgp_comment"`
 	Group          Group         `json:"group"`
 }
 
@@ -100,7 +102,6 @@ type Connection struct {
 	IPv4Route                string                 `json:"ipv4_route"`
 	IPv6Route                string                 `json:"ipv6_route"`
 	NTT                      string                 `json:"ntt"`
-	NOCID                    *uint                  `json:"noc_id"`
 	PreferredAP              string                 `json:"preferred_ap"`
 	TermIP                   string                 `json:"term_ip"`
 	Monitor                  *bool                  `json:"monitor"`
@@ -113,7 +114,6 @@ type Connection struct {
 	Enable                   *bool                  `json:"enable"`
 	Comment                  string                 `json:"comment"`
 	BgpComment               string                 `json:"bgp_comment"`
-	NOC                      *NOC                   `json:"noc"`
 	BGPRouter                BGPRouter              `json:"bgp_router"`
 	TunnelEndPointRouterIP   TunnelEndPointRouterIP `json:"tunnel_endpoint_router_ip"`
 	Service                  Service                `json:"service"`

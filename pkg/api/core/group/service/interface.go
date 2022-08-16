@@ -52,7 +52,8 @@ type Input struct {
 	EndDate        *string          `json:"end_date"`
 	ASN            uint             `json:"asn"`
 	IP             []IPInput        `json:"ip"`
-	Lock           bool             `json:"lock"`
+	Comment        string           `json:"comment"`
+	BGPComment     string           `json:"bgp_comment"`
 }
 
 type JPNIC struct {

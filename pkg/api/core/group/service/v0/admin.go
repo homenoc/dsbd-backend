@@ -116,11 +116,13 @@ func AddByAdmin(c *gin.Context) {
 	}
 
 	// pattern check: IP Transit
+	var bgpComment = ""
 	if resultServiceTemplate.NeedGlobalAS {
 		if input.ASN == 0 {
 			c.JSON(http.StatusBadRequest, common.Error{Error: "no data: ASN"})
 			return
 		}
+		bgpComment = input.BGPComment
 	}
 
 	resultNetwork := dbService.Get(service.SearchNewNumber, &core.Service{GroupID: uint(id)})
@@ -165,6 +167,8 @@ func AddByAdmin(c *gin.Context) {
 		Enable:         &[]bool{true}[0],
 		Pass:           &[]bool{false}[0],
 		AddAllow:       &[]bool{false}[0],
+		Comment:        input.Comment,
+		BGPComment:     bgpComment,
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})

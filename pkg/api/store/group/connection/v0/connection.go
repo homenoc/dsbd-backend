@@ -61,7 +61,6 @@ func Update(base int, c core.Connection) error {
 	if connection.UpdateInfo == base {
 		err = db.Model(&core.Connection{Model: gorm.Model{ID: c.ID}}).Updates(core.Connection{
 			NTT:     c.NTT,
-			NOC:     c.NOC,
 			TermIP:  c.TermIP,
 			Monitor: c.Monitor,
 		}).Error
@@ -92,23 +91,13 @@ func Get(base int, data *core.Connection) connection.ResultDatabase {
 	var connectionStruct []core.Connection
 
 	if base == connection.ID { //ID
-		err = db.Preload("NOC").
-			Preload("BGPRouter").
+		err = db.Preload("BGPRouter").
 			Preload("TunnelEndPointRouterIP").
 			Preload("Service").
 			Preload("Service.Group").
 			First(&connectionStruct, data.ID).Error
 	} else if base == connection.ServiceID {
 		err = db.Where("service_id = ?", data.ServiceID).Find(&connectionStruct).Error
-	} else if base == connection.NOCID {
-		err = db.Preload("NOC").
-			Preload("BGPRouter").
-			Preload("TunnelEndPointRouterIP").
-			Preload("Service").
-			Preload("Service.Group").
-			Preload("Service.Group.User").
-			Where("noc_id = ?", data.NOCID).
-			Find(&connectionStruct).Error
 	} else {
 		log.Println("base select error")
 		return connection.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
@@ -130,8 +119,7 @@ func GetAll() connection.ResultDatabase {
 	defer dbSQL.Close()
 
 	var connections []core.Connection
-	err = db.Preload("NOC").
-		Preload("BGPRouter").
+	err = db.Preload("BGPRouter").
 		Preload("BGPRouter.NOC").
 		Preload("TunnelEndPointRouterIP").
 		Preload("Service").
