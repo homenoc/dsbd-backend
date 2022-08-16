@@ -7,11 +7,9 @@ import (
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/noc"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	dbConnection "github.com/homenoc/dsbd-backend/pkg/api/store/group/connection/v0"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
-	dbNOC "github.com/homenoc/dsbd-backend/pkg/api/store/noc/v0"
 	"gorm.io/gorm"
 	"log"
 	"net/http"
@@ -46,6 +44,8 @@ func AddByAdmin(c *gin.Context) {
 		return
 	}
 
+	log.Println(input)
+
 	if err = check(input); err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 		return
@@ -69,12 +69,6 @@ func AddByAdmin(c *gin.Context) {
 	err = config.CheckIncludePreferredAPTemplate(input.PreferredAP)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	resultNOC := dbNOC.Get(noc.ID, &core.NOC{Model: gorm.Model{ID: input.NOCID}})
-	if resultNOC.Err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: resultNOC.Err.Error()})
 		return
 	}
 
@@ -133,7 +127,7 @@ func AddByAdmin(c *gin.Context) {
 		IPv6Route:         input.IPv6Route,
 		NTT:               input.NTT,
 		PreferredAP:       input.PreferredAP,
-		NOCID:             &[]uint{input.NOCID}[0],
+		NOCID:             nil,
 		TermIP:            input.TermIP,
 		Address:           input.Address,
 		Monitor:           &[]bool{input.Monitor}[0],
