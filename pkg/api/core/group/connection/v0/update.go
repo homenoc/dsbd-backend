@@ -42,8 +42,5 @@ func updateAdminConnection(input, replace core.Connection) core.Connection {
 	//NTT
 	replace.NTT = input.NTT
 
-	//NOC
-	replace.NOCID = input.NOCID
-
 	return replace
 }

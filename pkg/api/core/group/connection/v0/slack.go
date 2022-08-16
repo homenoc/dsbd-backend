@@ -116,12 +116,6 @@ func changeText(before, after core.Connection) string {
 
 	}
 
-	if after.NOCID != nil {
-		if *before.NOCID != *after.NOCID {
-			data += "希望NOC: " + before.NOC.Name + " => " + nocText(*after.NOCID) + "\n"
-		}
-	}
-
 	if after.TermIP != "" && after.TermIP != before.TermIP {
 		data += "終端アドレス: " + before.TermIP + "=>" + after.TermIP + "\n"
 	}

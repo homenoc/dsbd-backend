@@ -127,7 +127,6 @@ func AddByAdmin(c *gin.Context) {
 		IPv6Route:         input.IPv6Route,
 		NTT:               input.NTT,
 		PreferredAP:       input.PreferredAP,
-		NOCID:             nil,
 		TermIP:            input.TermIP,
 		Address:           input.Address,
 		Monitor:           &[]bool{input.Monitor}[0],
