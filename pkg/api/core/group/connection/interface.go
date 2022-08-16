@@ -29,7 +29,6 @@ type Input struct {
 	Address           string `json:"address"`
 	IPv4Route         string `json:"ipv4_route"`
 	IPv6Route         string `json:"ipv6_route"`
-	NOCID             uint   `json:"noc_id"`
 	TermIP            string `json:"term_ip"`
 	Monitor           bool   `json:"monitor"`
 }

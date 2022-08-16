@@ -8,12 +8,10 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/noc"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	dbConnection "github.com/homenoc/dsbd-backend/pkg/api/store/group/connection/v0"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
-	dbNOC "github.com/homenoc/dsbd-backend/pkg/api/store/noc/v0"
 	"gorm.io/gorm"
 	"log"
 	"net/http"
@@ -91,15 +89,6 @@ func Add(c *gin.Context) {
 		err = config.CheckIncludeNTTTemplate(input.NTT)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-			return
-		}
-	}
-
-	// NOCIDが0の時、「どこでも収容」という意味
-	if input.NOCID != 0 {
-		resultNOC := dbNOC.Get(noc.ID, &core.NOC{Model: gorm.Model{ID: input.NOCID}})
-		if resultNOC.Err != nil {
-			c.JSON(http.StatusBadRequest, common.Error{Error: resultNOC.Err.Error()})
 			return
 		}
 	}
@@ -189,13 +178,6 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	var NOCID *uint
-	if input.NOCID == 0 {
-		NOCID = nil
-	} else {
-		NOCID = &[]uint{input.NOCID}[0]
-	}
-
 	_, err = dbConnection.Create(&core.Connection{
 		ServiceID:                resultService.Service[0].ID,
 		ConnectionType:           input.ConnectionType,
@@ -205,7 +187,7 @@ func Add(c *gin.Context) {
 		IPv6Route:                input.IPv6Route,
 		NTT:                      input.NTT,
 		PreferredAP:              input.PreferredAP,
-		NOCID:                    NOCID,
+		NOCID:                    nil,
 		BGPRouterID:              nil,
 		TunnelEndPointRouterIPID: nil,
 		TermIP:                   input.TermIP,
