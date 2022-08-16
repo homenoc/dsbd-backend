@@ -31,6 +31,7 @@ type Input struct {
 	IPv6Route         string `json:"ipv6_route"`
 	TermIP            string `json:"term_ip"`
 	Monitor           bool   `json:"monitor"`
+	Comment           string `json:"comment"`
 }
 
 type Connection struct {
@@ -44,7 +45,6 @@ type Connection struct {
 	ConnectionComment            string `json:"connection_comment"` // ServiceがETCの時や補足説明で必要
 	ConnectionNumber             uint   `json:"connection_number"`
 	NTT                          string `json:"ntt"`
-	NOCID                        *uint  `json:"noc_id"`
 	NOCName                      string `json:"noc_name"`
 	TermIP                       string `json:"term_ip"`
 	Monitor                      *bool  `json:"monitor"`

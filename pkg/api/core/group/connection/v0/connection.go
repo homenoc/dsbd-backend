@@ -191,6 +191,7 @@ func Add(c *gin.Context) {
 		TunnelEndPointRouterIPID: nil,
 		TermIP:                   input.TermIP,
 		Address:                  input.Address,
+		Comment:                  input.Comment,
 		Monitor:                  &[]bool{input.Monitor}[0],
 		Enable:                   &[]bool{true}[0],
 		Open:                     &[]bool{false}[0],

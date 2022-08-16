@@ -107,7 +107,6 @@ func Get(base int, data *core.Group) group.ResultDatabase {
 			Preload("Services.IP").
 			Preload("Services.IP.Plan").
 			Preload("Services.Connection").
-			Preload("Services.Connection.NOC").
 			Preload("Services.Connection.BGPRouter").
 			Preload("Services.Connection.BGPRouter.NOC").
 			Preload("Services.Connection.TunnelEndPointRouterIP").

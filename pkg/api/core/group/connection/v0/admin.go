@@ -130,6 +130,7 @@ func AddByAdmin(c *gin.Context) {
 		TermIP:            input.TermIP,
 		Address:           input.Address,
 		Monitor:           &[]bool{input.Monitor}[0],
+		Comment:           input.Comment,
 		Enable:            &[]bool{true}[0],
 		Open:              &[]bool{false}[0],
 	})
