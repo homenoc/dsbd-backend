@@ -405,12 +405,12 @@ func changeText(before, after core.Service) string {
 		}
 	}
 
-	if before.V4Name != after.V4Name {
-		data += "ネットワーク名(v4): " + before.V4Name + "=>" + after.V4Name + "\n"
+	if before.Comment != after.Comment {
+		data += "Comment: " + before.Comment + "=>" + after.Comment + "\n"
 	}
 
-	if before.V6Name != after.V6Name {
-		data += "ネットワーク名(v6): " + before.V6Name + "=>" + after.V6Name + "\n"
+	if before.BGPComment != after.BGPComment {
+		data += "BGPComment: " + before.BGPComment + "=>" + after.BGPComment + "\n"
 	}
 
 	if before.Org != after.Org {
