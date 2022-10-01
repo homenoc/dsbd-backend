@@ -111,9 +111,8 @@ func changeText(before, after core.Connection) string {
 		}
 	}
 
-	if after.NTT != "" {
+	if after.NTT != before.NTT {
 		data += "インターネット接続: " + before.NTT + " => " + after.NTT + "\n"
-
 	}
 
 	if after.TermIP != "" && after.TermIP != before.TermIP {
