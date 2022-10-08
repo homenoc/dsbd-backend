@@ -146,6 +146,7 @@ type ServiceTemplate struct {
 	NeedGlobalAS bool   `json:"need_global_as"`
 	NeedComment  bool   `json:"need_comment"`
 	NeedRoute    bool   `json:"need_route"`
+	NeedBGP      bool   `json:"need_bgp"`
 }
 
 type ConnectionTemplate struct {
