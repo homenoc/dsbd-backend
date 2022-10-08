@@ -349,6 +349,7 @@ func Get(c *gin.Context) {
 						fmt.Sprintf("%03d", tmpService.ServiceNumber),
 					ServiceType:    tmpService.ServiceType,
 					NeedRoute:      resultServiceWithTemplate.NeedRoute,
+					NeedBGP:        resultServiceWithTemplate.NeedBGP,
 					NeedJPNIC:      resultServiceWithTemplate.NeedJPNIC,
 					AddAllow:       *tmpService.AddAllow,
 					Pass:           *tmpService.Pass,
