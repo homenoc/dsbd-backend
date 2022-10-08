@@ -141,6 +141,7 @@ type Service struct {
 	ServiceID      string  `json:"service_id"`
 	ServiceType    string  `json:"service_type"`
 	NeedRoute      bool    `json:"need_route"`
+	NeedBGP        bool    `json:"need_bgp"`
 	NeedJPNIC      bool    `json:"need_jpnic"`
 	AddAllow       bool    `json:"add_allow"`
 	Pass           bool    `json:"pass"`
