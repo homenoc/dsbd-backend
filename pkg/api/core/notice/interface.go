@@ -27,7 +27,7 @@ type Input struct {
 	Fault     *bool   `json:"fault"`
 	Info      *bool   `json:"info"`
 	Title     string  `json:"title"`
-	Data      string  `json:"data"`
+	Body      string  `json:"body"`
 }
 
 type Notice struct {

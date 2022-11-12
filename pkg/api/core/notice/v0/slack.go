@@ -43,7 +43,7 @@ func noticeSlackAddByAdmin(input notice.Input) {
 			Type: slack.MBTSection,
 			Text: &slack.TextBlockObject{
 				Type: "mrkdwn",
-				Text: input.Data,
+				Text: input.Body,
 			},
 		},
 		slack.NewDividerBlock(),
@@ -85,8 +85,8 @@ func changeText(before core.Notice, after notice.Input) string {
 	}
 
 	//Data
-	if after.Data != "" && after.Data != before.Data {
-		data += "Contents: " + before.Data + " => " + after.Data + "\n"
+	if after.Body != "" && after.Body != before.Data {
+		data += "Contents: " + before.Data + " => " + after.Body + "\n"
 	}
 
 	//if after.UserID != before.UserID {
