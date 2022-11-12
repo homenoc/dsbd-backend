@@ -16,6 +16,7 @@ func noticeSlack(err error, input mail.Mail) {
 				Title: "メール送信(失敗)",
 				Text:  "error: \n" + err.Error(),
 				Fields: []slack.AttachmentField{
+					{Title: "To", Value: input.ToMail},
 					{Title: "Subject", Value: input.Subject},
 					{Title: "Content", Value: input.Content},
 				},
@@ -27,6 +28,7 @@ func noticeSlack(err error, input mail.Mail) {
 				Color: "good",
 				Title: "メール送信",
 				Fields: []slack.AttachmentField{
+					{Title: "To", Value: input.ToMail},
 					{Title: "Subject", Value: input.Subject},
 					{Title: "Content", Value: input.Content},
 				},
