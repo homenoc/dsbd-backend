@@ -10,7 +10,7 @@ func check(input notice.Input) error {
 	if input.Title == "" {
 		return fmt.Errorf("no data: title")
 	}
-	if input.Data == "" {
+	if input.Body == "" {
 		return fmt.Errorf("no data: data")
 	}
 	return nil

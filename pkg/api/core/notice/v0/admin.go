@@ -73,7 +73,7 @@ func AddByAdmin(c *gin.Context) {
 		Fault:     input.Fault,
 		Info:      input.Info,
 		Title:     input.Title,
-		Data:      input.Data,
+		Data:      input.Body,
 	}); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
@@ -148,7 +148,7 @@ func UpdateByAdmin(c *gin.Context) {
 		Fault:     input.Fault,
 		Info:      input.Info,
 		Title:     input.Title,
-		Data:      input.Data,
+		Data:      input.Body,
 	}); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
