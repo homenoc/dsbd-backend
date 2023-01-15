@@ -3,6 +3,12 @@ name: Go-Develop
 on:
   push:
     branches: [ develop ]
+    paths:
+    - '.github/**'
+    - 'cmd/**'
+    - 'pkg/**'
+    - 'go.mod'
+    - 'go.sum'
   pull_request:
     branches: [ develop ]
 
