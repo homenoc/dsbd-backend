@@ -93,6 +93,9 @@ func Add(c *gin.Context) {
 				return
 			}
 		}
+		// 非公開情報をFalseにする
+		replaceHiddenFalseForJPNICAdmin(&input.JPNICAdmin)
+		replaceHiddenFalseForJPNICTech(&input.JPNICTech)
 
 		// IPトランジット以外
 		if !resultServiceTemplate.NeedGlobalAS {
