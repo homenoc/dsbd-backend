@@ -26,6 +26,9 @@ import (
 )
 
 func AdminRestAPI() {
+	if !config.IsDebug {
+		gin.SetMode(gin.ReleaseMode)
+	}
 	router := gin.Default()
 	router.Use(cors)
 
@@ -217,6 +220,9 @@ func AdminRestAPI() {
 }
 
 func UserRestAPI() {
+	if !config.IsDebug {
+		gin.SetMode(gin.ReleaseMode)
+	}
 	router := gin.Default()
 	router.Use(cors)
 
