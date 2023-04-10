@@ -165,6 +165,7 @@ type Log struct {
 }
 
 var Conf Config
+var IsDebug = false
 
 func GetConfig(inputConfPath string) error {
 	configPath := "./data.json"
