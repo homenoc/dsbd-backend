@@ -25,6 +25,10 @@ var startUserCmd = &cobra.Command{
 		if err != nil {
 			log.Fatalf("could not greet: %v", err)
 		}
+		config.IsDebug, err = cmd.Flags().GetBool("debug")
+		if err != nil {
+			log.Fatalf("could not greet: %v", err)
+		}
 		if config.GetConfig(confPath) != nil {
 			log.Fatalf("error config process |%v", err)
 		}
@@ -48,6 +52,10 @@ var startAdminCmd = &cobra.Command{
 		if err != nil {
 			log.Fatalf("could not greet: %v", err)
 		}
+		config.IsDebug, err = cmd.Flags().GetBool("debug")
+		if err != nil {
+			log.Fatalf("could not greet: %v", err)
+		}
 		if config.GetConfig(confPath) != nil {
 			log.Fatalf("error config process |%v", err)
 		}
@@ -67,4 +75,5 @@ func init() {
 	startCmd.AddCommand(startAdminCmd)
 	startCmd.AddCommand(startUserCmd)
 	startCmd.PersistentFlags().StringP("config", "c", "", "config path")
+	startCmd.PersistentFlags().BoolP("debug", "d", false, "debug command")
 }
