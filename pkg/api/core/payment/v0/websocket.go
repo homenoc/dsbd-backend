@@ -113,7 +113,13 @@ func GetStripeWebHook(c *gin.Context) {
 			jst, _ := time.LoadLocation(config.Conf.Controller.TimeZone)
 			timeDate := time.Date(periodEndTime.Year(), periodEndTime.Month(), periodEndTime.Day(), 0, 0, 0, 0, jst)
 			if groupID != 0 {
-				err = dbGroup.Update(group.UpdateAll, core.Group{Model: gorm.Model{ID: uint(groupID)}, StripeSubscriptionID: &sub, MemberExpired: &timeDate})
+				resultGroup := dbGroup.Get(group.ID, &core.Group{Model: gorm.Model{ID: uint(groupID)}})
+				if resultGroup.Err != nil {
+					return
+				}
+				if resultGroup.Group[0].MemberExpired.Unix() < timeDate.Unix() {
+					err = dbGroup.Update(group.UpdateAll, core.Group{Model: gorm.Model{ID: uint(groupID)}, StripeSubscriptionID: &sub, MemberExpired: &timeDate})
+				}
 			}
 			// slack notify(payment log)
 			field := []string{
