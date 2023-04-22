@@ -69,6 +69,7 @@ type Service struct {
 	PostCode       string        `json:"postcode"`
 	Address        string        `json:"address"`
 	AddressEn      string        `json:"address_en"`
+	Abuse          string        `json:"abuse"`
 	ASN            *uint         `json:"asn"`
 	AveUpstream    uint          `json:"avg_upstream"`
 	MaxUpstream    uint          `json:"max_upstream"`
