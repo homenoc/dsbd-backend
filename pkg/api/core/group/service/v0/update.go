@@ -30,6 +30,11 @@ func replaceService(replace, input core.Service) core.Service {
 		replace.AddressEn = input.AddressEn
 	}
 
+	//Abuse
+	if input.Abuse != "" {
+		replace.Abuse = input.Abuse
+	}
+	
 	//Open
 	if input.Pass != replace.Pass {
 		replace.Pass = input.Pass

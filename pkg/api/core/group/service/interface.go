@@ -44,6 +44,7 @@ type Input struct {
 	Postcode       string           `json:"postcode"`
 	Address        string           `json:"address"`
 	AddressEn      string           `json:"address_en"`
+	Abuse          string           `json:"abuse"`
 	AveUpstream    uint             `json:"avg_upstream"`
 	MaxUpstream    uint             `json:"max_upstream"`
 	AveDownstream  uint             `json:"avg_downstream"`
