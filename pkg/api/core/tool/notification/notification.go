@@ -13,6 +13,7 @@ var Notification NotifyStruct
 
 func NewNotification() {
 	// slack
-	slackToken := config.Conf.Slack.Token
-	Notification.Slack = slack.New(slackToken)
+	slackToken := config.Conf.Slack.BotToken
+	appToken := slack.OptionAppLevelToken(config.Conf.Slack.AppToken)
+	Notification.Slack = slack.New(slackToken, appToken, slack.OptionDebug(config.IsDebug))
 }

@@ -12,6 +12,7 @@ const (
 	Open              = 3
 	SearchNewNumber   = 4
 	GIDAndAddAllow    = 5
+	ASN               = 6
 	UpdateName        = 100
 	UpdateDate        = 102
 	UpdateRoute       = 103

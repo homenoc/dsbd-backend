@@ -100,7 +100,8 @@ type Radius struct {
 }
 
 type Slack struct {
-	Token    string        `json:"token"`
+	AppToken string        `json:"app_token"`
+	BotToken string        `json:"bot_token"`
 	Channels SlackChannels `json:"channels"`
 }
 

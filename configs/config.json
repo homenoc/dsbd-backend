@@ -46,7 +46,8 @@
     "ca_file_path": ""
   },
   "slack": {
-    "token": "",
+    "app_token": "",
+    "bot_token": "",
     "channels": {
       "main": "#test"
     }

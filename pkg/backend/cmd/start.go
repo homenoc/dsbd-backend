@@ -4,6 +4,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/slack"
 	"github.com/spf13/cobra"
 	"github.com/stripe/stripe-go/v73"
 	"log"
@@ -33,6 +34,7 @@ var startUserCmd = &cobra.Command{
 			log.Fatalf("error config process |%v", err)
 		}
 		notification.NewNotification()
+		go slack.StartAppSlack()
 		notification.NoticeLog("good", []string{
 			"Status: User側 API起動",
 		})
@@ -59,7 +61,9 @@ var startAdminCmd = &cobra.Command{
 		if config.GetConfig(confPath) != nil {
 			log.Fatalf("error config process |%v", err)
 		}
+
 		notification.NewNotification()
+		go slack.StartAppSlack()
 		notification.NoticeLog("good", []string{
 			"Status: Admin側 API起動",
 		})

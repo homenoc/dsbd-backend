@@ -133,7 +133,7 @@ func Get(base int, u *core.User) user.ResultDatabase {
 		err = db.Where("group_id = ?", u.GroupID).Find(&userStruct).Error
 	} else if base == user.Email { //Mail
 		err = db.Where("email = ?", u.Email).Find(&userStruct).Error
-	} else if base == user.MailToken { //Token
+	} else if base == user.MailToken { //BotToken
 		err = db.Where("mail_token = ?", u.MailToken).Find(&userStruct).Error
 	} else if base == user.GIDAndLevel { //GroupID and Level
 		err = db.Where("group_id = ? AND level = ?", u.GroupID, u.Level).Find(&userStruct).Error
