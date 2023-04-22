@@ -113,7 +113,9 @@ func Get(base int, data *core.Service) service.ResultDatabase {
 
 	var serviceStruct []core.Service
 
-	if base == service.ID { //ID
+	switch base {
+	//ID
+	case service.ID:
 		err = db.Preload("IP").
 			Preload("IP.Plan").
 			Preload("Connection").
@@ -123,23 +125,24 @@ func Get(base int, data *core.Service) service.ResultDatabase {
 			Preload("JPNICTech").
 			Preload("Group").
 			First(&serviceStruct, data.ID).Error
-	} else if base == service.Org { //Mail
+	//	Mail
+	case service.Org:
 		err = db.Preload("IP").
 			Preload("Connection").
 			Preload("JPNICAdmin").
 			Preload("JPNICTech").
 			Where("org = ?", data.Org).Find(&serviceStruct).Error
-	} else if base == service.GID {
+	case service.GID:
 		err = db.Preload("IP").
 			Preload("Connection").
 			Preload("JPNICAdmin").
 			Preload("JPNICTech").
 			Where("group_id = ?", data.GroupID).Find(&serviceStruct).Error
-	} else if base == service.GIDAndAddAllow {
+	case service.GIDAndAddAllow:
 		err = db.Where("group_id = ? AND add_allow = ?", data.GroupID, true).Find(&serviceStruct).Error
-	} else if base == service.SearchNewNumber {
+	case service.SearchNewNumber:
 		err = db.Where("group_id = ?", data.GroupID).Find(&serviceStruct).Error
-	} else if base == service.Open {
+	case service.Open:
 		err = db.Where("group_id = ? AND open = ?", data.GroupID, true).
 			Preload("IP", "open = ?", true).
 			Preload("Connection", "open = ?", true).
@@ -148,9 +151,16 @@ func Get(base int, data *core.Service) service.ResultDatabase {
 			Preload("JPNICAdmin").
 			Preload("JPNICTech").
 			Find(&serviceStruct).Error
-	} else {
+	case service.ASN:
+		err = db.Where("asn = ? AND pass = ? AND enable = ?", data.ASN, true, true).
+			Preload("IP").
+			Preload("Connection", "open = ?", true).
+			Preload("Group").
+			Find(&serviceStruct).Error
+	default:
 		log.Println("base select error")
 		return service.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
+
 	}
 	return service.ResultDatabase{Err: err, Service: serviceStruct}
 }
