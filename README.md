@@ -26,5 +26,14 @@ go run . init database
 sql_mode=''
 ```
 
+## 開発環境 (Docker Compose V2)
+```shell
+mkdir tmp
+cp configs/config.json tmp/config.json
+docker compose up -d
+```
+UserAPI  :8080
+AdminAPI :8081
+
 ## Database
 https://drawsql.app/y-net/diagrams/dsbd-backend/embed
