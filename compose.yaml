@@ -1,0 +1,35 @@
+services:
+  user-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    command: air -c .air-user.toml
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app
+    depends_on:
+      -  db
+  admin-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    command: air -c .air-admin.toml
+    ports:
+    - "8081:8081"
+    volumes:
+      - .:/app
+    depends_on:
+        -  db
+  db:
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: dsbd-backend
+      MYSQL_USER: dsbd
+    volumes:
+        - db:/var/lib/mysql
+        - ./db/init:/docker-entrypoint-initdb.d
+volumes:
+    db:
+        driver: local
