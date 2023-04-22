@@ -2,42 +2,40 @@
   "controller": {
     "user": {
       "ip": "127.0.0.1",
-      "url": "http://localhost:8080",
+      "url": "http://127.0.0.1:8080",
+      "return_url": "http://127.0.0.1:8080",
       "port": 8080
     },
     "admin": {
       "ip": "127.0.0.1",
-      "port": 81,
+      "port": 8081,
+      "return_url": "http://127.0.0.1:8081",
       "auth": {
-        "user": "test",
-        "pass": "test"
+        "user": "admin",
+        "pass": "admin"
       }
-    },
-    "auth": {
-      "token1": "token1",
-      "token2": "token2",
-      "token3": "token3"
     },
     "timezone": "Asia/Tokyo"
   },
   "stripe": {
     "webhook_secret_key": "",
-    "secret_key": ""
+    "secret_key": "",
+    "membership_configuration": ""
   },
   "db": {
-    "ip": "127.0.0.1",
+    "ip": "db",
     "port": 3306,
     "user": "root",
-    "pass": "test",
-    "dbName": "test"
+    "pass": "root",
+    "dbName": "dsbd-backend"
   },
   "mail": {
-    "Host": "mail.example",
+    "Host": "127.0.0.1",
     "Port": 587,
-    "From": "mail.example",
-    "User": "user",
-    "Pass": "pass",
-    "Contract": "contract"
+    "From": "",
+    "User": "",
+    "Pass": "",
+    "Contract": ""
   },
   "jpnic": {
     "url": "",
@@ -47,14 +45,42 @@
     "v6_key_file_path": "",
     "ca_file_path": ""
   },
-  "slack": [
-    {
-      "id": "main",
-      "url": "https://hooks.slack.com/services/xxxxxxx",
-      "channel": "xxxx",
-      "name": "xxxxx"
+  "slack": {
+    "app_token": "",
+    "bot_token": "",
+    "channels": {
+      "main": "#test"
     }
-  ],
+  },
+  "template": {
+    "service": [
+    ],
+    "connection": [
+
+    ],
+    "membership": [
+    ],
+    "ntt": [
+    ],
+    "v4": [
+    ],
+    "v6": [
+    ],
+    "v4_route": [
+      "IPv4 Full Route",
+      "IPv4 Default Route",
+      "etc"
+    ],
+    "v6_route": [
+      "IPv6 Full Route",
+      "IPv6 Default Route",
+      "etc"
+    ],
+    "preferred_ap": [
+    ],
+    "mail": [
+    ]
+  },
   "log": {
     "path": ""
   }

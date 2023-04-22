@@ -80,11 +80,13 @@ func Get(base int, data *core.IP) ip.ResultDatabase {
 
 	var ips []core.IP
 
-	if base == ip.ID { //ID
+	switch base {
+	// ID
+	case ip.ID:
 		err = db.First(&ips, data.ID).Error
-	} else {
+	default:
 		log.Println("base select error")
-		return ip.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
+		err = fmt.Errorf("(%s)error: base select\n", time.Now())
 	}
 	return ip.ResultDatabase{IP: ips, Err: err}
 }

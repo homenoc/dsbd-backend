@@ -1,6 +1,7 @@
 package notification
 
 import (
+	"fmt"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/slack-go/slack"
 	"strings"
@@ -45,11 +46,12 @@ func NoticeLog(color string, baseKeyValue []string) {
 		slackAttachField = append(slackAttachField, slack.AttachmentField{Title: splitKeyValue[0], Value: keyValue[len(splitKeyValue[0])+1:]})
 	}
 
-	Notification.Slack.PostMessage(config.Conf.Slack.Channels.Log, slack.MsgOptionAttachments(
+	_, _, err := Notification.Slack.PostMessage(config.Conf.Slack.Channels.Log, slack.MsgOptionAttachments(
 		slack.Attachment{
 			Color:  color,
 			Title:  "System",
 			Fields: slackAttachField,
 		},
 	))
+	fmt.Println(err)
 }

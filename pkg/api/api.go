@@ -68,15 +68,15 @@ func AdminRestAPI() {
 			v1.POST("/logout", token.DeleteAdminUser)
 
 			//
-			// Token
+			// BotToken
 			//
 			v1.POST("/token/generate", token.GenerateByAdmin)
 
 			v1.POST("/token", token.AddByAdmin)
-			// Token Delete
+			// BotToken Delete
 			v1.DELETE("/token", token.DeleteAllByAdmin)
 			v1.DELETE("/token/:id", token.DeleteByAdmin)
-			// Token Update
+			// BotToken Update
 			v1.PUT("/token/:id", token.UpdateByAdmin)
 			v1.GET("/token", token.GetAllByAdmin)
 			v1.GET("/token/:id", token.GetByAdmin)
@@ -323,7 +323,7 @@ func UserRestAPI() {
 
 func cors(c *gin.Context) {
 
-	//c.Header("Access-Control-Allow-Headers", "Accept, Content-ID, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, Access-Control-Request-Headers, Access-Control-Request-Method, Connection, Host, Origin, User-Agent, Referer, Cache-Control, X-header")
+	//c.Header("Access-Control-Allow-Headers", "Accept, Content-ID, Content-Length, Accept-Encoding, X-CSRF-BotToken, Authorization, Access-Control-Request-Headers, Access-Control-Request-Method, Connection, Host, Origin, User-Agent, Referer, Cache-Control, X-header")
 	c.Header("Access-Control-Allow-Origin", "*")
 	c.Header("Access-Control-Allow-Methods", "*")
 	c.Header("Access-Control-Allow-Headers", "*")
