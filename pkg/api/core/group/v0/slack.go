@@ -111,8 +111,22 @@ func changeTextByAdmin(before, after core.Group) string {
 	}
 
 	if after.CouponID != nil {
+		if before.CouponID == nil {
+			data += "CouponID: None => " + *after.CouponID + "\n"
+
+		}
 		if *before.CouponID != *after.CouponID {
 			data += "CouponID: " + *before.CouponID + " => " + *after.CouponID + "\n"
+		}
+	}
+
+	if after.MemberExpired != nil {
+		if before.MemberExpired == nil {
+			data += "MemberExpired: None => " + after.MemberExpired.Format("2006-01-02") + "\n"
+
+		}
+		if *before.CouponID != *after.CouponID {
+			data += "MemberExpired: " + before.MemberExpired.Format("2006-01-02") + " => " + after.MemberExpired.Format("2006-01-02") + "\n"
 		}
 	}
 

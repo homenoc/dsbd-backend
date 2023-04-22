@@ -63,7 +63,7 @@ func PostAdminSubscribeGettingURL(c *gin.Context) {
 	}
 
 	// exist check: stripeCustomerID
-	if *result.Group[0].StripeCustomerID == "" || result.Group[0].StripeCustomerID == nil {
+	if result.Group[0].StripeCustomerID == nil || *result.Group[0].StripeCustomerID == "" {
 		params := &stripe.CustomerParams{
 			Description: stripe.String("[" + strconv.Itoa(int(result.Group[0].ID)) + "] Org: " + result.Group[0].Org + "(" + result.Group[0].OrgEn + ")"),
 		}
@@ -143,7 +143,7 @@ func GetAdminBillingPortalURL(c *gin.Context) {
 	}
 
 	// exist check: stripeCustomerID
-	if *result.Group[0].StripeCustomerID == "" || result.Group[0].StripeCustomerID == nil {
+	if result.Group[0].StripeCustomerID == nil || *result.Group[0].StripeCustomerID == "" {
 		c.JSON(http.StatusNotFound, common.Error{Error: "CustomerID is not found..."})
 		return
 	}
