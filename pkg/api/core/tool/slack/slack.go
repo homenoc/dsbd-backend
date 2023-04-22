@@ -75,7 +75,7 @@ func StartAppSlack() {
 				}
 				inputArray := strings.Split(cmd.Text, " ")
 				socketMode.Ack(*event.Request)
-				if cmd.Command != "/dsbd" || len(inputArray) < 1 {
+				if len(inputArray) < 1 {
 					socketMode.PostMessage(cmd.ChannelName, invalidCommand(), slack.MsgOptionReplaceOriginal(cmd.ResponseURL))
 					continue
 				}
