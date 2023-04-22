@@ -72,6 +72,7 @@ func GetByAdmin(c *gin.Context) {
 			core.MemberTypeStandard,
 			core.MemberTypeStudent,
 			core.MemberTypeCommittee,
+			core.MemberTypeCommitteeFree,
 			core.MemberTypeDisable,
 		},
 	})
