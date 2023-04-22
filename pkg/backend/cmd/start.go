@@ -34,7 +34,6 @@ var startUserCmd = &cobra.Command{
 			log.Fatalf("error config process |%v", err)
 		}
 		notification.NewNotification()
-		go slack.StartAppSlack()
 		notification.NoticeLog("good", []string{
 			"Status: User側 API起動",
 		})
