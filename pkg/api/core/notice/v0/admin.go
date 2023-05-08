@@ -127,16 +127,18 @@ func UpdateByAdmin(c *gin.Context) {
 	jst, _ := time.LoadLocation(config.Conf.Controller.TimeZone)
 
 	startTime, _ := time.ParseInLocation(layoutInput, input.StartTime, jst)
-	endTime, _ := time.ParseInLocation(layoutInput, *input.EndTime, jst)
+
+	// 9999年12月31日 23:59:59.59
+	var endTime = time.Date(9999, time.December, 31, 23, 59, 59, 59, jst)
+	if input.EndTime != nil {
+		endTime, _ = time.ParseInLocation(layoutInput, *input.EndTime, jst)
+	}
 
 	tmp := dbNotice.Get(notice.ID, &core.Notice{Model: gorm.Model{ID: uint(id)}})
 	if tmp.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: tmp.Err.Error()})
 		return
 	}
-
-	log.Println(startTime)
-	log.Println(endTime)
 
 	noticeSlackReplaceByAdmin(tmp.Notice[0], input)
 
