@@ -105,7 +105,9 @@ func changeText(before core.Notice, after notice.Input) string {
 		data += "Start Time: " + before.StartTime.Add(9*time.Hour).Format(layoutInput) + " => " + after.StartTime + "\n"
 	}
 
-	if *after.EndTime != before.EndTime.Add(9*time.Hour).Format(layoutInput) {
+	if after.EndTime == nil {
+		data += "End Time: " + before.EndTime.Add(9*time.Hour).Format(layoutInput) + " => 無制限\n"
+	} else if *after.EndTime != before.EndTime.Add(9*time.Hour).Format(layoutInput) {
 		data += "End Time: " + before.EndTime.Add(9*time.Hour).Format(layoutInput) + " => " + *after.EndTime + "\n"
 	}
 
