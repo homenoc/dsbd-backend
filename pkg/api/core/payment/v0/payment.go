@@ -117,9 +117,8 @@ func GetBillingPortalURL(c *gin.Context) {
 	}
 
 	params := &stripe.BillingPortalSessionParams{
-		Customer:      stripe.String(*resultAuth.User.Group.StripeCustomerID),
-		Configuration: stripe.String(config.Conf.Stripe.MembershipConfiguration),
-		ReturnURL:     stripe.String(config.Conf.Controller.User.ReturnURL),
+		Customer:  stripe.String(*resultAuth.User.Group.StripeCustomerID),
+		ReturnURL: stripe.String(config.Conf.Controller.User.ReturnURL),
 	}
 
 	s, err := billingSession.New(params)

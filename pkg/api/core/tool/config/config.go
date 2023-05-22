@@ -49,9 +49,8 @@ type Web struct {
 }
 
 type Stripe struct {
-	WebhookSecretKey        string `json:"webhook_secret_key"`
-	SecretKey               string `json:"secret_key"`
-	MembershipConfiguration string `json:"membership_configuration"`
+	WebhookSecretKey string `json:"webhook_secret_key"`
+	SecretKey        string `json:"secret_key"`
 }
 
 type AdminAuth struct {
