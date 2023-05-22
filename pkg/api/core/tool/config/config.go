@@ -10,6 +10,8 @@ const ToMainSlackNotify = "main"
 const ToPaymentSlackNotify = "payment"
 const ToPaymentLogSlackNotify = "payment_log"
 
+var BaseStripeUrl = "https://dashboard.stripe.com"
+
 type Config struct {
 	Controller Controller `json:"controller"`
 	Web        Web        `json:"web"`
@@ -51,6 +53,7 @@ type Web struct {
 type Stripe struct {
 	WebhookSecretKey string `json:"webhook_secret_key"`
 	SecretKey        string `json:"secret_key"`
+	IsTest           bool   `json:"is_test"`
 }
 
 type AdminAuth struct {
@@ -180,6 +183,9 @@ func GetConfig(inputConfPath string) error {
 	err = json.Unmarshal(file, &data)
 	if err != nil {
 		log.Fatal(err)
+	}
+	if data.Stripe.IsTest {
+		BaseStripeUrl += "/test"
 	}
 	Conf = data
 	return nil

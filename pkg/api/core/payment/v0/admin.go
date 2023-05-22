@@ -162,3 +162,77 @@ func GetAdminBillingPortalURL(c *gin.Context) {
 
 	c.JSON(http.StatusOK, map[string]string{"url": s.URL})
 }
+
+func GetAdminDashboardCustomerURL(c *gin.Context) {
+	// ID取得
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	// Admin authentication
+	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
+	if resultAdmin.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
+		return
+	}
+
+	// serviceIDが0の時エラー処理
+	if id == 0 {
+		c.JSON(http.StatusBadRequest, common.Error{Error: fmt.Sprintf("ID is wrong... ")})
+		return
+	}
+
+	result := dbGroup.Get(group.ID, &core.Group{Model: gorm.Model{ID: uint(id)}})
+	if result.Err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
+		return
+	}
+
+	// exist check: stripeCustomerID
+	if result.Group[0].StripeCustomerID == nil || *result.Group[0].StripeCustomerID == "" {
+		c.JSON(http.StatusNotFound, common.Error{Error: "CustomerID is not found..."})
+		return
+	}
+
+	url := config.BaseStripeUrl + "/customers/" + *result.Group[0].StripeCustomerID
+	c.JSON(http.StatusOK, map[string]string{"url": url})
+}
+
+func GetAdminDashboardSubscribeURL(c *gin.Context) {
+	// ID取得
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+		return
+	}
+
+	// Admin authentication
+	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
+	if resultAdmin.Err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
+		return
+	}
+
+	// serviceIDが0の時エラー処理
+	if id == 0 {
+		c.JSON(http.StatusBadRequest, common.Error{Error: fmt.Sprintf("ID is wrong... ")})
+		return
+	}
+
+	result := dbGroup.Get(group.ID, &core.Group{Model: gorm.Model{ID: uint(id)}})
+	if result.Err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
+		return
+	}
+
+	// exist check: stripeCustomerID
+	if result.Group[0].StripeSubscriptionID == nil || *result.Group[0].StripeSubscriptionID == "" {
+		c.JSON(http.StatusNotFound, common.Error{Error: "SubscribeID is not found..."})
+		return
+	}
+
+	url := config.BaseStripeUrl + "/subscriptions/" + *result.Group[0].StripeSubscriptionID
+	c.JSON(http.StatusOK, map[string]string{"url": url})
+}
