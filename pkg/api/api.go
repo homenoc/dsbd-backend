@@ -171,7 +171,9 @@ func AdminRestAPI() {
 			// Payment
 			//
 			v1.POST("/group/:id/payment/subscribe", payment.PostAdminSubscribeGettingURL)
+			v1.GET("/group/:id/payment/subscribe", payment.GetAdminDashboardSubscribeURL)
 			v1.GET("/group/:id/payment", payment.GetAdminBillingPortalURL)
+			v1.GET("/group/:id/payment/customer", payment.GetAdminDashboardCustomerURL)
 
 			//
 			// JPNIC ByAdmin

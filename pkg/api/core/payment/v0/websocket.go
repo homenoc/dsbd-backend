@@ -165,6 +165,7 @@ func GetStripeWebHook(c *gin.Context) {
 			groupID, _ = strconv.Atoi(groupIDStr)
 
 			// stripe standard data
+			sub := event.Data.Object["id"].(string)
 			customer := event.Data.Object["customer"].(string)
 			planID := event.Data.Object["plan"].(map[string]interface{})["id"].(string)
 			amount := event.Data.Object["plan"].(map[string]interface{})["amount"].(float64)
@@ -177,7 +178,7 @@ func GetStripeWebHook(c *gin.Context) {
 			jst, _ := time.LoadLocation(config.Conf.Controller.TimeZone)
 			timeDate := time.Date(periodEndTime.Year(), periodEndTime.Month(), periodEndTime.Day(), 0, 0, 0, 0, jst)
 			if groupID != 0 {
-				err = dbGroup.Update(group.UpdateAll, core.Group{Model: gorm.Model{ID: uint(groupID)}, MemberExpired: &timeDate})
+				err = dbGroup.Update(group.UpdateAll, core.Group{Model: gorm.Model{ID: uint(groupID)}, StripeSubscriptionID: &sub, MemberExpired: &timeDate})
 			}
 
 			// slack notify(payment log)
