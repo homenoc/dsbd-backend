@@ -180,11 +180,11 @@ func expiredStatusText(status uint) string {
 	if status == 0 {
 		return "0"
 	} else if status == 1 {
-		return "ユーザより廃止"
-	} else if status == 2 {
-		return "運営委員より廃止"
-	} else if status == 3 {
 		return "審査落ち"
+	} else if status == 2 {
+		return "ユーザより廃止"
+	} else if status == 3 {
+		return "運営委員より廃止"
 	} else {
 		return "status不明"
 	}
