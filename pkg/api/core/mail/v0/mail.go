@@ -49,10 +49,10 @@ func SendMail(d mailStruct.Mail) error {
 	receivers := []string{to.Address}
 
 	msg := "" +
+		"Content-Type: text/plain; charset=\"UTF-8\"\r\n" +
 		"From:" + from.String() + "\r\n" +
 		"To:" + to.String() + "\r\n" +
 		encodeSubject(d.Subject) + "\r\n" +
-		"Content-Type: text/plain; charset=UTF-8\r\n" +
 		"\r\n" + d.Content + "\r\n"
 
 	auth := smtp.PlainAuth("", config.Conf.Mail.User, config.Conf.Mail.Pass, config.Conf.Mail.Host)
