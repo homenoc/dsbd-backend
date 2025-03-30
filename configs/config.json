@@ -15,7 +15,12 @@
         "pass": "admin"
       }
     },
-    "timezone": "Asia/Tokyo"
+    "timezone": "Asia/Tokyo",
+    "auth": {
+      "token1": "",
+      "token2": "",
+      "token3": ""
+    }
   },
   "stripe": {
     "webhook_secret_key": "",
@@ -30,12 +35,13 @@
     "dbName": "dsbd-backend"
   },
   "mail": {
-    "Host": "127.0.0.1",
-    "Port": 587,
-    "From": "",
-    "User": "",
-    "Pass": "",
-    "Contract": ""
+    "host": "127.0.0.1",
+    "port": 587,
+    "from": "",
+    "user": "",
+    "pass": "",
+    "contract": "",
+    "cc": ""
   },
   "jpnic": {
     "url": "",
@@ -45,12 +51,24 @@
     "v6_key_file_path": "",
     "ca_file_path": ""
   },
+  "radius": {
+      "host": "",
+      "port": 0,
+      "user": "",
+      "pass": ""
+  },
+  "web": {
+    "url": ""
+  },
   "slack": {
-    "app_token": "",
-    "bot_token": "",
-    "channels": {
-      "main": "#test"
-    }
+      "app_token": "",
+      "bot_token": "",
+      "channels": {
+          "main": "",
+          "log": "",
+          "payment": "",
+          "payment_log": ""
+      }
   },
   "template": {
     "service": [
@@ -82,6 +100,6 @@
     ]
   },
   "log": {
-    "path": ""
+      "path": ""
   }
 }
