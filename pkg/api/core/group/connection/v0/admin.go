@@ -230,11 +230,19 @@ func GetByAdmin(c *gin.Context) {
 	}
 
 	bgpRouterResult := dbBgpRouter.Get(bgpRouter.ID, &core.BGPRouter{Model: gorm.Model{ID: *result.Connection[0].BGPRouterID}})
+	if bgpRouterResult.Err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: bgpRouterResult.Err.Error()})
+		return
+	}
 	if len(bgpRouterResult.BGPRouter) != 0 {
 		result.Connection[0].BGPRouter = bgpRouterResult.BGPRouter[0]
 	}
 
 	nocResult := dbNoc.Get(noc.ID, &core.NOC{Model: gorm.Model{ID: bgpRouterResult.BGPRouter[0].NOCID}})
+	if nocResult.Err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: nocResult.Err.Error()})
+		return
+	}
 	if len(nocResult.NOC) != 0 {
 		result.Connection[0].BGPRouter.NOC = nocResult.NOC[0]
 	}
