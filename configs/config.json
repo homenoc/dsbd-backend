@@ -38,7 +38,7 @@
     "Host": "mail.homenoc.ad.jp",
     "Domain": "homenoc.ad.jp",
     "Port": 587,
-    "Name": "Home NOC Operators' Group Support",
+    "From_Name": "Home NOC Operators' Group Support",
     "from": "",
     "user": "",
     "pass": "",

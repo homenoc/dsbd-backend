@@ -19,7 +19,7 @@ func generateMessageID() string {
 }
 
 func SendMail(d mailStruct.Mail) error {
-	from := "" + config.Conf.Mail.FromName + "<" + config.Conf.Mail.From + ">"
+	from := "" + config.Conf.Mail.FromName + " <" + config.Conf.Mail.From + ">"
 	to := d.ToMail
 	messageID := generateMessageID()
 
