@@ -2,7 +2,6 @@ package v0
 
 import (
 	"fmt"
-	"log"
 	"time"
 	"crypto/rand"
 	"math/big"
@@ -42,11 +41,11 @@ func SendMail(d mailStruct.Mail) error {
 		mail.WithUsername(config.Conf.Mail.User), mail.WithPassword(config.Conf.Mail.Pass),
 	)
 	if err != nil {
-		log.Fatalf("failed to create new mail delivery client: %s", err)
+		return fmt.Errorf("failed to create new mail delivery client: %s", err)
 	}
 	err = client.DialAndSend(message)
 	if err != nil {
-		log.Fatalf("failed to deliver mail: %s", err)
+		return fmt.Errorf("failed to deliver mail: %s", err)
 	}
 	noticeSlack(err, d)
 
