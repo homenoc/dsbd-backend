@@ -43,11 +43,10 @@ func SendMail(d mailStruct.Mail) error {
 	if err != nil {
 		log.Fatalf("failed to create new mail delivery client: %s", err)
 	}
-	if err := client.DialAndSend(message); err != nil {
+	err = client.DialAndSend(message)
+	if err != nil {
 		log.Fatalf("failed to deliver mail: %s", err)
 	}
-	log.Printf("Mail successfully delivered.")
-
 	noticeSlack(err, d)
 
 	return nil
