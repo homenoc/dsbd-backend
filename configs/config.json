@@ -35,8 +35,10 @@
     "dbName": "dsbd-backend"
   },
   "mail": {
-    "host": "127.0.0.1",
-    "port": 587,
+    "Host": "mail.homenoc.ad.jp",
+    "Domain": "homenoc.ad.jp",
+    "Port": 587,
+    "From_Name": "Home NOC Operators' Group Support",
     "from": "",
     "user": "",
     "pass": "",
