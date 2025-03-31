@@ -234,7 +234,7 @@ func GetByAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: bgpRouterResult.Err.Error()})
 		return
 	}
-	if len(bgpRouterResult.BGPRouter) != 0 {
+	if len(bgpRouterResult.BGPRouter) > 0 {
 		result.Connection[0].BGPRouter = bgpRouterResult.BGPRouter[0]
 	}
 
@@ -243,7 +243,7 @@ func GetByAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: nocResult.Err.Error()})
 		return
 	}
-	if len(nocResult.NOC) != 0 {
+	if len(nocResult.NOC) > 0 {
 		result.Connection[0].BGPRouter.NOC = nocResult.NOC[0]
 	}
 
