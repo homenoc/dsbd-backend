@@ -2,18 +2,23 @@ package v0
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/noc"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/noc/bgpRouter"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	dbConnection "github.com/homenoc/dsbd-backend/pkg/api/store/group/connection/v0"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
+	dbBgpRouter "github.com/homenoc/dsbd-backend/pkg/api/store/noc/bgpRouter/v0"
+	dbNoc "github.com/homenoc/dsbd-backend/pkg/api/store/noc/v0"
 	"gorm.io/gorm"
-	"log"
-	"net/http"
-	"strconv"
 )
 
 func AddByAdmin(c *gin.Context) {
@@ -223,6 +228,13 @@ func GetByAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
 	}
+
+	bgpRouterResult := dbBgpRouter.Get(bgpRouter.ID, &core.BGPRouter{Model: gorm.Model{ID: *result.Connection[0].BGPRouterID}})
+	result.Connection[0].BGPRouter = bgpRouterResult.BGPRouter[0]
+
+	nocResult := dbNoc.Get(noc.ID, &core.NOC{Model: gorm.Model{ID: bgpRouterResult.BGPRouter[0].NOCID}})
+	result.Connection[0].BGPRouter.NOC = nocResult.NOC[0]
+
 	c.JSON(http.StatusOK, connection.Result{Connection: result.Connection})
 }
 
