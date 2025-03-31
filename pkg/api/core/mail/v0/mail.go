@@ -26,10 +26,10 @@ func SendMail(d mailStruct.Mail) error {
 	message := mail.NewMsg()
 	message.SetMIMEVersion(mail.MIME10)
 	if err := message.From(from); err != nil {
-		log.Fatalf("failed to set FROM address: %s", err)
+		return fmt.Errorf("failed to set FROM address: %s", err)
 	}
 	if err := message.To(to); err != nil {
-		log.Fatalf("failed to set TO address: %s", err)
+		return fmt.Errorf("failed to set TO address: %s", err)
 	}
 	message.SetMessageIDWithValue(messageID)
 
