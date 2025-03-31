@@ -77,7 +77,9 @@ type DB struct {
 
 type MailServer struct {
 	Host     string `json:"host"`
+	Domain   string `json:"domain"`
 	Port     int    `json:"port"`
+	FromName string `json:"from_name"`
 	From     string `json:"from"`
 	CC       string `json:"cc"`
 	Contract string `json:"contract"`
