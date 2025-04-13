@@ -27,6 +27,8 @@ services:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: dsbd-backend
       MYSQL_USER: dsbd
+    ports:
+      - "127.0.0.1:3306:3306"
     volumes:
         - db:/var/lib/mysql
         - ./db/init:/docker-entrypoint-initdb.d

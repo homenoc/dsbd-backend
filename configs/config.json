@@ -15,7 +15,12 @@
         "pass": "admin"
       }
     },
-    "timezone": "Asia/Tokyo"
+    "timezone": "Asia/Tokyo",
+    "auth": {
+      "token1": "",
+      "token2": "",
+      "token3": ""
+    }
   },
   "stripe": {
     "webhook_secret_key": "",
@@ -30,12 +35,15 @@
     "dbName": "dsbd-backend"
   },
   "mail": {
-    "Host": "127.0.0.1",
+    "Host": "mail.homenoc.ad.jp",
+    "Domain": "homenoc.ad.jp",
     "Port": 587,
-    "From": "",
-    "User": "",
-    "Pass": "",
-    "Contract": ""
+    "From_Name": "Home NOC Operators' Group Support",
+    "from": "",
+    "user": "",
+    "pass": "",
+    "contract": "",
+    "cc": ""
   },
   "jpnic": {
     "url": "",
@@ -45,26 +53,141 @@
     "v6_key_file_path": "",
     "ca_file_path": ""
   },
+  "radius": {
+      "host": "",
+      "port": 0,
+      "user": "",
+      "pass": ""
+  },
+  "web": {
+    "url": ""
+  },
   "slack": {
-    "app_token": "",
-    "bot_token": "",
-    "channels": {
-      "main": "#test"
-    }
+      "app_token": "",
+      "bot_token": "",
+      "channels": {
+          "main": "",
+          "log": "",
+          "payment": "",
+          "payment_log": ""
+      }
   },
   "template": {
     "service": [
+      {
+        "name": "L2",
+        "type": "2000",
+        "comment": "L2接続",
+        "need_jpnic": true,
+        "need_global_as": false,
+        "need_comment": false,
+        "need_route": false,
+        "need_bgp": false
+      },
+      {
+        "name": "L3 Static",
+        "type": "3S00",
+        "comment": "Staticにて接続",
+        "need_jpnic": true,
+        "need_global_as": false,
+        "need_comment": false,
+        "need_route": true,
+        "need_bgp": false
+      },
+      {
+        "name": "L3 BGP",
+        "type": "3B00",
+        "comment": "BGPにて接続",
+        "need_jpnic": true,
+        "need_global_as": false,
+        "need_comment": false,
+        "need_route": true,
+        "need_bgp": true
+      },
+      {
+        "name": "トランジット提供",
+        "type": "IP3B",
+        "comment": "グローバルASのユーザに対するトランジット提供(L3 BGP)",
+        "need_jpnic": false,
+        "need_global_as": true,
+        "need_comment": false,
+        "need_route": true,
+        "need_bgp": true
+      }
     ],
     "connection": [
-
+      {
+        "name": "Ether IP",
+        "type": "EIP",
+        "comment": "EtherIP上で提供",
+        "need_internet": true,
+        "need_comment": false,
+        "need_cross_connect": false,
+        "is_l2": true,
+        "is_l3": false
+      },
+      {
+        "name": "GREトンネル",
+        "type": "GRE",
+        "comment": "GREトンネル上で/30のP2P接続を行う",
+        "need_internet": true,
+        "need_comment": false,
+        "need_cross_connect": false,
+        "is_l2": false,
+        "is_l3": true
+      },
+      {
+        "name": "IP-IPトンネル",
+        "type": "IPT",
+        "comment": "IP-IPトンネル上で/30のP2P接続を行う",
+        "need_internet": true,
+        "need_comment": false,
+        "need_cross_connect": false,
+        "is_l2": false,
+        "is_l3": true
+      },
+      {
+        "name": "Cross Connect",
+        "type": "CC0",
+        "comment": "構内接続、構内線、キャリア専用線上で提供",
+        "need_internet": false,
+        "need_comment": true,
+        "need_cross_connect": true,
+        "is_l2": true,
+        "is_l3": true
+      },
+      {
+        "name": "その他",
+        "type": "ETC",
+        "comment": "その他の接続方式",
+        "need_internet": false,
+        "need_comment": true,
+        "need_cross_connect": false,
+        "is_l2": false,
+        "is_l3": false
+      }
     ],
     "membership": [
     ],
     "ntt": [
+      "はい（IPoEによりIPv6インターネットへ接続可能）",
+      "はい（IPoEによりIPv6インターネットへ接続不可）",
+      "はい（フレッツv6オプションの契約なし）",
+      "いいえ（フレッツ以外でインターネットに接続可能）",
+      "いいえ（IPv6でのインターネット接続不可）",
+      "etc"
     ],
     "v4": [
+      "/27",
+      "/28",
+      "/29"
     ],
     "v6": [
+      "/48",
+      "/52",
+      "/56",
+      "/60",
+      "/64"
     ],
     "v4_route": [
       "IPv4 Full Route",
@@ -77,11 +200,15 @@
       "etc"
     ],
     "preferred_ap": [
+      "東日本",
+      "西日本",
+      "福岡",
+      "フィリピン"
     ],
     "mail": [
     ]
   },
   "log": {
-    "path": ""
+      "path": ""
   }
 }
