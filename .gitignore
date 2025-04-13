@@ -1,3 +1,4 @@
 /cmd/backend/*.json
 .idea/
 tmp
+.DS_Store
