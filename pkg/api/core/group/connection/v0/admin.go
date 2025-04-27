@@ -245,6 +245,9 @@ func GetByAdmin(c *gin.Context) {
 	}
 	if len(nocResult.NOC) > 0 {
 		result.Connection[0].BGPRouter.NOC = nocResult.NOC[0]
+	} else {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: fmt.Sprintf("NOCID %d is not found", bgpRouterResult.BGPRouter[0].NOCID)})
+		return
 	}
 
 	c.JSON(http.StatusOK, connection.Result{Connection: result.Connection})
