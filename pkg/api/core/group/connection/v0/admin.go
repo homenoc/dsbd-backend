@@ -11,13 +11,9 @@ import (
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/noc"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/noc/bgpRouter"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	dbConnection "github.com/homenoc/dsbd-backend/pkg/api/store/group/connection/v0"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
-	dbBgpRouter "github.com/homenoc/dsbd-backend/pkg/api/store/noc/bgpRouter/v0"
-	dbNoc "github.com/homenoc/dsbd-backend/pkg/api/store/noc/v0"
 	"gorm.io/gorm"
 )
 
@@ -226,27 +222,6 @@ func GetByAdmin(c *gin.Context) {
 	result := dbConnection.Get(connection.ID, &core.Connection{Model: gorm.Model{ID: uint(id)}})
 	if result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
-		return
-	}
-
-	bgpRouterResult := dbBgpRouter.Get(bgpRouter.ID, &core.BGPRouter{Model: gorm.Model{ID: *result.Connection[0].BGPRouterID}})
-	if bgpRouterResult.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: bgpRouterResult.Err.Error()})
-		return
-	}
-	if len(bgpRouterResult.BGPRouter) > 0 {
-		result.Connection[0].BGPRouter = bgpRouterResult.BGPRouter[0]
-	}
-
-	nocResult := dbNoc.Get(noc.ID, &core.NOC{Model: gorm.Model{ID: bgpRouterResult.BGPRouter[0].NOCID}})
-	if nocResult.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: nocResult.Err.Error()})
-		return
-	}
-	if len(nocResult.NOC) > 0 {
-		result.Connection[0].BGPRouter.NOC = nocResult.NOC[0]
-	} else {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: fmt.Sprintf("NOCID %d is not found", bgpRouterResult.BGPRouter[0].NOCID)})
 		return
 	}
 
