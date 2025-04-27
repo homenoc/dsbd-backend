@@ -2,12 +2,13 @@ package v0
 
 import (
 	"fmt"
+	"log"
+	"time"
+
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
 	"gorm.io/gorm"
-	"log"
-	"time"
 )
 
 func Create(connection *core.Connection) (*core.Connection, error) {
@@ -92,6 +93,7 @@ func Get(base int, data *core.Connection) connection.ResultDatabase {
 
 	if base == connection.ID { //ID
 		err = db.Preload("BGPRouter").
+			Preload("BGPRouter.NOC").
 			Preload("TunnelEndPointRouterIP").
 			Preload("Service").
 			Preload("Service.Group").
