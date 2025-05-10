@@ -68,7 +68,7 @@ func Update(base int, c core.Connection) error {
 	} else if connection.UpdateServiceID == base {
 		err = db.Model(&core.Connection{Model: gorm.Model{ID: c.ID}}).Updates(core.Connection{ServiceID: c.ServiceID}).Error
 	} else if base == connection.UpdateAll {
-		err = db.Model(&core.Connection{Model: gorm.Model{ID: c.ID}}).Updates(c).Error
+		err = db.Model(&core.Connection{Model: gorm.Model{ID: c.ID}}).Select("*").Updates(c).Error
 	} else {
 		log.Println("base select error")
 		return fmt.Errorf("(%s)error: base select\n", time.Now())
