@@ -19,7 +19,7 @@ env:
 
 jobs:
   build-and-push:
-    runs-on: ${{ matrix.architecture.runner }}
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
@@ -31,13 +31,6 @@ jobs:
             target: user-api
           - name: admin-api
             target: admin-api
-        architecture:
-          - runner: ubuntu-latest
-            platform: linux/amd64
-            suffix: amd64
-          - runner: ubuntu-24.04-arm
-            platform: linux/arm64
-            suffix: arm64
 
     steps:
       - name: Checkout repository
@@ -59,9 +52,9 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service.name }}
           tags: |
-            type=raw,value=latest-${{ matrix.architecture.suffix }},enable=${{ github.ref == 'refs/heads/main' }}
-            type=raw,value=develop-${{ matrix.architecture.suffix }},enable=${{ github.ref == 'refs/heads/develop' }}
-            type=sha,prefix=sha-,format=short,suffix=-${{ matrix.architecture.suffix }}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=raw,value=develop,enable=${{ github.ref == 'refs/heads/develop' }}
+            type=sha,prefix=sha-,format=short
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -69,48 +62,8 @@ jobs:
           context: .
           file: ./Dockerfile
           target: ${{ matrix.service.target }}
-          platforms: ${{ matrix.architecture.platform }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-  create-manifest:
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-
-    strategy:
-      matrix:
-        service:
-          - name: user-api
-          - name: admin-api
-
-    steps:
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create and push manifest for latest
-        if: github.ref == 'refs/heads/main'
-        run: |
-          docker manifest create \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service.name }}:latest \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service.name }}:latest-amd64 \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service.name }}:latest-arm64
-          docker manifest push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service.name }}:latest
-
-      - name: Create and push manifest for develop
-        if: github.ref == 'refs/heads/develop'
-        run: |
-          docker manifest create \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service.name }}:develop \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service.name }}:develop-amd64 \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service.name }}:develop-arm64
-          docker manifest push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service.name }}:develop
