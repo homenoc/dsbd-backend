@@ -2,6 +2,7 @@ package v0
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
@@ -22,9 +23,11 @@ func AgreeAntisocialCheck(c *gin.Context) {
 		return
 	}
 
+	now := time.Now()
 	if err := dbUser.Update(user.UpdateAntisocialCheck, &core.User{
-		Model:           gorm.Model{ID: authResult.User.ID},
-		AntisocialCheck: &[]bool{true}[0],
+		Model:             gorm.Model{ID: authResult.User.ID},
+		AntisocialCheck:   &[]bool{true}[0],
+		AntisocialCheckAt: &now,
 	}); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return

@@ -5,16 +5,17 @@ import (
 )
 
 type User struct {
-	ID               uint   `json:"id"`
-	GroupID          uint   `json:"group_id"`
-	StripeCustomerID string `json:"stripe_customer_id"`
-	Name             string `json:"name"`
-	NameEn           string `json:"name_en"`
-	Email            string `json:"email"`
-	Status           uint   `json:"status"`
-	Level            uint   `json:"level"`
-	MailVerify       *bool  `json:"mail_verify"`
-	AntisocialCheck  *bool  `json:"antisocial_check"`
+	ID                uint       `json:"id"`
+	GroupID           uint       `json:"group_id"`
+	StripeCustomerID  string     `json:"stripe_customer_id"`
+	Name              string     `json:"name"`
+	NameEn            string     `json:"name_en"`
+	Email             string     `json:"email"`
+	Status            uint       `json:"status"`
+	Level             uint       `json:"level"`
+	MailVerify        *bool      `json:"mail_verify"`
+	AntisocialCheck   *bool      `json:"antisocial_check"`
+	AntisocialCheckAt *time.Time `json:"antisocial_check_at"`
 }
 
 type Group struct {

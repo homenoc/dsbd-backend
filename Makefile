@@ -1,4 +1,4 @@
-.PHONY: tidy build run-user run-admin migrate seed test lint db-up db-down db-logs docker-up docker-down docker-migrate docker-seed docker-logs setup setup-docker clean
+.PHONY: tidy build run-user run-admin migrate seed test lint db-up db-down db-clean db-logs docker-up docker-down docker-clean docker-migrate docker-seed docker-logs setup setup-docker clean
 
 # 依存関係の整理
 tidy:
@@ -38,6 +38,9 @@ db-up:
 db-down:
 	docker compose -f compose.dev.yaml down
 
+db-clean:
+	docker compose -f compose.dev.yaml down -v
+
 db-logs:
 	docker compose -f compose.dev.yaml logs -f
 
@@ -47,6 +50,9 @@ docker-up:
 
 docker-down:
 	docker compose down
+
+docker-clean:
+	docker compose down -v
 
 docker-logs:
 	docker compose logs -f
