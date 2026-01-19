@@ -26,8 +26,15 @@ func ConnectDB() (*gorm.DB, error) {
 }
 
 func InitDB() {
-	db, _ := ConnectDB()
-	result := db.AutoMigrate(
+	log.Println("[DB] Connecting to database...")
+	db, err := ConnectDB()
+	if err != nil {
+		log.Fatalf("[DB] Failed to connect: %v", err)
+	}
+	log.Println("[DB] Connected successfully")
+
+	log.Println("[DB] Running migrations...")
+	err = db.AutoMigrate(
 		&core.User{},
 		&core.Group{},
 		&core.Memo{},
@@ -46,5 +53,8 @@ func InitDB() {
 		&core.Token{},
 		&core.Notice{},
 	)
-	log.Println(result)
+	if err != nil {
+		log.Fatalf("[DB] Migration failed: %v", err)
+	}
+	log.Println("[DB] Migration completed successfully")
 }

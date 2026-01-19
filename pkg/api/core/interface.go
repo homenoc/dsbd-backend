@@ -18,8 +18,9 @@ type User struct {
 	Pass          string    `json:"pass"`
 	ExpiredStatus *uint     `json:"expired_status"`
 	Level         uint      `json:"level"`
-	MailVerify    *bool     `json:"mail_verify"`
-	MailToken     string    `json:"mail_token"`
+	MailVerify       *bool     `json:"mail_verify"`
+	MailToken        string    `json:"mail_token"`
+	AntisocialCheck  *bool     `json:"antisocial_check"`
 }
 
 type Group struct {

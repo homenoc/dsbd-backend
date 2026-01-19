@@ -14,6 +14,7 @@ type User struct {
 	Status           uint   `json:"status"`
 	Level            uint   `json:"level"`
 	MailVerify       *bool  `json:"mail_verify"`
+	AntisocialCheck  *bool  `json:"antisocial_check"`
 }
 
 type Group struct {

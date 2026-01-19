@@ -53,5 +53,7 @@ func NoticeLog(color string, baseKeyValue []string) {
 			Fields: slackAttachField,
 		},
 	))
-	fmt.Println(err)
+	if err != nil {
+		fmt.Println("[Slack] Notification error:", err)
+	}
 }
