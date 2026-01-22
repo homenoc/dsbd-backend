@@ -8,27 +8,54 @@ HomeNOC WebSystem Backend - A Go backend service for managing network operations
 
 ## Build & Run Commands
 
+### Tool Management (aqua)
 ```bash
-# Build
-go build -o tmp/main cmd/backend/main.go
+# Install aqua (if not installed)
+brew install aquaproj/aqua/aqua
 
-# Initialize database (required on first run)
-go run cmd/backend/main.go init database --config config.json
-
-# Start User API (port 8080)
-go run cmd/backend/main.go start user --config config.json
-
-# Start Admin API (port 8081)
-go run cmd/backend/main.go start admin --config config.json
-
-# Run tests
-go test ./...
-
-# Local development with Docker Compose (includes MySQL + hot reload via Air)
-mkdir tmp
-cp configs/config.json tmp/config.json
-docker compose up -d
+# Install development tools (Go, Air, golangci-lint)
+aqua i
 ```
+
+### Local Development (Recommended)
+```bash
+# Initial setup
+make setup              # Creates tmp/ and copies config
+
+# Database (Docker)
+make db-up              # Start MySQL container
+make migrate            # Run database migrations
+make seed               # Create test accounts
+
+# Run servers
+make run-user           # User API on :8080
+make run-admin          # Admin API on :8081
+
+# Stop
+make db-down
+```
+
+### Docker Compose (Full Stack)
+```bash
+make setup-docker       # Setup with Docker config
+make docker-up          # Start all containers
+make docker-migrate     # Run migrations in container
+make docker-seed        # Create test data in container
+```
+
+### Testing & Linting
+```bash
+make test               # Run all tests (go test ./...)
+make lint               # Run golangci-lint
+
+# Run single test
+go test -v -run TestFunctionName ./path/to/package/...
+```
+
+### Test Accounts (created by `make seed`)
+- **Master**: master@example.com / password (Level 1: full access)
+- **Member**: member@example.com / password (Level 2: general member)
+- **Admin API**: Uses Basic auth from config (default: admin/admin)
 
 ## Architecture
 
@@ -65,6 +92,7 @@ pkg/api/
 - Handlers in `pkg/api/core/{feature}/v0/` handle HTTP requests
 - Naming convention: `*ByAdmin` suffix for admin-only handlers
 - Store layer in `pkg/api/store/{feature}/` for database operations
+- Routes defined in `pkg/api/api.go` (AdminRestAPI and UserRestAPI functions)
 
 ### Configuration
 Single JSON config file (`configs/config.json`) loaded via Viper. Key sections:
@@ -74,10 +102,20 @@ Single JSON config file (`configs/config.json`) loaded via Viper. Key sections:
 - `slack`: Notification channels
 - `mail`: SMTP settings
 - `jpnic`: IP address registration certificates
+- `template`: Service types (L2, L3 Static, L3 BGP, Transit) and connection types (EtherIP, GRE, IP-IP, Cross Connect)
 
 ## Database
 
 - **ORM**: GORM with MySQL driver
-- **Auto-migration**: Handled in `InitDB()`
+- **Auto-migration**: Handled in `store.InitDB()` in `pkg/api/store/store.go`
 - **Note**: MySQL `sql_mode=''` may be needed for long text fields
 - Database diagram: https://drawsql.app/y-net/diagrams/dsbd-backend/embed
+
+## Testing
+
+Tests use `go-sqlmock` for database mocking. Pattern for database tests:
+```go
+mock, cleanup := setupTestDB(t)
+defer cleanup()
+// Use store.SetTestDB() / store.ClearTestDB() for test DB injection
+```
