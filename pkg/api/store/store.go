@@ -9,7 +9,23 @@ import (
 	"strconv"
 )
 
+// testDB is used for testing purposes only
+var testDB *gorm.DB
+
+// SetTestDB sets a test database connection (for testing only)
+func SetTestDB(db *gorm.DB) {
+	testDB = db
+}
+
+// ClearTestDB clears the test database connection
+func ClearTestDB() {
+	testDB = nil
+}
+
 func ConnectDB() (*gorm.DB, error) {
+	if testDB != nil {
+		return testDB, nil
+	}
 	user := config.Conf.DB.User
 	pass := config.Conf.DB.Pass
 	protocol := "tcp(" + config.Conf.DB.IP + ":" + strconv.Itoa(config.Conf.DB.Port) + ")"
