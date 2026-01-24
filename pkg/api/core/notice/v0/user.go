@@ -21,7 +21,7 @@ func userExtraction(inputUser, inputGroup, inputNOC []uint) []uint {
 		//I should implement check function
 		for _, tmpGroup := range inputGroup {
 			result := dbGroup.Get(group.ID, &core.Group{Model: gorm.Model{ID: tmpGroup}})
-			if result.Err != nil {
+			if result.Err == nil {
 				for _, tmpResultGroup := range result.Group {
 					for _, tmpUser := range tmpResultGroup.Users {
 						userArray = append(userArray, tmpUser.ID)
