@@ -59,18 +59,19 @@ func AddByAdmin(c *gin.Context) {
 		return
 	}
 
-	// check NTT(Internet)
-	err = config.CheckIncludeNTTTemplate(input.NTT)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
+	// check NTT and preferredAP (internet)
+	if connectionTemplate.NeedInternet {
+		err = config.CheckIncludeNTTTemplate(input.NTT)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+			return
+		}
 
-	// check preferredAP
-	err = config.CheckIncludePreferredAPTemplate(input.PreferredAP)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
+		err = config.CheckIncludePreferredAPTemplate(input.PreferredAP)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+			return
+		}
 	}
 
 	resultService := dbService.Get(connection.ID, &core.Service{Model: gorm.Model{ID: uint(id)}})
@@ -127,6 +128,8 @@ func AddByAdmin(c *gin.Context) {
 		IX:                input.IX,
 		IXPeerType:        input.IXPeerType,
 		IXVlanID:          input.IXVlanID,
+		LinkV4Your:        input.LinkV4Your,
+		LinkV6Your:        input.LinkV6Your,
 		IPv4Route:         input.IPv4Route,
 		IPv6Route:         input.IPv6Route,
 		NTT:               input.NTT,
