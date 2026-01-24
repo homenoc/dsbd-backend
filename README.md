@@ -104,5 +104,24 @@ make test
 sql_mode=''
 ```
 
+### 本番データでのマイグレーションテスト
+本番データ（data.sql）を使ってマイグレーションが通るかテストする手順：
+
+```shell
+# 1. DBを初期化してdata.sqlをインポート
+docker compose down -v
+docker compose up -d db
+sleep 5
+docker compose exec -T db mysql -uroot -proot dsbd-backend < data.sql
+
+# 2. マイグレーション実行
+make migrate
+```
+
+**注意**: 本番でマイグレーション前に無効な日付データの修正が必要な場合があります：
+```sql
+UPDATE ips SET start_date = NULL WHERE start_date = '0000-00-00 00:00:00';
+```
+
 ## Database
 https://drawsql.app/y-net/diagrams/dsbd-backend/embed

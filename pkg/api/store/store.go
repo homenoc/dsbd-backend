@@ -33,7 +33,8 @@ func ConnectDB() (*gorm.DB, error) {
 
 	dsn := user + ":" + pass + "@" + protocol + "/" + dbName + "?charset=utf8&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
-		PrepareStmt: true,
+		PrepareStmt:                          true,
+		DisableForeignKeyConstraintWhenMigrating: true,
 	})
 	if err != nil {
 		return nil, err
