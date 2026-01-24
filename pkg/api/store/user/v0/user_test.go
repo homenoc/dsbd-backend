@@ -2,10 +2,11 @@ package v0
 
 import (
 	"testing"
+	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/noc"
+	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -37,22 +38,26 @@ func setupTestDB(t *testing.T) (sqlmock.Sqlmock, func()) {
 	return mock, cleanup
 }
 
-func TestUpdatePartField(t *testing.T) {
+func TestUpdateAntisocialCheck(t *testing.T) {
 	mock, cleanup := setupTestDB(t)
 	defer cleanup()
 
+	now := time.Now()
+	trueValue := true
+
 	mock.ExpectBegin()
-	mock.ExpectExec("UPDATE `nocs`").
-		WithArgs(sqlmock.AnyArg(), "nocTest", uint(1)).
+	mock.ExpectExec("UPDATE `users`").
+		WithArgs(sqlmock.AnyArg(), trueValue, sqlmock.AnyArg(), uint(1)).
 		WillReturnResult(sqlmock.NewResult(0, 1))
 	mock.ExpectCommit()
 
-	testTemplate := core.NOC{
-		Model: gorm.Model{ID: 1},
-		Name:  "nocTest",
+	testUser := &core.User{
+		Model:             gorm.Model{ID: 1},
+		AntisocialCheck:   &trueValue,
+		AntisocialCheckAt: &now,
 	}
 
-	if err := Update(noc.UpdateAll, testTemplate); err != nil {
+	if err := Update(user.UpdateAntisocialCheck, testUser); err != nil {
 		t.Fatal(err)
 	}
 

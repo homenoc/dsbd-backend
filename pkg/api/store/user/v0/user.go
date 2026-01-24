@@ -74,17 +74,21 @@ func Update(base int, u *core.User) error {
 		err = db.Model(&core.User{Model: gorm.Model{ID: u.ID}}).Updates(core.User{GroupID: u.GroupID}).Error
 	} else if user.UpdateLevel == base {
 		err = db.Model(&core.User{Model: gorm.Model{ID: u.ID}}).Updates(core.User{Level: u.Level}).Error
+	} else if user.UpdateAntisocialCheck == base {
+		err = db.Model(&core.User{Model: gorm.Model{ID: u.ID}}).Updates(core.User{AntisocialCheck: u.AntisocialCheck, AntisocialCheckAt: u.AntisocialCheckAt}).Error
 	} else if user.UpdateAll == base {
 		err = db.Model(&core.User{Model: gorm.Model{ID: u.ID}}).Updates(core.User{
-			GroupID:       u.GroupID,
-			Name:          u.Name,
-			NameEn:        u.NameEn,
-			Email:         u.Email,
-			Pass:          u.Pass,
-			Level:         u.Level,
-			MailVerify:    u.MailVerify,
-			MailToken:     u.MailToken,
-			ExpiredStatus: u.ExpiredStatus,
+			GroupID:           u.GroupID,
+			Name:              u.Name,
+			NameEn:            u.NameEn,
+			Email:             u.Email,
+			Pass:              u.Pass,
+			Level:             u.Level,
+			MailVerify:        u.MailVerify,
+			MailToken:         u.MailToken,
+			ExpiredStatus:     u.ExpiredStatus,
+			AntisocialCheck:   u.AntisocialCheck,
+			AntisocialCheckAt: u.AntisocialCheckAt,
 		}).Error
 	} else {
 		log.Println("base select error")

@@ -28,7 +28,7 @@
     "membership_configuration": ""
   },
   "db": {
-    "ip": "127.0.0.1",
+    "ip": "db",
     "port": 3306,
     "user": "root",
     "pass": "root",
@@ -157,16 +157,6 @@
         "is_l3": true
       },
       {
-        "name": "IX接続",
-        "type": "IXP",
-        "comment": "インターネットエクスチェンジ経由で接続",
-        "need_internet": false,
-        "need_comment": false,
-        "need_cross_connect": false,
-        "is_l2": false,
-        "is_l3": true
-      },
-      {
         "name": "その他",
         "type": "ETC",
         "comment": "その他の接続方式",
@@ -178,38 +168,6 @@
       }
     ],
     "membership": [
-    ],
-    "ix": [
-      {
-        "name": "JPIX TOKYO",
-        "ipv4_address": "210.171.225.165",
-        "ipv6_address": "2001:de8:8::5:9105:1"
-      },
-      {
-        "name": "JPIX OSAKA",
-        "ipv4_address": "103.246.232.165",
-        "ipv6_address": "2001:de8:8:6:0:5:9105:1"
-      },
-      {
-        "name": "Equinix Tokyo",
-        "ipv4_address": "203.190.230.227",
-        "ipv6_address": "2001:de8:5::5:9105:1"
-      },
-      {
-        "name": "BBIX Manila",
-        "ipv4_address": "61.245.0.45",
-        "ipv6_address": "2001:ded:4000::5:9105:1"
-      },
-      {
-        "name": "JCIX",
-        "ipv4_address": "202.226.3.2",
-        "ipv6_address": "2402:b7c0:e000::5:9105:1"
-      },
-      {
-        "name": "ENTERNET-IX",
-        "ipv4_address": "163.220.192.36",
-        "ipv6_address": "2401:5e40:c600::5:9105:1"
-      }
     ],
     "ntt": [
       "はい（IPoEによりIPv6インターネットへ接続可能）",

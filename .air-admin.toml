@@ -3,7 +3,7 @@ tmp_dir = "tmp"
 
 [build]
   args_bin = []
-  bin = "tmp/main init database --config tmp/config.json;tmp/main start admin --config tmp/config.json"
+  bin = "tmp/main start admin --config tmp/config.json"
   cmd = "go build -o tmp/main cmd/backend/main.go"
   delay = 0
   exclude_dir = ["assets", "tmp", "vendor", "testdata", "db"]

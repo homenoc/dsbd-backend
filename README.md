@@ -9,11 +9,89 @@
 * Slack通知
 * 各システムとの連携
 
-## 初回実行時
+## セットアップ
+
+### 開発ツールのインストール (aqua)
+[aqua](https://aquaproj.github.io/)を使用して開発ツール（Go, Air, golangci-lint）を管理しています。
+
+```shell
+# aquaのインストール（未インストールの場合）
+brew install aquaproj/aqua/aqua
+
+# PATHの設定（.zshrc または .bashrc に追加）
+export PATH="$(aqua root-dir)/bin:$PATH"
+
+# 開発ツールのインストール
+aqua i
 ```
-cd cmd/backend
-go run . init database --config config.json
-go run . init database 
+
+### ローカル開発（推奨）
+DBのみDockerで起動し、Goアプリはローカルで実行します。
+
+```shell
+# 初期設定（ローカル用config）
+make setup
+
+# DB起動
+make db-up
+
+# マイグレーション（初回のみ）
+make migrate
+
+# シードデータ作成（テストユーザー等）
+make seed
+
+# User API起動 (port 8080)
+make run-user
+
+# Admin API起動 (port 8081)
+make run-admin
+
+# DB停止
+make db-down
+```
+
+### Docker Compose（全サービス）
+全てのサービスをDockerで起動します。
+
+```shell
+# 初期設定（Docker用config）
+make setup-docker
+
+# コンテナ起動
+make docker-up
+
+# マイグレーション（初回のみ）
+make docker-migrate
+
+# シードデータ作成（テストユーザー等）
+make docker-seed
+
+# ログ確認
+make docker-logs
+
+# コンテナ停止
+make docker-down
+```
+
+- UserAPI  : http://localhost:8080
+- AdminAPI : http://localhost:8081
+
+### テストアカウント
+`make seed` で作成されるテストアカウント（User API用）：
+
+| 種別 | メールアドレス | パスワード | 権限 |
+|------|---------------|-----------|------|
+| マスター | master@example.com | password | Level 1: 申請・変更・閲覧 |
+| 一般メンバー | member@example.com | password | Level 2: 一般メンバー |
+
+※ 反社チェック未同意状態で作成されます（`PUT /api/v1/user/antisocial/agree` で同意）
+
+Admin APIは `config.json` のBasic認証を使用（デフォルト: admin/admin）
+
+### テスト
+```shell
+make test
 ```
 
 ## MySQL
@@ -26,14 +104,24 @@ go run . init database
 sql_mode=''
 ```
 
-## 開発環境 (Docker Compose V2)
+### 本番データでのマイグレーションテスト
+本番データ（data.sql）を使ってマイグレーションが通るかテストする手順：
+
 ```shell
-mkdir tmp
-cp configs/config.json tmp/config.json
-docker compose up -d
+# 1. DBを初期化してdata.sqlをインポート
+docker compose down -v
+docker compose up -d db
+sleep 5
+docker compose exec -T db mysql -uroot -proot dsbd-backend < data.sql
+
+# 2. マイグレーション実行
+make migrate
 ```
-UserAPI  :8080
-AdminAPI :8081
+
+**注意**: 本番でマイグレーション前に無効な日付データの修正が必要な場合があります：
+```sql
+UPDATE ips SET start_date = NULL WHERE start_date = '0000-00-00 00:00:00';
+```
 
 ## Database
 https://drawsql.app/y-net/diagrams/dsbd-backend/embed
