@@ -33,6 +33,11 @@ func AdminRestAPI() {
 	router := gin.Default()
 	router.Use(cors)
 
+	// Health check endpoint
+	router.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	})
+
 	go token.TokenRemove()
 
 	api := router.Group("/api")
@@ -229,6 +234,11 @@ func UserRestAPI() {
 	router := gin.Default()
 	router.Use(cors)
 
+	// Health check endpoint
+	router.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	})
+
 	api := router.Group("/api")
 	{
 		v1 := api.Group("/v1")
@@ -259,6 +269,8 @@ func UserRestAPI() {
 			v1.POST("/user", user.Add)
 			// User Create(Group)
 			v1.POST("/group/:id/user", user.AddGroup)
+			// Antisocial Check
+			v1.PUT("/user/antisocial/agree", user.AgreeAntisocialCheck)
 			// User Update
 			v1.PUT("/user/:id", user.Update)
 			// User Delete

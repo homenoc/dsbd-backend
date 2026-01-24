@@ -43,13 +43,15 @@ func Get(c *gin.Context) {
 	}
 
 	resultUser = info.User{
-		ID:         authResult.User.ID,
-		GroupID:    groupID,
-		Name:       authResult.User.Name,
-		NameEn:     authResult.User.NameEn,
-		Email:      authResult.User.Email,
-		Level:      authResult.User.Level,
-		MailVerify: authResult.User.MailVerify,
+		ID:                authResult.User.ID,
+		GroupID:           groupID,
+		Name:              authResult.User.Name,
+		NameEn:            authResult.User.NameEn,
+		Email:             authResult.User.Email,
+		Level:             authResult.User.Level,
+		MailVerify:        authResult.User.MailVerify,
+		AntisocialCheck:   authResult.User.AntisocialCheck,
+		AntisocialCheckAt: authResult.User.AntisocialCheckAt,
 	}
 
 	//log.Println(*authResult.User.Group.PaymentCouponTemplateID)
@@ -123,13 +125,15 @@ func Get(c *gin.Context) {
 		if 0 < authResult.User.Level && authResult.User.Level <= 3 {
 			for _, tmpUser := range dbUserResult.User[0].Group.Users {
 				resultUserList = append(resultUserList, info.User{
-					ID:         tmpUser.ID,
-					GroupID:    *tmpUser.GroupID,
-					Name:       tmpUser.Name,
-					NameEn:     tmpUser.NameEn,
-					Email:      tmpUser.Email,
-					Level:      tmpUser.Level,
-					MailVerify: tmpUser.MailVerify,
+					ID:                tmpUser.ID,
+					GroupID:           *tmpUser.GroupID,
+					Name:              tmpUser.Name,
+					NameEn:            tmpUser.NameEn,
+					Email:             tmpUser.Email,
+					Level:             tmpUser.Level,
+					MailVerify:        tmpUser.MailVerify,
+					AntisocialCheck:   tmpUser.AntisocialCheck,
+					AntisocialCheckAt: tmpUser.AntisocialCheckAt,
 				})
 			}
 		}

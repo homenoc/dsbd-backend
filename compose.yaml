@@ -22,7 +22,8 @@ services:
     depends_on:
         -  db
   db:
-    image: mysql
+    image: mariadb:10.6
+    command: --sql_mode=""
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: dsbd-backend
