@@ -24,23 +24,26 @@ var startUserCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		confPath, err := cmd.Flags().GetString("config")
 		if err != nil {
-			log.Fatalf("could not greet: %v", err)
+			log.Fatalf("[Config] Failed to get config path: %v", err)
 		}
 		config.IsDebug, err = cmd.Flags().GetBool("debug")
 		if err != nil {
-			log.Fatalf("could not greet: %v", err)
+			log.Fatalf("[Config] Failed to get debug flag: %v", err)
 		}
+		log.Printf("[Config] Loading config from %s", confPath)
 		if config.GetConfig(confPath) != nil {
-			log.Fatalf("error config process |%v", err)
+			log.Fatalf("[Config] Failed to load config: %v", err)
 		}
+		log.Println("[Config] Config loaded successfully")
+
 		notification.NewNotification()
 		notification.NoticeLog("good", []string{
 			"Status: User側 API起動",
 		})
 		stripe.Key = config.Conf.Stripe.SecretKey
 
+		log.Printf("[Server] Starting User API on port %d", config.Conf.Controller.User.Port)
 		api.UserRestAPI()
-		log.Println("end")
 	},
 }
 
@@ -51,15 +54,17 @@ var startAdminCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		confPath, err := cmd.Flags().GetString("config")
 		if err != nil {
-			log.Fatalf("could not greet: %v", err)
+			log.Fatalf("[Config] Failed to get config path: %v", err)
 		}
 		config.IsDebug, err = cmd.Flags().GetBool("debug")
 		if err != nil {
-			log.Fatalf("could not greet: %v", err)
+			log.Fatalf("[Config] Failed to get debug flag: %v", err)
 		}
+		log.Printf("[Config] Loading config from %s", confPath)
 		if config.GetConfig(confPath) != nil {
-			log.Fatalf("error config process |%v", err)
+			log.Fatalf("[Config] Failed to load config: %v", err)
 		}
+		log.Println("[Config] Config loaded successfully")
 
 		notification.NewNotification()
 		go slack.StartAppSlack()
@@ -68,8 +73,8 @@ var startAdminCmd = &cobra.Command{
 		})
 		stripe.Key = config.Conf.Stripe.SecretKey
 
+		log.Printf("[Server] Starting Admin API on port %d", config.Conf.Controller.Admin.Port)
 		api.AdminRestAPI()
-		log.Println("end")
 	},
 }
 

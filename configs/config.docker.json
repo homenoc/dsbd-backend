@@ -28,7 +28,7 @@
     "membership_configuration": ""
   },
   "db": {
-    "ip": "127.0.0.1",
+    "ip": "db",
     "port": 3306,
     "user": "root",
     "pass": "root",

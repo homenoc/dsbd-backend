@@ -9,7 +9,23 @@ import (
 	"strconv"
 )
 
+// testDB is used for testing purposes only
+var testDB *gorm.DB
+
+// SetTestDB sets a test database connection (for testing only)
+func SetTestDB(db *gorm.DB) {
+	testDB = db
+}
+
+// ClearTestDB clears the test database connection
+func ClearTestDB() {
+	testDB = nil
+}
+
 func ConnectDB() (*gorm.DB, error) {
+	if testDB != nil {
+		return testDB, nil
+	}
 	user := config.Conf.DB.User
 	pass := config.Conf.DB.Pass
 	protocol := "tcp(" + config.Conf.DB.IP + ":" + strconv.Itoa(config.Conf.DB.Port) + ")"
@@ -17,7 +33,8 @@ func ConnectDB() (*gorm.DB, error) {
 
 	dsn := user + ":" + pass + "@" + protocol + "/" + dbName + "?charset=utf8&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
-		PrepareStmt: true,
+		PrepareStmt:                          true,
+		DisableForeignKeyConstraintWhenMigrating: true,
 	})
 	if err != nil {
 		return nil, err
@@ -26,8 +43,15 @@ func ConnectDB() (*gorm.DB, error) {
 }
 
 func InitDB() {
-	db, _ := ConnectDB()
-	result := db.AutoMigrate(
+	log.Println("[DB] Connecting to database...")
+	db, err := ConnectDB()
+	if err != nil {
+		log.Fatalf("[DB] Failed to connect: %v", err)
+	}
+	log.Println("[DB] Connected successfully")
+
+	log.Println("[DB] Running migrations...")
+	err = db.AutoMigrate(
 		&core.User{},
 		&core.Group{},
 		&core.Memo{},
@@ -46,5 +70,8 @@ func InitDB() {
 		&core.Token{},
 		&core.Notice{},
 	)
-	log.Println(result)
+	if err != nil {
+		log.Fatalf("[DB] Migration failed: %v", err)
+	}
+	log.Println("[DB] Migration completed successfully")
 }

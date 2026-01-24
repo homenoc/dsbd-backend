@@ -269,6 +269,8 @@ func UserRestAPI() {
 			v1.POST("/user", user.Add)
 			// User Create(Group)
 			v1.POST("/group/:id/user", user.AddGroup)
+			// Antisocial Check
+			v1.PUT("/user/antisocial/agree", user.AgreeAntisocialCheck)
 			// User Update
 			v1.PUT("/user/:id", user.Update)
 			// User Delete

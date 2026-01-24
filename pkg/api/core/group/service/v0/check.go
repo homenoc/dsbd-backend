@@ -154,7 +154,7 @@ func ipCheck(admin, restrict bool, ip service.IPInput) error {
 			}
 			subnet, err := strconv.Atoi(ip.IP[1:])
 			if err != nil {
-				return fmt.Errorf(err.Error())
+				return err
 			}
 			quantity := uint(math.Pow(2, float64(32-subnet)))
 
