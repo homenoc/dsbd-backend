@@ -1,8 +1,9 @@
 package core
 
 import (
-	"gorm.io/gorm"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type User struct {
@@ -101,8 +102,8 @@ type Connection struct {
 	ConnectionComment        string                 `json:"connection_comment"` // ServiceがETCの時や補足説明で必要
 	ConnectionNumber         uint                   `json:"connection_number"`
 	IX                       string                 `json:"ix"`           // 接続IX（configで定義されたIX名）
-	IXPeerType               string                 `json:"ix_peer_type"` // パブリック or PC/CUG
-	IXVlanID                 string                 `json:"ix_vlan_id"`   // VLAN-ID（PC/CUGの場合）
+	IXPeerType               string                 `json:"ix_peer_type"` // パブリック or PI/CUG
+	IXVlanID                 string                 `json:"ix_vlan_id"`   // VLAN-ID（PI/CUGの場合）
 	IPv4Route                string                 `json:"ipv4_route"`
 	IPv6Route                string                 `json:"ipv6_route"`
 	NTT                      string                 `json:"ntt"`
