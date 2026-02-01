@@ -66,3 +66,49 @@ func CheckIncludePreferredAPTemplate(data string) error {
 
 	return fmt.Errorf("preferredAP template is not found")
 }
+
+func CheckIncludeIXTemplate(data string) error {
+	if data == "" {
+		return fmt.Errorf("IX is required for IXP connection")
+	}
+	for _, ix := range Conf.Template.IX {
+		if ix.Name == data {
+			return nil
+		}
+	}
+
+	return fmt.Errorf("IX template is not found: %s", data)
+}
+
+func CheckIXPeerType(data string) error {
+	validTypes := []string{"パブリック", "PC/CUG"}
+	for _, t := range validTypes {
+		if t == data {
+			return nil
+		}
+	}
+
+	return fmt.Errorf("invalid IXPeerType: %s (valid values: パブリック, PC/CUG)", data)
+}
+
+func CheckIXFields(ix, peerType, vlanID string) error {
+	// IX名のチェック
+	if err := CheckIncludeIXTemplate(ix); err != nil {
+		return err
+	}
+
+	// IXPeerTypeのチェック
+	if peerType == "" {
+		return fmt.Errorf("IXPeerType is required for IXP connection")
+	}
+	if err := CheckIXPeerType(peerType); err != nil {
+		return err
+	}
+
+	// PC/CUGの場合はVLAN-IDが必須
+	if peerType == "PC/CUG" && vlanID == "" {
+		return fmt.Errorf("IXVlanID is required when IXPeerType is PC/CUG")
+	}
+
+	return nil
+}

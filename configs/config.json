@@ -156,7 +156,7 @@
         "is_l2": true,
         "is_l3": true
       },
-     {
+      {
         "name": "Internet Exchange Point",
         "type": "IXP",
         "comment": "IXPにて提供",

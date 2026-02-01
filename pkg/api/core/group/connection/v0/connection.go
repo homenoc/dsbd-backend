@@ -92,6 +92,14 @@ func Add(c *gin.Context) {
 		}
 	}
 
+	// check IX fields (IXP connection)
+	if input.ConnectionType == "IXP" {
+		if err = config.CheckIXFields(input.IX, input.IXPeerType, input.IXVlanID); err != nil {
+			c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+			return
+		}
+	}
+
 	resultService := dbService.Get(service.ID, &core.Service{Model: gorm.Model{ID: uint(id)}})
 	if resultService.Err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: resultService.Err.Error()})
