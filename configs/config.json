@@ -117,9 +117,9 @@
     ],
     "connection": [
       {
-        "name": "Ether IP",
+        "name": "Ethernet over IPトンネル",
         "type": "EIP",
-        "comment": "EtherIP上で提供",
+        "comment": "",
         "need_internet": true,
         "need_comment": false,
         "need_cross_connect": false,
@@ -129,7 +129,7 @@
       {
         "name": "GREトンネル",
         "type": "GRE",
-        "comment": "GREトンネル上で/30のP2P接続を行う",
+        "comment": "",
         "need_internet": true,
         "need_comment": false,
         "need_cross_connect": false,
@@ -139,7 +139,7 @@
       {
         "name": "IP-IPトンネル",
         "type": "IPT",
-        "comment": "IP-IPトンネル上で/30のP2P接続を行う",
+        "comment": "",
         "need_internet": true,
         "need_comment": false,
         "need_cross_connect": false,
@@ -147,9 +147,9 @@
         "is_l3": true
       },
       {
-        "name": "Cross Connect",
+        "name": "直接接続",
         "type": "CC0",
-        "comment": "構内接続、構内線、キャリア専用線上で提供",
+        "comment": "データセンター構内回線、キャリア専用線上などで直接接続",
         "need_internet": false,
         "need_comment": true,
         "need_cross_connect": true,
@@ -157,9 +157,9 @@
         "is_l3": true
       },
       {
-        "name": "Internet Exchange Point",
+        "name": "IX接続",
         "type": "IXP",
-        "comment": "IXPにて提供",
+        "comment": "インターネットエクスチェンジ経由で接続",
         "need_internet": false,
         "need_comment": true,
         "need_cross_connect": true,
