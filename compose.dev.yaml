@@ -1,6 +1,7 @@
 services:
   db:
     image: mysql
+    command: --sql-mode=''
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: dsbd-backend

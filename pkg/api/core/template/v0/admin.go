@@ -55,6 +55,7 @@ func GetByAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, template.ResultAdmin{
 		Services:               config.Conf.Template.Service,
 		Connections:            config.Conf.Template.Connection,
+		IX:                     config.Conf.Template.IX,
 		NTTs:                   config.Conf.Template.NTT,
 		NOC:                    resultNOC.NOC,
 		BGPRouter:              resultBGPRouter.BGPRouter,

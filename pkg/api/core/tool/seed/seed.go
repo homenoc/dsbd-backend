@@ -3,10 +3,13 @@ package seed
 import (
 	"log"
 	"strings"
+	"time"
 
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/hash"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
+	dbConnection "github.com/homenoc/dsbd-backend/pkg/api/store/group/connection/v0"
+	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	dbNOC "github.com/homenoc/dsbd-backend/pkg/api/store/noc/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
@@ -39,12 +42,29 @@ func Run() error {
 		return err
 	}
 
+	// Service
+	log.Println("[Seed] Creating test service...")
+	service, err := createTestService(group)
+	if err != nil {
+		log.Printf("[Seed] Warning: Service creation skipped: %v", err)
+	}
+
+	// Connection
+	log.Println("[Seed] Creating test connection...")
+	if err := createTestConnection(service); err != nil {
+		log.Printf("[Seed] Warning: Connection creation skipped: %v", err)
+	}
+
 	log.Println("[Seed] Seed data creation completed!")
 	log.Println("")
 	log.Println("[Seed] Test accounts (User API):")
 	log.Println("  - Master: master@example.com / password (Level 1: 申請・変更・閲覧)")
 	log.Println("  - Member: member@example.com / password (Level 2: 一般メンバー)")
 	log.Println("  ※ 反社チェック未同意状態（PUT /api/v1/user/antisocial/agree で同意）")
+	log.Println("")
+	log.Println("[Seed] Test service & connection:")
+	log.Println("  - Service: L3 BGP (1-3B00001)")
+	log.Println("  - Connection: EtherIP (1-3B00001-EIP001)")
 	log.Println("")
 	log.Println("[Seed] Admin API uses Basic Auth from config.json (default: admin/admin)")
 
@@ -136,4 +156,63 @@ func createTestUsers(db interface{}, group *core.Group) error {
 	}
 
 	return nil
+}
+
+func createTestService(group *core.Group) (*core.Service, error) {
+	if group == nil {
+		return nil, nil
+	}
+
+	pass := true
+	enable := true
+	addAllow := true
+
+	service := &core.Service{
+		GroupID:        group.ID,
+		ServiceType:    "3B00", // L3 BGP
+		ServiceComment: "開発用テストサービス",
+		ServiceNumber:  1,
+		Org:            "テスト組織",
+		OrgEn:          "Test Organization",
+		PostCode:       "100-0001",
+		Address:        "東京都千代田区",
+		AddressEn:      "Chiyoda-ku, Tokyo",
+		AveUpstream:    100,
+		MaxUpstream:    1000,
+		AveDownstream:  100,
+		MaxDownstream:  1000,
+		StartDate:      time.Now(),
+		Pass:           &pass,
+		Enable:         &enable,
+		AddAllow:       &addAllow,
+	}
+
+	return dbService.Create(service)
+}
+
+func createTestConnection(service *core.Service) error {
+	if service == nil {
+		return nil
+	}
+
+	open := false
+	enable := true
+	monitor := false
+
+	connection := &core.Connection{
+		ServiceID:         service.ID,
+		ConnectionType:    "EIP", // EtherIP
+		ConnectionComment: "開発用テスト接続",
+		ConnectionNumber:  1,
+		NTT:               "はい（IPoEによりIPv6インターネットへ接続可能）",
+		PreferredAP:       "東日本",
+		TermIP:            "192.0.2.1",
+		Address:           "東京都",
+		Open:              &open,
+		Enable:            &enable,
+		Monitor:           &monitor,
+	}
+
+	_, err := dbConnection.Create(connection)
+	return err
 }

@@ -120,6 +120,7 @@ type Template struct {
 	Service     []ServiceTemplate    `json:"service"`
 	Connection  []ConnectionTemplate `json:"connection"`
 	Membership  []MembershipTemplate `json:"membership"`
+	IX          []IXTemplate         `json:"ix"`
 	NTT         []string             `json:"NTT"`
 	V4          []string             `json:"v4"`
 	V6          []string             `json:"v6"`
@@ -163,6 +164,12 @@ type ConnectionTemplate struct {
 	NeedCrossConnect bool   `json:"need_cross_connect"`
 	IsL2             bool   `json:"is_l2"`
 	IsL3             bool   `json:"is_l3"`
+}
+
+type IXTemplate struct {
+	Name        string `json:"name"`         // IX名
+	IPv4Address string `json:"ipv4_address"` // ピアリングLAN IPv4
+	IPv6Address string `json:"ipv6_address"` // ピアリングLAN IPv6
 }
 
 type Log struct {
