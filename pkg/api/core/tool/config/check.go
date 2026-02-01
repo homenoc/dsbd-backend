@@ -81,14 +81,14 @@ func CheckIncludeIXTemplate(data string) error {
 }
 
 func CheckIXPeerType(data string) error {
-	validTypes := []string{"パブリック", "PC/CUG"}
+	validTypes := []string{"パブリック", "PI/CUG"}
 	for _, t := range validTypes {
 		if t == data {
 			return nil
 		}
 	}
 
-	return fmt.Errorf("invalid IXPeerType: %s (valid values: パブリック, PC/CUG)", data)
+	return fmt.Errorf("invalid IXPeerType: %s (valid values: パブリック, PI/CUG)", data)
 }
 
 func CheckIXFields(ix, peerType, vlanID string) error {
@@ -105,9 +105,9 @@ func CheckIXFields(ix, peerType, vlanID string) error {
 		return err
 	}
 
-	// PC/CUGの場合はVLAN-IDが必須
-	if peerType == "PC/CUG" && vlanID == "" {
-		return fmt.Errorf("IXVlanID is required when IXPeerType is PC/CUG")
+	// PI/CUGの場合はVLAN-IDが必須
+	if peerType == "PI/CUG" && vlanID == "" {
+		return fmt.Errorf("IXVlanID is required when IXPeerType is PI/CUG")
 	}
 
 	return nil
