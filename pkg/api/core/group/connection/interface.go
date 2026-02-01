@@ -26,6 +26,11 @@ type Input struct {
 	ConnectionComment string `json:"connection_comment"` // ServiceがETCの時や補足説明で必要
 	PreferredAP       string `json:"preferred_ap"`
 	NTT               string `json:"ntt"`
+	IX                string `json:"ix"`           // 接続IX
+	IXPeerType        string `json:"ix_peer_type"` // パブリック or PC/CUG
+	IXVlanID          string `json:"ix_vlan_id"`   // VLAN-ID（PC/CUGの場合）
+	LinkV4Your        string `json:"link_v4_your"` // 相手側IPv4アドレス（IX接続時）
+	LinkV6Your        string `json:"link_v6_your"` // 相手側IPv6アドレス（IX接続時）
 	Address           string `json:"address"`
 	IPv4Route         string `json:"ipv4_route"`
 	IPv6Route         string `json:"ipv6_route"`
@@ -45,6 +50,9 @@ type Connection struct {
 	ConnectionComment            string `json:"connection_comment"` // ServiceがETCの時や補足説明で必要
 	ConnectionNumber             uint   `json:"connection_number"`
 	NTT                          string `json:"ntt"`
+	IX                           string `json:"ix"`           // 接続IX
+	IXPeerType                   string `json:"ix_peer_type"` // パブリック or PC/CUG
+	IXVlanID                     string `json:"ix_vlan_id"`   // VLAN-ID（PC/CUGの場合）
 	NOCName                      string `json:"noc_name"`
 	TermIP                       string `json:"term_ip"`
 	Monitor                      *bool  `json:"monitor"`

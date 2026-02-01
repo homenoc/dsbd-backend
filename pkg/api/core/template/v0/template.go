@@ -30,6 +30,7 @@ func Get(c *gin.Context) {
 	c.JSON(http.StatusOK, template.Result{
 		Services:          resultService,
 		Connections:       config.Conf.Template.Connection,
+		IX:                config.Conf.Template.IX,
 		NTTs:              config.Conf.Template.NTT,
 		IPv4:              config.Conf.Template.V4,
 		IPv6:              config.Conf.Template.V6,

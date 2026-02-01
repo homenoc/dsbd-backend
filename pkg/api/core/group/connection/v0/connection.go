@@ -77,17 +77,24 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	// check preferredAP
-	err = config.CheckIncludePreferredAPTemplate(input.PreferredAP)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	// check NTT (internet)
+	// check preferredAP and NTT (internet)
 	if connectionTemplate.NeedInternet {
+		err = config.CheckIncludePreferredAPTemplate(input.PreferredAP)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+			return
+		}
+
 		err = config.CheckIncludeNTTTemplate(input.NTT)
 		if err != nil {
+			c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
+			return
+		}
+	}
+
+	// check IX fields (IXP connection)
+	if input.ConnectionType == "IXP" {
+		if err = config.CheckIXFields(input.IX, input.IXPeerType, input.IXVlanID); err != nil {
 			c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 			return
 		}
@@ -183,6 +190,11 @@ func Add(c *gin.Context) {
 		ConnectionType:           input.ConnectionType,
 		ConnectionComment:        input.ConnectionComment,
 		ConnectionNumber:         number,
+		IX:                       input.IX,
+		IXPeerType:               input.IXPeerType,
+		IXVlanID:                 input.IXVlanID,
+		LinkV4Your:               input.LinkV4Your,
+		LinkV6Your:               input.LinkV6Your,
 		IPv4Route:                input.IPv4Route,
 		IPv6Route:                input.IPv6Route,
 		NTT:                      input.NTT,

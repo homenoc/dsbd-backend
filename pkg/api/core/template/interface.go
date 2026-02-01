@@ -19,6 +19,7 @@ type Input struct {
 type Result struct {
 	Services          []config.ServiceTemplate    `json:"services"`
 	Connections       []config.ConnectionTemplate `json:"connections"`
+	IX                []config.IXTemplate         `json:"ix"`
 	NTTs              []string                    `json:"ntts"`
 	IPv4              []string                    `json:"ipv4"`
 	IPv6              []string                    `json:"ipv6"`
@@ -31,6 +32,7 @@ type Result struct {
 type ResultAdmin struct {
 	Services               []config.ServiceTemplate      `json:"services"`
 	Connections            []config.ConnectionTemplate   `json:"connections"`
+	IX                     []config.IXTemplate           `json:"ix"`
 	NTTs                   []string                      `json:"ntts"`
 	NOC                    []core.NOC                    `json:"nocs"`
 	BGPRouter              []core.BGPRouter              `json:"bgp_router"`
