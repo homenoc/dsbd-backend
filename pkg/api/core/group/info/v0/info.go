@@ -2,6 +2,11 @@ package v0
 
 import (
 	"fmt"
+	"net/http"
+	"sort"
+	"strconv"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
@@ -13,10 +18,6 @@ import (
 	dbNotice "github.com/homenoc/dsbd-backend/pkg/api/store/notice/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"gorm.io/gorm"
-	"net/http"
-	"sort"
-	"strconv"
-	"time"
 )
 
 func Get(c *gin.Context) {
@@ -417,6 +418,7 @@ func Get(c *gin.Context) {
 							NOC:        tmpConnection.BGPRouter.NOC.Name,
 							NOCIP:      tmpConnection.TunnelEndPointRouterIP.IP,
 							TermIP:     tmpConnection.TermIP,
+							RFC8950:    tmpConnection.RFC8950,
 							LinkV4Our:  tmpConnection.LinkV4Our,
 							LinkV4Your: tmpConnection.LinkV4Your,
 							LinkV6Our:  tmpConnection.LinkV6Our,

@@ -35,6 +35,7 @@ type Input struct {
 	IPv4Route         string `json:"ipv4_route"`
 	IPv6Route         string `json:"ipv6_route"`
 	TermIP            string `json:"term_ip"`
+	RFC8950           bool   `json:"rfc8950"`
 	Monitor           bool   `json:"monitor"`
 	Comment           string `json:"comment"`
 }
@@ -55,6 +56,7 @@ type Connection struct {
 	IXVlanID                     string `json:"ix_vlan_id"`   // VLAN-ID（PI/CUGの場合）
 	NOCName                      string `json:"noc_name"`
 	TermIP                       string `json:"term_ip"`
+	RFC8950                      bool   `json:"rfc8950"`
 	Monitor                      *bool  `json:"monitor"`
 	Address                      string `json:"address"` //都道府県　市町村
 	LinkV4Our                    string `json:"link_v4_our"`
