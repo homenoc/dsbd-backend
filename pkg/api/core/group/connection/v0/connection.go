@@ -2,6 +2,10 @@ package v0
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
@@ -13,9 +17,6 @@ import (
 	dbConnection "github.com/homenoc/dsbd-backend/pkg/api/store/group/connection/v0"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
 	"gorm.io/gorm"
-	"log"
-	"net/http"
-	"strconv"
 )
 
 func Add(c *gin.Context) {
@@ -202,6 +203,7 @@ func Add(c *gin.Context) {
 		BGPRouterID:              nil,
 		TunnelEndPointRouterIPID: nil,
 		TermIP:                   input.TermIP,
+		RFC8950:                  input.RFC8950,
 		Address:                  input.Address,
 		Comment:                  input.Comment,
 		Monitor:                  &[]bool{input.Monitor}[0],
