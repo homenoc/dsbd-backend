@@ -1,6 +1,8 @@
 package v0
 
 import (
+	"strconv"
+
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/noc"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/noc/bgpRouter"
@@ -12,7 +14,6 @@ import (
 	dbNOC "github.com/homenoc/dsbd-backend/pkg/api/store/noc/v0"
 	"github.com/slack-go/slack"
 	"gorm.io/gorm"
-	"strconv"
 )
 
 func noticeAdd(applicant, groupID, serviceCode, connectionCodeNew, connectionCodeComment string) {
@@ -133,6 +134,16 @@ func changeText(before, after core.Connection) string {
 
 	if after.LinkV6Your != "" && after.LinkV6Your != before.LinkV6Your {
 		data += "v6(相手団体側): " + before.LinkV6Your + "=>" + after.LinkV6Your + "\n"
+	}
+
+	if after.RFC8950 != before.RFC8950 {
+		beforeStatus := "無効"
+		afterStatus := "有効"
+		if !after.RFC8950 {
+			beforeStatus = "有効"
+			afterStatus = "無効"
+		}
+		data += "RFC8950: " + beforeStatus + " => " + afterStatus + "\n"
 	}
 
 	return data

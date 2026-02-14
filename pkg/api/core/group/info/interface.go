@@ -81,6 +81,7 @@ type Info struct {
 	NOC            string   `json:"noc"`
 	NOCIP          string   `json:"noc_ip"`
 	TermIP         string   `json:"term_ip"`
+	RFC8950        bool     `json:"rfc8950"`
 	LinkV4Our      string   `json:"link_v4_our"`
 	LinkV4Your     string   `json:"link_v4_your"`
 	LinkV6Our      string   `json:"link_v6_our"`

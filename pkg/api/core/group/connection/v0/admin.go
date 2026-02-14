@@ -143,6 +143,7 @@ func AddByAdmin(c *gin.Context) {
 		NTT:               input.NTT,
 		PreferredAP:       input.PreferredAP,
 		TermIP:            input.TermIP,
+		RFC8950:           input.RFC8950,
 		Address:           input.Address,
 		Monitor:           &[]bool{input.Monitor}[0],
 		Comment:           input.Comment,

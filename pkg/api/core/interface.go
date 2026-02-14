@@ -8,21 +8,21 @@ import (
 
 type User struct {
 	gorm.Model
-	Tokens        []*Token  `json:"tokens"`
-	Notice        []*Notice `json:"notice" gorm:"many2many:user_notice;"`
-	Ticket        []Ticket  `json:"tickets"`
-	Group         *Group    `json:"group"`
-	GroupID       *uint     `json:"group_id"`
-	Name          string    `json:"name"`
-	NameEn        string    `json:"name_en"`
-	Email         string    `json:"email"`
-	Pass          string    `json:"pass"`
-	ExpiredStatus *uint     `json:"expired_status"`
-	Level         uint      `json:"level"`
-	MailVerify         *bool      `json:"mail_verify"`
-	MailToken          string     `json:"mail_token"`
-	AntisocialCheck    *bool      `json:"antisocial_check"`
-	AntisocialCheckAt  *time.Time `json:"antisocial_check_at"`
+	Tokens            []*Token   `json:"tokens"`
+	Notice            []*Notice  `json:"notice" gorm:"many2many:user_notice;"`
+	Ticket            []Ticket   `json:"tickets"`
+	Group             *Group     `json:"group"`
+	GroupID           *uint      `json:"group_id"`
+	Name              string     `json:"name"`
+	NameEn            string     `json:"name_en"`
+	Email             string     `json:"email"`
+	Pass              string     `json:"pass"`
+	ExpiredStatus     *uint      `json:"expired_status"`
+	Level             uint       `json:"level"`
+	MailVerify        *bool      `json:"mail_verify"`
+	MailToken         string     `json:"mail_token"`
+	AntisocialCheck   *bool      `json:"antisocial_check"`
+	AntisocialCheckAt *time.Time `json:"antisocial_check_at"`
 }
 
 type Group struct {
@@ -109,6 +109,7 @@ type Connection struct {
 	NTT                      string                 `json:"ntt"`
 	PreferredAP              string                 `json:"preferred_ap"`
 	TermIP                   string                 `json:"term_ip"`
+	RFC8950                  bool                   `json:"rfc8950"`
 	Monitor                  *bool                  `json:"monitor"`
 	Address                  string                 `json:"address"` //都道府県　市町村
 	LinkV4Our                string                 `json:"link_v4_our"`
