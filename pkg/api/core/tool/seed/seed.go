@@ -28,21 +28,21 @@ func Run() error {
 
 	// NOC
 	log.Println("[Seed] Creating NOC data...")
-	noc, err := createNOCData()
+	nocs, err := createNOCData()
 	if err != nil {
 		log.Printf("[Seed] Warning: NOC creation skipped: %v", err)
 	}
 
 	// BGP Router
 	log.Println("[Seed] Creating BGP router...")
-	bgpRouter, err := createBGPRouter(noc)
+	bgpRouter, err := createBGPRouter(nocs["noc01"])
 	if err != nil {
 		log.Printf("[Seed] Warning: BGP router creation skipped: %v", err)
 	}
 
-	// Tunnel EndPoint Router (+ IP)
-	log.Println("[Seed] Creating tunnel endpoint router...")
-	tunnelEndPointRouterIP, err := createTunnelEndPointRouter(noc)
+	// Tunnel EndPoint Routers (+ IPs)
+	log.Println("[Seed] Creating tunnel endpoint routers...")
+	tunnelEndPointRouterIP, err := createTunnelEndPointRouters(nocs)
 	if err != nil {
 		log.Printf("[Seed] Warning: Tunnel endpoint router creation skipped: %v", err)
 	}
@@ -81,9 +81,9 @@ func Run() error {
 	log.Println("  ※ 反社チェック未同意状態（PUT /api/v1/user/antisocial/agree で同意）")
 	log.Println("")
 	log.Println("[Seed] Test NOC & routers:")
-	log.Println("  - NOC: NOC01 (神奈川県横浜市)")
-	log.Println("  - BGP Router: noc01er01")
-	log.Println("  - Tunnel EndPoint Router: noc01er01 (IP: 2404:7a81:920:9600::1111/64)")
+	log.Println("  - NOC: 10拠点 (NOC01〜, ダミーロケーション)")
+	log.Println("  - BGP Router: noc01er01 (NOC01)")
+	log.Println("  - Tunnel EndPoint Routers: 26台 / 25 IP (ダミー: 2001:db8::/32, 203.0.113.0/24)")
 	log.Println("")
 	log.Println("[Seed] Test service & connection:")
 	log.Println("  - Service: L3 BGP (1-3B00001)")
@@ -94,17 +94,50 @@ func Run() error {
 	return nil
 }
 
-func createNOCData() (*core.NOC, error) {
-	enable := true
+type nocSeed struct {
+	key       string
+	name      string
+	location  string
+	bandwidth string
+	enable    bool
+}
 
-	noc := &core.NOC{
-		Name:      "NOC01",
-		Location:  "神奈川県横浜市",
-		Bandwidth: "2Gbps",
-		Enable:    &enable,
+// createNOCData は本番構成を模した複数拠点の NOC を作成し、
+// 拠点コードをキーにしたマップで返す（ルータ作成時の親参照に使う）。
+func createNOCData() (map[string]*core.NOC, error) {
+	seeds := []nocSeed{
+		{key: "noc01", name: "NOC01", location: "神奈川県横浜市", bandwidth: "10Gbps", enable: true},
+		{key: "noc02", name: "NOC02", location: "東京都千代田区", bandwidth: "1Gbps", enable: false},
+		{key: "noc05", name: "NOC05", location: "東京都新宿区", bandwidth: "10Gbps", enable: true},
+		{key: "pop03", name: "POP03", location: "東京都品川区", bandwidth: "10Gbps", enable: true},
+		{key: "pop52", name: "POP52", location: "大阪府大阪市", bandwidth: "10Gbps", enable: true},
+		{key: "noc51", name: "NOC51", location: "大阪府大阪市", bandwidth: "10Gbps", enable: true},
+		{key: "noc03", name: "NOC03", location: "東京都港区", bandwidth: "1Gbps", enable: false},
+		{key: "pop53", name: "POP53", location: "愛知県名古屋市", bandwidth: "10Gbps", enable: true},
+		{key: "noc52", name: "NOC52", location: "福岡県福岡市", bandwidth: "10Gbps", enable: true},
+		{key: "noc06", name: "NOC06", location: "東京都大田区", bandwidth: "10Gbps", enable: true},
 	}
 
-	return dbNOC.Create(noc)
+	nocs := make(map[string]*core.NOC, len(seeds))
+	for _, s := range seeds {
+		enable := s.enable
+		noc, err := dbNOC.Create(&core.NOC{
+			Name:      s.name,
+			Location:  s.location,
+			Bandwidth: s.bandwidth,
+			Enable:    &enable,
+		})
+		if err != nil {
+			log.Printf("[Seed] Warning: NOC %s creation skipped: %v", s.name, err)
+			continue
+		}
+		nocs[s.key] = noc
+	}
+
+	if len(nocs) == 0 {
+		return nil, nil
+	}
+	return nocs, nil
 }
 
 func createBGPRouter(noc *core.NOC) (*core.BGPRouter, error) {
@@ -123,31 +156,92 @@ func createBGPRouter(noc *core.NOC) (*core.BGPRouter, error) {
 	return dbBGPRouter.Create(bgpRouter)
 }
 
-func createTunnelEndPointRouter(noc *core.NOC) (*core.TunnelEndPointRouterIP, error) {
-	if noc == nil {
+type tunnelRouterIPSeed struct {
+	ip     string // ダミーIP（本番値は伏せ、RFC 3849/5737 のドキュメント用レンジを使用）
+	enable bool
+}
+
+type tunnelRouterSeed struct {
+	nocKey   string // createNOCData のキーで親 NOC を参照
+	hostName string
+	enable   bool
+	ips      []tunnelRouterIPSeed // 0個のルータ（IP未割当）もある
+}
+
+// createTunnelEndPointRouters は本番の tunnel_end_point_routers /
+// tunnel_end_point_router_ips 構成を模したルータ群とその IP を作成する。
+// IP はすべてダミー値。本番のホスト部の慣習（er=::1111, ctep=::c179 など）と
+// プレフィックス長の有無、IPv4/IPv6 の別、enable フラグは踏襲している。
+// 戻り値はテスト接続で使う先頭 IP（noc01er01）。
+func createTunnelEndPointRouters(nocs map[string]*core.NOC) (*core.TunnelEndPointRouterIP, error) {
+	if len(nocs) == 0 {
 		return nil, nil
 	}
 
-	enable := true
-
-	router := &core.TunnelEndPointRouter{
-		NOCID:    &noc.ID,
-		HostName: "noc01er01",
-		Enable:   &enable,
+	routers := []tunnelRouterSeed{
+		{nocKey: "noc01", hostName: "noc01er01", enable: true, ips: []tunnelRouterIPSeed{{ip: "2001:db8:1:1::1111/64", enable: true}}},
+		{nocKey: "noc01", hostName: "noc01ctep02", enable: true, ips: []tunnelRouterIPSeed{{ip: "2001:db8:1:1::c179/64", enable: true}}},
+		{nocKey: "noc02", hostName: "noc02er01", enable: false},
+		{nocKey: "noc02", hostName: "noc02ctep01", enable: false, ips: []tunnelRouterIPSeed{{ip: "2001:db8:2:1::c179/64", enable: false}}},
+		{nocKey: "noc05", hostName: "noc05er01", enable: true, ips: []tunnelRouterIPSeed{{ip: "2001:db8:3:1::1111", enable: true}}},
+		{nocKey: "noc05", hostName: "noc05ctep01", enable: true, ips: []tunnelRouterIPSeed{{ip: "2001:db8:3:1::c179", enable: true}}},
+		{nocKey: "pop03", hostName: "pop03er01", enable: false, ips: []tunnelRouterIPSeed{{ip: "2001:db8:4:1::1113/64", enable: false}}},
+		{nocKey: "pop03", hostName: "pop03er02", enable: false, ips: []tunnelRouterIPSeed{{ip: "2001:db8:4:2::1111", enable: false}}},
+		{nocKey: "pop03", hostName: "pop03er03", enable: true, ips: []tunnelRouterIPSeed{{ip: "2001:db8:4:3::1113/64", enable: true}}},
+		{nocKey: "pop03", hostName: "pop03ctep01", enable: true, ips: []tunnelRouterIPSeed{{ip: "2001:db8:4:4::c179/64", enable: true}}},
+		{nocKey: "pop03", hostName: "pop03ctep02", enable: true, ips: []tunnelRouterIPSeed{{ip: "2001:db8:4:5::c179/64", enable: true}}},
+		{nocKey: "pop52", hostName: "pop52er01", enable: true, ips: []tunnelRouterIPSeed{{ip: "2001:db8:5:1::1111", enable: true}}},
+		{nocKey: "pop52", hostName: "pop52ctep02", enable: true, ips: []tunnelRouterIPSeed{{ip: "2001:db8:5:1::c179", enable: true}}},
+		{nocKey: "noc51", hostName: "noc51er01", enable: true, ips: []tunnelRouterIPSeed{{ip: "2001:db8:6:1::1111/64", enable: true}}},
+		{nocKey: "noc51", hostName: "noc51ctep01", enable: true, ips: []tunnelRouterIPSeed{{ip: "2001:db8:6:1::c179/64", enable: true}}},
+		{nocKey: "noc03", hostName: "noc03er01", enable: false, ips: []tunnelRouterIPSeed{{ip: "2001:db8:7:1::5:9105:179/64", enable: false}}},
+		{nocKey: "noc03", hostName: "noc03ctep01", enable: false, ips: []tunnelRouterIPSeed{{ip: "2001:db8:7:1::c179/64", enable: false}}},
+		{nocKey: "pop52", hostName: "pop52er02", enable: false, ips: []tunnelRouterIPSeed{{ip: "2001:db8:5:2::1112/64", enable: false}}},
+		{nocKey: "pop53", hostName: "pop53er01", enable: true, ips: []tunnelRouterIPSeed{{ip: "2001:db8:8:1::1111/64", enable: true}}},
+		{nocKey: "pop53", hostName: "pop53ctep01", enable: true, ips: []tunnelRouterIPSeed{{ip: "2001:db8:8:1::c179/64", enable: true}}},
+		{nocKey: "noc52", hostName: "noc52er01", enable: true, ips: []tunnelRouterIPSeed{{ip: "2001:db8:9:1::1111/64", enable: true}}},
+		{nocKey: "noc52", hostName: "noc52ctep01", enable: true, ips: []tunnelRouterIPSeed{{ip: "2001:db8:9:1::6/64", enable: true}}},
+		{nocKey: "noc06", hostName: "noc06er01", enable: true, ips: []tunnelRouterIPSeed{{ip: "2001:db8:a:1::1111", enable: true}}},
+		{nocKey: "noc06", hostName: "noc06ctep01", enable: true, ips: []tunnelRouterIPSeed{{ip: "2001:db8:a:1::c179", enable: true}}},
+		{nocKey: "pop03", hostName: "pop03er04", enable: true, ips: []tunnelRouterIPSeed{{ip: "2001:db8:4:6::face/64", enable: true}}},
 	}
 
-	router, err := dbTunnelEndPointRouter.Create(router)
-	if err != nil {
-		return nil, err
+	var firstIP *core.TunnelEndPointRouterIP
+	for _, rs := range routers {
+		noc := nocs[rs.nocKey]
+		if noc == nil {
+			continue
+		}
+
+		routerEnable := rs.enable
+		router, err := dbTunnelEndPointRouter.Create(&core.TunnelEndPointRouter{
+			NOCID:    &noc.ID,
+			HostName: rs.hostName,
+			Enable:   &routerEnable,
+		})
+		if err != nil {
+			log.Printf("[Seed] Warning: tunnel router %s creation skipped: %v", rs.hostName, err)
+			continue
+		}
+
+		for _, ipSeed := range rs.ips {
+			ipEnable := ipSeed.enable
+			createdIP, err := dbTunnelEndPointRouterIP.Create(&core.TunnelEndPointRouterIP{
+				TunnelEndPointRouterID: &router.ID,
+				IP:                     ipSeed.ip,
+				Enable:                 &ipEnable,
+			})
+			if err != nil {
+				log.Printf("[Seed] Warning: tunnel router IP %s creation skipped: %v", ipSeed.ip, err)
+				continue
+			}
+			if firstIP == nil {
+				firstIP = createdIP
+			}
+		}
 	}
 
-	routerIP := &core.TunnelEndPointRouterIP{
-		TunnelEndPointRouterID: &router.ID,
-		IP:                     "2404:7a81:920:9600::1111/64",
-		Enable:                 &enable,
-	}
-
-	return dbTunnelEndPointRouterIP.Create(routerIP)
+	return firstIP, nil
 }
 
 func createTestGroup() (*core.Group, error) {
