@@ -11,6 +11,9 @@ import (
 	dbConnection "github.com/homenoc/dsbd-backend/pkg/api/store/group/connection/v0"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
+	dbBGPRouter "github.com/homenoc/dsbd-backend/pkg/api/store/noc/bgpRouter/v0"
+	dbTunnelEndPointRouter "github.com/homenoc/dsbd-backend/pkg/api/store/noc/tunnelEndPointRouter/v0"
+	dbTunnelEndPointRouterIP "github.com/homenoc/dsbd-backend/pkg/api/store/noc/tunnelEndPointRouterIP/v0"
 	dbNOC "github.com/homenoc/dsbd-backend/pkg/api/store/noc/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 )
@@ -25,8 +28,23 @@ func Run() error {
 
 	// NOC
 	log.Println("[Seed] Creating NOC data...")
-	if err := createNOCData(); err != nil {
+	noc, err := createNOCData()
+	if err != nil {
 		log.Printf("[Seed] Warning: NOC creation skipped: %v", err)
+	}
+
+	// BGP Router
+	log.Println("[Seed] Creating BGP router...")
+	bgpRouter, err := createBGPRouter(noc)
+	if err != nil {
+		log.Printf("[Seed] Warning: BGP router creation skipped: %v", err)
+	}
+
+	// Tunnel EndPoint Router (+ IP)
+	log.Println("[Seed] Creating tunnel endpoint router...")
+	tunnelEndPointRouterIP, err := createTunnelEndPointRouter(noc)
+	if err != nil {
+		log.Printf("[Seed] Warning: Tunnel endpoint router creation skipped: %v", err)
 	}
 
 	// Group
@@ -51,7 +69,7 @@ func Run() error {
 
 	// Connection
 	log.Println("[Seed] Creating test connection...")
-	if err := createTestConnection(service); err != nil {
+	if err := createTestConnection(service, bgpRouter, tunnelEndPointRouterIP); err != nil {
 		log.Printf("[Seed] Warning: Connection creation skipped: %v", err)
 	}
 
@@ -62,6 +80,11 @@ func Run() error {
 	log.Println("  - Member: member@example.com / password (Level 2: 一般メンバー)")
 	log.Println("  ※ 反社チェック未同意状態（PUT /api/v1/user/antisocial/agree で同意）")
 	log.Println("")
+	log.Println("[Seed] Test NOC & routers:")
+	log.Println("  - NOC: NOC01 (神奈川県横浜市)")
+	log.Println("  - BGP Router: noc01er01")
+	log.Println("  - Tunnel EndPoint Router: noc01er01 (IP: 2404:7a81:920:9600::1111/64)")
+	log.Println("")
 	log.Println("[Seed] Test service & connection:")
 	log.Println("  - Service: L3 BGP (1-3B00001)")
 	log.Println("  - Connection: EtherIP (1-3B00001-EIP001)")
@@ -71,19 +94,60 @@ func Run() error {
 	return nil
 }
 
-func createNOCData() error {
+func createNOCData() (*core.NOC, error) {
 	enable := true
 
 	noc := &core.NOC{
-		Name:      "Tokyo NOC",
-		Location:  "Tokyo",
-		Bandwidth: "10Gbps",
+		Name:      "NOC01",
+		Location:  "神奈川県横浜市",
+		Bandwidth: "2Gbps",
 		Enable:    &enable,
-		Comment:   "Development NOC",
 	}
 
-	_, err := dbNOC.Create(noc)
-	return err
+	return dbNOC.Create(noc)
+}
+
+func createBGPRouter(noc *core.NOC) (*core.BGPRouter, error) {
+	if noc == nil {
+		return nil, nil
+	}
+
+	enable := true
+
+	bgpRouter := &core.BGPRouter{
+		NOCID:    noc.ID,
+		HostName: "noc01er01",
+		Enable:   &enable,
+	}
+
+	return dbBGPRouter.Create(bgpRouter)
+}
+
+func createTunnelEndPointRouter(noc *core.NOC) (*core.TunnelEndPointRouterIP, error) {
+	if noc == nil {
+		return nil, nil
+	}
+
+	enable := true
+
+	router := &core.TunnelEndPointRouter{
+		NOCID:    &noc.ID,
+		HostName: "noc01er01",
+		Enable:   &enable,
+	}
+
+	router, err := dbTunnelEndPointRouter.Create(router)
+	if err != nil {
+		return nil, err
+	}
+
+	routerIP := &core.TunnelEndPointRouterIP{
+		TunnelEndPointRouterID: &router.ID,
+		IP:                     "2404:7a81:920:9600::1111/64",
+		Enable:                 &enable,
+	}
+
+	return dbTunnelEndPointRouterIP.Create(routerIP)
 }
 
 func createTestGroup() (*core.Group, error) {
@@ -190,7 +254,7 @@ func createTestService(group *core.Group) (*core.Service, error) {
 	return dbService.Create(service)
 }
 
-func createTestConnection(service *core.Service) error {
+func createTestConnection(service *core.Service, bgpRouter *core.BGPRouter, tunnelEndPointRouterIP *core.TunnelEndPointRouterIP) error {
 	if service == nil {
 		return nil
 	}
@@ -211,6 +275,13 @@ func createTestConnection(service *core.Service) error {
 		Open:              &open,
 		Enable:            &enable,
 		Monitor:           &monitor,
+	}
+
+	if bgpRouter != nil {
+		connection.BGPRouterID = &bgpRouter.ID
+	}
+	if tunnelEndPointRouterIP != nil {
+		connection.TunnelEndPointRouterIPID = &tunnelEndPointRouterIP.ID
 	}
 
 	_, err := dbConnection.Create(connection)
