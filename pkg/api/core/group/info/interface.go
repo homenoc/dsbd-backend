@@ -78,6 +78,9 @@ type Info struct {
 	ASN            uint     `json:"asn"`
 	V4             []string `json:"v4"`
 	V6             []string `json:"v6"`
+	IX             string   `json:"ix"`
+	IXPeerType     string   `json:"ix_peer_type"`
+	IXVlanID       string   `json:"ix_vlan_id"`
 	NOC            string   `json:"noc"`
 	NOCIP          string   `json:"noc_ip"`
 	TermIP         string   `json:"term_ip"`
@@ -165,9 +168,13 @@ type Service struct {
 }
 
 type Connection struct {
-	ID        uint   `json:"id"`
-	ServiceID string `json:"service_id"`
-	Open      bool   `json:"open"`
+	ID             uint   `json:"id"`
+	ServiceID      string `json:"service_id"`
+	ConnectionType string `json:"connection_type"`
+	Open           bool   `json:"open"`
+	IX             string `json:"ix"`           // 接続IX
+	IXPeerType     string `json:"ix_peer_type"` // パブリック or PI/CUG
+	IXVlanID       string `json:"ix_vlan_id"`   // VLAN-ID（PI/CUGの場合）
 }
 
 type Request struct {

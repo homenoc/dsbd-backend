@@ -382,9 +382,13 @@ func Get(c *gin.Context) {
 				// Connection
 				if *tmpConnection.Enable {
 					resultConnection = append(resultConnection, info.Connection{
-						ID:        tmpConnection.ID,
-						ServiceID: serviceID,
-						Open:      *tmpConnection.Open,
+						ID:             tmpConnection.ID,
+						ServiceID:      serviceID,
+						ConnectionType: tmpConnection.ConnectionType,
+						Open:           *tmpConnection.Open,
+						IX:             tmpConnection.IX,
+						IXPeerType:     tmpConnection.IXPeerType,
+						IXVlanID:       tmpConnection.IXVlanID,
 					})
 				}
 
@@ -414,6 +418,9 @@ func Get(c *gin.Context) {
 							ASN:        asn,
 							V4:         v4,
 							V6:         v6,
+							IX:         tmpConnection.IX,
+							IXPeerType: tmpConnection.IXPeerType,
+							IXVlanID:   tmpConnection.IXVlanID,
 							Fee:        "Free",
 							NOC:        tmpConnection.BGPRouter.NOC.Name,
 							NOCIP:      tmpConnection.TunnelEndPointRouterIP.IP,
