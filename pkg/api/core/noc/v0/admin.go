@@ -77,13 +77,13 @@ func UpdateByAdmin(c *gin.Context) {
 		return
 	}
 
-	tmp := dbNOC.Get(noc.ID, &core.NOC{Model: gorm.Model{ID: uint(id)}})
+	tmp := dbNOC.GetByID(uint(id))
 	if tmp.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: tmp.Err.Error()})
 		return
 	}
 
-	if err = dbNOC.Update(noc.UpdateAll, replace(input, tmp.NOC[0])); err != nil {
+	if err = dbNOC.UpdateAll(replace(input, tmp.NOC[0])); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
@@ -102,7 +102,7 @@ func GetByAdmin(c *gin.Context) {
 		return
 	}
 
-	result := dbNOC.Get(noc.ID, &core.NOC{Model: gorm.Model{ID: uint(id)}})
+	result := dbNOC.GetByID(uint(id))
 	if result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return

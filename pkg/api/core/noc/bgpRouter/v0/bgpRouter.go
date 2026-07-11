@@ -77,13 +77,13 @@ func UpdateByAdmin(c *gin.Context) {
 		return
 	}
 
-	tmp := dbBGPRouter.Get(router.ID, &core.BGPRouter{Model: gorm.Model{ID: uint(id)}})
+	tmp := dbBGPRouter.GetByID(uint(id))
 	if tmp.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: tmp.Err.Error()})
 		return
 	}
 
-	if err = dbBGPRouter.Update(router.UpdateAll, replace(input, tmp.BGPRouter[0])); err != nil {
+	if err = dbBGPRouter.UpdateAll(replace(input, tmp.BGPRouter[0])); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
@@ -102,7 +102,7 @@ func GetByAdmin(c *gin.Context) {
 		return
 	}
 
-	result := dbBGPRouter.Get(router.ID, &core.BGPRouter{Model: gorm.Model{ID: uint(id)}})
+	result := dbBGPRouter.GetByID(uint(id))
 	if result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return

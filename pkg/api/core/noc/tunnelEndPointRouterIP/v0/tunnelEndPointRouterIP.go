@@ -77,13 +77,13 @@ func UpdateByAdmin(c *gin.Context) {
 		return
 	}
 
-	tmp := dbTunnelEndPointRouterIP.Get(tunnelEndPointRouterIP.ID, &core.TunnelEndPointRouterIP{Model: gorm.Model{ID: uint(id)}})
+	tmp := dbTunnelEndPointRouterIP.GetByID(uint(id))
 	if tmp.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: tmp.Err.Error()})
 		return
 	}
 
-	if err = dbTunnelEndPointRouterIP.Update(tunnelEndPointRouterIP.UpdateAll, replace(input, tmp.TunnelEndPointRouterIP[0])); err != nil {
+	if err = dbTunnelEndPointRouterIP.UpdateAll(replace(input, tmp.TunnelEndPointRouterIP[0])); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
@@ -102,7 +102,7 @@ func GetByAdmin(c *gin.Context) {
 		return
 	}
 
-	result := dbTunnelEndPointRouterIP.Get(tunnelEndPointRouterIP.ID, &core.TunnelEndPointRouterIP{Model: gorm.Model{ID: uint(id)}})
+	result := dbTunnelEndPointRouterIP.GetByID(uint(id))
 	if result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return

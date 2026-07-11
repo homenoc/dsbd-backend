@@ -4,16 +4,12 @@ import (
 	"strconv"
 
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/noc"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/noc/bgpRouter"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/noc/tunnelEndPointRouterIP"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	dbBGPRouter "github.com/homenoc/dsbd-backend/pkg/api/store/noc/bgpRouter/v0"
 	dbTunnelEndPointRouterIP "github.com/homenoc/dsbd-backend/pkg/api/store/noc/tunnelEndPointRouterIP/v0"
 	dbNOC "github.com/homenoc/dsbd-backend/pkg/api/store/noc/v0"
 	"github.com/slack-go/slack"
-	"gorm.io/gorm"
 )
 
 func noticeAdd(applicant, groupID, serviceCode, connectionCodeNew, connectionCodeComment string) {
@@ -151,7 +147,7 @@ func changeText(before, after core.Connection) string {
 
 func bgpRouterText(status uint) string {
 	if status != 0 {
-		result := dbBGPRouter.Get(bgpRouter.ID, &core.BGPRouter{Model: gorm.Model{ID: status}})
+		result := dbBGPRouter.GetByID(status)
 		return result.BGPRouter[0].HostName
 	} else {
 		return "なし"
@@ -160,8 +156,7 @@ func bgpRouterText(status uint) string {
 
 func tunnelEndPointRouterIPText(status uint) string {
 	if status != 0 {
-		result := dbTunnelEndPointRouterIP.Get(tunnelEndPointRouterIP.ID,
-			&core.TunnelEndPointRouterIP{Model: gorm.Model{ID: status}})
+		result := dbTunnelEndPointRouterIP.GetByID(status)
 		return result.TunnelEndPointRouterIP[0].TunnelEndPointRouter.HostName + " " +
 			result.TunnelEndPointRouterIP[0].IP
 	} else {
@@ -170,6 +165,6 @@ func tunnelEndPointRouterIPText(status uint) string {
 }
 
 func nocText(status uint) string {
-	result := dbNOC.Get(noc.ID, &core.NOC{Model: gorm.Model{ID: status}})
+	result := dbNOC.GetByID(status)
 	return result.NOC[0].Name
 }

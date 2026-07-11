@@ -5,7 +5,6 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/noc"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -52,7 +51,7 @@ func TestUpdatePartField(t *testing.T) {
 		Name:  "nocTest",
 	}
 
-	if err := Update(noc.UpdateAll, testTemplate); err != nil {
+	if err := UpdateAll(testTemplate); err != nil {
 		t.Fatal(err)
 	}
 
