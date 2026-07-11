@@ -30,7 +30,7 @@ func AddByAdmin(c *gin.Context) {
 	}
 
 	//check exist for database
-	result := dbUser.Get(user.Email, &core.User{Email: input.Email})
+	result := dbUser.GetByEmail(input.Email)
 	if result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
@@ -83,7 +83,7 @@ func UpdateByAdmin(c *gin.Context) {
 		return
 	}
 
-	tmp := dbUser.Get(user.ID, &core.User{Model: gorm.Model{ID: input.ID}})
+	tmp := dbUser.GetByID(input.ID)
 	if tmp.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: tmp.Err.Error()})
 		return
@@ -95,7 +95,7 @@ func UpdateByAdmin(c *gin.Context) {
 		return
 	}
 
-	if err = dbUser.Update(user.UpdateAll, &replace); err != nil {
+	if err = dbUser.UpdateAll(&replace); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
@@ -114,7 +114,7 @@ func GetByAdmin(c *gin.Context) {
 		return
 	}
 
-	result := dbUser.Get(user.ID, &core.User{Model: gorm.Model{ID: uint(id)}})
+	result := dbUser.GetByID(uint(id))
 	if result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return

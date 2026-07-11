@@ -6,7 +6,6 @@ import (
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"gorm.io/gorm"
@@ -95,7 +94,7 @@ func Add(c *gin.Context) {
 
 	noticeAddGroup(userResult.User, input)
 
-	if err = dbUser.Update(user.UpdateGID, &core.User{Model: gorm.Model{ID: userResult.User.ID}, GroupID: &groupData.ID}); err != nil {
+	if err = dbUser.UpdateGID(&core.User{Model: gorm.Model{ID: userResult.User.ID}, GroupID: &groupData.ID}); err != nil {
 		log.Println(dbGroup.Delete(&core.Group{Model: gorm.Model{ID: groupData.ID}}))
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 	} else {

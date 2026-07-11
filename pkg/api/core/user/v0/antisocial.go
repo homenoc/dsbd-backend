@@ -8,7 +8,6 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"gorm.io/gorm"
 )
@@ -24,7 +23,7 @@ func AgreeAntisocialCheck(c *gin.Context) {
 	}
 
 	now := time.Now()
-	if err := dbUser.Update(user.UpdateAntisocialCheck, &core.User{
+	if err := dbUser.UpdateAntisocialCheck(&core.User{
 		Model:             gorm.Model{ID: authResult.User.ID},
 		AntisocialCheck:   &[]bool{true}[0],
 		AntisocialCheckAt: &now,

@@ -6,7 +6,6 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbIP "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/ip/v0"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
@@ -97,7 +96,7 @@ func getUserInfo(userId uint) slack.MsgOption {
 			},
 		},
 	}
-	userDetail := dbUser.Get(user.ID, &core.User{Model: gorm.Model{ID: userId}})
+	userDetail := dbUser.GetByID(userId)
 	if userDetail.Err != nil {
 		return errorProcess(blocks, "データ取得エラー", userDetail.Err.Error())
 	}

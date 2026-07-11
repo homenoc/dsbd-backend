@@ -60,7 +60,7 @@ func Add(c *gin.Context) {
 	}
 
 	//check exist for database
-	result := dbUser.Get(user.Email, &core.User{Email: input.Email})
+	result := dbUser.GetByEmail(input.Email)
 	if result.Err != nil {
 		log.Println(result.Err)
 	}
@@ -176,7 +176,7 @@ func AddGroup(c *gin.Context) {
 	}
 
 	//check exist for database
-	result := dbUser.Get(user.Email, &core.User{Email: input.Email})
+	result := dbUser.GetByEmail(input.Email)
 	if result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
@@ -211,7 +211,7 @@ func AddGroup(c *gin.Context) {
 func MailVerify(c *gin.Context) {
 	mailToken := c.Param("token")
 
-	result := dbUser.Get(user.MailToken, &core.User{MailToken: mailToken})
+	result := dbUser.GetByMailToken(mailToken)
 	if result.Err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: result.Err.Error() + "| we can't find token data"})
 		return
@@ -240,7 +240,7 @@ func MailVerify(c *gin.Context) {
 		return
 	}
 
-	if err := dbUser.Update(user.UpdateVerifyMail, &core.User{
+	if err := dbUser.UpdateMailVerify(&core.User{
 		Model:      gorm.Model{ID: result.User[0].ID},
 		MailVerify: &[]bool{true}[0],
 	}); err != nil {
@@ -300,7 +300,7 @@ func Delete(c *gin.Context) {
 		return
 	}
 
-	u := dbUser.Get(user.ID, &core.User{Model: gorm.Model{ID: uint(id)}})
+	u := dbUser.GetByID(uint(id))
 	if u.Err != nil {
 		log.Println(u.Err)
 		c.JSON(http.StatusInternalServerError, common.Error{Error: "error: database error"})
@@ -371,7 +371,7 @@ func Update(c *gin.Context) {
 			c.JSON(http.StatusForbidden, common.Error{Error: "error: failed user level"})
 			return
 		}
-		userResult := dbUser.Get(user.ID, &core.User{Model: gorm.Model{ID: uint(id)}})
+		userResult := dbUser.GetByID(uint(id))
 		if userResult.Err != nil {
 			c.JSON(http.StatusInternalServerError, common.Error{Error: userResult.Err.Error()})
 			return
@@ -393,7 +393,7 @@ func Update(c *gin.Context) {
 
 	noticeRenew(authResult.User, serverData, input)
 
-	if err = dbUser.Update(user.UpdateAll, &u); err != nil {
+	if err = dbUser.UpdateAll(&u); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 	} else {
 		c.JSON(http.StatusOK, user.Result{})

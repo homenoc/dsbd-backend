@@ -14,7 +14,6 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support/ticket"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbChat "github.com/homenoc/dsbd-backend/pkg/api/store/support/chat/v0"
 	dbTicket "github.com/homenoc/dsbd-backend/pkg/api/store/support/ticket/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
@@ -292,10 +291,7 @@ func GetAdminWebSocket(c *gin.Context) {
 
 			if len(resultTicket.Tickets) != 0 {
 				if groupID != 0 {
-					resultUser := dbUser.Get(user.GIDAndLevel, &core.User{
-						GroupID: resultTicket.Tickets[0].GroupID,
-						Level:   1,
-					})
+					resultUser := dbUser.GetByGroupIDAndLevel(resultTicket.Tickets[0].GroupID, core.LevelMaster)
 					if resultUser.Err != nil {
 						log.Println(resultUser.Err)
 					}
@@ -312,9 +308,7 @@ func GetAdminWebSocket(c *gin.Context) {
 						}
 					}
 				} else {
-					resultUser := dbUser.Get(user.ID, &core.User{
-						Model: gorm.Model{ID: *resultTicket.Tickets[0].UserID},
-					})
+					resultUser := dbUser.GetByID(*resultTicket.Tickets[0].UserID)
 					if resultUser.Err != nil {
 						log.Println(resultUser.Err)
 					}

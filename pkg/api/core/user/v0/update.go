@@ -31,7 +31,7 @@ func replaceUser(serverData core.User, input user.Input) (core.User, error) {
 		if !strings.Contains(input.Email, "@") {
 			return core.User{}, fmt.Errorf("wrong email address")
 		}
-		tmp := dbUser.Get(user.Email, &core.User{Email: input.Email})
+		tmp := dbUser.GetByEmail(input.Email)
 		if tmp.Err != nil {
 			return serverData, tmp.Err
 		}
@@ -93,7 +93,7 @@ func updateAdminUser(input, replace core.User) (core.User, error) {
 		if !strings.Contains(input.Email, "@") {
 			return core.User{}, fmt.Errorf("wrong email address")
 		}
-		tmp := dbUser.Get(user.Email, &core.User{Email: input.Email})
+		tmp := dbUser.GetByEmail(input.Email)
 		if tmp.Err != nil {
 			return replace, tmp.Err
 		}

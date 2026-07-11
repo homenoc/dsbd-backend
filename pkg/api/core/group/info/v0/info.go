@@ -14,7 +14,6 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/info"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/notice"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbNotice "github.com/homenoc/dsbd-backend/pkg/api/store/notice/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"gorm.io/gorm"
@@ -32,7 +31,7 @@ func Get(c *gin.Context) {
 
 	// User
 	var resultUser info.User
-	dbUserResult := dbUser.Get(user.IDDetail, &core.User{Model: gorm.Model{ID: authResult.User.ID}})
+	dbUserResult := dbUser.GetDetail(authResult.User.ID)
 	if dbUserResult.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: dbUserResult.Err.Error()})
 		return

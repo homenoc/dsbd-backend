@@ -7,24 +7,6 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/info"
 )
 
-const (
-	ID               = 0
-	IDDetail         = 10
-	GID              = 1
-	Name             = 2
-	Email            = 3
-	MailToken        = 4
-	GIDAndLevel      = 5
-	IDGetGroup       = 6
-	UpdateVerifyMail = 100
-	UpdateGID        = 101
-	UpdateInfo       = 102
-	UpdateStatus     = 105
-	UpdateLevel            = 106
-	UpdateAntisocialCheck  = 107
-	UpdateAll              = 150
-)
-
 type Input struct {
 	Name   string `json:"name"`
 	NameEn string `json:"name_en"`

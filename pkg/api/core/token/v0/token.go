@@ -9,7 +9,6 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/hash"
 	logging "github.com/homenoc/dsbd-backend/pkg/api/core/tool/log"
 	toolToken "github.com/homenoc/dsbd-backend/pkg/api/core/tool/token"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbToken "github.com/homenoc/dsbd-backend/pkg/api/store/token/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"gorm.io/gorm"
@@ -55,7 +54,7 @@ func Generate(c *gin.Context) {
 		return
 	}
 
-	userResult := dbUser.Get(user.Email, &core.User{Email: mail})
+	userResult := dbUser.GetByEmail(mail)
 	if userResult.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: userResult.Err.Error()})
 		return
