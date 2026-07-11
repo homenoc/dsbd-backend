@@ -16,15 +16,16 @@ func Delete(n *core.NOC) error {
 	return store.DB().Delete(n).Error
 }
 
-// UpdateAll updates the editable NOC fields (was Update(UpdateAll, ...)).
-func UpdateAll(data core.NOC) error {
-	return store.DB().Model(&core.NOC{Model: gorm.Model{ID: data.ID}}).Updates(core.NOC{
-		Name:      data.Name,
-		Location:  data.Location,
-		Bandwidth: data.Bandwidth,
-		Enable:    data.Enable,
-		Comment:   data.Comment,
-	}).Error
+// Update writes the admin-editable columns of the NOC row. Value-typed columns
+// are always written (so clearing to "" persists); pointer columns only when
+// provided, so an omitted field never nulls the row. Callers pass a full object
+// (the handler merges the request onto the current record).
+func Update(data core.NOC) error {
+	cols := []string{"name", "location", "bandwidth", "comment"}
+	if data.Enable != nil {
+		cols = append(cols, "enable")
+	}
+	return store.DB().Model(&core.NOC{Model: gorm.Model{ID: data.ID}}).Select(cols).Updates(data).Error
 }
 
 // GetByID looks up one NOC by primary key.

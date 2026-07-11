@@ -16,13 +16,16 @@ func Delete(r *core.BGPRouter) error {
 	return store.DB().Delete(r).Error
 }
 
-// UpdateAll updates the editable BGP router fields (was Update(UpdateAll, ...)).
-func UpdateAll(data core.BGPRouter) error {
-	return store.DB().Model(&core.BGPRouter{Model: gorm.Model{ID: data.ID}}).Updates(core.BGPRouter{
-		HostName: data.HostName,
-		Address:  data.Address,
-		Enable:   data.Enable,
-	}).Error
+// Update writes the admin-editable columns of the BGP router row. Value-typed
+// columns are always written (so clearing to "" persists); pointer columns only
+// when provided. Note: noc_id and comment were not updatable before either —
+// kept out of the whitelist for parity.
+func Update(data core.BGPRouter) error {
+	cols := []string{"host_name", "address"}
+	if data.Enable != nil {
+		cols = append(cols, "enable")
+	}
+	return store.DB().Model(&core.BGPRouter{Model: gorm.Model{ID: data.ID}}).Select(cols).Updates(data).Error
 }
 
 // GetByID looks up one BGP router by primary key.

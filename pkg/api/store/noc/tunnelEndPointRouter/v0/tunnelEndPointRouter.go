@@ -16,16 +16,19 @@ func Delete(r *core.TunnelEndPointRouter) error {
 	return store.DB().Delete(r).Error
 }
 
-// UpdateAll updates the editable tunnel endpoint router fields.
-func UpdateAll(data core.TunnelEndPointRouter) error {
+// Update writes the admin-editable columns of the tunnel endpoint router row.
+// Value-typed columns are always written (so clearing persists); pointer
+// columns only when provided.
+func Update(data core.TunnelEndPointRouter) error {
+	cols := []string{"host_name", "capacity", "comment"}
+	if data.NOCID != nil {
+		cols = append(cols, "noc_id")
+	}
+	if data.Enable != nil {
+		cols = append(cols, "enable")
+	}
 	return store.DB().Model(&core.TunnelEndPointRouter{Model: gorm.Model{ID: data.ID}}).
-		Updates(core.TunnelEndPointRouter{
-			NOCID:    data.NOCID,
-			HostName: data.HostName,
-			Capacity: data.Capacity,
-			Comment:  data.Comment,
-			Enable:   data.Enable,
-		}).Error
+		Select(cols).Updates(data).Error
 }
 
 // GetByID looks up one tunnel endpoint router by primary key.

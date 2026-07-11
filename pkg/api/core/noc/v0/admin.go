@@ -66,7 +66,7 @@ func UpdateByAdmin(c *gin.Context) {
 		return
 	}
 
-	if err = dbNOC.UpdateAll(replace(input, tmp.NOC[0])); err != nil {
+	if err = dbNOC.Update(replace(input, tmp.NOC[0])); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}

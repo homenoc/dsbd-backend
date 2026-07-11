@@ -22,18 +22,30 @@ func Delete(n *core.Notice) error {
 	return store.DB().Delete(n).Error
 }
 
-// UpdateAll updates the editable notice fields (was Update(UpdateAll, ...)).
-func UpdateAll(data core.Notice) error {
-	return store.DB().Model(&core.Notice{Model: gorm.Model{ID: data.ID}}).Updates(core.Notice{
-		StartTime: data.StartTime,
-		EndTime:   data.EndTime,
-		Important: data.Important,
-		Everyone:  data.Everyone,
-		Fault:     data.Fault,
-		Info:      data.Info,
-		Title:     data.Title,
-		Data:      data.Data,
-	}).Error
+// Update writes the admin-editable columns of the notice row. Value-typed
+// columns are always written (so clearing persists); pointer and time columns
+// only when provided, so an omitted field never nulls the row.
+func Update(data core.Notice) error {
+	cols := []string{"title", "data"}
+	if !data.StartTime.IsZero() {
+		cols = append(cols, "start_time")
+	}
+	if !data.EndTime.IsZero() {
+		cols = append(cols, "end_time")
+	}
+	if data.Everyone != nil {
+		cols = append(cols, "everyone")
+	}
+	if data.Important != nil {
+		cols = append(cols, "important")
+	}
+	if data.Fault != nil {
+		cols = append(cols, "fault")
+	}
+	if data.Info != nil {
+		cols = append(cols, "info")
+	}
+	return store.DB().Model(&core.Notice{Model: gorm.Model{ID: data.ID}}).Select(cols).Updates(data).Error
 }
 
 // GetByID looks up one notice by primary key.

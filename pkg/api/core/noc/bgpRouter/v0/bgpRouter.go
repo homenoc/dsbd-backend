@@ -66,7 +66,7 @@ func UpdateByAdmin(c *gin.Context) {
 		return
 	}
 
-	if err = dbBGPRouter.UpdateAll(replace(input, tmp.BGPRouter[0])); err != nil {
+	if err = dbBGPRouter.Update(replace(input, tmp.BGPRouter[0])); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}

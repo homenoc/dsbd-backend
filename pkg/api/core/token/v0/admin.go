@@ -96,7 +96,7 @@ func UpdateByAdmin(c *gin.Context) {
 		return
 	}
 
-	if err = dbToken.UpdateAll(&input); err != nil {
+	if err = dbToken.Update(&input); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}

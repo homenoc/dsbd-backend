@@ -66,7 +66,7 @@ func UpdateByAdmin(c *gin.Context) {
 		return
 	}
 
-	if err = dbGateway.UpdateAll(replace(input, tmp.TunnelEndPointRouter[0])); err != nil {
+	if err = dbGateway.Update(replace(input, tmp.TunnelEndPointRouter[0])); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}

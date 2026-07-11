@@ -125,7 +125,7 @@ func UpdateByAdmin(c *gin.Context) {
 
 	noticeSlackReplaceByAdmin(tmp.Notice[0], input)
 
-	if err = dbNotice.UpdateAll(core.Notice{
+	if err = dbNotice.Update(core.Notice{
 		Model:     gorm.Model{ID: uint(id)},
 		StartTime: startTime,
 		EndTime:   endTime,

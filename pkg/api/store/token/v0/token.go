@@ -34,8 +34,10 @@ func Renew(t *core.Token) error {
 		Updates(core.Token{ExpiredAt: t.ExpiredAt}).Error
 }
 
-// UpdateAll updates all mutable token fields (was Update(UpdateAll, ...)).
-func UpdateAll(t *core.Token) error {
+// Update writes the mutable token fields. Legacy non-zero semantics kept as-is:
+// the admin token PUT has no known frontend caller, so its payload shape is
+// unverified and the safer non-destructive behaviour is preserved.
+func Update(t *core.Token) error {
 	return store.DB().Model(&core.Token{Model: gorm.Model{ID: t.ID}}).Updates(core.Token{
 		ExpiredAt:   t.ExpiredAt,
 		UserID:      t.UserID,

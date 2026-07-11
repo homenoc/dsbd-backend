@@ -66,7 +66,7 @@ func UpdateByAdmin(c *gin.Context) {
 		return
 	}
 
-	if err = dbTunnelEndPointRouterIP.UpdateAll(replace(input, tmp.TunnelEndPointRouterIP[0])); err != nil {
+	if err = dbTunnelEndPointRouterIP.Update(replace(input, tmp.TunnelEndPointRouterIP[0])); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
