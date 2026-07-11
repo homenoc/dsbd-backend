@@ -83,7 +83,7 @@ func TestGoldenAPI(t *testing.T) {
 	cases := []testCase{
 		// --- user API: reads & error shapes ---
 		{name: "user_health", router: userRouter, method: "GET", path: "/health"},
-		{name: "user_template", router: userRouter, method: "GET", path: "/api/v1/template", headers: userHeaders},
+		{name: "user_catalog", router: userRouter, method: "GET", path: "/api/v1/catalog", headers: userHeaders},
 		{name: "user_info", router: userRouter, method: "GET", path: "/api/v1/info", headers: userHeaders},
 		{name: "user_service_add_allow", router: userRouter, method: "GET", path: "/api/v1/service/add_allow", headers: userHeaders},
 		{name: "user_info_unauthorized", router: userRouter, method: "GET", path: "/api/v1/info",
@@ -96,7 +96,7 @@ func TestGoldenAPI(t *testing.T) {
 			headers: map[string]string{"USER": "admin", "PASS": "wrong"}},
 		{name: "admin_unauthorized", router: adminRouter, method: "GET", path: "/api/v1/user",
 			headers: map[string]string{"ACCESS_TOKEN": "bogus"}},
-		{name: "admin_template", router: adminRouter, method: "GET", path: "/api/v1/template", headers: adminHeaders},
+		{name: "admin_catalog", router: adminRouter, method: "GET", path: "/api/v1/catalog", headers: adminHeaders},
 		{name: "admin_user_list", router: adminRouter, method: "GET", path: "/api/v1/user", headers: adminHeaders},
 		{name: "admin_user_detail", router: adminRouter, method: "GET", path: "/api/v1/user/1", headers: adminHeaders},
 		{name: "admin_group_list", router: adminRouter, method: "GET", path: "/api/v1/group", headers: adminHeaders},

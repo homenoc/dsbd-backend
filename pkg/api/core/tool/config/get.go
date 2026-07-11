@@ -2,25 +2,9 @@ package config
 
 import "fmt"
 
-func GetServiceTemplate(serviceType string) (*ServiceTemplate, error) {
-	for _, service := range Conf.Template.Service {
-		if service.Type == serviceType {
-			return &service, nil
-		}
-	}
-
-	return nil, fmt.Errorf("service template is not found")
-}
-
-func GetConnectionTemplate(connectionType string) (*ConnectionTemplate, error) {
-	for _, connection := range Conf.Template.Connection {
-		if connection.Type == connectionType {
-			return &connection, nil
-		}
-	}
-
-	return nil, fmt.Errorf("service template is not found")
-}
+// Service/connection type definitions moved to the code registry in package
+// core (core.GetServiceType / core.GetConnectionType); they are no longer in
+// config because each capability flag drives Go validation and a frontend form.
 
 func GetMailTemplate(id string) (*MailTemplate, error) {
 	for _, mail := range Conf.Template.Mail {

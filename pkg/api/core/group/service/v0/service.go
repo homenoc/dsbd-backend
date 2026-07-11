@@ -7,7 +7,6 @@ import (
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
@@ -64,7 +63,7 @@ func Add(c *gin.Context) {
 	var grpIP []core.IP = nil
 
 	// check input.ConnectionType and getting connection template
-	resultServiceTemplate, err := config.GetServiceTemplate(input.ServiceType)
+	resultServiceTemplate, err := core.GetServiceType(input.ServiceType)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 		return

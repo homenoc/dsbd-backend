@@ -53,7 +53,7 @@ func AddByAdmin(c *gin.Context) {
 	}
 
 	// check input.ConnectionType and getting connection template
-	connectionTemplate, err := config.GetConnectionTemplate(input.ConnectionType)
+	connectionTemplate, err := core.GetConnectionType(input.ConnectionType)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 		return
@@ -95,7 +95,7 @@ func AddByAdmin(c *gin.Context) {
 	}
 
 	// getting service with template
-	resultServiceWithTemplate, err := config.GetServiceTemplate(resultService.Service[0].ServiceType)
+	resultServiceWithTemplate, err := core.GetServiceType(resultService.Service[0].ServiceType)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return

@@ -20,7 +20,7 @@ import (
 	notice "github.com/homenoc/dsbd-backend/pkg/api/core/notice/v0"
 	payment "github.com/homenoc/dsbd-backend/pkg/api/core/payment/v0"
 	ticket "github.com/homenoc/dsbd-backend/pkg/api/core/support/ticket/v0"
-	template "github.com/homenoc/dsbd-backend/pkg/api/core/template/v0"
+	catalog "github.com/homenoc/dsbd-backend/pkg/api/core/catalog/v0"
 	token "github.com/homenoc/dsbd-backend/pkg/api/core/token/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	user "github.com/homenoc/dsbd-backend/pkg/api/core/user/v0"
@@ -101,7 +101,7 @@ func NewAdminRouter() *gin.Engine {
 			v1.DELETE("/memo/:id", memo.DeleteByAdmin)
 
 			// Template
-			v1.GET("/template", template.GetByAdmin)
+			v1.GET("/catalog", catalog.GetByAdmin)
 
 			//
 			// NOC
@@ -294,7 +294,7 @@ func NewUserRouter() *gin.Engine {
 			v1.POST("/group", group.Add)
 
 			// Template
-			v1.GET("/template", template.Get)
+			v1.GET("/catalog", catalog.Get)
 
 			// Service add
 			v1.POST("/service", service.Add)
