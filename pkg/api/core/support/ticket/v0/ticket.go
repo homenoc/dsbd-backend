@@ -13,7 +13,6 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support/ticket"
 	dbChat "github.com/homenoc/dsbd-backend/pkg/api/store/support/chat/v0"
 	dbTicket "github.com/homenoc/dsbd-backend/pkg/api/store/support/ticket/v0"
-	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"strconv"
@@ -182,7 +181,7 @@ func Update(c *gin.Context) {
 	}
 
 	// Tickets DBからデータを取得
-	ticketResult := dbTicket.Get(ticket.ID, &core.Ticket{Model: gorm.Model{ID: uint(id)}})
+	ticketResult := dbTicket.GetByID(uint(id))
 	if ticketResult.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: ticketResult.Err.Error()})
 		return
@@ -214,7 +213,7 @@ func Update(c *gin.Context) {
 	updateTicketData.Solved = input.Solved
 
 	// Ticketのアップデート
-	err = dbTicket.Update(ticket.UpdateAll, updateTicketData)
+	err = dbTicket.UpdateAll(updateTicketData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
@@ -254,7 +253,7 @@ func GetWebSocket(c *gin.Context) {
 		return
 	}
 
-	ticketResult := dbTicket.Get(ticket.ID, &core.Ticket{Model: gorm.Model{ID: uint(id)}})
+	ticketResult := dbTicket.GetByID(uint(id))
 	if ticketResult.Err != nil {
 		log.Println("ws:// support error: db error")
 		conn.WriteMessage(websocket.TextMessage, []byte("error: db error"))

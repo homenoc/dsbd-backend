@@ -134,7 +134,7 @@ func UpdateByAdmin(c *gin.Context) {
 		endTime, _ = time.ParseInLocation(layoutInput, *input.EndTime, jst)
 	}
 
-	tmp := dbNotice.Get(notice.ID, &core.Notice{Model: gorm.Model{ID: uint(id)}})
+	tmp := dbNotice.GetByID(uint(id))
 	if tmp.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: tmp.Err.Error()})
 		return
@@ -142,7 +142,7 @@ func UpdateByAdmin(c *gin.Context) {
 
 	noticeSlackReplaceByAdmin(tmp.Notice[0], input)
 
-	if err = dbNotice.Update(notice.UpdateAll, core.Notice{
+	if err = dbNotice.UpdateAll(core.Notice{
 		Model:     gorm.Model{ID: uint(id)},
 		StartTime: startTime,
 		EndTime:   endTime,
@@ -171,7 +171,7 @@ func GetByAdmin(c *gin.Context) {
 		return
 	}
 
-	result := dbNotice.Get(notice.ID, &core.Notice{Model: gorm.Model{ID: uint(id)}})
+	result := dbNotice.GetByID(uint(id))
 	if result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return

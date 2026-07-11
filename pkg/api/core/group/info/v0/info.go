@@ -12,11 +12,9 @@ import (
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/info"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/notice"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	dbNotice "github.com/homenoc/dsbd-backend/pkg/api/store/notice/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
-	"gorm.io/gorm"
 )
 
 func Get(c *gin.Context) {
@@ -144,7 +142,7 @@ func Get(c *gin.Context) {
 
 	// Notice
 	var resultNotice []info.Notice
-	noticeResult := dbNotice.Get(notice.UIDOrAll, &core.Notice{User: []core.User{{Model: gorm.Model{ID: authResult.User.ID}}}})
+	noticeResult := dbNotice.GetActiveForUser(authResult.User.ID)
 	if noticeResult.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: noticeResult.Err.Error()})
 		return

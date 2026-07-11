@@ -17,7 +17,6 @@ import (
 	dbChat "github.com/homenoc/dsbd-backend/pkg/api/store/support/chat/v0"
 	dbTicket "github.com/homenoc/dsbd-backend/pkg/api/store/support/ticket/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
-	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"strconv"
@@ -121,7 +120,7 @@ func UpdateByAdmin(c *gin.Context) {
 	}
 
 	// Tickets DBからデータを取得
-	ticketResult := dbTicket.Get(ticket.ID, &core.Ticket{Model: gorm.Model{ID: uint(id)}})
+	ticketResult := dbTicket.GetByID(uint(id))
 	if ticketResult.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: ticketResult.Err.Error()})
 		return
@@ -135,7 +134,7 @@ func UpdateByAdmin(c *gin.Context) {
 	}
 
 	// Ticketのアップデート
-	err = dbTicket.Update(ticket.UpdateAll, replace)
+	err = dbTicket.UpdateAll(replace)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
@@ -161,7 +160,7 @@ func GetByAdmin(c *gin.Context) {
 	}
 
 	// IDからDBからチケットを検索
-	resultTicket := dbTicket.Get(ticket.ID, &core.Ticket{Model: gorm.Model{ID: uint(id)}})
+	resultTicket := dbTicket.GetByID(uint(id))
 	if resultTicket.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: resultTicket.Err.Error()})
 		return
@@ -215,7 +214,7 @@ func GetAdminWebSocket(c *gin.Context) {
 		return
 	}
 
-	ticketResult := dbTicket.Get(ticket.ID, &core.Ticket{Model: gorm.Model{ID: uint(id)}})
+	ticketResult := dbTicket.GetByID(uint(id))
 	if ticketResult.Err != nil {
 		log.Println("ws:// support error: db error")
 		conn.WriteMessage(websocket.TextMessage, []byte("error: db error"))
@@ -282,7 +281,7 @@ func GetAdminWebSocket(c *gin.Context) {
 				Message:   msg.Message,
 			})
 
-			resultTicket := dbTicket.Get(ticket.ID, &core.Ticket{Model: gorm.Model{ID: ticketResult.Tickets[0].ID}})
+			resultTicket := dbTicket.GetByID(ticketResult.Tickets[0].ID)
 			if resultTicket.Err != nil {
 				log.Println(resultTicket.Err)
 			}

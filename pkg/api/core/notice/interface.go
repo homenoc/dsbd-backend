@@ -4,18 +4,6 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 )
 
-const (
-	ID                    = 0
-	UIDOrAll              = 1
-	UIDOrGIDOrAll         = 2
-	UIDOrGIDOrNOCAllOrAll = 3
-	NOCAll                = 4
-	Important             = 10
-	Fault                 = 11
-	Info                  = 12
-	UpdateAll             = 150
-)
-
 type Input struct {
 	UserID    []uint  `json:"user_id"`
 	GroupID   []uint  `json:"group_id"`
