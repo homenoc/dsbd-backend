@@ -10,7 +10,6 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/info"
 	"github.com/homenoc/dsbd-backend/pkg/api/middleware"
-	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	dbNotice "github.com/homenoc/dsbd-backend/pkg/api/store/notice/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 )
@@ -21,6 +20,19 @@ import (
 func Get(c *gin.Context) {
 	u := middleware.CurrentUser(c)
 
+	// One GetDetail load carries the whole association graph this payload
+	// needs (group -> services -> IP/connections/routers, plus tickets).
+	userResult := dbUser.GetDetail(u.ID)
+	if userResult.Err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: userResult.Err.Error()})
+		return
+	}
+	if len(userResult.User) == 0 {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: "user not found"})
+		return
+	}
+	userDetail := userResult.User[0]
+
 	resultUser := projectUser(u)
 
 	// Group and member list
@@ -29,16 +41,9 @@ func Get(c *gin.Context) {
 	var group core.Group
 	hasGroup := false
 
-	if u.GroupID != nil {
-		groupResult := dbGroup.GetByID(*u.GroupID)
-		if groupResult.Err != nil {
-			c.JSON(http.StatusInternalServerError, common.Error{Error: groupResult.Err.Error()})
-			return
-		}
-		if len(groupResult.Group) != 0 {
-			group = groupResult.Group[0]
-			hasGroup = true
-		}
+	if userDetail.GroupID != nil && userDetail.Group != nil {
+		group = *userDetail.Group
+		hasGroup = true
 	}
 
 	if hasGroup {
@@ -130,17 +135,8 @@ func Get(c *gin.Context) {
 		})
 	}
 
-	// Ticket / Request (needs the full ticket association graph)
-	userResult := dbUser.GetDetail(u.ID)
-	if userResult.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: userResult.Err.Error()})
-		return
-	}
-	if len(userResult.User) == 0 {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: "user not found"})
-		return
-	}
-	resultTicket, resultRequest := buildTickets(userResult.User[0])
+	// Ticket / Request
+	resultTicket, resultRequest := buildTickets(userDetail)
 
 	// Service / Connection / derived network info (group-scoped; level-gated)
 	var resultService []info.Service
