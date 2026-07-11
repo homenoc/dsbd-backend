@@ -168,23 +168,23 @@ type IP struct {
 	gorm.Model
 	ServiceID uint       `json:"service_id"`
 	Version   uint       `json:"version"`
-	Name      string     `json:"name"`
-	IP        string     `json:"ip"`
+	Name      string     `json:"name" notify:"Name"`
+	IP        string     `json:"ip" notify:"IP"`
 	Plan      []*Plan    `json:"plan" `
 	PlanJPNIC *string    `json:"" gorm:"size:15000"` //いらんかも
 	StartDate time.Time  `json:"start_date"`
 	EndDate   *time.Time `json:"end_date"`
-	UseCase   string     `json:"use_case"`
-	Open      *bool      `json:"open"`
+	UseCase   string     `json:"use_case" notify:"UseCase"`
+	Open      *bool      `json:"open" notify:"Open,true=開通,false=未開通"`
 }
 
 type Plan struct {
 	gorm.Model
 	IPID     uint   `json:"ip_id"`
-	Name     string `json:"name"`
-	After    uint   `json:"after"`
-	HalfYear uint   `json:"half_year"`
-	OneYear  uint   `json:"one_year"`
+	Name     string `json:"name" notify:"Name"`
+	After    uint   `json:"after" notify:"直後"`
+	HalfYear uint   `json:"half_year" notify:"半年後"`
+	OneYear  uint   `json:"one_year" notify:"1年後"`
 }
 
 type JPNICAdmin struct {
@@ -192,23 +192,23 @@ type JPNICAdmin struct {
 	ServiceID     uint   `json:"service_id"`
 	Hidden        bool   `json:"hidden"`
 	IsGroup       bool   `json:"is_group"`
-	V4JPNICHandle string `json:"v4_jpnic_handle"`
-	V6JPNICHandle string `json:"v6_jpnic_handle"`
-	Name          string `json:"name"`
-	NameEn        string `json:"name_en"`
-	Mail          string `json:"mail"`
-	Org           string `json:"org"`
-	OrgEn         string `json:"org_en"`
-	PostCode      string `json:"postcode"`
-	Address       string `json:"address"`
-	AddressEn     string `json:"address_en"`
-	Dept          string `json:"dept"`
-	DeptEn        string `json:"dept_en"`
+	V4JPNICHandle string `json:"v4_jpnic_handle" notify:"JPNICHandle(IPv4)"`
+	V6JPNICHandle string `json:"v6_jpnic_handle" notify:"JPNICHandle(IPv6)"`
+	Name          string `json:"name" notify:"Name"`
+	NameEn        string `json:"name_en" notify:"Name(En)"`
+	Mail          string `json:"mail" notify:"Mail"`
+	Org           string `json:"org" notify:"Org"`
+	OrgEn         string `json:"org_en" notify:"Org(En)"`
+	PostCode      string `json:"postcode" notify:"PostCode"`
+	Address       string `json:"address" notify:"Address"`
+	AddressEn     string `json:"address_en" notify:"Address(En)"`
+	Dept          string `json:"dept" notify:"Dept"`
+	DeptEn        string `json:"dept_en" notify:"Dept(En)"`
 	Title         string `json:"title"`
 	TitleEn       string `json:"title_en"`
-	Tel           string `json:"tel"`
-	Fax           string `json:"fax"`
-	Country       string `json:"country"`
+	Tel           string `json:"tel" notify:"Tel"`
+	Fax           string `json:"fax" notify:"Fax"`
+	Country       string `json:"country" notify:"Country"`
 }
 
 type JPNICTech struct {
@@ -216,23 +216,23 @@ type JPNICTech struct {
 	ServiceID     uint   `json:"service_id"`
 	Hidden        bool   `json:"hidden"`
 	IsGroup       bool   `json:"is_group"`
-	V4JPNICHandle string `json:"v4_jpnic_handle"`
-	V6JPNICHandle string `json:"v6_jpnic_handle"`
-	Name          string `json:"name"`
-	NameEn        string `json:"name_en"`
-	Mail          string `json:"mail"`
-	Org           string `json:"org"`
-	OrgEn         string `json:"org_en"`
-	PostCode      string `json:"postcode"`
-	Address       string `json:"address"`
-	AddressEn     string `json:"address_en"`
-	Dept          string `json:"dept"`
-	DeptEn        string `json:"dept_en"`
+	V4JPNICHandle string `json:"v4_jpnic_handle" notify:"JPNICHandle(IPv4)"`
+	V6JPNICHandle string `json:"v6_jpnic_handle" notify:"JPNICHandle(IPv6)"`
+	Name          string `json:"name" notify:"Name"`
+	NameEn        string `json:"name_en" notify:"Name(En)"`
+	Mail          string `json:"mail" notify:"Mail"`
+	Org           string `json:"org" notify:"Org"`
+	OrgEn         string `json:"org_en" notify:"Org(En)"`
+	PostCode      string `json:"postcode" notify:"PostCode"`
+	Address       string `json:"address" notify:"Address"`
+	AddressEn     string `json:"address_en" notify:"Address(En)"`
+	Dept          string `json:"dept" notify:"Dept"`
+	DeptEn        string `json:"dept_en" notify:"Dept(En)"`
 	Title         string `json:"title"`
 	TitleEn       string `json:"title_en"`
-	Tel           string `json:"tel"`
-	Fax           string `json:"fax"`
-	Country       string `json:"country"`
+	Tel           string `json:"tel" notify:"Tel"`
+	Fax           string `json:"fax" notify:"Fax"`
+	Country       string `json:"country" notify:"Country"`
 }
 
 // 申請中/承諾済み/却下

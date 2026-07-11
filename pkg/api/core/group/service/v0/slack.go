@@ -356,182 +356,22 @@ func changeText(before, after core.Service) string {
 	return notify.Diff(before, after)
 }
 
+// changeTextJPNICByAdmin is driven by the `notify:"..."` tags on core.JPNICAdmin.
 func changeTextJPNICByAdmin(before, after core.JPNICAdmin) string {
-	data := ""
-
-	if before.V4JPNICHandle != after.V4JPNICHandle {
-		data += "JPNICHandle(IPv4): " + before.V4JPNICHandle + "=>" + after.V4JPNICHandle + "\n"
-	}
-
-	if before.V6JPNICHandle != after.V6JPNICHandle {
-		data += "JPNICHandle(IPv6): " + before.V6JPNICHandle + "=>" + after.V6JPNICHandle + "\n"
-	}
-
-	if before.Name != after.Name {
-		data += "Name: " + before.Name + "=>" + after.Name + "\n"
-	}
-
-	if before.NameEn != after.NameEn {
-		data += "Name(En): " + before.NameEn + "=>" + after.NameEn + "\n"
-	}
-
-	if before.Mail != after.Mail {
-		data += "Mail: " + before.Mail + "=>" + after.Mail + "\n"
-	}
-
-	if before.Org != after.Org {
-		data += "Org: " + before.Org + "=>" + after.Org + "\n"
-	}
-
-	if before.OrgEn != after.OrgEn {
-		data += "Org(En): " + before.OrgEn + "=>" + after.OrgEn + "\n"
-	}
-
-	if before.PostCode != after.PostCode {
-		data += "PostCode: " + before.PostCode + "=>" + after.PostCode + "\n"
-	}
-
-	if before.Address != after.Address {
-		data += "Address: " + before.Address + "=>" + after.Address + "\n"
-	}
-
-	if before.AddressEn != after.AddressEn {
-		data += "Address(En): " + before.AddressEn + "=>" + after.AddressEn + "\n"
-	}
-
-	if before.Dept != after.Dept {
-		data += "Dept: " + before.Dept + "=>" + after.Dept + "\n"
-	}
-
-	if before.DeptEn != after.DeptEn {
-		data += "Dept(En): " + before.DeptEn + "=>" + after.DeptEn + "\n"
-	}
-
-	if before.Tel != after.Tel {
-		data += "Tel: " + before.Tel + "=>" + after.Tel + "\n"
-	}
-
-	if before.Fax != after.Fax {
-		data += "Fax: " + before.Fax + "=>" + after.Fax + "\n"
-	}
-
-	if before.Country != after.Country {
-		data += "Country: " + before.Country + "=>" + after.Country + "\n"
-	}
-
-	return data
+	return notify.Diff(before, after)
 }
 
+// changeTextJPNICTech is driven by the `notify:"..."` tags on core.JPNICTech.
 func changeTextJPNICTech(before, after core.JPNICTech) string {
-	data := ""
-
-	if before.V4JPNICHandle != after.V4JPNICHandle {
-		data += "JPNICHandle(IPv4): " + before.V4JPNICHandle + "=>" + after.V4JPNICHandle + "\n"
-	}
-
-	if before.V6JPNICHandle != after.V6JPNICHandle {
-		data += "JPNICHandle(IPv6): " + before.V6JPNICHandle + "=>" + after.V6JPNICHandle + "\n"
-	}
-
-	if before.Name != after.Name {
-		data += "Name: " + before.Name + "=>" + after.Name + "\n"
-	}
-
-	if before.NameEn != after.NameEn {
-		data += "Name(En): " + before.NameEn + "=>" + after.NameEn + "\n"
-	}
-
-	if before.Mail != after.Mail {
-		data += "Mail: " + before.Mail + "=>" + after.Mail + "\n"
-	}
-
-	if before.Org != after.Org {
-		data += "Org: " + before.Org + "=>" + after.Org + "\n"
-	}
-
-	if before.OrgEn != after.OrgEn {
-		data += "Org(En): " + before.OrgEn + "=>" + after.OrgEn + "\n"
-	}
-
-	if before.PostCode != after.PostCode {
-		data += "PostCode: " + before.PostCode + "=>" + after.PostCode + "\n"
-	}
-
-	if before.Address != after.Address {
-		data += "Address: " + before.Address + "=>" + after.Address + "\n"
-	}
-
-	if before.AddressEn != after.AddressEn {
-		data += "Address(En): " + before.AddressEn + "=>" + after.AddressEn + "\n"
-	}
-
-	if before.Dept != after.Dept {
-		data += "Dept: " + before.Dept + "=>" + after.Dept + "\n"
-	}
-
-	if before.DeptEn != after.DeptEn {
-		data += "Dept(En): " + before.DeptEn + "=>" + after.DeptEn + "\n"
-	}
-
-	if before.Tel != after.Tel {
-		data += "Tel: " + before.Tel + "=>" + after.Tel + "\n"
-	}
-
-	if before.Fax != after.Fax {
-		data += "Fax: " + before.Fax + "=>" + after.Fax + "\n"
-	}
-
-	if before.Country != after.Country {
-		data += "Country: " + before.Country + "=>" + after.Country + "\n"
-	}
-
-	return data
+	return notify.Diff(before, after)
 }
 
+// changeTextIP is driven by the `notify:"..."` tags on core.IP.
 func changeTextIP(before, after core.IP) string {
-	data := ""
-
-	if before.Name != after.Name {
-		data += "Name: " + before.Name + "=>" + after.Name + "\n"
-	}
-
-	if before.IP != after.IP {
-		data += "IP: " + before.IP + "=>" + after.IP + "\n"
-	}
-
-	if before.UseCase != after.UseCase {
-		data += "UseCase: " + before.UseCase + "=>" + after.UseCase + "\n"
-	}
-
-	if before.Open != nil && after.Open != nil && *before.Open != *after.Open {
-		if *after.Open {
-			data += "Open: 未開通 => 開通\n"
-		} else {
-			data += "Open: 開通 => 未開通\n"
-		}
-	}
-
-	return data
+	return notify.Diff(before, after)
 }
 
+// changeTextPlan is driven by the `notify:"..."` tags on core.Plan.
 func changeTextPlan(before, after core.Plan) string {
-	data := ""
-
-	if before.Name != after.Name {
-		data += "Name: " + before.Name + "=>" + after.Name + "\n"
-	}
-
-	if before.After != after.After {
-		data += "直後: " + strconv.Itoa(int(before.After)) + "=>" + strconv.Itoa(int(after.After)) + "\n"
-	}
-
-	if before.HalfYear != after.HalfYear {
-		data += "半年後: " + strconv.Itoa(int(before.HalfYear)) + "=>" + strconv.Itoa(int(after.HalfYear)) + "\n"
-	}
-
-	if before.OneYear != after.OneYear {
-		data += "1年後: " + strconv.Itoa(int(before.OneYear)) + "=>" + strconv.Itoa(int(after.OneYear)) + "\n"
-	}
-
-	return data
+	return notify.Diff(before, after)
 }

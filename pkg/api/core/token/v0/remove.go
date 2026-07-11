@@ -1,11 +1,12 @@
 package v0
 
 import (
+	"log"
+	"time"
+
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	dbToken "github.com/homenoc/dsbd-backend/pkg/api/store/token/v0"
 	"gorm.io/gorm"
-	"log"
-	"time"
 )
 
 func TokenRemove() {
