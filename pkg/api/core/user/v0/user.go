@@ -6,7 +6,6 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/mail"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/mail/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
@@ -136,7 +135,7 @@ func AddGroup(c *gin.Context) {
 		return
 	}
 
-	resultGroup := dbGroup.Get(group.ID, &core.Group{Model: gorm.Model{ID: uint(id)}})
+	resultGroup := dbGroup.GetByID(uint(id))
 	if resultGroup.Err != nil {
 		c.JSON(http.StatusForbidden, common.Error{Error: "error: access is not permitted"})
 		return

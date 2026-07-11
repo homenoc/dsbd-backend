@@ -6,7 +6,6 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
@@ -195,7 +194,7 @@ func Add(c *gin.Context) {
 
 	// ---------ここまで処理が通っている場合、DBへの書き込みにすべて成功している
 	// GroupのStatusをAfterStatusにする
-	if err = dbGroup.Update(group.UpdateAll, core.Group{
+	if err = dbGroup.UpdateAll(core.Group{
 		Model:    gorm.Model{ID: result.User.Group.ID},
 		AddAllow: &[]bool{false}[0],
 	}); err != nil {

@@ -2,16 +2,16 @@ package v0
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
 	"gorm.io/gorm"
-	"log"
-	"time"
 )
 
 func Create(g *core.Group) (*core.Group, error) {
-	result := Get(group.Org, &core.Group{Org: g.Org})
+	result := GetByOrg(g.Org)
 	if result.Err != nil {
 		return &core.Group{}, result.Err
 	}
@@ -20,93 +20,48 @@ func Create(g *core.Group) (*core.Group, error) {
 		return &core.Group{}, fmt.Errorf("error: this org name is already registered")
 	}
 
-	db, err := store.ConnectDB()
-	if err != nil {
-		log.Println("database connection error")
-		return g, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-
-	err = db.Create(&g).Error
+	err := store.DB().Create(&g).Error
 	return g, err
 }
 
-func Delete(group *core.Group) error {
-	db, err := store.ConnectDB()
-	if err != nil {
-		log.Println("database connection error")
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-
-	return db.Delete(group).Error
+func Delete(g *core.Group) error {
+	return store.DB().Delete(g).Error
 }
 
-func Update(base int, g core.Group) error {
-	db, err := store.ConnectDB()
-	if err != nil {
-		log.Println("database connection error")
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-
-	err = nil
-
-	if group.UpdateOrg == base {
-		err = db.Model(&core.Group{Model: gorm.Model{ID: g.ID}}).Updates(core.Group{Org: g.Org}).Error
-	} else if group.UpdateMembership == base {
-		err = db.Model(&core.Group{Model: gorm.Model{ID: g.ID}}).Updates(core.Group{
-			StripeCustomerID:     g.StripeCustomerID,
-			StripeSubscriptionID: g.StripeSubscriptionID,
-			MemberExpired:        g.MemberExpired,
-		}).Error
-	} else if group.UpdateAll == base {
-		err = db.Model(&core.Group{Model: gorm.Model{ID: g.ID}}).Updates(g).Error
-	} else {
-		log.Println("base select error")
-		return fmt.Errorf("(%s)error: base select\n", time.Now())
-	}
-	return err
+// UpdateAll updates the group with all non-zero fields of g (was Update(UpdateAll, ...)).
+func UpdateAll(g core.Group) error {
+	return store.DB().Model(&core.Group{Model: gorm.Model{ID: g.ID}}).Updates(g).Error
 }
 
-func Get(base int, data *core.Group) group.ResultDatabase {
-	db, err := store.ConnectDB()
-	if err != nil {
-		log.Println("database connection error")
-		return group.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
-	}
+// GetByID loads a group with the full user/service/connection association graph.
+func GetByID(id uint) group.ResultDatabase {
+	var groups []core.Group
+	err := store.DB().Preload("Users").
+		Preload("Services").
+		Preload("Tickets").
+		Preload("Memos").
+		Preload("Services.IP").
+		Preload("Services.IP.Plan").
+		Preload("Services.Connection").
+		Preload("Services.Connection.BGPRouter").
+		Preload("Services.Connection.BGPRouter.NOC").
+		Preload("Services.Connection.TunnelEndPointRouterIP").
+		Preload("Services.JPNICAdmin").
+		Preload("Services.JPNICTech").
+		First(&groups, id).Error
+	return group.ResultDatabase{Group: groups, Err: err}
+}
 
-	var groupStruct []core.Group
-
-	if base == group.ID { //ID
-		err = db.Preload("Users").
-			Preload("Services").
-			Preload("Tickets").
-			Preload("Memos").
-			Preload("Services.IP").
-			Preload("Services.IP.Plan").
-			Preload("Services.Connection").
-			Preload("Services.Connection.BGPRouter").
-			Preload("Services.Connection.BGPRouter.NOC").
-			Preload("Services.Connection.TunnelEndPointRouterIP").
-			Preload("Services.JPNICAdmin").
-			Preload("Services.JPNICTech").
-			First(&groupStruct, data.ID).Error
-	} else if base == group.Org { //Org
-		err = db.Where("org = ?", data.Org).Find(&groupStruct).Error
-	} else {
-		log.Println("base select error")
-		return group.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
-	}
-	return group.ResultDatabase{Group: groupStruct, Err: err}
+// GetByOrg returns groups matching an organization name.
+func GetByOrg(org string) group.ResultDatabase {
+	var groups []core.Group
+	err := store.DB().Where("org = ?", org).Find(&groups).Error
+	return group.ResultDatabase{Group: groups, Err: err}
 }
 
 func GetAll() group.ResultDatabase {
-	db, err := store.ConnectDB()
-	if err != nil {
-		log.Println("database connection error")
-		return group.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
-	}
-
 	var groups []core.Group
-	err = db.Preload("Users").
+	err := store.DB().Preload("Users").
 		Preload("Memos").
 		Find(&groups).Error
 	return group.ResultDatabase{Group: groups, Err: err}

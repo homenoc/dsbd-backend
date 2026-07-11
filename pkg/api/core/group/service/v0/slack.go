@@ -2,18 +2,16 @@ package v0
 
 import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	"github.com/slack-go/slack"
-	"gorm.io/gorm"
 	"strconv"
 )
 
 func getGroupInfo(groupID uint) core.Group {
-	result := dbGroup.Get(group.ID, &core.Group{Model: gorm.Model{ID: groupID}})
+	result := dbGroup.GetByID(groupID)
 	return result.Group[0]
 }
 

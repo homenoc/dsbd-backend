@@ -45,7 +45,7 @@ func Add(c *gin.Context) {
 	}
 
 	// double check
-	resultDB := dbGroup.Get(group.Org, &core.Group{Org: input.Org})
+	resultDB := dbGroup.GetByOrg(input.Org)
 	if resultDB.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: "error: can't get data from db."})
 		return

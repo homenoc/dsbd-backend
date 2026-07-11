@@ -6,7 +6,6 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/payment"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
@@ -42,7 +41,7 @@ func PostAdminSubscribeGettingURL(c *gin.Context) {
 		return
 	}
 
-	result := dbGroup.Get(group.ID, &core.Group{Model: gorm.Model{ID: uint(id)}})
+	result := dbGroup.GetByID(uint(id))
 	if result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
@@ -72,7 +71,7 @@ func PostAdminSubscribeGettingURL(c *gin.Context) {
 			noticePaymentError(true, []string{"Type: Create Customer", "Error: " + err.Error()})
 			log.Println("Error: " + err.Error())
 		}
-		err = dbGroup.Update(group.UpdateAll, core.Group{Model: gorm.Model{ID: result.Group[0].ID}, StripeCustomerID: &cus.ID})
+		err = dbGroup.UpdateAll(core.Group{Model: gorm.Model{ID: result.Group[0].ID}, StripeCustomerID: &cus.ID})
 		noticePaymentLog(stripe.Event{
 			ID:   cus.ID,
 			Type: "stripe customer追加",
@@ -136,7 +135,7 @@ func GetAdminBillingPortalURL(c *gin.Context) {
 		return
 	}
 
-	result := dbGroup.Get(group.ID, &core.Group{Model: gorm.Model{ID: uint(id)}})
+	result := dbGroup.GetByID(uint(id))
 	if result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
@@ -184,7 +183,7 @@ func GetAdminDashboardCustomerURL(c *gin.Context) {
 		return
 	}
 
-	result := dbGroup.Get(group.ID, &core.Group{Model: gorm.Model{ID: uint(id)}})
+	result := dbGroup.GetByID(uint(id))
 	if result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
@@ -221,7 +220,7 @@ func GetAdminDashboardSubscribeURL(c *gin.Context) {
 		return
 	}
 
-	result := dbGroup.Get(group.ID, &core.Group{Model: gorm.Model{ID: uint(id)}})
+	result := dbGroup.GetByID(uint(id))
 	if result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
