@@ -76,7 +76,7 @@
         "v6_jpnic_handle": ""
       },
       "jpnic_tech": null,
-      "max_bandwidth_as": "",
+      "max_bandwidth_as": "100Mbps",
       "max_downstream": 100,
       "max_upstream": 100,
       "org": "テスト組織",

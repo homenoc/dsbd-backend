@@ -168,6 +168,7 @@ func Add(c *gin.Context) {
 		MaxUpstream:    input.MaxUpstream,
 		AveDownstream:  input.AveDownstream,
 		MaxDownstream:  input.MaxDownstream,
+		MaxBandWidthAS: input.MaxBandWidthAS,
 		StartDate:      startDate,
 		EndDate:        endDate,
 		ASN:            &[]uint{input.ASN}[0],

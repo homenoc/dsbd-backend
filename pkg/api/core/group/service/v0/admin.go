@@ -152,6 +152,7 @@ func AddByAdmin(c *gin.Context) {
 		PostCode:       input.Postcode,
 		Address:        input.Address,
 		AddressEn:      input.AddressEn,
+		Abuse:          input.Abuse,
 		AveUpstream:    input.AveUpstream,
 		MaxUpstream:    input.MaxUpstream,
 		AveDownstream:  input.AveDownstream,
