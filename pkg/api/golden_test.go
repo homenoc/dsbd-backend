@@ -84,13 +84,6 @@ func TestGoldenAPI(t *testing.T) {
 		// --- user API: reads & error shapes ---
 		{name: "user_health", router: userRouter, method: "GET", path: "/health"},
 		{name: "user_catalog", router: userRouter, method: "GET", path: "/api/v1/catalog", headers: userHeaders},
-		{name: "user_me", router: userRouter, method: "GET", path: "/api/v1/user/me", headers: userHeaders},
-		{name: "user_group", router: userRouter, method: "GET", path: "/api/v1/group", headers: userHeaders},
-		{name: "user_service", router: userRouter, method: "GET", path: "/api/v1/service", headers: userHeaders},
-		{name: "user_connection", router: userRouter, method: "GET", path: "/api/v1/connection", headers: userHeaders},
-		{name: "user_notice", router: userRouter, method: "GET", path: "/api/v1/notice", headers: userHeaders},
-		{name: "user_ticket", router: userRouter, method: "GET", path: "/api/v1/ticket", headers: userHeaders},
-		{name: "user_request", router: userRouter, method: "GET", path: "/api/v1/request", headers: userHeaders},
 		{name: "user_info", router: userRouter, method: "GET", path: "/api/v1/info", headers: userHeaders},
 		{name: "user_service_add_allow", router: userRouter, method: "GET", path: "/api/v1/service/add_allow", headers: userHeaders},
 		{name: "user_info_unauthorized", router: userRouter, method: "GET", path: "/api/v1/info",

@@ -9,6 +9,7 @@ import (
 	catalog "github.com/homenoc/dsbd-backend/pkg/api/core/catalog/v0"
 	controller "github.com/homenoc/dsbd-backend/pkg/api/core/controller/v0"
 	connection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection/v0"
+	info "github.com/homenoc/dsbd-backend/pkg/api/core/group/info/v0"
 	memo "github.com/homenoc/dsbd-backend/pkg/api/core/group/memo/v0"
 	service "github.com/homenoc/dsbd-backend/pkg/api/core/group/service/v0"
 	group "github.com/homenoc/dsbd-backend/pkg/api/core/group/v0"
@@ -283,17 +284,9 @@ func NewUserRouter() *gin.Engine {
 			v1.DELETE("/user/:id", middleware.GroupAuth(0), user.Delete)
 
 			//
-			// Per-resource user reads (formerly the /info bootstrap blob)
+			// Info (user-facing read API: one GET-only bootstrap payload)
 			//
-			v1.GET("/user/me", middleware.UserAuth, user.GetMe)
-			v1.GET("/group", middleware.UserAuth, group.Get)
-			v1.GET("/service", middleware.UserAuth, service.Get)
-			v1.GET("/connection", middleware.UserAuth, connection.Get)
-			v1.GET("/notice", middleware.UserAuth, notice.GetActive)
-			v1.GET("/ticket", middleware.UserAuth, ticket.GetUserTickets)
-			v1.GET("/request", middleware.UserAuth, ticket.GetUserRequests)
-			// Derived network summary of the user's opened connections
-			v1.GET("/info", middleware.UserAuth, connection.GetInfo)
+			v1.GET("/info", middleware.UserAuth, info.Get)
 
 			//
 			// Group

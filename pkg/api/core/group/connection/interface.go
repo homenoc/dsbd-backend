@@ -2,7 +2,6 @@ package connection
 
 import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
 )
 
 type Input struct {
@@ -31,46 +30,4 @@ type Result struct {
 type ResultDatabase struct {
 	Err        error
 	Connection []core.Connection
-}
-
-// Connection is the user-facing wire shape of an enabled connection
-// (GET /connection).
-type Connection struct {
-	ID        uint   `json:"id"`
-	ServiceID string `json:"service_id"`
-	Open      bool   `json:"open"`
-}
-
-// Info is the derived network summary of an opened connection
-// (GET /info) — the contract-disclosure data the web Info page renders.
-type Info struct {
-	ServiceID      string          `json:"service_id"`
-	Service        string          `json:"service"`
-	Assign         bool            `json:"assign"`
-	ASN            uint            `json:"asn"`
-	V4             []string        `json:"v4"`
-	V6             []string        `json:"v6"`
-	NOC            string          `json:"noc"`
-	NOCIP          string          `json:"noc_ip"`
-	TermIP         string          `json:"term_ip"`
-	RFC8950        bool            `json:"rfc8950"`
-	LinkV4Our      string          `json:"link_v4_our"`
-	LinkV4Your     string          `json:"link_v4_your"`
-	LinkV6Our      string          `json:"link_v6_our"`
-	LinkV6Your     string          `json:"link_v6_your"`
-	Fee            string          `json:"fee"`
-	Org            string          `json:"org"`
-	OrgEn          string          `json:"org_en"`
-	PostCode       string          `json:"postcode"`
-	Address        string          `json:"address"`
-	AddressEn      string          `json:"address_en"`
-	JPNICAdmin     service.JPNIC   `json:"jpnic_admin"`
-	JPNICTech      []service.JPNIC `json:"jpnic_tech"`
-	AveUpstream    uint            `json:"avg_upstream"`
-	MaxUpstream    uint            `json:"max_upstream"`
-	AveDownstream  uint            `json:"avg_downstream"`
-	MaxDownstream  uint            `json:"max_downstream"`
-	MaxBandWidthAS string          `json:"max_bandwidth_as"`
-	BGPRouteV4     string          `json:"bgp_route_v4"`
-	BGPRouteV6     string          `json:"bgp_route_v6"`
 }

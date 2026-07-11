@@ -2,7 +2,6 @@ package ticket
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
@@ -57,37 +56,4 @@ var WsUpgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		return true
 	},
-}
-
-// UserView is the user-facing wire shape of a support ticket (GET /ticket).
-type UserView struct {
-	ID        uint       `json:"id"`
-	CreatedAt time.Time  `json:"created_at"`
-	GroupID   uint       `json:"group_id"`
-	UserID    uint       `json:"user_id"`
-	Title     string     `json:"title"`
-	Admin     *bool      `json:"admin"`
-	Chat      []ChatView `json:"chat"`
-	Solved    *bool      `json:"solved"`
-}
-
-// RequestView is the user-facing wire shape of a request ticket (GET /request).
-type RequestView struct {
-	ID        uint       `json:"id"`
-	CreatedAt time.Time  `json:"created_at"`
-	GroupID   uint       `json:"group_id"`
-	UserID    uint       `json:"user_id"`
-	Title     string     `json:"title"`
-	Admin     *bool      `json:"admin"`
-	Chat      []ChatView `json:"chat"`
-	Solved    *bool      `json:"solved"`
-	Reject    *bool      `json:"reject"`
-}
-
-type ChatView struct {
-	CreatedAt time.Time `json:"created_at"`
-	TicketID  uint      `json:"ticket_id"`
-	UserID    uint      `json:"user_id"`
-	Admin     bool      `json:"admin"`
-	Data      string    `json:"data" gorm:"size:65535"`
 }

@@ -1,8 +1,6 @@
 package notice
 
 import (
-	"time"
-
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 )
 
@@ -29,18 +27,6 @@ type ResultDatabase struct {
 	Notice []core.Notice
 }
 
-// Notice is the user-facing wire shape of an active notice (GET /notice).
-type Notice struct {
-	StartTime time.Time `json:"start_time"`
-	EndTime   time.Time `json:"end_time"`
-	Everyone  bool      `json:"everyone"`
-	Important bool      `json:"important"`
-	Fault     bool      `json:"fault"`
-	Info      bool      `json:"info"`
-	Title     string    `json:"title"`
-	Data      string    `json:"data"`
-}
-
 type Result struct {
-	Notice []Notice `json:"notice"`
+	Notice []core.Notice `json:"notice"`
 }
