@@ -5,17 +5,24 @@ package core
 // the comparisons in code change, not the stored or serialized numbers.
 
 // UserLevel is User.Level. Lower value = more privilege within a group.
+// 1 is only ever assigned at account registration; 2-4 are what a master
+// assigns when inviting users to the group (user.AddGroup validates 2..4,
+// and the invite dialog labels them 追加・変更・閲覧(Master) / 閲覧のみ(User)
+// / 通知のみ(Guest)).
 type UserLevel = uint
 
 const (
-	LevelMaster UserLevel = 1 // グループ内の申請・変更・閲覧が可能
-	LevelMember UserLevel = 2 // 一般メンバー
+	LevelMaster UserLevel = 1 // 初期登録者(申請・変更・閲覧)
+	LevelEditor UserLevel = 2 // Masterから割当された申請・変更・閲覧権限
+	LevelViewer UserLevel = 3 // グループ内の情報閲覧のみ
+	LevelGuest  UserLevel = 4 // 障害情報の通知のみ
 )
 
 // CanManageServices reports whether a level may create/modify services and
-// connections. Replaces the raw `Level > 2` guard.
+// connections (levels 1-2; replaces the raw `Level > 2` guard, minus its
+// acceptance of the invalid zero value).
 func CanManageServices(level UserLevel) bool {
-	return level <= LevelMember
+	return LevelMaster <= level && level <= LevelEditor
 }
 
 // ExpiredStatus is User.ExpiredStatus / Group.ExpiredStatus.
