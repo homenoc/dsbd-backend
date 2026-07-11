@@ -16,12 +16,6 @@ func Create(jpnic *core.JPNICTech) (*core.JPNICTech, error) {
 		log.Println("database connection error")
 		return jpnic, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return nil, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	defer dbSQL.Close()
 
 	err = db.Create(&jpnic).Error
 	return jpnic, err
@@ -33,12 +27,6 @@ func Delete(jpnic *core.JPNICTech) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	defer dbSQL.Close()
 
 	return db.Delete(jpnic).Error
 }
@@ -49,12 +37,6 @@ func Update(base int, jpnic core.JPNICTech) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	defer dbSQL.Close()
 
 	if base == jpnicTech.UpdateAll {
 		err = db.Model(&core.JPNICTech{Model: gorm.Model{ID: jpnic.ID}}).Updates(jpnic).Error
@@ -72,12 +54,6 @@ func Get(base int, data *core.JPNICTech) jpnicTech.ResultDatabase {
 		log.Println("database connection error")
 		return jpnicTech.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return jpnicTech.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
-	}
-	defer dbSQL.Close()
 
 	var jpnicTechStruct []core.JPNICTech
 
@@ -96,12 +72,6 @@ func GetAll() jpnicTech.ResultDatabase {
 		log.Println("database connection error")
 		return jpnicTech.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return jpnicTech.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
-	}
-	defer dbSQL.Close()
 
 	var networks []core.JPNICTech
 	err = db.Find(&networks).Error

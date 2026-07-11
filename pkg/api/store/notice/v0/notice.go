@@ -20,12 +20,6 @@ func Create(notice *core.Notice) (*core.Notice, error) {
 		log.Println("database connection error")
 		return notice, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return nil, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	defer dbSQL.Close()
 
 	err = db.Create(&notice).Error
 	return notice, err
@@ -37,12 +31,6 @@ func Delete(notice *core.Notice) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	defer dbSQL.Close()
 
 	return db.Delete(notice).Error
 }
@@ -53,12 +41,6 @@ func Update(base int, data core.Notice) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	defer dbSQL.Close()
 
 	err = nil
 
@@ -86,12 +68,6 @@ func Get(base int, data *core.Notice) notice.ResultDatabase {
 		log.Println("database connection error")
 		return notice.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return notice.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
-	}
-	defer dbSQL.Close()
 
 	var noticeStruct []core.Notice
 
@@ -141,12 +117,6 @@ func GetAll() notice.ResultDatabase {
 		log.Println("database connection error")
 		return notice.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return notice.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
-	}
-	defer dbSQL.Close()
 
 	var notices []core.Notice
 	err = db.Find(&notices).Error

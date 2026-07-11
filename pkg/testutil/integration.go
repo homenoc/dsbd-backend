@@ -65,10 +65,31 @@ func SetupIntegration(tb testing.TB) {
 
 	recreateTestDB(tb)
 
+	// Inject a dedicated connection to the freshly-created test schema via the
+	// SetTestDB seam so store.DB() uses it instead of the process pool.
+	store.SetTestDB(openTestDB(tb))
+	tb.Cleanup(func() { store.ClearTestDB() })
+
 	store.InitDB()
 	if err := seed.Run(); err != nil {
 		tb.Fatalf("failed to seed test database: %v", err)
 	}
+}
+
+func openTestDB(tb testing.TB) *gorm.DB {
+	tb.Helper()
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
+		config.Conf.DB.User, config.Conf.DB.Pass, config.Conf.DB.IP,
+		strconv.Itoa(config.Conf.DB.Port), TestDBName)
+	conn, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+		PrepareStmt:                              true,
+		DisableForeignKeyConstraintWhenMigrating: true,
+		Logger:                                   logger.Discard,
+	})
+	if err != nil {
+		tb.Fatalf("failed to open test DB connection: %v", err)
+	}
+	return conn
 }
 
 func recreateTestDB(tb testing.TB) {

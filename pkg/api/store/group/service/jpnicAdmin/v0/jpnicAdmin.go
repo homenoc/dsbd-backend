@@ -16,12 +16,6 @@ func Create(network *core.JPNICAdmin) (*core.JPNICAdmin, error) {
 		log.Println("database connection error")
 		return network, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return nil, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	defer dbSQL.Close()
 
 	err = db.Create(&network).Error
 	return network, err
@@ -33,12 +27,6 @@ func Delete(network *core.JPNICAdmin) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	defer dbSQL.Close()
 
 	return db.Delete(network).Error
 }
@@ -49,12 +37,6 @@ func Update(base int, u core.JPNICAdmin) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	defer dbSQL.Close()
 
 	err = nil
 
@@ -84,12 +66,6 @@ func Get(base int, data *core.JPNICAdmin) jpnicAdmin.ResultDatabase {
 		log.Println("database connection error")
 		return jpnicAdmin.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return jpnicAdmin.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
-	}
-	defer dbSQL.Close()
 
 	var jpnicAdminStruct []core.JPNICAdmin
 
@@ -108,12 +84,6 @@ func GetAll() jpnicAdmin.ResultDatabase {
 		log.Println("database connection error")
 		return jpnicAdmin.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return jpnicAdmin.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
-	}
-	defer dbSQL.Close()
 
 	var networks []core.JPNICAdmin
 	err = db.Find(&networks).Error

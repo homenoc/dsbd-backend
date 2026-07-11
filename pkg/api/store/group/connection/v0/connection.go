@@ -17,12 +17,6 @@ func Create(connection *core.Connection) (*core.Connection, error) {
 		log.Println("database connection error")
 		return connection, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return nil, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	defer dbSQL.Close()
 
 	err = db.Create(&connection).Error
 	return connection, err
@@ -34,12 +28,6 @@ func Delete(connection *core.Connection) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	defer dbSQL.Close()
 
 	return db.Delete(connection).Error
 }
@@ -50,12 +38,6 @@ func Update(base int, c core.Connection) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	defer dbSQL.Close()
 
 	err = nil
 
@@ -82,12 +64,6 @@ func Get(base int, data *core.Connection) connection.ResultDatabase {
 		log.Println("database connection error")
 		return connection.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return connection.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
-	}
-	defer dbSQL.Close()
 
 	var connectionStruct []core.Connection
 
@@ -113,12 +89,6 @@ func GetAll() connection.ResultDatabase {
 		log.Println("database connection error")
 		return connection.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return connection.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
-	}
-	defer dbSQL.Close()
 
 	var connections []core.Connection
 	err = db.Preload("BGPRouter").

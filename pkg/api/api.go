@@ -352,18 +352,35 @@ func UserRestAPI() {
 }
 
 func cors(c *gin.Context) {
-
-	//c.Header("Access-Control-Allow-Headers", "Accept, Content-ID, Content-Length, Accept-Encoding, X-CSRF-BotToken, Authorization, Access-Control-Request-Headers, Access-Control-Request-Method, Connection, Host, Origin, User-Agent, Referer, Cache-Control, X-header")
-	c.Header("Access-Control-Allow-Origin", "*")
-	c.Header("Access-Control-Allow-Methods", "*")
-	c.Header("Access-Control-Allow-Headers", "*")
-	c.Header("Content-ID", "application/json")
-	c.Header("Access-Control-Allow-Credentials", "true")
-	//c.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	// A wildcard origin ("*") together with Allow-Credentials:true is rejected by
+	// browsers for credentialed requests, so we reflect a specific allowed origin
+	// instead. config.cors.origins is an exact-match allowlist; when empty the
+	// request Origin is echoed back (valid with credentials).
+	if origin := c.Request.Header.Get("Origin"); origin != "" && originAllowed(origin) {
+		c.Header("Access-Control-Allow-Origin", origin)
+		c.Header("Vary", "Origin")
+		c.Header("Access-Control-Allow-Credentials", "true")
+	}
+	c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+	c.Header("Access-Control-Allow-Headers",
+		"Content-Type, USER_TOKEN, ACCESS_TOKEN, HASH_PASS, Email, USER, PASS")
 
 	if c.Request.Method != "OPTIONS" {
 		c.Next()
 	} else {
 		c.AbortWithStatus(http.StatusOK)
 	}
+}
+
+func originAllowed(origin string) bool {
+	allow := config.Conf.CORS.Origins
+	if len(allow) == 0 {
+		return true // no allowlist configured: echo the request origin
+	}
+	for _, o := range allow {
+		if o == origin {
+			return true
+		}
+	}
+	return false
 }

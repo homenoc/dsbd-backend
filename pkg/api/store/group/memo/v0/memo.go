@@ -15,12 +15,6 @@ func Create(connection *core.Memo) (*core.Memo, error) {
 		log.Println("database connection error")
 		return connection, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return nil, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	defer dbSQL.Close()
 
 	err = db.Create(&connection).Error
 	return connection, err
@@ -32,12 +26,6 @@ func Delete(connection *core.Memo) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	defer dbSQL.Close()
 
 	return db.Delete(connection).Error
 }
@@ -48,12 +36,6 @@ func Update(memo core.Memo) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	defer dbSQL.Close()
 
 	err = nil
 

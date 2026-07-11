@@ -17,12 +17,6 @@ func Create(router *core.TunnelEndPointRouter) (*core.TunnelEndPointRouter, erro
 		log.Println("database connection error")
 		return router, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return nil, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	defer dbSQL.Close()
 
 	err = db.Create(&router).Error
 	return router, err
@@ -34,12 +28,6 @@ func Delete(router *core.TunnelEndPointRouter) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	defer dbSQL.Close()
 
 	return db.Delete(router).Error
 }
@@ -50,12 +38,6 @@ func Update(base int, data core.TunnelEndPointRouter) error {
 		log.Println("database connection error")
 		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
 	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	defer dbSQL.Close()
 
 	err = nil
 
@@ -80,12 +62,6 @@ func Get(base int, data *core.TunnelEndPointRouter) tunnelEndPointRouter.ResultD
 		log.Println("database connection error")
 		return tunnelEndPointRouter.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return tunnelEndPointRouter.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
-	}
-	defer dbSQL.Close()
 
 	var routerStruct []core.TunnelEndPointRouter
 
@@ -106,12 +82,6 @@ func GetAll() tunnelEndPointRouter.ResultDatabase {
 		log.Println("database connection error")
 		return tunnelEndPointRouter.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
 	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return tunnelEndPointRouter.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
-	}
-	defer dbSQL.Close()
 
 	var routers []core.TunnelEndPointRouter
 	err = db.Find(&routers).Error

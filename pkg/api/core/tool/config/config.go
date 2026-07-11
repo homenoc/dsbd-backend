@@ -23,6 +23,14 @@ type Config struct {
 	Slack      Slack      `json:"slack"`
 	Log        Log        `json:"log"`
 	Template   Template   `json:"template"`
+	CORS       CORS       `json:"cors"`
+}
+
+// CORS controls cross-origin access. Origins is an allowlist of exact origins
+// (scheme+host+port). When empty, the request's Origin header is echoed back,
+// which is valid together with credentials (unlike "*").
+type CORS struct {
+	Origins []string `json:"origins"`
 }
 
 type Controller struct {
