@@ -6,6 +6,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
+	"github.com/homenoc/dsbd-backend/pkg/api/notify"
 	dbBGPRouter "github.com/homenoc/dsbd-backend/pkg/api/store/noc/bgpRouter/v0"
 	dbTunnelEndPointRouterIP "github.com/homenoc/dsbd-backend/pkg/api/store/noc/tunnelEndPointRouterIP/v0"
 	dbNOC "github.com/homenoc/dsbd-backend/pkg/api/store/noc/v0"
@@ -76,23 +77,12 @@ func noticeUpdateByAdmin(before, after core.Connection) {
 	))
 }
 
+// changeText summarises the connection fields that changed. Scalar fields are
+// driven by the `notify:"..."` tags on core.Connection; the BGP router and
+// tunnel-endpoint IP need related-entity hostname resolution, so they stay as
+// custom lines here.
 func changeText(before, after core.Connection) string {
-	data := ""
-	if before.Open != nil && after.Open != nil {
-		if *before.Open != *after.Open {
-			if *after.Open {
-				data += "開通: 未開通 => 開通済み\n"
-			} else {
-				data += "開通: 開通 => 未開通\n"
-			}
-		}
-	}
-
-	if after.ConnectionType != "" {
-		if before.ConnectionType != after.ConnectionType {
-			data += "接続ID: " + before.ConnectionType + " => " + after.ConnectionType + "\n"
-		}
-	}
+	data := notify.Diff(before, after)
 
 	if after.BGPRouterID != nil {
 		if before.BGPRouterID == nil || *before.BGPRouterID != *after.BGPRouterID {
@@ -106,40 +96,6 @@ func changeText(before, after core.Connection) string {
 				before.TunnelEndPointRouterIP.IP + " => " +
 				tunnelEndPointRouterIPText(*after.TunnelEndPointRouterIPID) + "\n"
 		}
-	}
-
-	if after.NTT != before.NTT {
-		data += "インターネット接続: " + before.NTT + " => " + after.NTT + "\n"
-	}
-
-	if after.TermIP != "" && after.TermIP != before.TermIP {
-		data += "終端アドレス: " + before.TermIP + "=>" + after.TermIP + "\n"
-	}
-
-	if after.LinkV4Our != "" && after.LinkV4Our != before.LinkV4Our {
-		data += "v4(HomeNOC側): " + before.LinkV4Our + "=>" + after.LinkV4Our + "\n"
-	}
-
-	if after.LinkV4Your != "" && after.LinkV4Your != before.LinkV4Your {
-		data += "v4(相手団体側): " + before.LinkV4Your + "=>" + after.LinkV4Your + "\n"
-	}
-
-	if after.LinkV6Our != "" && after.LinkV6Our != before.LinkV6Our {
-		data += "v6(HomeNOC側): " + before.LinkV6Our + "=>" + after.LinkV6Our + "\n"
-	}
-
-	if after.LinkV6Your != "" && after.LinkV6Your != before.LinkV6Your {
-		data += "v6(相手団体側): " + before.LinkV6Your + "=>" + after.LinkV6Your + "\n"
-	}
-
-	if after.RFC8950 != before.RFC8950 {
-		beforeStatus := "無効"
-		afterStatus := "有効"
-		if !after.RFC8950 {
-			beforeStatus = "有効"
-			afterStatus = "無効"
-		}
-		data += "RFC8950: " + beforeStatus + " => " + afterStatus + "\n"
 	}
 
 	return data

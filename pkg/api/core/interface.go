@@ -31,25 +31,25 @@ type Group struct {
 	Services             []Service  `json:"services"`
 	Tickets              []Ticket   `json:"tickets"`
 	Memos                []Memo     `json:"memos"`
-	StripeCustomerID     *string    `json:"stripe_customer_id"`
-	StripeSubscriptionID *string    `json:"stripe_subscription_id"`
+	StripeCustomerID     *string    `json:"stripe_customer_id" notify:"StripeCustomerID"`
+	StripeSubscriptionID *string    `json:"stripe_subscription_id" notify:"StripeSubscriptionID"`
 	Agree                *bool      `json:"agree"`
 	Question             string     `json:"question" gorm:"size:10000"`
-	Org                  string     `json:"org"`
-	OrgEn                string     `json:"org_en"`
-	PostCode             string     `json:"postcode"`
-	Address              string     `json:"address"`
-	AddressEn            string     `json:"address_en"`
-	Tel                  string     `json:"tel"`
-	Country              string     `json:"country"`
+	Org                  string     `json:"org" notify:"Org"`
+	OrgEn                string     `json:"org_en" notify:"Org(En)"`
+	PostCode             string     `json:"postcode" notify:"PostCode"`
+	Address              string     `json:"address" notify:"Address"`
+	AddressEn            string     `json:"address_en" notify:"Address(En)"`
+	Tel                  string     `json:"tel" notify:"Tel"`
+	Country              string     `json:"country" notify:"Country"`
 	Contract             string     `json:"contract"`
-	CouponID             *string    `json:"coupon_id"`
+	CouponID             *string    `json:"coupon_id" notify:"CouponID"`
 	MemberType           uint       `json:"member_type"`
-	MemberExpired        *time.Time `json:"member_expired"`
+	MemberExpired        *time.Time `json:"member_expired" notify:"MemberExpired,date"`
 	Comment              string     `json:"comment"`
-	Pass                 *bool      `json:"pass"`
+	Pass                 *bool      `json:"pass" notify:"審査,true=審査合格済み,false=未審査"`
 	ExpiredStatus        *uint      `json:"expired_status"`
-	AddAllow             *bool      `json:"add_allow"`
+	AddAllow             *bool      `json:"add_allow" notify:"サービス新規申請,true=許可,false=禁止"`
 }
 
 // Memo Type 1:Important(Red) 2:Comment1(Blue) 3:Comment2(Gray)
@@ -64,20 +64,20 @@ type Memo struct {
 type Service struct {
 	gorm.Model
 	GroupID        uint          `json:"group_id"`
-	ServiceType    string        `json:"service_type"`
+	ServiceType    string        `json:"service_type" notify:"ServiceID"`
 	ServiceComment string        `json:"service_comment"`
 	ServiceNumber  uint          `json:"service_number"`
-	Org            string        `json:"org"`
-	OrgEn          string        `json:"org_en"`
-	PostCode       string        `json:"postcode"`
-	Address        string        `json:"address"`
-	AddressEn      string        `json:"address_en"`
+	Org            string        `json:"org" notify:"Org"`
+	OrgEn          string        `json:"org_en" notify:"Org(En)"`
+	PostCode       string        `json:"postcode" notify:"PostCode"`
+	Address        string        `json:"address" notify:"Address"`
+	AddressEn      string        `json:"address_en" notify:"Address(En)"`
 	Abuse          string        `json:"abuse"`
-	ASN            *uint         `json:"asn"`
-	AveUpstream    uint          `json:"avg_upstream"`
-	MaxUpstream    uint          `json:"max_upstream"`
-	AveDownstream  uint          `json:"avg_downstream"`
-	MaxDownstream  uint          `json:"max_downstream"`
+	ASN            *uint         `json:"asn" notify:"ASN"`
+	AveUpstream    uint          `json:"avg_upstream" notify:"平均アップロード帯域,unit=Kbps"`
+	MaxUpstream    uint          `json:"max_upstream" notify:"最大アップロード帯域,unit=Kbps"`
+	AveDownstream  uint          `json:"avg_downstream" notify:"平均ダウンロード帯域,unit=Kbps"`
+	MaxDownstream  uint          `json:"max_downstream" notify:"最大ダウンロード帯域,unit=Kbps"`
 	MaxBandWidthAS string        `json:"max_bandwidth_as"`
 	IP             []IP          `json:"ip"`
 	Connection     []*Connection `json:"connections"`
@@ -85,11 +85,11 @@ type Service struct {
 	JPNICTech      []JPNICTech   `json:"jpnic_tech"`
 	StartDate      time.Time     `json:"start_date"`
 	EndDate        *time.Time    `json:"end_date"`
-	Pass           *bool         `json:"pass"`
+	Pass           *bool         `json:"pass" notify:"開通,true=開通済み,false=未開通"`
 	Enable         *bool         `json:"enable"`
-	AddAllow       *bool         `json:"add_allow"`
-	Comment        string        `json:"comment"`
-	BGPComment     string        `json:"bgp_comment"`
+	AddAllow       *bool         `json:"add_allow" notify:"ユーザ側にて接続追加の許可,true=許可,false=禁止"`
+	Comment        string        `json:"comment" notify:"Comment"`
+	BGPComment     string        `json:"bgp_comment" notify:"BGPComment"`
 	Group          Group         `json:"group"`
 }
 
@@ -98,7 +98,7 @@ type Connection struct {
 	ServiceID                uint                   `json:"service_id"`
 	BGPRouterID              *uint                  `json:"bgp_router_id"`                //使用RouterのID
 	TunnelEndPointRouterIPID *uint                  `json:"tunnel_endpoint_router_ip_id"` //使用エンドポイントルータのID
-	ConnectionType           string                 `json:"connection_type"`
+	ConnectionType           string                 `json:"connection_type" notify:"接続ID"`
 	ConnectionComment        string                 `json:"connection_comment"` // ServiceがETCの時や補足説明で必要
 	ConnectionNumber         uint                   `json:"connection_number"`
 	IX                       string                 `json:"ix"`           // 接続IX（configで定義されたIX名）
@@ -106,17 +106,17 @@ type Connection struct {
 	IXVlanID                 string                 `json:"ix_vlan_id"`   // VLAN-ID（PI/CUGの場合）
 	IPv4Route                string                 `json:"ipv4_route"`
 	IPv6Route                string                 `json:"ipv6_route"`
-	NTT                      string                 `json:"ntt"`
+	NTT                      string                 `json:"ntt" notify:"インターネット接続"`
 	PreferredAP              string                 `json:"preferred_ap"`
-	TermIP                   string                 `json:"term_ip"`
-	RFC8950                  bool                   `json:"rfc8950"`
+	TermIP                   string                 `json:"term_ip" notify:"終端アドレス"`
+	RFC8950                  bool                   `json:"rfc8950" notify:"RFC8950,true=有効,false=無効"`
 	Monitor                  *bool                  `json:"monitor"`
 	Address                  string                 `json:"address"` //都道府県　市町村
-	LinkV4Our                string                 `json:"link_v4_our"`
-	LinkV4Your               string                 `json:"link_v4_your"`
-	LinkV6Our                string                 `json:"link_v6_our"`
-	LinkV6Your               string                 `json:"link_v6_your"`
-	Open                     *bool                  `json:"open"`
+	LinkV4Our                string                 `json:"link_v4_our" notify:"v4(HomeNOC側)"`
+	LinkV4Your               string                 `json:"link_v4_your" notify:"v4(相手団体側)"`
+	LinkV6Our                string                 `json:"link_v6_our" notify:"v6(HomeNOC側)"`
+	LinkV6Your               string                 `json:"link_v6_your" notify:"v6(相手団体側)"`
+	Open                     *bool                  `json:"open" notify:"開通,true=開通済み,false=未開通"`
 	Enable                   *bool                  `json:"enable"`
 	Comment                  string                 `json:"comment"`
 	BGPRouter                BGPRouter              `json:"bgp_router"`

@@ -5,6 +5,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
+	"github.com/homenoc/dsbd-backend/pkg/api/notify"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	"github.com/slack-go/slack"
 	"strconv"
@@ -349,89 +350,10 @@ func noticeUpdatePlanByAdmin(before, after core.Plan) {
 	))
 }
 
+// changeText summarises the service fields that changed. The per-field diff is
+// now driven by the `notify:"..."` tags on core.Service (see pkg/api/notify).
 func changeText(before, after core.Service) string {
-	data := ""
-	if before.Pass != nil && after.Pass != nil {
-		if *before.Pass != *after.Pass {
-			if *after.Pass {
-				data += "開通: 未開通 => 開通済み\n"
-			} else {
-				data += "開通: 開通 => 未開通\n"
-			}
-		}
-	}
-
-	if before.AddAllow != nil && after.AddAllow != nil {
-		if *before.AddAllow != *after.AddAllow {
-			if *after.AddAllow {
-				data += "ユーザ側にて接続追加の許可: 禁止 => 許可\n"
-			} else {
-				data += "ユーザ側にて接続追加の許可: 許可 => 禁止\n"
-			}
-		}
-	}
-
-	if after.ServiceType != "" {
-		if before.ServiceType != after.ServiceType {
-			data += "ServiceID: " + before.ServiceType + " => " + after.ServiceType + "\n"
-		}
-	}
-
-	if before.AveDownstream != after.AveDownstream {
-		data += "平均ダウンロード帯域: " + strconv.Itoa(int(before.AveDownstream)) + "Kbps => " +
-			strconv.Itoa(int(after.AveDownstream)) + "Kbps\n"
-	}
-
-	if before.MaxDownstream != after.MaxDownstream {
-		data += "最大ダウンロード帯域: " + strconv.Itoa(int(before.MaxDownstream)) + "Kbps => " +
-			strconv.Itoa(int(after.MaxDownstream)) + "Kbps\n"
-	}
-
-	if before.AveUpstream != after.AveUpstream {
-		data += "平均アップロード帯域: " + strconv.Itoa(int(before.AveUpstream)) + "Kbps => " +
-			strconv.Itoa(int(after.AveUpstream)) + "Kbps\n"
-	}
-
-	if before.MaxUpstream != after.MaxUpstream {
-		data += "最大アップロード帯域: " + strconv.Itoa(int(before.MaxUpstream)) + "Kbps => " +
-			strconv.Itoa(int(after.MaxUpstream)) + "Kbps\n"
-	}
-
-	if before.ASN != nil && after.ASN != nil {
-		if *before.ASN != *after.ASN {
-			data += "ASN: " + strconv.Itoa(int(*before.ASN)) + " => " + strconv.Itoa(int(*after.ASN)) + "\n"
-		}
-	}
-
-	if before.Comment != after.Comment {
-		data += "Comment: " + before.Comment + "=>" + after.Comment + "\n"
-	}
-
-	if before.BGPComment != after.BGPComment {
-		data += "BGPComment: " + before.BGPComment + "=>" + after.BGPComment + "\n"
-	}
-
-	if before.Org != after.Org {
-		data += "Org: " + before.Org + "=>" + after.Org + "\n"
-	}
-
-	if before.OrgEn != after.OrgEn {
-		data += "Org(En): " + before.OrgEn + "=>" + after.OrgEn + "\n"
-	}
-
-	if before.PostCode != after.PostCode {
-		data += "PostCode: " + before.PostCode + "=>" + after.PostCode + "\n"
-	}
-
-	if before.Address != after.Address {
-		data += "Address: " + before.Address + "=>" + after.Address + "\n"
-	}
-
-	if before.AddressEn != after.AddressEn {
-		data += "Address(En): " + before.AddressEn + "=>" + after.AddressEn + "\n"
-	}
-
-	return data
+	return notify.Diff(before, after)
 }
 
 func changeTextJPNICByAdmin(before, after core.JPNICAdmin) string {
