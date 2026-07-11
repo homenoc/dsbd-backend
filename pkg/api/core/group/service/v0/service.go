@@ -42,7 +42,7 @@ func Add(c *gin.Context) {
 	}
 
 	// status check for group
-	if !(*user.Group.ExpiredStatus == 0 && *user.Group.Pass) {
+	if !(*user.Group.ExpiredStatus == core.ExpiredNone && *user.Group.Pass) {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: "error: failed group status"})
 		return
 	}

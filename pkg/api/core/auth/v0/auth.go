@@ -20,7 +20,7 @@ func UserAuthorization(data core.Token) auth.UserResult {
 		return auth.UserResult{Err: fmt.Errorf("db error")}
 	}
 
-	if 0 < *tokens[0].User.ExpiredStatus {
+	if *tokens[0].User.ExpiredStatus != core.ExpiredNone {
 		return auth.UserResult{Err: fmt.Errorf("deleted this user")}
 	}
 

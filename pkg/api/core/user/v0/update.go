@@ -67,7 +67,7 @@ func replaceUser(serverData core.User, input user.Input) (core.User, error) {
 
 	//Level
 	if input.Level != 0 {
-		if !(1 < input.Level && input.Level < 5) {
+		if !(core.LevelEditor <= input.Level && input.Level <= core.LevelGuest) {
 			return core.User{}, fmt.Errorf("error: user level is invalid")
 		} else {
 			serverData.Level = input.Level

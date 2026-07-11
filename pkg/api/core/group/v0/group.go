@@ -72,7 +72,7 @@ func Add(c *gin.Context) {
 		AddressEn:     input.AddressEn,
 		Tel:           input.Tel,
 		Country:       input.Country,
-		ExpiredStatus: &[]uint{0}[0],
+		ExpiredStatus: &[]uint{core.ExpiredNone}[0],
 		Contract:      input.Contract,
 		MemberType:    memberType,
 		MemberExpired: memberExpired,

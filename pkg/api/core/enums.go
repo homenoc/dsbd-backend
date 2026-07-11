@@ -25,6 +25,12 @@ func CanManageServices(level UserLevel) bool {
 	return LevelMaster <= level && level <= LevelEditor
 }
 
+// CanViewGroup reports whether a level may read group-scoped resources
+// (levels 1-3; guests only receive notifications).
+func CanViewGroup(level UserLevel) bool {
+	return LevelMaster <= level && level <= LevelViewer
+}
+
 // ExpiredStatus is User.ExpiredStatus / Group.ExpiredStatus.
 type ExpiredStatus = uint
 

@@ -31,7 +31,7 @@ func authUser(c *gin.Context) (core.User, bool) {
 // canAccessGroup mirrors the blob's guard: a group-scoped resource is readable
 // only by users at level 1..3. Returns ok=false (after writing 403) otherwise.
 func canAccessGroup(c *gin.Context, u core.User) bool {
-	if !(0 < u.Level && u.Level <= 3) {
+	if !core.CanViewGroup(u.Level) {
 		c.JSON(http.StatusForbidden, common.Error{Error: "error: access is not permitted"})
 		return false
 	}
@@ -322,7 +322,7 @@ func GetGroup(c *gin.Context) {
 
 	// isExpired (課金確認)
 	isExpired := false
-	if group.MemberType < 50 && group.MemberExpired != nil {
+	if core.IsPaidMemberType(group.MemberType) && group.MemberExpired != nil {
 		jst, err := time.LoadLocation("Asia/Tokyo")
 		if err != nil {
 			panic(err)
@@ -331,7 +331,7 @@ func GetGroup(c *gin.Context) {
 		if nowJST.Unix() > group.MemberExpired.Add(time.Hour*24).Unix() {
 			isExpired = true
 		}
-	} else if group.MemberType < 50 && group.MemberExpired == nil {
+	} else if core.IsPaidMemberType(group.MemberType) && group.MemberExpired == nil {
 		isExpired = true
 	}
 
@@ -373,7 +373,7 @@ func GetGroup(c *gin.Context) {
 	}
 
 	var resultUserList []info.User
-	if 0 < user.Level && user.Level <= 3 {
+	if core.CanViewGroup(user.Level) {
 		for _, tmpUser := range group.Users {
 			resultUserList = append(resultUserList, projectUser(tmpUser))
 		}

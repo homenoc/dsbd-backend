@@ -52,8 +52,8 @@ func Add(c *gin.Context) {
 		NameEn:        input.NameEn,
 		Email:         input.Email,
 		Pass:          input.Pass,
-		ExpiredStatus: &[]uint{0}[0],
-		Level:         1,
+		ExpiredStatus: &[]uint{core.ExpiredNone}[0],
+		Level:         core.LevelMaster,
 		MailVerify:    &[]bool{false}[0],
 		MailToken:     mailToken,
 	}
@@ -144,7 +144,7 @@ func AddGroup(c *gin.Context) {
 		return
 	}
 
-	if !(1 < input.Level && input.Level < 5) {
+	if !(core.LevelEditor <= input.Level && input.Level <= core.LevelGuest) {
 		c.JSON(http.StatusBadRequest, common.Error{Error: "error: user level is invalid"})
 		return
 	}
@@ -161,7 +161,7 @@ func AddGroup(c *gin.Context) {
 		NameEn:        input.NameEn,
 		Email:         input.Email,
 		Pass:          strings.ToLower(hash.Generate(pass)),
-		ExpiredStatus: &[]uint{0}[0],
+		ExpiredStatus: &[]uint{core.ExpiredNone}[0],
 		Level:         input.Level,
 		MailVerify:    &[]bool{false}[0],
 		MailToken:     mailToken,
@@ -280,7 +280,7 @@ func Delete(c *gin.Context) {
 
 	currentUser := middleware.CurrentUser(c)
 
-	if currentUser.Level > 3 {
+	if !core.CanViewGroup(currentUser.Level) {
 		c.JSON(http.StatusForbidden, common.Error{Error: "error: failed user level"})
 		return
 	}
@@ -297,7 +297,7 @@ func Delete(c *gin.Context) {
 		return
 	}
 
-	if u.User[0].Level < 2 {
+	if u.User[0].Level < core.LevelEditor {
 		c.JSON(http.StatusForbidden, common.Error{Error: "error: The master user cannot be deleted."})
 		return
 	}
