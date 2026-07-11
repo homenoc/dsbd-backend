@@ -4,23 +4,6 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 )
 
-const (
-	ID              = 0
-	OrgJa           = 1
-	Org             = 2
-	Email           = 3
-	ServiceID       = 4
-	SearchNewNumber = 5
-	NOCID           = 6
-	UpdateID        = 100
-	UpdateServiceID = 101
-	UpdateUserInfo  = 102
-	UpdateTechID    = 103
-	UpdateInfo      = 104
-	UpdateData      = 105
-	UpdateAll       = 150
-)
-
 type Input struct {
 	ConnectionType    string `json:"connection_type"`
 	ConnectionComment string `json:"connection_comment"` // ServiceがETCの時や補足説明で必要

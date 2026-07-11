@@ -168,7 +168,7 @@ func Add(c *gin.Context) {
 		}
 	}
 
-	resultConnection := dbConnection.Get(connection.ServiceID, &core.Connection{ServiceID: uint(id)})
+	resultConnection := dbConnection.GetByServiceID(uint(id))
 	if resultConnection.Err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: resultConnection.Err.Error()})
 		return

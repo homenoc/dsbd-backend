@@ -88,7 +88,7 @@ func AddByAdmin(c *gin.Context) {
 		return
 	}
 
-	resultConnection := dbConnection.Get(connection.ServiceID, &core.Connection{ServiceID: uint(id)})
+	resultConnection := dbConnection.GetByServiceID(uint(id))
 	if resultConnection.Err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: resultConnection.Err.Error()})
 		return
@@ -205,7 +205,7 @@ func UpdateByAdmin(c *gin.Context) {
 		return
 	}
 
-	tmp := dbConnection.Get(connection.ID, &core.Connection{Model: gorm.Model{ID: uint(id)}})
+	tmp := dbConnection.GetByID(uint(id))
 	if tmp.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: tmp.Err.Error()})
 		return
@@ -215,7 +215,7 @@ func UpdateByAdmin(c *gin.Context) {
 
 	input.ID = uint(id)
 
-	if err = dbConnection.Update(connection.UpdateAll, input); err != nil {
+	if err = dbConnection.UpdateAll(input); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
@@ -234,7 +234,7 @@ func GetByAdmin(c *gin.Context) {
 		return
 	}
 
-	result := dbConnection.Get(connection.ID, &core.Connection{Model: gorm.Model{ID: uint(id)}})
+	result := dbConnection.GetByID(uint(id))
 	if result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
