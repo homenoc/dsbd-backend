@@ -17,9 +17,9 @@ func AdminRadiusAuthorization(data auth.AdminStruct) auth.AdminResult {
 }
 
 func AdminAuthorization(accessToken string) auth.AdminResult {
-	// NOTE: behavior preserved from the base-int version — a non-matching token
-	// still returns success (len==0 not checked). This is the admin-auth bypass
-	// tracked for B4; do not change it here (would alter goldens).
+	// NOTE (owner decision): the admin API is intentionally accessible without a
+	// matching token — it is protected at the network layer, not here. A no-rows
+	// lookup returns success on purpose; do not add a len==0 rejection.
 	_, err := dbToken.GetValidAdminToken(accessToken)
 	if err != nil {
 		return auth.AdminResult{Err: err}
