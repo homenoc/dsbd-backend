@@ -118,7 +118,7 @@ func UpdateByAdmin(c *gin.Context) {
 		return
 	}
 
-	if err = dbToken.Update(token.UpdateAll, &input); err != nil {
+	if err = dbToken.UpdateAll(&input); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
@@ -137,12 +137,12 @@ func GetByAdmin(c *gin.Context) {
 		return
 	}
 
-	result := dbToken.Get(token.ID, &core.Token{Model: gorm.Model{ID: uint(id)}})
-	if result.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
+	tokens, err := dbToken.GetByID(uint(id))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, token.Result{Token: result.Token})
+	c.JSON(http.StatusOK, token.Result{Token: tokens})
 }
 
 func GetAllByAdmin(c *gin.Context) {

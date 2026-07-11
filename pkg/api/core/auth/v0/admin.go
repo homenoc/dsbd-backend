@@ -2,9 +2,7 @@ package v0
 
 import (
 	"fmt"
-	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/auth"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	dbToken "github.com/homenoc/dsbd-backend/pkg/api/store/token/v0"
 )
@@ -19,9 +17,12 @@ func AdminRadiusAuthorization(data auth.AdminStruct) auth.AdminResult {
 }
 
 func AdminAuthorization(accessToken string) auth.AdminResult {
-	tokenResult := dbToken.Get(token.AdminToken, &core.Token{AccessToken: accessToken})
-	if tokenResult.Err != nil {
-		return auth.AdminResult{Err: tokenResult.Err}
+	// NOTE: behavior preserved from the base-int version — a non-matching token
+	// still returns success (len==0 not checked). This is the admin-auth bypass
+	// tracked for B4; do not change it here (would alter goldens).
+	_, err := dbToken.GetValidAdminToken(accessToken)
+	if err != nil {
+		return auth.AdminResult{Err: err}
 	}
 	return auth.AdminResult{Err: nil}
 }
