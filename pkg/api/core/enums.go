@@ -21,15 +21,18 @@ func CanManageServices(level UserLevel) bool {
 // ExpiredStatus is User.ExpiredStatus / Group.ExpiredStatus.
 type ExpiredStatus = uint
 
+// Meanings follow the writers (the admin UI's 廃止 menu and the Slack
+// notifier's expiredStatusText): 1=審査落ち, 2=ユーザより廃止,
+// 3=運営委員より廃止. The original auth error strings had 1 and 3
+// cross-wired; ExpiredMessage below is the corrected reader.
 const (
 	ExpiredNone         ExpiredStatus = 0 // 有効
-	ExpiredByMaster     ExpiredStatus = 1 // Masterアカウントによる停止
-	ExpiredByCommittee  ExpiredStatus = 2 // 運営委員会による停止
-	ExpiredReviewFailed ExpiredStatus = 3 // 審査不合格による停止
+	ExpiredReviewFailed ExpiredStatus = 1 // 審査不合格による廃止
+	ExpiredByMaster     ExpiredStatus = 2 // ユーザ(Master)による廃止
+	ExpiredByCommittee  ExpiredStatus = 3 // 運営委員会による廃止
 )
 
 // ExpiredMessage returns the user-facing reason for a group's expired status.
-// Mirrors the strings previously inlined in auth.GroupAuthorization.
 func ExpiredMessage(s ExpiredStatus) string {
 	switch s {
 	case ExpiredByMaster:

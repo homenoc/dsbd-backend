@@ -17,10 +17,10 @@ func DeleteJPNICByAdmin(id uint) error {
 }
 
 // UpdateJPNICByAdmin writes the editable JPNIC admin-contact columns from a
-// full object. Value-typed columns are always written (clearing persists);
-// service_id and the hidden/is_group structural flags stay untouchable.
+// full object. Value-typed columns are always written (clearing persists,
+// and hidden/is_group are settable both ways); service_id stays untouchable.
 func UpdateJPNICByAdmin(input core.JPNICAdmin) error {
-	cols := []string{"v4_jpnic_handle", "v6_jpnic_handle", "name", "name_en", "mail",
+	cols := []string{"hidden", "is_group", "v4_jpnic_handle", "v6_jpnic_handle", "name", "name_en", "mail",
 		"org", "org_en", "post_code", "address", "address_en",
 		"dept", "dept_en", "title", "title_en", "tel", "fax", "country"}
 	return store.DB().Model(&core.JPNICAdmin{Model: gorm.Model{ID: input.ID}}).
