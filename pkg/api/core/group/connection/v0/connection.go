@@ -50,7 +50,7 @@ func Add(c *gin.Context) {
 	}
 
 	// check authority
-	if result.User.Level > 2 {
+	if !core.CanManageServices(result.User.Level) {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: "You don't have authority this operation"})
 		return
 	}
@@ -239,7 +239,8 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	notification.NoticeUpdateStatus(groupName, "開通作業中", "3[接続情報記入段階(User)] =>4[開通作業中]")
+	notification.NoticeUpdateStatus(groupName, core.StatusOpening.Label(),
+		core.TransitionText(core.StatusConnectionInput, core.StatusOpening))
 
 	c.JSON(http.StatusOK, common.Result{})
 }

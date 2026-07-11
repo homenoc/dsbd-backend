@@ -35,7 +35,7 @@ func Add(c *gin.Context) {
 	}
 
 	// check authority
-	if userResult.User.Level > 2 {
+	if !core.CanManageServices(userResult.User.Level) {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: "You don't have authority this operation"})
 		return
 	}

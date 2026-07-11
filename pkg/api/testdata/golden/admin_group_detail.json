@@ -293,12 +293,10 @@
           "group": null,
           "group_id": 1,
           "level": 1,
-          "mail_token": "",
           "mail_verify": true,
           "name": "マスターユーザー",
           "name_en": "Master User",
           "notice": null,
-          "pass": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
           "tickets": null,
           "tokens": null
         },
@@ -314,12 +312,10 @@
           "group": null,
           "group_id": 1,
           "level": 2,
-          "mail_token": "",
           "mail_verify": true,
           "name": "一般ユーザー",
           "name_en": "Member User",
           "notice": null,
-          "pass": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
           "tickets": null,
           "tokens": null
         }

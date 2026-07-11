@@ -131,7 +131,7 @@ func AddGroup(c *gin.Context) {
 		return
 	}
 
-	if resultAuth.User.Level > 2 {
+	if !core.CanManageServices(resultAuth.User.Level) {
 		c.JSON(http.StatusForbidden, common.Error{Error: "error: access is not permitted"})
 		return
 	}
@@ -366,8 +366,8 @@ func Update(c *gin.Context) {
 			c.JSON(http.StatusForbidden, common.Error{Error: "error: Group ID = 0"})
 			return
 		}
-		// Level = 1　のみ全ユーザの設定を変更可能。権限レベルが2以上は不可
-		if authResult.User.Level > 2 {
+		// Master/Member（Level 1,2）のみユーザ設定を変更可能。Level 3以上は不可
+		if !core.CanManageServices(authResult.User.Level) {
 			c.JSON(http.StatusForbidden, common.Error{Error: "error: failed user level"})
 			return
 		}

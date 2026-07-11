@@ -1,6 +1,7 @@
 package v0
 
 import (
+	"errors"
 	"fmt"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/auth"
@@ -52,14 +53,8 @@ func GroupAuthorization(errorType uint, data core.Token) auth.GroupResult {
 		return auth.GroupResult{Err: fmt.Errorf("error: unexamined")}
 	}
 	// アカウント失効時の動作
-	if *resultToken.Token[0].User.Group.ExpiredStatus == 1 {
-		return auth.GroupResult{Err: fmt.Errorf("error: discontinued by Master Account")}
-	}
-	if *resultToken.Token[0].User.Group.ExpiredStatus == 2 {
-		return auth.GroupResult{Err: fmt.Errorf("error: discontinuation by the steering committee")}
-	}
-	if *resultToken.Token[0].User.Group.ExpiredStatus == 3 {
-		return auth.GroupResult{Err: fmt.Errorf("error: discontinuation due to failed review")}
+	if msg := core.ExpiredMessage(*resultToken.Token[0].User.Group.ExpiredStatus); msg != "" {
+		return auth.GroupResult{Err: errors.New(msg)}
 	}
 
 	go renewProcess(resultToken.Token[0])

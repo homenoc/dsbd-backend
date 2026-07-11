@@ -109,7 +109,7 @@ func Get(c *gin.Context) {
 			MemberExpired: authResult.User.Group.MemberExpired,
 			CouponID:      couponID,
 		}
-		if authResult.User.Level < 3 {
+		if core.CanManageServices(authResult.User.Level) {
 			resultGroup.Agree = dbUserResult.User[0].Group.Agree
 			resultGroup.Question = dbUserResult.User[0].Group.Question
 			resultGroup.Org = dbUserResult.User[0].Group.Org

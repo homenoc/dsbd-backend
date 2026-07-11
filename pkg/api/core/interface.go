@@ -16,11 +16,11 @@ type User struct {
 	Name              string     `json:"name"`
 	NameEn            string     `json:"name_en"`
 	Email             string     `json:"email"`
-	Pass              string     `json:"pass"`
+	Pass              string     `json:"-"` // password hash: never serialize to clients
 	ExpiredStatus     *uint      `json:"expired_status"`
 	Level             uint       `json:"level"`
 	MailVerify        *bool      `json:"mail_verify"`
-	MailToken         string     `json:"mail_token"`
+	MailToken         string     `json:"-"` // email-verification secret: never serialize
 	AntisocialCheck   *bool      `json:"antisocial_check"`
 	AntisocialCheckAt *time.Time `json:"antisocial_check_at"`
 }
