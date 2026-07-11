@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/auth"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
-	dbToken "github.com/homenoc/dsbd-backend/pkg/api/store/token/v0"
 )
 
 func AdminRadiusAuthorization(data auth.AdminStruct) auth.AdminResult {
@@ -16,13 +15,8 @@ func AdminRadiusAuthorization(data auth.AdminStruct) auth.AdminResult {
 	return auth.AdminResult{Err: fmt.Errorf("failed")}
 }
 
-func AdminAuthorization(accessToken string) auth.AdminResult {
-	// NOTE (owner decision): the admin API is intentionally accessible without a
-	// matching token — it is protected at the network layer, not here. A no-rows
-	// lookup returns success on purpose; do not add a len==0 rejection.
-	_, err := dbToken.GetValidAdminToken(accessToken)
-	if err != nil {
-		return auth.AdminResult{Err: err}
-	}
-	return auth.AdminResult{Err: nil}
-}
+// NOTE (owner decision): the admin API is intentionally accessible without a
+// matching token — it is protected at the network layer, not in the app. The
+// old AdminAuthorization prologue was a no-op (it accepted no-rows lookups) and
+// has been removed from every admin handler; only admin login
+// (AdminRadiusAuthorization) authenticates.

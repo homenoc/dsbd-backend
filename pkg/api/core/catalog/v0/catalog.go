@@ -55,10 +55,5 @@ func Get(c *gin.Context) {
 
 // GetByAdmin serves the full catalog to the admin app.
 func GetByAdmin(c *gin.Context) {
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
 	c.JSON(http.StatusOK, build(false))
 }

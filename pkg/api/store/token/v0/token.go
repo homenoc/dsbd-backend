@@ -81,14 +81,6 @@ func GetAdminBotToken(accessToken string) ([]core.Token, error) {
 	return tokens, err
 }
 
-// GetValidAdminToken returns valid (non-expired) admin tokens matching an access token.
-func GetValidAdminToken(accessToken string) ([]core.Token, error) {
-	var tokens []core.Token
-	err := store.DB().Where("access_token = ? AND admin = ? AND expired_at > ?",
-		accessToken, true, time.Now()).Find(&tokens).Error
-	return tokens, err
-}
-
 // GetExpired returns tokens past their expiry (for the cleanup goroutine).
 func GetExpired() ([]core.Token, error) {
 	var tokens []core.Token

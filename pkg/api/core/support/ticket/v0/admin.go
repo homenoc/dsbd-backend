@@ -5,7 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
-	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	controllerInterface "github.com/homenoc/dsbd-backend/pkg/api/core/controller"
 	controller "github.com/homenoc/dsbd-backend/pkg/api/core/controller/v0"
@@ -25,13 +24,6 @@ import (
 
 func CreateByAdmin(c *gin.Context) {
 	var input support.FirstInput
-
-	// Admin authentication
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
 
 	err := c.BindJSON(&input)
 	if err != nil {
@@ -99,12 +91,6 @@ func CreateByAdmin(c *gin.Context) {
 
 func UpdateByAdmin(c *gin.Context) {
 	var input core.Ticket
-	// Admin authentication
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -146,12 +132,6 @@ func UpdateByAdmin(c *gin.Context) {
 }
 
 func GetByAdmin(c *gin.Context) {
-	// Admin authentication
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -169,12 +149,6 @@ func GetByAdmin(c *gin.Context) {
 }
 
 func GetAllByAdmin(c *gin.Context) {
-	// Admin authentication
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
 
 	// Tickets DBからGroup IDのTicketデータを抽出
 	resultTicket := dbTicket.GetAll()
@@ -191,8 +165,6 @@ func GetAdminWebSocket(c *gin.Context) {
 	// /support?id=0?user_token=accessID?access_token=token
 	// id = ticketID, access_token = AccessToken
 
-	accessToken := c.Query("access_token")
-
 	id, err := strconv.Atoi(c.Query("id"))
 	if err != nil {
 		log.Println("id wrong: ", err)
@@ -206,13 +178,6 @@ func GetAdminWebSocket(c *gin.Context) {
 	}
 
 	defer conn.Close()
-
-	// Admin authentication
-	resultAdmin := auth.AdminAuthorization(accessToken)
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
 
 	ticketResult := dbTicket.GetByID(uint(id))
 	if ticketResult.Err != nil {
@@ -230,7 +195,7 @@ func GetAdminWebSocket(c *gin.Context) {
 	// WebSocket送信
 	support.Clients[&support.WebSocket{
 		TicketID: uint(id),
-		UserID:   resultAdmin.AdminID,
+		UserID:   0,
 		UserName: "HomeNOC",
 		GroupID:  groupID,
 		Socket:   conn,
@@ -244,7 +209,7 @@ func GetAdminWebSocket(c *gin.Context) {
 			log.Printf("error: %v", err)
 			delete(support.Clients, &support.WebSocket{
 				TicketID: uint(id),
-				UserID:   resultAdmin.AdminID,
+				UserID:   0,
 				UserName: "HomeNOC(運営)",
 				GroupID:  groupID,
 				Socket:   conn,
@@ -262,7 +227,7 @@ func GetAdminWebSocket(c *gin.Context) {
 			conn.WriteJSON(&support.WebSocketResult{Err: "db write error"})
 		} else {
 			msg.TicketID = uint(id)
-			msg.UserID = resultAdmin.AdminID
+			msg.UserID = 0
 			msg.GroupID = groupID
 			msg.UserName = "HomeNOC(運営)"
 			msg.Admin = true
@@ -275,7 +240,7 @@ func GetAdminWebSocket(c *gin.Context) {
 				TicketID:  uint(id),
 				CreatedAt: msg.CreatedAt,
 				Admin:     msg.Admin,
-				UserID:    resultAdmin.AdminID,
+				UserID:    0,
 				UserName:  msg.UserName,
 				GroupID:   groupID,
 				Message:   msg.Message,
