@@ -15,7 +15,6 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/middleware"
 	dbConnection "github.com/homenoc/dsbd-backend/pkg/api/store/group/connection/v0"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
-	"gorm.io/gorm"
 )
 
 func Add(c *gin.Context) {
@@ -224,10 +223,7 @@ func Add(c *gin.Context) {
 	//	return
 	//}
 
-	if err = dbService.UpdateAll(core.Service{
-		Model:    gorm.Model{ID: resultService.Service[0].ID},
-		AddAllow: &[]bool{false}[0],
-	}); err != nil {
+	if err = dbService.UpdateAddAllow(resultService.Service[0].ID, false); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}

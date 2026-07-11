@@ -2,7 +2,6 @@ package v0
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/payment"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
@@ -12,7 +11,6 @@ import (
 	billingSession "github.com/stripe/stripe-go/v73/billingportal/session"
 	"github.com/stripe/stripe-go/v73/checkout/session"
 	"github.com/stripe/stripe-go/v73/customer"
-	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"strconv"
@@ -50,7 +48,7 @@ func PostSubscribeGettingURL(c *gin.Context) {
 			)
 			log.Println("Error: " + err.Error())
 		}
-		err = dbGroup.UpdateAll(core.Group{Model: gorm.Model{ID: user.Group.ID}, StripeCustomerID: &cus.ID})
+		err = dbGroup.UpdateStripeCustomerID(user.Group.ID, cus.ID)
 		noticePaymentLog(stripe.Event{
 			ID:   cus.ID,
 			Type: "stripe customer追加",

@@ -143,8 +143,16 @@ func TestGoldenAPI(t *testing.T) {
 				`"max_downstream":100,"start_date":"2030-01-01","asn":65001}`},
 
 		// --- mutations: admin approval flow ---
+		// The admin PUT contract is a whole object (the FE detail pages send the
+		// full entity back); the store whitelist always writes value-typed
+		// columns, so a sparse body would clear them.
 		{name: "admin_service_approve", router: adminRouter, method: "PUT", path: "/api/v1/service/2",
-			headers: adminHeaders, body: `{"pass":true}`},
+			headers: adminHeaders,
+			body: `{"service_type":"IP3B","service_comment":"","org":"テスト組織","org_en":"Test Org",` +
+				`"postcode":"100-0001","address":"東京都千代田区","address_en":"Chiyoda, Tokyo",` +
+				`"abuse":"abuse@example.com","avg_upstream":10,"max_upstream":100,` +
+				`"avg_downstream":10,"max_downstream":100,"max_bandwidth_as":"100Mbps",` +
+				`"comment":"","bgp_comment":"golden test","pass":true}`},
 		{name: "admin_service_detail_after_approve", router: adminRouter, method: "GET", path: "/api/v1/service/2",
 			headers: adminHeaders},
 		{name: "admin_connection_open", router: adminRouter, method: "PUT", path: "/api/v1/connection/2",

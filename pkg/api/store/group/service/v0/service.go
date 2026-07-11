@@ -28,9 +28,40 @@ func UpdateData(c core.Service) error {
 	}).Error
 }
 
-// UpdateAll updates the service with all non-zero fields of c (was Update(UpdateAll, ...)).
-func UpdateAll(c core.Service) error {
-	return store.DB().Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Updates(c).Error
+// Update writes the admin-editable columns of the service row from a full
+// object (the admin whole-object PUT). Value-typed columns are always written
+// (so clearing to "" persists); pointer/time columns only when provided, so an
+// omitted field never nulls the row. Sparse internal writes must use the
+// intent functions instead.
+func Update(c core.Service) error {
+	cols := []string{"service_type", "service_comment", "org", "org_en", "post_code",
+		"address", "address_en", "abuse", "ave_upstream", "max_upstream",
+		"ave_downstream", "max_downstream", "max_band_width_as", "comment", "bgp_comment"}
+	if c.ASN != nil {
+		cols = append(cols, "asn")
+	}
+	if !c.StartDate.IsZero() {
+		cols = append(cols, "start_date")
+	}
+	if c.EndDate != nil {
+		cols = append(cols, "end_date")
+	}
+	if c.Pass != nil {
+		cols = append(cols, "pass")
+	}
+	if c.Enable != nil {
+		cols = append(cols, "enable")
+	}
+	if c.AddAllow != nil {
+		cols = append(cols, "add_allow")
+	}
+	return store.DB().Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Select(cols).Updates(c).Error
+}
+
+// UpdateAddAllow flips whether users may add connections to the service.
+func UpdateAddAllow(id uint, allow bool) error {
+	return store.DB().Model(&core.Service{Model: gorm.Model{ID: id}}).
+		Update("add_allow", allow).Error
 }
 
 // GetByID loads one service with its full association graph.

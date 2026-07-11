@@ -11,7 +11,6 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/middleware"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
-	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"strconv"
@@ -189,10 +188,7 @@ func Add(c *gin.Context) {
 
 	// ---------ここまで処理が通っている場合、DBへの書き込みにすべて成功している
 	// GroupのStatusをAfterStatusにする
-	if err = dbGroup.UpdateAll(core.Group{
-		Model:    gorm.Model{ID: user.Group.ID},
-		AddAllow: &[]bool{false}[0],
-	}); err != nil {
+	if err = dbGroup.UpdateAddAllow(user.Group.ID, false); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
