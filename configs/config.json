@@ -35,11 +35,11 @@
     "dbName": "dsbd-backend"
   },
   "mail": {
-    "Host": "mail.homenoc.ad.jp",
+    "Host": "127.0.0.1",
     "Domain": "homenoc.ad.jp",
-    "Port": 587,
+    "Port": 1025,
     "From_Name": "Home NOC Operators' Group Support",
-    "from": "",
+    "from": "noreply@homenoc.ad.jp",
     "user": "",
     "pass": "",
     "contract": "",
@@ -54,23 +54,23 @@
     "ca_file_path": ""
   },
   "radius": {
-      "host": "",
-      "port": 0,
-      "user": "",
-      "pass": ""
+    "host": "",
+    "port": 0,
+    "user": "",
+    "pass": ""
   },
   "web": {
     "url": ""
   },
   "slack": {
-      "app_token": "",
-      "bot_token": "",
-      "channels": {
-          "main": "",
-          "log": "",
-          "payment": "",
-          "payment_log": ""
-      }
+    "app_token": "",
+    "bot_token": "",
+    "channels": {
+      "main": "",
+      "log": "",
+      "payment": "",
+      "payment_log": ""
+    }
   },
   "template": {
     "service": [
@@ -177,8 +177,7 @@
         "is_l3": false
       }
     ],
-    "membership": [
-    ],
+    "membership": [],
     "ix": [
       {
         "name": "JPIX TOKYO",
@@ -248,10 +247,9 @@
       "フィリピン",
       "台湾"
     ],
-    "mail": [
-    ]
+    "mail": []
   },
   "log": {
-      "path": ""
+    "path": ""
   }
 }
