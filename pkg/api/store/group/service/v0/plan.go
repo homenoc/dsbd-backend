@@ -1,20 +1,13 @@
 package v0
 
 import (
-	"fmt"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
 	"gorm.io/gorm"
-	"log"
-	"time"
 )
 
 func JoinPlan(ipID uint, input core.Plan) error {
-	db, err := store.ConnectDB()
-	if err != nil {
-		log.Println("database connection error")
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
+	db := store.DB()
 
 	return db.Model(&core.IP{Model: gorm.Model{ID: ipID}}).
 		Association("Plan").
@@ -22,21 +15,13 @@ func JoinPlan(ipID uint, input core.Plan) error {
 }
 
 func DeletePlan(id uint) error {
-	db, err := store.ConnectDB()
-	if err != nil {
-		log.Println("database connection error")
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
+	db := store.DB()
 
 	return db.Delete(core.Plan{Model: gorm.Model{ID: id}}).Error
 }
 
 func UpdatePlan(input core.Plan) error {
-	db, err := store.ConnectDB()
-	if err != nil {
-		log.Println("database connection error")
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
+	db := store.DB()
 
 	return db.Model(&core.Plan{Model: gorm.Model{ID: input.ID}}).Updates(input).Error
 }
@@ -44,13 +29,9 @@ func UpdatePlan(input core.Plan) error {
 func GetPlan(data *core.Plan) (core.Plan, error) {
 	var plans core.Plan
 
-	db, err := store.ConnectDB()
-	if err != nil {
-		log.Println("database connection error")
-		return plans, err
-	}
+	db := store.DB()
 
-	err = db.First(&plans, data.ID).Error
+	err := db.First(&plans, data.ID).Error
 
 	return plans, err
 }

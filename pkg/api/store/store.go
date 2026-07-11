@@ -90,14 +90,6 @@ func Tx(fn func(tx *gorm.DB) error) error {
 	return DB().Transaction(fn)
 }
 
-// ConnectDB is retained for backward compatibility with existing store
-// functions; it returns the shared pool instead of opening a new connection.
-//
-// Deprecated: use DB(). Callers must NOT close the returned *sql.DB.
-func ConnectDB() (*gorm.DB, error) {
-	return DB(), nil
-}
-
 func InitDB() {
 	log.Println("[DB] Connecting to database...")
 	if err := Init(); err != nil {

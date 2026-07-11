@@ -21,10 +21,7 @@ import (
 func Run() error {
 	log.Println("[Seed] Starting seed data creation...")
 
-	db, err := store.ConnectDB()
-	if err != nil {
-		return err
-	}
+	db := store.DB()
 
 	// NOC
 	log.Println("[Seed] Creating NOC data...")
