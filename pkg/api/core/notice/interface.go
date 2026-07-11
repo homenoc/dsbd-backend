@@ -1,6 +1,8 @@
 package notice
 
 import (
+	"time"
+
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 )
 
@@ -18,25 +20,6 @@ type Input struct {
 	Body      string  `json:"body"`
 }
 
-type Notice struct {
-	ID        uint   `json:"ID"`
-	UserID    uint   `json:"user_id"`
-	GroupID   uint   `json:"group_id"`
-	NOCID     uint   `json:"noc_id"`
-	Everyone  bool   `json:"everyone"`
-	StartTime string `json:"start_time"`
-	EndTime   string `json:"end_time"`
-	Important bool   `json:"important"`
-	Fault     bool   `json:"fault"`
-	Info      bool   `json:"info"`
-	Title     string `json:"title"`
-	Data      string `json:"data" gorm:"size:65535"`
-}
-
-type Result struct {
-	Notice []Notice `json:"notice"`
-}
-
 type ResultAdmin struct {
 	Notice []core.Notice `json:"notice"`
 }
@@ -44,4 +27,20 @@ type ResultAdmin struct {
 type ResultDatabase struct {
 	Err    error
 	Notice []core.Notice
+}
+
+// UserView is the user-facing wire shape of an active notice (GET /notice).
+type UserView struct {
+	StartTime time.Time `json:"start_time"`
+	EndTime   time.Time `json:"end_time"`
+	Everyone  bool      `json:"everyone"`
+	Important bool      `json:"important"`
+	Fault     bool      `json:"fault"`
+	Info      bool      `json:"info"`
+	Title     string    `json:"title"`
+	Data      string    `json:"data"`
+}
+
+type Result struct {
+	Notice []UserView `json:"notice"`
 }

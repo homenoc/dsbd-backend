@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/info"
 )
 
 type Input struct {
@@ -15,36 +14,12 @@ type Input struct {
 	Level  uint   `json:"level"`
 }
 
-type User struct {
-	ID                uint       `json:"id"`
-	Name              string     `json:"name"`
-	NameEn            string     `json:"name_en"`
-	Email             string     `json:"email"`
-	Level             uint       `json:"level"`
-	ExpiredStatus     uint       `json:"expired_status"`
-	MailVerify        *bool      `json:"mail_verify"`
-	AntisocialCheck   *bool      `json:"antisocial_check"`
-	AntisocialCheckAt *time.Time `json:"antisocial_check_at"`
-}
-
-type SimpleGroup struct {
-	ID            uint  `json:"id"`
-	Student       *bool `json:"student"`
-	Pass          *bool `json:"pass"`
-	Lock          *bool `json:"lock"`
-	ExpiredStatus *uint `json:"expired_status"`
-	Status        *uint `json:"status"`
-}
-
-type ResultOne struct {
-	User  SimpleUser  `json:"user"`
-	Group SimpleGroup `json:"group"`
-	Info  []info.Info `json:"info"`
-}
-
-type SimpleUser struct {
+// Profile is the user-facing wire shape of an account (GET /user/me and the
+// group member list in GET /group).
+type Profile struct {
 	ID                uint       `json:"id"`
 	GroupID           uint       `json:"group_id"`
+	StripeCustomerID  string     `json:"stripe_customer_id"`
 	Name              string     `json:"name"`
 	NameEn            string     `json:"name_en"`
 	Email             string     `json:"email"`
@@ -55,8 +30,27 @@ type SimpleUser struct {
 	AntisocialCheckAt *time.Time `json:"antisocial_check_at"`
 }
 
+// ProfileFrom projects a core.User onto its user-facing wire shape.
+func ProfileFrom(u core.User) Profile {
+	var groupID uint
+	if u.GroupID != nil {
+		groupID = *u.GroupID
+	}
+	return Profile{
+		ID:                u.ID,
+		GroupID:           groupID,
+		Name:              u.Name,
+		NameEn:            u.NameEn,
+		Email:             u.Email,
+		Level:             u.Level,
+		MailVerify:        u.MailVerify,
+		AntisocialCheck:   u.AntisocialCheck,
+		AntisocialCheckAt: u.AntisocialCheckAt,
+	}
+}
+
 type Result struct {
-	User []ResultOne `json:"user"`
+	User []Profile `json:"user"`
 }
 
 type ResultAdmin struct {
