@@ -59,6 +59,24 @@ func ExpiredMessage(s ExpiredStatus) string {
 	}
 }
 
+// ExpiredLabel returns the Japanese admin-facing label for an expired status
+// (previously duplicated as expiredStatusText in the group slack notifier and
+// hardcoded in the admin frontend).
+func ExpiredLabel(s ExpiredStatus) string {
+	switch s {
+	case ExpiredNone:
+		return "0"
+	case ExpiredReviewFailed:
+		return "審査落ち"
+	case ExpiredByMaster:
+		return "ユーザより廃止"
+	case ExpiredByCommittee:
+		return "運営委員より廃止"
+	default:
+		return "status不明"
+	}
+}
+
 // TokenTier is Token.Status (validity duration tier). Values preserved.
 type TokenTier = uint
 

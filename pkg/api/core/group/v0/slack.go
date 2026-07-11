@@ -93,39 +93,9 @@ func changeTextByAdmin(before, after core.Group) string {
 	}
 
 	if before.ExpiredStatus != nil && after.ExpiredStatus != nil && *before.ExpiredStatus != *after.ExpiredStatus {
-		data += "ExpiredStatus: " + expiredStatusText(*before.ExpiredStatus) + " => " +
-			expiredStatusText(*after.ExpiredStatus) + "\n"
+		data += "ExpiredStatus: " + core.ExpiredLabel(*before.ExpiredStatus) + " => " +
+			core.ExpiredLabel(*after.ExpiredStatus) + "\n"
 	}
 
 	return data
-}
-
-func expiredStatusText(status uint) string {
-	if status == 0 {
-		return "0"
-	} else if status == 1 {
-		return "審査落ち"
-	} else if status == 2 {
-		return "ユーザより廃止"
-	} else if status == 3 {
-		return "運営委員より廃止"
-	} else {
-		return "status不明"
-	}
-}
-
-func statusText(status uint) string {
-	if status == 0 {
-		return "0"
-	} else if status == 1 {
-		return "ネットワーク情報　記入段階"
-	} else if status == 2 {
-		return "審査中"
-	} else if status == 3 {
-		return "接続情報　記入段階"
-	} else if status == 4 {
-		return "開通作業中"
-	} else {
-		return "status不明"
-	}
 }
