@@ -6,25 +6,18 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
-	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
+	"github.com/homenoc/dsbd-backend/pkg/api/middleware"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"gorm.io/gorm"
 )
 
 func AgreeAntisocialCheck(c *gin.Context) {
-	userToken := c.Request.Header.Get("USER_TOKEN")
-	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
-
-	authResult := auth.UserAuthorization(core.Token{UserToken: userToken, AccessToken: accessToken})
-	if authResult.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: authResult.Err.Error()})
-		return
-	}
+	user := middleware.CurrentUser(c)
 
 	now := time.Now()
 	if err := dbUser.UpdateAntisocialCheck(&core.User{
-		Model:             gorm.Model{ID: authResult.User.ID},
+		Model:             gorm.Model{ID: user.ID},
 		AntisocialCheck:   &[]bool{true}[0],
 		AntisocialCheckAt: &now,
 	}); err != nil {

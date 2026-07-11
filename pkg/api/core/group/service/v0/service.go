@@ -8,6 +8,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
+	"github.com/homenoc/dsbd-backend/pkg/api/middleware"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	"gorm.io/gorm"
@@ -19,8 +20,6 @@ import (
 
 func Add(c *gin.Context) {
 	var input service.Input
-	userToken := c.Request.Header.Get("USER_TOKEN")
-	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
 	err := c.BindJSON(&input)
 	if err != nil {
@@ -30,14 +29,10 @@ func Add(c *gin.Context) {
 	}
 
 	// group authentication
-	result := auth.GroupAuthorization(0, core.Token{UserToken: userToken, AccessToken: accessToken})
-	if result.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
-		return
-	}
+	user := middleware.CurrentUser(c)
 
 	// check user level
-	if !core.CanManageServices(result.User.Level) {
+	if !core.CanManageServices(user.Level) {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: "You don't have authority this operation"})
 		return
 	}
@@ -49,13 +44,13 @@ func Add(c *gin.Context) {
 	}
 
 	// status check for group
-	if !(*result.User.Group.ExpiredStatus == 0 && *result.User.Group.Pass) {
+	if !(*user.Group.ExpiredStatus == 0 && *user.Group.Pass) {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: "error: failed group status"})
 		return
 	}
 
 	// add_allow check for group
-	if !(*result.User.Group.AddAllow) {
+	if !(*user.Group.AddAllow) {
 		c.JSON(http.StatusForbidden, common.Error{Error: "error: failed group add_allow status"})
 		return
 	}
@@ -135,7 +130,7 @@ func Add(c *gin.Context) {
 		bgpComment = input.BGPComment
 	}
 
-	resultNetwork := dbService.GetByGroupID(result.User.Group.ID)
+	resultNetwork := dbService.GetByGroupID(user.Group.ID)
 	if resultNetwork.Err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: resultNetwork.Err.Error()})
 		return
@@ -154,7 +149,7 @@ func Add(c *gin.Context) {
 
 	// db create for network
 	net, err := dbService.Create(&core.Service{
-		GroupID:        result.User.Group.ID,
+		GroupID:        user.Group.ID,
 		ServiceType:    input.ServiceType,
 		ServiceComment: input.ServiceComment,
 		ServiceNumber:  number,
@@ -186,8 +181,8 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	applicant := "[" + strconv.Itoa(int(result.User.ID)) + "] " + result.User.Name + "(" + result.User.NameEn + ")"
-	groupName := "[" + strconv.Itoa(int(result.User.Group.ID)) + "] " + result.User.Group.Org + "(" + result.User.Group.OrgEn + ")"
+	applicant := "[" + strconv.Itoa(int(user.ID)) + "] " + user.Name + "(" + user.NameEn + ")"
+	groupName := "[" + strconv.Itoa(int(user.Group.ID)) + "] " + user.Group.Org + "(" + user.Group.OrgEn + ")"
 	serviceCodeNew := resultServiceTemplate.Type + fmt.Sprintf("%03d", number)
 	serviceCodeComment := input.ServiceComment
 	noticeAdd(applicant, groupName, serviceCodeNew, serviceCodeComment)
@@ -195,7 +190,7 @@ func Add(c *gin.Context) {
 	// ---------ここまで処理が通っている場合、DBへの書き込みにすべて成功している
 	// GroupのStatusをAfterStatusにする
 	if err = dbGroup.UpdateAll(core.Group{
-		Model:    gorm.Model{ID: result.User.Group.ID},
+		Model:    gorm.Model{ID: user.Group.ID},
 		AddAllow: &[]bool{false}[0],
 	}); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
@@ -258,16 +253,9 @@ func Update(c *gin.Context) {
 }
 
 func GetAddAllow(c *gin.Context) {
-	userToken := c.Request.Header.Get("USER_TOKEN")
-	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
+	user := middleware.CurrentUser(c)
 
-	result := auth.GroupAuthorization(0, core.Token{UserToken: userToken, AccessToken: accessToken})
-	if result.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
-		return
-	}
-
-	if resultService := dbService.GetAddAllowByGroupID(result.User.Group.ID); resultService.Err != nil {
+	if resultService := dbService.GetAddAllowByGroupID(user.Group.ID); resultService.Err != nil {
 		log.Println(resultService.Err)
 		c.JSON(http.StatusInternalServerError, common.Error{Error: resultService.Err.Error()})
 	} else {

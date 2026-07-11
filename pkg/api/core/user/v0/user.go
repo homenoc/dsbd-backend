@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
-	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/mail"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/mail/v0"
@@ -13,6 +12,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/hash"
 	toolToken "github.com/homenoc/dsbd-backend/pkg/api/core/tool/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
+	"github.com/homenoc/dsbd-backend/pkg/api/middleware"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"gorm.io/gorm"
@@ -105,9 +105,6 @@ func AddGroup(c *gin.Context) {
 		return
 	}
 
-	userToken := c.Request.Header.Get("USER_TOKEN")
-	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
-
 	err = c.BindJSON(&input)
 	if err != nil {
 		log.Println(err)
@@ -124,13 +121,9 @@ func AddGroup(c *gin.Context) {
 	pass := ""
 
 	// グループ所属ユーザの登録
-	resultAuth := auth.GroupAuthorization(0, core.Token{UserToken: userToken, AccessToken: accessToken})
-	if resultAuth.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAuth.Err.Error()})
-		return
-	}
+	currentUser := middleware.CurrentUser(c)
 
-	if !core.CanManageServices(resultAuth.User.Level) {
+	if !core.CanManageServices(currentUser.Level) {
 		c.JSON(http.StatusForbidden, common.Error{Error: "error: access is not permitted"})
 		return
 	}
@@ -141,12 +134,12 @@ func AddGroup(c *gin.Context) {
 		return
 	}
 
-	if resultAuth.User.GroupID == nil {
+	if currentUser.GroupID == nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: "error: group is not found"})
 		return
 	}
 
-	if *resultAuth.User.GroupID != uint(id) {
+	if *currentUser.GroupID != uint(id) {
 		c.JSON(http.StatusBadRequest, common.Error{Error: "error: group id is invalid"})
 		return
 	}
@@ -163,7 +156,7 @@ func AddGroup(c *gin.Context) {
 	}
 
 	data = core.User{
-		GroupID:       resultAuth.User.GroupID,
+		GroupID:       currentUser.GroupID,
 		Name:          input.Name,
 		NameEn:        input.NameEn,
 		Email:         input.Email,
@@ -192,7 +185,7 @@ func AddGroup(c *gin.Context) {
 		return
 	}
 
-	noticeAddFromGroup(input, *resultAuth.User.Group)
+	noticeAddFromGroup(input, *currentUser.Group)
 
 	mailTemplate, _ := config.GetMailTemplate("signature")
 
@@ -285,16 +278,9 @@ func Delete(c *gin.Context) {
 		return
 	}
 
-	userToken := c.Request.Header.Get("USER_TOKEN")
-	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
+	currentUser := middleware.CurrentUser(c)
 
-	authResult := auth.GroupAuthorization(0, core.Token{UserToken: userToken, AccessToken: accessToken})
-	if authResult.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: authResult.Err.Error()})
-		return
-	}
-
-	if authResult.User.Level > 3 {
+	if currentUser.Level > 3 {
 		c.JSON(http.StatusForbidden, common.Error{Error: "error: failed user level"})
 		return
 	}
@@ -306,7 +292,7 @@ func Delete(c *gin.Context) {
 		return
 	}
 
-	if u.User[0].GroupID == nil || *u.User[0].GroupID != *authResult.User.GroupID {
+	if u.User[0].GroupID == nil || *u.User[0].GroupID != *currentUser.GroupID {
 		c.JSON(http.StatusBadRequest, common.Error{Error: "error: This user does not belong to your group."})
 		return
 	}
@@ -340,9 +326,6 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	userToken := c.Request.Header.Get("USER_TOKEN")
-	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
-
 	err = c.BindJSON(&input)
 	if err != nil {
 		log.Println(err)
@@ -350,23 +333,19 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	authResult := auth.UserAuthorization(core.Token{UserToken: userToken, AccessToken: accessToken})
-	if authResult.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: authResult.Err.Error()})
-		return
-	}
+	currentUser := middleware.CurrentUser(c)
 
 	var u, serverData core.User
 
-	if authResult.User.ID == uint(id) || id == 0 {
-		serverData = authResult.User
+	if currentUser.ID == uint(id) || id == 0 {
+		serverData = currentUser
 	} else {
-		if authResult.User.GroupID == nil {
+		if currentUser.GroupID == nil {
 			c.JSON(http.StatusForbidden, common.Error{Error: "error: Group ID = 0"})
 			return
 		}
 		// Master/Member（Level 1,2）のみユーザ設定を変更可能。Level 3以上は不可
-		if !core.CanManageServices(authResult.User.Level) {
+		if !core.CanManageServices(currentUser.Level) {
 			c.JSON(http.StatusForbidden, common.Error{Error: "error: failed user level"})
 			return
 		}
@@ -376,7 +355,7 @@ func Update(c *gin.Context) {
 			return
 		}
 
-		if userResult.User[0].GroupID == nil || *userResult.User[0].GroupID != *authResult.User.GroupID {
+		if userResult.User[0].GroupID == nil || *userResult.User[0].GroupID != *currentUser.GroupID {
 			c.JSON(http.StatusBadRequest, common.Error{Error: "error: This user does not belong to your group."})
 			return
 		}
@@ -390,7 +369,7 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	noticeRenew(authResult.User, serverData, input)
+	noticeRenew(currentUser, serverData, input)
 
 	if err = dbUser.UpdateAll(&u); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})

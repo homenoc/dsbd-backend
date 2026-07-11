@@ -24,6 +24,7 @@ import (
 	token "github.com/homenoc/dsbd-backend/pkg/api/core/token/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	user "github.com/homenoc/dsbd-backend/pkg/api/core/user/v0"
+	"github.com/homenoc/dsbd-backend/pkg/api/middleware"
 )
 
 // NewAdminRouter builds the admin API router (routes only, no background
@@ -271,52 +272,52 @@ func NewUserRouter() *gin.Engine {
 			//
 			// User
 			//
-			// User Create
+			// User Create (public: registration)
 			v1.POST("/user", user.Add)
 			// User Create(Group)
-			v1.POST("/group/:id/user", user.AddGroup)
+			v1.POST("/group/:id/user", middleware.GroupAuth(0), user.AddGroup)
 			// Antisocial Check
-			v1.PUT("/user/antisocial/agree", user.AgreeAntisocialCheck)
+			v1.PUT("/user/antisocial/agree", middleware.UserAuth, user.AgreeAntisocialCheck)
 			// User Update
-			v1.PUT("/user/:id", user.Update)
+			v1.PUT("/user/:id", middleware.UserAuth, user.Update)
 			// User Delete
-			v1.DELETE("/user/:id", user.Delete)
+			v1.DELETE("/user/:id", middleware.GroupAuth(0), user.Delete)
 
 			//
 			// Info / per-resource reads (was the single /info bootstrap blob)
 			//
-			v1.GET("/user/me", info.GetMe)
-			v1.GET("/group", info.GetGroup)
-			v1.GET("/service", info.GetService)
-			v1.GET("/connection", info.GetConnection)
-			v1.GET("/notice", info.GetNotice)
-			v1.GET("/ticket", info.GetTicket)
-			v1.GET("/request", info.GetRequest)
+			v1.GET("/user/me", middleware.UserAuth, info.GetMe)
+			v1.GET("/group", middleware.UserAuth, info.GetGroup)
+			v1.GET("/service", middleware.UserAuth, info.GetService)
+			v1.GET("/connection", middleware.UserAuth, info.GetConnection)
+			v1.GET("/notice", middleware.UserAuth, info.GetNotice)
+			v1.GET("/ticket", middleware.UserAuth, info.GetTicket)
+			v1.GET("/request", middleware.UserAuth, info.GetRequest)
 			// Derived active-connection network summary
-			v1.GET("/info", info.Get)
+			v1.GET("/info", middleware.UserAuth, info.Get)
 
 			//
 			// Group
 			//
 			// Group Create
-			v1.POST("/group", group.Add)
+			v1.POST("/group", middleware.UserAuth, group.Add)
 
 			// Template
-			v1.GET("/catalog", catalog.Get)
+			v1.GET("/catalog", middleware.UserAuth, catalog.Get)
 
 			// Service add
-			v1.POST("/service", service.Add)
-			v1.GET("/service/add_allow", service.GetAddAllow)
+			v1.POST("/service", middleware.GroupAuth(0), service.Add)
+			v1.GET("/service/add_allow", middleware.GroupAuth(0), service.GetAddAllow)
 			//v1.PUT("/group/network", network.Update)
 
 			// Connection Create
-			v1.POST("/service/:id/connection", connection.Add)
+			v1.POST("/service/:id/connection", middleware.GroupAuth(0), connection.Add)
 
 			//
 			// Payment
 			//
-			v1.POST("/payment/subscribe", payment.PostSubscribeGettingURL)
-			v1.GET("/payment", payment.GetBillingPortalURL)
+			v1.POST("/payment/subscribe", middleware.GroupAuth(0), payment.PostSubscribeGettingURL)
+			v1.GET("/payment", middleware.GroupAuth(0), payment.GetBillingPortalURL)
 
 			//
 			// Support/Request

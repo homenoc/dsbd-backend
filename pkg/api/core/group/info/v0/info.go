@@ -9,9 +9,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
-	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/info"
+	"github.com/homenoc/dsbd-backend/pkg/api/middleware"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	dbNotice "github.com/homenoc/dsbd-backend/pkg/api/store/notice/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
@@ -25,15 +25,7 @@ import (
 // authUser resolves the authenticated user, writing a 401 and returning ok=false
 // on failure.
 func authUser(c *gin.Context) (core.User, bool) {
-	userToken := c.Request.Header.Get("USER_TOKEN")
-	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
-
-	authResult := auth.UserAuthorization(core.Token{UserToken: userToken, AccessToken: accessToken})
-	if authResult.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: authResult.Err.Error()})
-		return core.User{}, false
-	}
-	return authResult.User, true
+	return middleware.CurrentUser(c), true
 }
 
 // canAccessGroup mirrors the blob's guard: a group-scoped resource is readable

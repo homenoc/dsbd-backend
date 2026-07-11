@@ -5,10 +5,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
-	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/catalog"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
+	"github.com/homenoc/dsbd-backend/pkg/api/middleware"
 )
 
 // build assembles the catalog. hideHidden drops services flagged Hidden (user
@@ -42,14 +41,7 @@ func build(hideHidden bool) catalog.Result {
 
 // Get serves the catalog to authenticated users (Hidden service types omitted).
 func Get(c *gin.Context) {
-	userResult := auth.UserAuthorization(core.Token{
-		UserToken:   c.Request.Header.Get("USER_TOKEN"),
-		AccessToken: c.Request.Header.Get("ACCESS_TOKEN"),
-	})
-	if userResult.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: userResult.Err.Error()})
-		return
-	}
+	_ = middleware.CurrentUser(c)
 	c.JSON(http.StatusOK, build(true))
 }
 
