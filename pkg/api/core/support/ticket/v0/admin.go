@@ -192,14 +192,15 @@ func GetAdminWebSocket(c *gin.Context) {
 		groupID = *ticketResult.Tickets[0].GroupID
 	}
 
-	// WebSocket送信
-	support.Clients[&support.WebSocket{
+	// WebSocket送信 (登録と同一ポインタで削除しないと永遠に消えない)
+	client := &support.WebSocket{
 		TicketID: uint(id),
 		UserID:   0,
 		UserName: "HomeNOC",
 		GroupID:  groupID,
 		Socket:   conn,
-	}] = true
+	}
+	support.Clients[client] = true
 
 	//WebSocket受信
 	for {
@@ -207,13 +208,7 @@ func GetAdminWebSocket(c *gin.Context) {
 		err = conn.ReadJSON(&msg)
 		if err != nil {
 			log.Printf("error: %v", err)
-			delete(support.Clients, &support.WebSocket{
-				TicketID: uint(id),
-				UserID:   0,
-				UserName: "HomeNOC(運営)",
-				GroupID:  groupID,
-				Socket:   conn,
-			})
+			delete(support.Clients, client)
 			break
 		}
 
@@ -290,8 +285,10 @@ func GetAdminWebSocket(c *gin.Context) {
 			}
 
 			//Slackに送信
-			groupValue := "[" + strconv.Itoa(int(resultTicket.Tickets[0].Group.ID)) + "] " + resultTicket.Tickets[0].Group.Org + "(" + resultTicket.Tickets[0].Group.OrgEn + ")"
-			noticeNewMessage(true, "", groupValue, ticketResult.Tickets[0], msg.Message)
+			if len(resultTicket.Tickets) != 0 {
+				groupValue := "[" + strconv.Itoa(int(resultTicket.Tickets[0].Group.ID)) + "] " + resultTicket.Tickets[0].Group.Org + "(" + resultTicket.Tickets[0].Group.OrgEn + ")"
+				noticeNewMessage(true, "", groupValue, ticketResult.Tickets[0], msg.Message)
+			}
 
 			support.Broadcast <- msg
 		}

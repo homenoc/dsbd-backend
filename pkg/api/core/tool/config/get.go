@@ -9,7 +9,10 @@ func GetMailTemplate(id string) (*MailTemplate, error) {
 		}
 	}
 
-	return nil, fmt.Errorf("mail template is not found")
+	// Return a non-nil empty template: callers append .Message to mail bodies
+	// inside long-lived loops (the support WebSocket handlers), where a nil
+	// deref panics and tears down the connection.
+	return &MailTemplate{}, fmt.Errorf("mail template is not found")
 }
 
 func GetMembershipTemplate(plan string) (*MembershipTemplate, error) {
@@ -19,5 +22,6 @@ func GetMembershipTemplate(plan string) (*MembershipTemplate, error) {
 		}
 	}
 
-	return nil, fmt.Errorf("mail template is not found")
+	// Non-nil for the same defensive reason as GetMailTemplate.
+	return &MembershipTemplate{}, fmt.Errorf("membership template is not found")
 }

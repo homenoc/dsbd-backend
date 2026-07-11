@@ -28,28 +28,24 @@ type Input struct {
 	BGPComment     string           `json:"bgp_comment"`
 }
 
-type IPInput struct {
-	Version   uint         `json:"version"`
-	Name      string       `json:"name"`
-	IP        string       `json:"ip"`
-	Plan      []*core.Plan `json:"plan"`
-	StartDate string       `json:"start_date"`
-	EndDate   *string      `json:"end_date"`
-	UseCase   string       `json:"use_case"`
-}
-
-type Result struct {
-	Service []core.Service `json:"service"`
-	//User    []core.User `json:"user"`
-}
-
-type ResultOne struct {
-	Service core.Service `json:"service"`
-}
-
-type ResultDatabase struct {
-	Err     error
-	Service []core.Service
+// JPNIC is a JPNIC contact as shown to users. The admin contact omits
+// its address fields on the wire.
+type JPNIC struct {
+	ID          uint   `json:"id"`
+	JPNICHandle string `json:"jpnic_handle"`
+	Name        string `json:"name"`
+	NameEn      string `json:"name_en"`
+	Mail        string `json:"mail"`
+	Org         string `json:"org"`
+	OrgEn       string `json:"org_en"`
+	PostCode    string `json:"postcode"`
+	Address     string `json:"address"`
+	AddressEn   string `json:"address_en"`
+	Dept        string `json:"dept"`
+	DeptEn      string `json:"dept_en"`
+	Tel         string `json:"tel"`
+	Fax         string `json:"fax"`
+	Country     string `json:"country"`
 }
 
 // Service is the user-facing wire shape of an enabled service
@@ -79,25 +75,6 @@ type Service struct {
 	IP             []IP    `json:"ip"`
 }
 
-// JPNIC is a JPNIC contact as shown to users. The admin contact omits
-// its address fields on the wire.
-type JPNIC struct {
-	ID        uint   `json:"id"`
-	Name      string `json:"name"`
-	NameEn    string `json:"name_en"`
-	Mail      string `json:"mail"`
-	Org       string `json:"org"`
-	OrgEn     string `json:"org_en"`
-	PostCode  string `json:"postcode"`
-	Address   string `json:"address"`
-	AddressEn string `json:"address_en"`
-	Dept      string `json:"dept"`
-	DeptEn    string `json:"dept_en"`
-	Tel       string `json:"tel"`
-	Fax       string `json:"fax"`
-	Country   string `json:"country"`
-}
-
 // IP is an opened IP assignment as shown to users.
 type IP struct {
 	ID        uint   `json:"id"`
@@ -107,6 +84,30 @@ type IP struct {
 	Plan      []Plan `json:"plan" `
 	PlanJPNIC string `json:"" gorm:"size:65535"`
 	UseCase   string `json:"use_case"`
+}
+
+type IPInput struct {
+	Version   uint         `json:"version"`
+	Name      string       `json:"name"`
+	IP        string       `json:"ip"`
+	Plan      []*core.Plan `json:"plan"`
+	StartDate string       `json:"start_date"`
+	EndDate   *string      `json:"end_date"`
+	UseCase   string       `json:"use_case"`
+}
+
+type Result struct {
+	Service []core.Service `json:"service"`
+	//User    []core.User `json:"user"`
+}
+
+type ResultOne struct {
+	Service core.Service `json:"service"`
+}
+
+type ResultDatabase struct {
+	Err     error
+	Service []core.Service
 }
 
 type Plan struct {

@@ -19,7 +19,6 @@ type Input struct {
 type User struct {
 	ID                uint       `json:"id"`
 	GroupID           uint       `json:"group_id"`
-	StripeCustomerID  string     `json:"stripe_customer_id"`
 	Name              string     `json:"name"`
 	NameEn            string     `json:"name_en"`
 	Email             string     `json:"email"`
