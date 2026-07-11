@@ -7,31 +7,23 @@ import (
 )
 
 func JoinPlan(ipID uint, input core.Plan) error {
-	db := store.DB()
-
-	return db.Model(&core.IP{Model: gorm.Model{ID: ipID}}).
+	return store.DB().Model(&core.IP{Model: gorm.Model{ID: ipID}}).
 		Association("Plan").
 		Append(&input)
 }
 
 func DeletePlan(id uint) error {
-	db := store.DB()
-
-	return db.Delete(core.Plan{Model: gorm.Model{ID: id}}).Error
+	return store.DB().Delete(core.Plan{Model: gorm.Model{ID: id}}).Error
 }
 
 func UpdatePlan(input core.Plan) error {
-	db := store.DB()
-
-	return db.Model(&core.Plan{Model: gorm.Model{ID: input.ID}}).Updates(input).Error
+	return store.DB().Model(&core.Plan{Model: gorm.Model{ID: input.ID}}).Updates(input).Error
 }
 
 func GetPlan(data *core.Plan) (core.Plan, error) {
 	var plans core.Plan
 
-	db := store.DB()
-
-	err := db.First(&plans, data.ID).Error
+	err := store.DB().First(&plans, data.ID).Error
 
 	return plans, err
 }

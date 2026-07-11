@@ -7,19 +7,13 @@ import (
 )
 
 func JoinJPNICTech(input core.JPNICTech) error {
-	db := store.DB()
-
-	return db.Create(&input).Error
+	return store.DB().Create(&input).Error
 }
 
 func DeleteJPNICTech(id uint) error {
-	db := store.DB()
-
-	return db.Delete(core.JPNICTech{Model: gorm.Model{ID: id}}).Error
+	return store.DB().Delete(core.JPNICTech{Model: gorm.Model{ID: id}}).Error
 }
 
 func UpdateJPNICTech(input core.JPNICTech) error {
-	db := store.DB()
-
-	return db.Model(&core.JPNICTech{Model: gorm.Model{ID: input.ID}}).Updates(input).Error
+	return store.DB().Model(&core.JPNICTech{Model: gorm.Model{ID: input.ID}}).Updates(input).Error
 }

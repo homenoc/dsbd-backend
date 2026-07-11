@@ -7,20 +7,14 @@ import (
 )
 
 func Create(connection *core.Memo) (*core.Memo, error) {
-	db := store.DB()
-
-	err := db.Create(&connection).Error
+	err := store.DB().Create(&connection).Error
 	return connection, err
 }
 
 func Delete(connection *core.Memo) error {
-	db := store.DB()
-
-	return db.Delete(connection).Error
+	return store.DB().Delete(connection).Error
 }
 
 func Update(memo core.Memo) error {
-	db := store.DB()
-
-	return db.Model(&core.Memo{Model: gorm.Model{ID: memo.ID}}).Updates(memo).Error
+	return store.DB().Model(&core.Memo{Model: gorm.Model{ID: memo.ID}}).Updates(memo).Error
 }

@@ -7,19 +7,13 @@ import (
 )
 
 func JoinIP(input core.IP) error {
-	db := store.DB()
-
-	return db.Create(&input).Error
+	return store.DB().Create(&input).Error
 }
 
 func DeleteIP(id uint) error {
-	db := store.DB()
-
-	return db.Select("Plan").Delete(&core.IP{Model: gorm.Model{ID: id}}).Error
+	return store.DB().Select("Plan").Delete(&core.IP{Model: gorm.Model{ID: id}}).Error
 }
 
 func UpdateIP(input core.IP) error {
-	db := store.DB()
-
-	return db.Model(&core.IP{Model: gorm.Model{ID: input.ID}}).Updates(input).Error
+	return store.DB().Model(&core.IP{Model: gorm.Model{ID: input.ID}}).Updates(input).Error
 }
