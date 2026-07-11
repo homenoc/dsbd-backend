@@ -156,7 +156,12 @@ func TestGoldenAPI(t *testing.T) {
 		{name: "admin_service_detail_after_approve", router: adminRouter, method: "GET", path: "/api/v1/service/2",
 			headers: adminHeaders},
 		{name: "admin_connection_open", router: adminRouter, method: "PUT", path: "/api/v1/connection/2",
-			headers: adminHeaders, body: `{"open":true}`},
+			headers: adminHeaders,
+			body: `{"connection_type":"EIP","connection_comment":"","ix":"","ix_peer_type":"",` +
+				`"ix_vlan_id":"","ipv4_route":"IPv4 Full Route","ipv6_route":"IPv6 Full Route",` +
+				`"ntt":"etc","preferred_ap":"東日本","term_ip":"203.0.113.100","rfc8950":false,` +
+				`"address":"東京都千代田区","link_v4_our":"","link_v4_your":"","link_v6_our":"",` +
+				`"link_v6_your":"","comment":"","monitor":true,"open":true}`},
 		{name: "admin_connection_detail_after_open", router: adminRouter, method: "GET", path: "/api/v1/connection/2",
 			headers: adminHeaders},
 	}
