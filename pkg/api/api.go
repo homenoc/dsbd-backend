@@ -381,12 +381,13 @@ func cors(c *gin.Context) {
 	}
 }
 
+// originAllowed reports whether origin is in the config.cors.origins
+// allowlist. Fail-safe: an empty/missing allowlist allows NOTHING cross-origin
+// — a deployment that forgets to configure it must not silently accept
+// credentialed requests from anywhere. Dev origins are listed in
+// configs/config.json.
 func originAllowed(origin string) bool {
-	allow := config.Conf.CORS.Origins
-	if len(allow) == 0 {
-		return true // no allowlist configured: echo the request origin
-	}
-	for _, o := range allow {
+	for _, o := range config.Conf.CORS.Origins {
 		if o == origin {
 			return true
 		}

@@ -27,8 +27,8 @@ type Config struct {
 }
 
 // CORS controls cross-origin access. Origins is an allowlist of exact origins
-// (scheme+host+port). When empty, the request's Origin header is echoed back,
-// which is valid together with credentials (unlike "*").
+// (scheme+host+port). Fail-safe: when empty, no cross-origin requests are
+// allowed — every deployment must list its frontend origins explicitly.
 type CORS struct {
 	Origins []string `json:"origins"`
 }
