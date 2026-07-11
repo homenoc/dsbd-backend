@@ -14,8 +14,21 @@ func DeleteIP(id uint) error {
 	return store.DB().Select("Plan").Delete(&core.IP{Model: gorm.Model{ID: id}}).Error
 }
 
+// UpdateIP writes the admin-editable IP columns from a full object. Value-typed
+// columns are always written (clearing persists); pointer/time columns only
+// when provided. service_id/version stay untouchable.
 func UpdateIP(input core.IP) error {
-	return store.DB().Model(&core.IP{Model: gorm.Model{ID: input.ID}}).Updates(input).Error
+	cols := []string{"name", "ip", "use_case"}
+	if !input.StartDate.IsZero() {
+		cols = append(cols, "start_date")
+	}
+	if input.EndDate != nil {
+		cols = append(cols, "end_date")
+	}
+	if input.Open != nil {
+		cols = append(cols, "open")
+	}
+	return store.DB().Model(&core.IP{Model: gorm.Model{ID: input.ID}}).Select(cols).Updates(input).Error
 }
 
 func GetIP(id uint) (core.IP, error) {

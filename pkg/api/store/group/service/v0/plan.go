@@ -16,8 +16,12 @@ func DeletePlan(id uint) error {
 	return store.DB().Delete(core.Plan{Model: gorm.Model{ID: id}}).Error
 }
 
+// UpdatePlan writes the editable plan columns from a full object. All are
+// value-typed and always written (clearing/zeroing persists); ip_id stays
+// untouchable.
 func UpdatePlan(input core.Plan) error {
-	return store.DB().Model(&core.Plan{Model: gorm.Model{ID: input.ID}}).Updates(input).Error
+	cols := []string{"name", "after", "half_year", "one_year"}
+	return store.DB().Model(&core.Plan{Model: gorm.Model{ID: input.ID}}).Select(cols).Updates(input).Error
 }
 
 func GetPlan(data *core.Plan) (core.Plan, error) {

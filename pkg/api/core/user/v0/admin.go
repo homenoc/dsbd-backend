@@ -77,7 +77,7 @@ func UpdateByAdmin(c *gin.Context) {
 		return
 	}
 
-	if err = dbUser.UpdateAll(&replace); err != nil {
+	if err = dbUser.Update(&replace); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}

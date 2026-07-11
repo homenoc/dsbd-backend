@@ -371,7 +371,7 @@ func Update(c *gin.Context) {
 
 	noticeRenew(currentUser, serverData, input)
 
-	if err = dbUser.UpdateAll(&u); err != nil {
+	if err = dbUser.Update(&u); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 	} else {
 		c.JSON(http.StatusOK, user.Result{})

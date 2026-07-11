@@ -120,7 +120,7 @@ func UpdateByAdmin(c *gin.Context) {
 	}
 
 	// Ticketのアップデート
-	err = dbTicket.UpdateAll(replace)
+	err = dbTicket.Update(replace)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return

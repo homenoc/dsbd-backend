@@ -213,7 +213,7 @@ func Update(c *gin.Context) {
 	updateTicketData.Solved = input.Solved
 
 	// Ticketのアップデート
-	err = dbTicket.UpdateAll(updateTicketData)
+	err = dbTicket.Update(updateTicketData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return

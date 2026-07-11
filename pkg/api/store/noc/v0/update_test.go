@@ -41,8 +41,10 @@ func TestUpdatePartField(t *testing.T) {
 	defer cleanup()
 
 	mock.ExpectBegin()
+	// Whitelisted value columns (name, location, bandwidth, comment) are always
+	// written plus updated_at; Enable is nil so it is omitted.
 	mock.ExpectExec("UPDATE `nocs`").
-		WithArgs(sqlmock.AnyArg(), "nocTest", uint(1)).
+		WithArgs(sqlmock.AnyArg(), "nocTest", "", "", "", uint(1)).
 		WillReturnResult(sqlmock.NewResult(0, 1))
 	mock.ExpectCommit()
 
@@ -51,7 +53,7 @@ func TestUpdatePartField(t *testing.T) {
 		Name:  "nocTest",
 	}
 
-	if err := UpdateAll(testTemplate); err != nil {
+	if err := Update(testTemplate); err != nil {
 		t.Fatal(err)
 	}
 

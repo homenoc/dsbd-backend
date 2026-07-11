@@ -33,21 +33,37 @@ func UpdateAntisocialCheck(u *core.User) error {
 		Updates(core.User{AntisocialCheck: u.AntisocialCheck, AntisocialCheckAt: u.AntisocialCheckAt}).Error
 }
 
-// UpdateAll updates all mutable user fields (was Update(UpdateAll, ...)).
-func UpdateAll(u *core.User) error {
-	return store.DB().Model(&core.User{Model: gorm.Model{ID: u.ID}}).Updates(core.User{
-		GroupID:           u.GroupID,
-		Name:              u.Name,
-		NameEn:            u.NameEn,
-		Email:             u.Email,
-		Pass:              u.Pass,
-		Level:             u.Level,
-		MailVerify:        u.MailVerify,
-		MailToken:         u.MailToken,
-		ExpiredStatus:     u.ExpiredStatus,
-		AntisocialCheck:   u.AntisocialCheck,
-		AntisocialCheckAt: u.AntisocialCheckAt,
-	}).Error
+// Update writes the editable user columns from a merged full object (both
+// callers merge the request onto the current record first). Credential-ish
+// columns (pass, mail_token) and level are written only when non-empty/non-zero
+// — they are never legitimately cleared; pointer columns only when provided.
+func Update(u *core.User) error {
+	cols := []string{"name", "name_en", "email"}
+	if u.Pass != "" {
+		cols = append(cols, "pass")
+	}
+	if u.MailToken != "" {
+		cols = append(cols, "mail_token")
+	}
+	if u.Level != 0 {
+		cols = append(cols, "level")
+	}
+	if u.GroupID != nil {
+		cols = append(cols, "group_id")
+	}
+	if u.MailVerify != nil {
+		cols = append(cols, "mail_verify")
+	}
+	if u.ExpiredStatus != nil {
+		cols = append(cols, "expired_status")
+	}
+	if u.AntisocialCheck != nil {
+		cols = append(cols, "antisocial_check")
+	}
+	if u.AntisocialCheckAt != nil {
+		cols = append(cols, "antisocial_check_at")
+	}
+	return store.DB().Model(&core.User{Model: gorm.Model{ID: u.ID}}).Select(cols).Updates(u).Error
 }
 
 // GetByID looks up one user by primary key.

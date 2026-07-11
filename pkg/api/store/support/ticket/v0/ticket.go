@@ -16,16 +16,27 @@ func Delete(t *core.Ticket) error {
 	return store.DB().Delete(t).Error
 }
 
-// UpdateAll updates the editable ticket fields (was Update(UpdateAll, ...)).
-func UpdateAll(t core.Ticket) error {
-	return store.DB().Model(&core.Ticket{Model: gorm.Model{ID: t.ID}}).Updates(&core.Ticket{
-		Title:         t.Title,
-		GroupID:       t.GroupID,
-		UserID:        t.UserID,
-		Solved:        t.Solved,
-		Request:       t.Request,
-		RequestReject: t.RequestReject,
-	}).Error
+// Update writes the mutable ticket columns from a merged full object (both
+// callers merge the request onto the current record first). Pointer columns
+// are written only when provided; chats and creation metadata stay untouched.
+func Update(t core.Ticket) error {
+	cols := []string{"title"}
+	if t.GroupID != nil {
+		cols = append(cols, "group_id")
+	}
+	if t.UserID != nil {
+		cols = append(cols, "user_id")
+	}
+	if t.Solved != nil {
+		cols = append(cols, "solved")
+	}
+	if t.Request != nil {
+		cols = append(cols, "request")
+	}
+	if t.RequestReject != nil {
+		cols = append(cols, "request_reject")
+	}
+	return store.DB().Model(&core.Ticket{Model: gorm.Model{ID: t.ID}}).Select(cols).Updates(t).Error
 }
 
 // GetByID loads one ticket with its user, group, and chat messages.
