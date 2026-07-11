@@ -16,18 +16,6 @@ func Delete(s *core.Service) error {
 	return store.DB().Delete(s).Error
 }
 
-// UpdateData updates the editable applicant/org fields (was Update(UpdateData, ...)).
-func UpdateData(c core.Service) error {
-	return store.DB().Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Updates(core.Service{
-		Org:       c.Org,
-		OrgEn:     c.OrgEn,
-		PostCode:  c.PostCode,
-		Address:   c.Address,
-		AddressEn: c.AddressEn,
-		ASN:       c.ASN,
-	}).Error
-}
-
 // Update writes the admin-editable columns of the service row from a full
 // object (the admin whole-object PUT). Value-typed columns are always written
 // (so clearing to "" persists); pointer/time columns only when provided, so an

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
-	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
@@ -197,55 +196,6 @@ func Add(c *gin.Context) {
 		core.TransitionText(core.StatusServiceInput, core.StatusExamination))
 
 	c.JSON(http.StatusOK, service.ResultOne{Service: *net})
-}
-
-// Todo: 以下の処理は実装中
-func Update(c *gin.Context) {
-	var input core.Service
-	userToken := c.Request.Header.Get("USER_TOKEN")
-	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
-
-	err := c.BindJSON(&input)
-	if err != nil {
-		log.Println(err)
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	result := auth.GroupAuthorization(0, core.Token{UserToken: userToken, AccessToken: accessToken})
-	if result.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
-		return
-	}
-
-	// check authority
-	if !core.CanManageServices(result.User.Level) {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: "You don't have authority this operation"})
-		return
-	}
-
-	resultNetwork := dbService.GetByID(input.ID)
-	if resultNetwork.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: resultNetwork.Err.Error()})
-		return
-	}
-	if len(resultNetwork.Service) == 0 {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: "failed Service ID"})
-		return
-	}
-	if resultNetwork.Service[0].GroupID != result.User.Group.ID {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: "Authorization failure"})
-		return
-	}
-
-	replace := replaceService(resultNetwork.Service[0], input)
-
-	if err = dbService.UpdateData(replace); err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, common.Result{})
 }
 
 func GetAddAllow(c *gin.Context) {

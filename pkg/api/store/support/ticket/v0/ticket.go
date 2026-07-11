@@ -21,12 +21,6 @@ func Delete(t *core.Ticket) error {
 // are written only when provided; chats and creation metadata stay untouched.
 func Update(t core.Ticket) error {
 	cols := []string{"title"}
-	if t.GroupID != nil {
-		cols = append(cols, "group_id")
-	}
-	if t.UserID != nil {
-		cols = append(cols, "user_id")
-	}
 	if t.Solved != nil {
 		cols = append(cols, "solved")
 	}

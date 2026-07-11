@@ -16,7 +16,7 @@ func DeleteJPNICTech(id uint) error {
 
 // UpdateJPNICTech writes the editable JPNIC tech-contact columns from a full
 // object. Value-typed columns are always written (clearing persists);
-// service_id and the hidden/is_group structural flags stay untouchable.
+// service_id structural flags stay untouchable.
 func UpdateJPNICTech(input core.JPNICTech) error {
 	cols := []string{"hidden", "is_group", "v4_jpnic_handle", "v6_jpnic_handle", "name", "name_en", "mail",
 		"org", "org_en", "post_code", "address", "address_en",
