@@ -33,9 +33,9 @@ type ResultDatabase struct {
 	Connection []core.Connection
 }
 
-// UserView is the user-facing wire shape of an enabled connection
+// Connection is the user-facing wire shape of an enabled connection
 // (GET /connection).
-type UserView struct {
+type Connection struct {
 	ID        uint   `json:"id"`
 	ServiceID string `json:"service_id"`
 	Open      bool   `json:"open"`

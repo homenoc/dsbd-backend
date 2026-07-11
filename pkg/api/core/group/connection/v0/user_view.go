@@ -41,11 +41,11 @@ func Get(c *gin.Context) {
 		return
 	}
 	if !hasGroup {
-		c.JSON(http.StatusOK, gin.H{"connection": []connection.UserView{}})
+		c.JSON(http.StatusOK, gin.H{"connection": []connection.Connection{}})
 		return
 	}
 
-	var views []connection.UserView
+	var views []connection.Connection
 	for _, s := range g.Services {
 		if _, err := core.GetServiceType(s.ServiceType); err != nil {
 			c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
@@ -56,7 +56,7 @@ func Get(c *gin.Context) {
 			if !*conn.Enable {
 				continue
 			}
-			views = append(views, connection.UserView{
+			views = append(views, connection.Connection{
 				ID:        conn.ID,
 				ServiceID: core.ConnectionCode(serviceCode, conn.ConnectionType, conn.ConnectionNumber),
 				Open:      *conn.Open,
@@ -95,9 +95,10 @@ func GetNetworkInfo(c *gin.Context) {
 			if !*ip.Open {
 				continue
 			}
-			if ip.Version == 4 {
+			switch ip.Version {
+			case 4:
 				v4 = append(v4, ip.IP)
-			} else if ip.Version == 6 {
+			case 6:
 				v6 = append(v6, ip.IP)
 			}
 		}
