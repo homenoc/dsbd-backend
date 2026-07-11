@@ -90,7 +90,11 @@ func Tx(fn func(tx *gorm.DB) error) error {
 	return DB().Transaction(fn)
 }
 
-func InitDB() {
+// Migrate connects (via Init) and runs AutoMigrate for every model. It is the
+// explicit schema-setup step used by the `init database` command and tests —
+// deliberately separate from Init(), which servers call at boot so that
+// starting a server does not re-run migrations.
+func Migrate() {
 	log.Println("[DB] Connecting to database...")
 	if err := Init(); err != nil {
 		log.Fatalf("[DB] Failed to connect: %v", err)

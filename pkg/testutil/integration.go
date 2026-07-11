@@ -70,7 +70,7 @@ func SetupIntegration(tb testing.TB) {
 	store.SetTestDB(openTestDB(tb))
 	tb.Cleanup(func() { store.ClearTestDB() })
 
-	store.InitDB()
+	store.Migrate()
 	if err := seed.Run(); err != nil {
 		tb.Fatalf("failed to seed test database: %v", err)
 	}

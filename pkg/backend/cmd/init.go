@@ -31,7 +31,7 @@ var initDatabaseCmd = &cobra.Command{
 		}
 		notification.NewNotification()
 
-		store.InitDB()
+		store.Migrate()
 
 		log.Println("[Init] Database initialization completed")
 	},
