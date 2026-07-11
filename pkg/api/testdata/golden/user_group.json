@@ -1,0 +1,55 @@
+{
+  "status": 200,
+  "body": {
+    "group": {
+      "add_allow": true,
+      "address": "東京都千代田区",
+      "address_en": "Chiyoda-ku, Tokyo",
+      "agree": true,
+      "contract": "",
+      "country": "Japan",
+      "coupon_id": "",
+      "expired_status": 0,
+      "id": 1,
+      "is_expired": true,
+      "is_stripe_id": false,
+      "member_expired": null,
+      "member_type": "一般会員",
+      "member_type_id": 1,
+      "org": "テスト組織",
+      "org_en": "Test Organization",
+      "pass": true,
+      "postcode": "100-0001",
+      "question": "開発用テストグループです",
+      "tel": "03-1234-5678"
+    },
+    "user_list": [
+      {
+        "antisocial_check": false,
+        "antisocial_check_at": null,
+        "email": "master@example.com",
+        "group_id": 1,
+        "id": 1,
+        "level": 1,
+        "mail_verify": true,
+        "name": "マスターユーザー",
+        "name_en": "Master User",
+        "status": 0,
+        "stripe_customer_id": ""
+      },
+      {
+        "antisocial_check": false,
+        "antisocial_check_at": null,
+        "email": "member@example.com",
+        "group_id": 1,
+        "id": 2,
+        "level": 2,
+        "mail_verify": true,
+        "name": "一般ユーザー",
+        "name_en": "Member User",
+        "status": 0,
+        "stripe_customer_id": ""
+      }
+    ]
+  }
+}

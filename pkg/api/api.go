@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	catalog "github.com/homenoc/dsbd-backend/pkg/api/core/catalog/v0"
 	controller "github.com/homenoc/dsbd-backend/pkg/api/core/controller/v0"
 	connection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection/v0"
 	info "github.com/homenoc/dsbd-backend/pkg/api/core/group/info/v0"
@@ -20,7 +21,6 @@ import (
 	notice "github.com/homenoc/dsbd-backend/pkg/api/core/notice/v0"
 	payment "github.com/homenoc/dsbd-backend/pkg/api/core/payment/v0"
 	ticket "github.com/homenoc/dsbd-backend/pkg/api/core/support/ticket/v0"
-	catalog "github.com/homenoc/dsbd-backend/pkg/api/core/catalog/v0"
 	token "github.com/homenoc/dsbd-backend/pkg/api/core/token/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	user "github.com/homenoc/dsbd-backend/pkg/api/core/user/v0"
@@ -283,8 +283,16 @@ func NewUserRouter() *gin.Engine {
 			v1.DELETE("/user/:id", user.Delete)
 
 			//
-			// Info
+			// Info / per-resource reads (was the single /info bootstrap blob)
 			//
+			v1.GET("/user/me", info.GetMe)
+			v1.GET("/group", info.GetGroup)
+			v1.GET("/service", info.GetService)
+			v1.GET("/connection", info.GetConnection)
+			v1.GET("/notice", info.GetNotice)
+			v1.GET("/ticket", info.GetTicket)
+			v1.GET("/request", info.GetRequest)
+			// Derived active-connection network summary
 			v1.GET("/info", info.Get)
 
 			//

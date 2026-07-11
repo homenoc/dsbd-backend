@@ -1,0 +1,18 @@
+{
+  "status": 200,
+  "body": {
+    "user": {
+      "antisocial_check": false,
+      "antisocial_check_at": null,
+      "email": "master@example.com",
+      "group_id": 1,
+      "id": 1,
+      "level": 1,
+      "mail_verify": true,
+      "name": "マスターユーザー",
+      "name_en": "Master User",
+      "status": 0,
+      "stripe_customer_id": ""
+    }
+  }
+}
