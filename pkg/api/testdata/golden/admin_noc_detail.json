@@ -1,0 +1,20 @@
+{
+  "status": 200,
+  "body": {
+    "noc": [
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 1,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "bandwidth": "10Gbps",
+        "bgp_router": null,
+        "comment": "",
+        "enable": true,
+        "location": "神奈川県横浜市",
+        "name": "NOC01",
+        "tunnel_endpoint_router": null
+      }
+    ]
+  }
+}

@@ -1,0 +1,1900 @@
+{
+  "status": 200,
+  "body": {
+    "bgp_router": [
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 1,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "address": "",
+        "comment": "",
+        "enable": true,
+        "hostname": "noc01er01",
+        "noc": {
+          "CreatedAt": "\u003cTIME\u003e",
+          "DeletedAt": null,
+          "ID": 0,
+          "UpdatedAt": "\u003cTIME\u003e",
+          "bandwidth": "",
+          "bgp_router": null,
+          "comment": "",
+          "enable": null,
+          "location": "",
+          "name": "",
+          "tunnel_endpoint_router": null
+        },
+        "noc_id": 1
+      }
+    ],
+    "connections": [
+      {
+        "comment": "",
+        "is_l2": true,
+        "is_l3": false,
+        "name": "Ethernet over IPトンネル",
+        "need_comment": false,
+        "need_cross_connect": false,
+        "need_internet": true,
+        "type": "EIP"
+      },
+      {
+        "comment": "",
+        "is_l2": false,
+        "is_l3": true,
+        "name": "GREトンネル",
+        "need_comment": false,
+        "need_cross_connect": false,
+        "need_internet": true,
+        "type": "GRE"
+      },
+      {
+        "comment": "",
+        "is_l2": false,
+        "is_l3": true,
+        "name": "IP-IPトンネル",
+        "need_comment": false,
+        "need_cross_connect": false,
+        "need_internet": true,
+        "type": "IPT"
+      },
+      {
+        "comment": "データセンター構内回線、キャリア専用線上などで直接接続",
+        "is_l2": true,
+        "is_l3": true,
+        "name": "直接接続",
+        "need_comment": true,
+        "need_cross_connect": true,
+        "need_internet": false,
+        "type": "CC0"
+      },
+      {
+        "comment": "インターネットエクスチェンジ経由で接続",
+        "is_l2": true,
+        "is_l3": true,
+        "name": "IX接続",
+        "need_comment": true,
+        "need_cross_connect": true,
+        "need_internet": false,
+        "type": "IXP"
+      },
+      {
+        "comment": "その他の接続方式",
+        "is_l2": false,
+        "is_l3": false,
+        "name": "その他",
+        "need_comment": true,
+        "need_cross_connect": false,
+        "need_internet": false,
+        "type": "ETC"
+      }
+    ],
+    "group": [
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 1,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "add_allow": true,
+        "address": "東京都千代田区",
+        "address_en": "Chiyoda-ku, Tokyo",
+        "agree": true,
+        "comment": "",
+        "contract": "",
+        "country": "Japan",
+        "coupon_id": null,
+        "expired_status": 0,
+        "member_expired": null,
+        "member_type": 1,
+        "memos": [],
+        "org": "テスト組織",
+        "org_en": "Test Organization",
+        "pass": true,
+        "postcode": "100-0001",
+        "question": "開発用テストグループです",
+        "services": null,
+        "stripe_customer_id": null,
+        "stripe_subscription_id": null,
+        "tel": "03-1234-5678",
+        "tickets": null,
+        "users": [
+          {
+            "CreatedAt": "\u003cTIME\u003e",
+            "DeletedAt": null,
+            "ID": 1,
+            "UpdatedAt": "\u003cTIME\u003e",
+            "antisocial_check": false,
+            "antisocial_check_at": null,
+            "email": "master@example.com",
+            "expired_status": 0,
+            "group": null,
+            "group_id": 1,
+            "level": 1,
+            "mail_token": "",
+            "mail_verify": true,
+            "name": "マスターユーザー",
+            "name_en": "Master User",
+            "notice": null,
+            "pass": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
+            "tickets": null,
+            "tokens": null
+          },
+          {
+            "CreatedAt": "\u003cTIME\u003e",
+            "DeletedAt": null,
+            "ID": 2,
+            "UpdatedAt": "\u003cTIME\u003e",
+            "antisocial_check": false,
+            "antisocial_check_at": null,
+            "email": "member@example.com",
+            "expired_status": 0,
+            "group": null,
+            "group_id": 1,
+            "level": 2,
+            "mail_token": "",
+            "mail_verify": true,
+            "name": "一般ユーザー",
+            "name_en": "Member User",
+            "notice": null,
+            "pass": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
+            "tickets": null,
+            "tokens": null
+          }
+        ]
+      }
+    ],
+    "ipv4": [
+      "/27",
+      "/28",
+      "/29"
+    ],
+    "ipv4_route": [
+      "IPv4 Full Route",
+      "IPv4 Default Route",
+      "etc"
+    ],
+    "ipv6": [
+      "/48",
+      "/52",
+      "/56",
+      "/60",
+      "/64"
+    ],
+    "ipv6_route": [
+      "IPv6 Full Route",
+      "IPv6 Default Route",
+      "etc"
+    ],
+    "ix": [
+      {
+        "ipv4_address": "210.171.225.165",
+        "ipv6_address": "2001:de8:8::5:9105:1",
+        "name": "JPIX TOKYO"
+      },
+      {
+        "ipv4_address": "103.246.232.165",
+        "ipv6_address": "2001:de8:8:6:0:5:9105:1",
+        "name": "JPIX OSAKA"
+      },
+      {
+        "ipv4_address": "203.190.230.227",
+        "ipv6_address": "2001:de8:5::5:9105:1",
+        "name": "Equinix Tokyo"
+      },
+      {
+        "ipv4_address": "61.245.0.45",
+        "ipv6_address": "2001:ded:4000::5:9105:1",
+        "name": "BBIX Manila"
+      },
+      {
+        "ipv4_address": "202.226.3.2",
+        "ipv6_address": "2402:b7c0:e000::5:9105:1",
+        "name": "JCIX"
+      },
+      {
+        "ipv4_address": "103.158.187.190",
+        "ipv6_address": "2a0f:5707:ffe3::190",
+        "name": "STUIX"
+      }
+    ],
+    "mail_template": [],
+    "member_type": [
+      {
+        "id": 1,
+        "name": "一般会員"
+      },
+      {
+        "id": 70,
+        "name": "学生会員"
+      },
+      {
+        "id": 40,
+        "name": "運営委員(有償)"
+      },
+      {
+        "id": 90,
+        "name": "運営委員(無償)"
+      },
+      {
+        "id": 99,
+        "name": ""
+      }
+    ],
+    "nocs": [
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 1,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "bandwidth": "10Gbps",
+        "bgp_router": [
+          {
+            "CreatedAt": "\u003cTIME\u003e",
+            "DeletedAt": null,
+            "ID": 1,
+            "UpdatedAt": "\u003cTIME\u003e",
+            "address": "",
+            "comment": "",
+            "enable": true,
+            "hostname": "noc01er01",
+            "noc": {
+              "CreatedAt": "\u003cTIME\u003e",
+              "DeletedAt": null,
+              "ID": 0,
+              "UpdatedAt": "\u003cTIME\u003e",
+              "bandwidth": "",
+              "bgp_router": null,
+              "comment": "",
+              "enable": null,
+              "location": "",
+              "name": "",
+              "tunnel_endpoint_router": null
+            },
+            "noc_id": 1
+          }
+        ],
+        "comment": "",
+        "enable": true,
+        "location": "神奈川県横浜市",
+        "name": "NOC01",
+        "tunnel_endpoint_router": [
+          {
+            "CreatedAt": "\u003cTIME\u003e",
+            "DeletedAt": null,
+            "ID": 1,
+            "UpdatedAt": "\u003cTIME\u003e",
+            "capacity": 0,
+            "comment": "",
+            "enable": true,
+            "hostname": "noc01er01",
+            "noc_id": 1,
+            "tunnel_endpoint_router_ip": [
+              {
+                "CreatedAt": "\u003cTIME\u003e",
+                "DeletedAt": null,
+                "ID": 1,
+                "UpdatedAt": "\u003cTIME\u003e",
+                "comment": "",
+                "enable": true,
+                "ip": "2001:db8:1:1::1111/64",
+                "tunnel_endpoint_router": {
+                  "CreatedAt": "\u003cTIME\u003e",
+                  "DeletedAt": null,
+                  "ID": 0,
+                  "UpdatedAt": "\u003cTIME\u003e",
+                  "capacity": 0,
+                  "comment": "",
+                  "enable": null,
+                  "hostname": "",
+                  "noc_id": null,
+                  "tunnel_endpoint_router_ip": null
+                },
+                "tunnel_endpoint_router_id": 1
+              }
+            ]
+          },
+          {
+            "CreatedAt": "\u003cTIME\u003e",
+            "DeletedAt": null,
+            "ID": 2,
+            "UpdatedAt": "\u003cTIME\u003e",
+            "capacity": 0,
+            "comment": "",
+            "enable": true,
+            "hostname": "noc01ctep02",
+            "noc_id": 1,
+            "tunnel_endpoint_router_ip": [
+              {
+                "CreatedAt": "\u003cTIME\u003e",
+                "DeletedAt": null,
+                "ID": 2,
+                "UpdatedAt": "\u003cTIME\u003e",
+                "comment": "",
+                "enable": true,
+                "ip": "2001:db8:1:1::c179/64",
+                "tunnel_endpoint_router": {
+                  "CreatedAt": "\u003cTIME\u003e",
+                  "DeletedAt": null,
+                  "ID": 0,
+                  "UpdatedAt": "\u003cTIME\u003e",
+                  "capacity": 0,
+                  "comment": "",
+                  "enable": null,
+                  "hostname": "",
+                  "noc_id": null,
+                  "tunnel_endpoint_router_ip": null
+                },
+                "tunnel_endpoint_router_id": 2
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 2,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "bandwidth": "1Gbps",
+        "bgp_router": [],
+        "comment": "",
+        "enable": false,
+        "location": "東京都千代田区",
+        "name": "NOC02",
+        "tunnel_endpoint_router": [
+          {
+            "CreatedAt": "\u003cTIME\u003e",
+            "DeletedAt": null,
+            "ID": 3,
+            "UpdatedAt": "\u003cTIME\u003e",
+            "capacity": 0,
+            "comment": "",
+            "enable": false,
+            "hostname": "noc02er01",
+            "noc_id": 2,
+            "tunnel_endpoint_router_ip": []
+          },
+          {
+            "CreatedAt": "\u003cTIME\u003e",
+            "DeletedAt": null,
+            "ID": 4,
+            "UpdatedAt": "\u003cTIME\u003e",
+            "capacity": 0,
+            "comment": "",
+            "enable": false,
+            "hostname": "noc02ctep01",
+            "noc_id": 2,
+            "tunnel_endpoint_router_ip": [
+              {
+                "CreatedAt": "\u003cTIME\u003e",
+                "DeletedAt": null,
+                "ID": 3,
+                "UpdatedAt": "\u003cTIME\u003e",
+                "comment": "",
+                "enable": false,
+                "ip": "2001:db8:2:1::c179/64",
+                "tunnel_endpoint_router": {
+                  "CreatedAt": "\u003cTIME\u003e",
+                  "DeletedAt": null,
+                  "ID": 0,
+                  "UpdatedAt": "\u003cTIME\u003e",
+                  "capacity": 0,
+                  "comment": "",
+                  "enable": null,
+                  "hostname": "",
+                  "noc_id": null,
+                  "tunnel_endpoint_router_ip": null
+                },
+                "tunnel_endpoint_router_id": 4
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 3,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "bandwidth": "10Gbps",
+        "bgp_router": [],
+        "comment": "",
+        "enable": true,
+        "location": "東京都新宿区",
+        "name": "NOC05",
+        "tunnel_endpoint_router": [
+          {
+            "CreatedAt": "\u003cTIME\u003e",
+            "DeletedAt": null,
+            "ID": 5,
+            "UpdatedAt": "\u003cTIME\u003e",
+            "capacity": 0,
+            "comment": "",
+            "enable": true,
+            "hostname": "noc05er01",
+            "noc_id": 3,
+            "tunnel_endpoint_router_ip": [
+              {
+                "CreatedAt": "\u003cTIME\u003e",
+                "DeletedAt": null,
+                "ID": 4,
+                "UpdatedAt": "\u003cTIME\u003e",
+                "comment": "",
+                "enable": true,
+                "ip": "2001:db8:3:1::1111",
+                "tunnel_endpoint_router": {
+                  "CreatedAt": "\u003cTIME\u003e",
+                  "DeletedAt": null,
+                  "ID": 0,
+                  "UpdatedAt": "\u003cTIME\u003e",
+                  "capacity": 0,
+                  "comment": "",
+                  "enable": null,
+                  "hostname": "",
+                  "noc_id": null,
+                  "tunnel_endpoint_router_ip": null
+                },
+                "tunnel_endpoint_router_id": 5
+              }
+            ]
+          },
+          {
+            "CreatedAt": "\u003cTIME\u003e",
+            "DeletedAt": null,
+            "ID": 6,
+            "UpdatedAt": "\u003cTIME\u003e",
+            "capacity": 0,
+            "comment": "",
+            "enable": true,
+            "hostname": "noc05ctep01",
+            "noc_id": 3,
+            "tunnel_endpoint_router_ip": [
+              {
+                "CreatedAt": "\u003cTIME\u003e",
+                "DeletedAt": null,
+                "ID": 5,
+                "UpdatedAt": "\u003cTIME\u003e",
+                "comment": "",
+                "enable": true,
+                "ip": "2001:db8:3:1::c179",
+                "tunnel_endpoint_router": {
+                  "CreatedAt": "\u003cTIME\u003e",
+                  "DeletedAt": null,
+                  "ID": 0,
+                  "UpdatedAt": "\u003cTIME\u003e",
+                  "capacity": 0,
+                  "comment": "",
+                  "enable": null,
+                  "hostname": "",
+                  "noc_id": null,
+                  "tunnel_endpoint_router_ip": null
+                },
+                "tunnel_endpoint_router_id": 6
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 4,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "bandwidth": "10Gbps",
+        "bgp_router": [],
+        "comment": "",
+        "enable": true,
+        "location": "東京都品川区",
+        "name": "POP03",
+        "tunnel_endpoint_router": [
+          {
+            "CreatedAt": "\u003cTIME\u003e",
+            "DeletedAt": null,
+            "ID": 7,
+            "UpdatedAt": "\u003cTIME\u003e",
+            "capacity": 0,
+            "comment": "",
+            "enable": false,
+            "hostname": "pop03er01",
+            "noc_id": 4,
+            "tunnel_endpoint_router_ip": [
+              {
+                "CreatedAt": "\u003cTIME\u003e",
+                "DeletedAt": null,
+                "ID": 6,
+                "UpdatedAt": "\u003cTIME\u003e",
+                "comment": "",
+                "enable": false,
+                "ip": "2001:db8:4:1::1113/64",
+                "tunnel_endpoint_router": {
+                  "CreatedAt": "\u003cTIME\u003e",
+                  "DeletedAt": null,
+                  "ID": 0,
+                  "UpdatedAt": "\u003cTIME\u003e",
+                  "capacity": 0,
+                  "comment": "",
+                  "enable": null,
+                  "hostname": "",
+                  "noc_id": null,
+                  "tunnel_endpoint_router_ip": null
+                },
+                "tunnel_endpoint_router_id": 7
+              }
+            ]
+          },
+          {
+            "CreatedAt": "\u003cTIME\u003e",
+            "DeletedAt": null,
+            "ID": 8,
+            "UpdatedAt": "\u003cTIME\u003e",
+            "capacity": 0,
+            "comment": "",
+            "enable": false,
+            "hostname": "pop03er02",
+            "noc_id": 4,
+            "tunnel_endpoint_router_ip": [
+              {
+                "CreatedAt": "\u003cTIME\u003e",
+                "DeletedAt": null,
+                "ID": 7,
+                "UpdatedAt": "\u003cTIME\u003e",
+                "comment": "",
+                "enable": false,
+                "ip": "2001:db8:4:2::1111",
+                "tunnel_endpoint_router": {
+                  "CreatedAt": "\u003cTIME\u003e",
+                  "DeletedAt": null,
+                  "ID": 0,
+                  "UpdatedAt": "\u003cTIME\u003e",
+                  "capacity": 0,
+                  "comment": "",
+                  "enable": null,
+                  "hostname": "",
+                  "noc_id": null,
+                  "tunnel_endpoint_router_ip": null
+                },
+                "tunnel_endpoint_router_id": 8
+              }
+            ]
+          },
+          {
+            "CreatedAt": "\u003cTIME\u003e",
+            "DeletedAt": null,
+            "ID": 9,
+            "UpdatedAt": "\u003cTIME\u003e",
+            "capacity": 0,
+            "comment": "",
+            "enable": true,
+            "hostname": "pop03er03",
+            "noc_id": 4,
+            "tunnel_endpoint_router_ip": [
+              {
+                "CreatedAt": "\u003cTIME\u003e",
+                "DeletedAt": null,
+                "ID": 8,
+                "UpdatedAt": "\u003cTIME\u003e",
+                "comment": "",
+                "enable": true,
+                "ip": "2001:db8:4:3::1113/64",
+                "tunnel_endpoint_router": {
+                  "CreatedAt": "\u003cTIME\u003e",
+                  "DeletedAt": null,
+                  "ID": 0,
+                  "UpdatedAt": "\u003cTIME\u003e",
+                  "capacity": 0,
+                  "comment": "",
+                  "enable": null,
+                  "hostname": "",
+                  "noc_id": null,
+                  "tunnel_endpoint_router_ip": null
+                },
+                "tunnel_endpoint_router_id": 9
+              }
+            ]
+          },
+          {
+            "CreatedAt": "\u003cTIME\u003e",
+            "DeletedAt": null,
+            "ID": 10,
+            "UpdatedAt": "\u003cTIME\u003e",
+            "capacity": 0,
+            "comment": "",
+            "enable": true,
+            "hostname": "pop03ctep01",
+            "noc_id": 4,
+            "tunnel_endpoint_router_ip": [
+              {
+                "CreatedAt": "\u003cTIME\u003e",
+                "DeletedAt": null,
+                "ID": 9,
+                "UpdatedAt": "\u003cTIME\u003e",
+                "comment": "",
+                "enable": true,
+                "ip": "2001:db8:4:4::c179/64",
+                "tunnel_endpoint_router": {
+                  "CreatedAt": "\u003cTIME\u003e",
+                  "DeletedAt": null,
+                  "ID": 0,
+                  "UpdatedAt": "\u003cTIME\u003e",
+                  "capacity": 0,
+                  "comment": "",
+                  "enable": null,
+                  "hostname": "",
+                  "noc_id": null,
+                  "tunnel_endpoint_router_ip": null
+                },
+                "tunnel_endpoint_router_id": 10
+              }
+            ]
+          },
+          {
+            "CreatedAt": "\u003cTIME\u003e",
+            "DeletedAt": null,
+            "ID": 11,
+            "UpdatedAt": "\u003cTIME\u003e",
+            "capacity": 0,
+            "comment": "",
+            "enable": true,
+            "hostname": "pop03ctep02",
+            "noc_id": 4,
+            "tunnel_endpoint_router_ip": [
+              {
+                "CreatedAt": "\u003cTIME\u003e",
+                "DeletedAt": null,
+                "ID": 10,
+                "UpdatedAt": "\u003cTIME\u003e",
+                "comment": "",
+                "enable": true,
+                "ip": "2001:db8:4:5::c179/64",
+                "tunnel_endpoint_router": {
+                  "CreatedAt": "\u003cTIME\u003e",
+                  "DeletedAt": null,
+                  "ID": 0,
+                  "UpdatedAt": "\u003cTIME\u003e",
+                  "capacity": 0,
+                  "comment": "",
+                  "enable": null,
+                  "hostname": "",
+                  "noc_id": null,
+                  "tunnel_endpoint_router_ip": null
+                },
+                "tunnel_endpoint_router_id": 11
+              }
+            ]
+          },
+          {
+            "CreatedAt": "\u003cTIME\u003e",
+            "DeletedAt": null,
+            "ID": 25,
+            "UpdatedAt": "\u003cTIME\u003e",
+            "capacity": 0,
+            "comment": "",
+            "enable": true,
+            "hostname": "pop03er04",
+            "noc_id": 4,
+            "tunnel_endpoint_router_ip": [
+              {
+                "CreatedAt": "\u003cTIME\u003e",
+                "DeletedAt": null,
+                "ID": 24,
+                "UpdatedAt": "\u003cTIME\u003e",
+                "comment": "",
+                "enable": true,
+                "ip": "2001:db8:4:6::face/64",
+                "tunnel_endpoint_router": {
+                  "CreatedAt": "\u003cTIME\u003e",
+                  "DeletedAt": null,
+                  "ID": 0,
+                  "UpdatedAt": "\u003cTIME\u003e",
+                  "capacity": 0,
+                  "comment": "",
+                  "enable": null,
+                  "hostname": "",
+                  "noc_id": null,
+                  "tunnel_endpoint_router_ip": null
+                },
+                "tunnel_endpoint_router_id": 25
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 5,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "bandwidth": "10Gbps",
+        "bgp_router": [],
+        "comment": "",
+        "enable": true,
+        "location": "大阪府大阪市",
+        "name": "POP52",
+        "tunnel_endpoint_router": [
+          {
+            "CreatedAt": "\u003cTIME\u003e",
+            "DeletedAt": null,
+            "ID": 12,
+            "UpdatedAt": "\u003cTIME\u003e",
+            "capacity": 0,
+            "comment": "",
+            "enable": true,
+            "hostname": "pop52er01",
+            "noc_id": 5,
+            "tunnel_endpoint_router_ip": [
+              {
+                "CreatedAt": "\u003cTIME\u003e",
+                "DeletedAt": null,
+                "ID": 11,
+                "UpdatedAt": "\u003cTIME\u003e",
+                "comment": "",
+                "enable": true,
+                "ip": "2001:db8:5:1::1111",
+                "tunnel_endpoint_router": {
+                  "CreatedAt": "\u003cTIME\u003e",
+                  "DeletedAt": null,
+                  "ID": 0,
+                  "UpdatedAt": "\u003cTIME\u003e",
+                  "capacity": 0,
+                  "comment": "",
+                  "enable": null,
+                  "hostname": "",
+                  "noc_id": null,
+                  "tunnel_endpoint_router_ip": null
+                },
+                "tunnel_endpoint_router_id": 12
+              }
+            ]
+          },
+          {
+            "CreatedAt": "\u003cTIME\u003e",
+            "DeletedAt": null,
+            "ID": 13,
+            "UpdatedAt": "\u003cTIME\u003e",
+            "capacity": 0,
+            "comment": "",
+            "enable": true,
+            "hostname": "pop52ctep02",
+            "noc_id": 5,
+            "tunnel_endpoint_router_ip": [
+              {
+                "CreatedAt": "\u003cTIME\u003e",
+                "DeletedAt": null,
+                "ID": 12,
+                "UpdatedAt": "\u003cTIME\u003e",
+                "comment": "",
+                "enable": true,
+                "ip": "2001:db8:5:1::c179",
+                "tunnel_endpoint_router": {
+                  "CreatedAt": "\u003cTIME\u003e",
+                  "DeletedAt": null,
+                  "ID": 0,
+                  "UpdatedAt": "\u003cTIME\u003e",
+                  "capacity": 0,
+                  "comment": "",
+                  "enable": null,
+                  "hostname": "",
+                  "noc_id": null,
+                  "tunnel_endpoint_router_ip": null
+                },
+                "tunnel_endpoint_router_id": 13
+              }
+            ]
+          },
+          {
+            "CreatedAt": "\u003cTIME\u003e",
+            "DeletedAt": null,
+            "ID": 18,
+            "UpdatedAt": "\u003cTIME\u003e",
+            "capacity": 0,
+            "comment": "",
+            "enable": false,
+            "hostname": "pop52er02",
+            "noc_id": 5,
+            "tunnel_endpoint_router_ip": [
+              {
+                "CreatedAt": "\u003cTIME\u003e",
+                "DeletedAt": null,
+                "ID": 17,
+                "UpdatedAt": "\u003cTIME\u003e",
+                "comment": "",
+                "enable": false,
+                "ip": "2001:db8:5:2::1112/64",
+                "tunnel_endpoint_router": {
+                  "CreatedAt": "\u003cTIME\u003e",
+                  "DeletedAt": null,
+                  "ID": 0,
+                  "UpdatedAt": "\u003cTIME\u003e",
+                  "capacity": 0,
+                  "comment": "",
+                  "enable": null,
+                  "hostname": "",
+                  "noc_id": null,
+                  "tunnel_endpoint_router_ip": null
+                },
+                "tunnel_endpoint_router_id": 18
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 6,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "bandwidth": "10Gbps",
+        "bgp_router": [],
+        "comment": "",
+        "enable": true,
+        "location": "大阪府大阪市",
+        "name": "NOC51",
+        "tunnel_endpoint_router": [
+          {
+            "CreatedAt": "\u003cTIME\u003e",
+            "DeletedAt": null,
+            "ID": 14,
+            "UpdatedAt": "\u003cTIME\u003e",
+            "capacity": 0,
+            "comment": "",
+            "enable": true,
+            "hostname": "noc51er01",
+            "noc_id": 6,
+            "tunnel_endpoint_router_ip": [
+              {
+                "CreatedAt": "\u003cTIME\u003e",
+                "DeletedAt": null,
+                "ID": 13,
+                "UpdatedAt": "\u003cTIME\u003e",
+                "comment": "",
+                "enable": true,
+                "ip": "2001:db8:6:1::1111/64",
+                "tunnel_endpoint_router": {
+                  "CreatedAt": "\u003cTIME\u003e",
+                  "DeletedAt": null,
+                  "ID": 0,
+                  "UpdatedAt": "\u003cTIME\u003e",
+                  "capacity": 0,
+                  "comment": "",
+                  "enable": null,
+                  "hostname": "",
+                  "noc_id": null,
+                  "tunnel_endpoint_router_ip": null
+                },
+                "tunnel_endpoint_router_id": 14
+              }
+            ]
+          },
+          {
+            "CreatedAt": "\u003cTIME\u003e",
+            "DeletedAt": null,
+            "ID": 15,
+            "UpdatedAt": "\u003cTIME\u003e",
+            "capacity": 0,
+            "comment": "",
+            "enable": true,
+            "hostname": "noc51ctep01",
+            "noc_id": 6,
+            "tunnel_endpoint_router_ip": [
+              {
+                "CreatedAt": "\u003cTIME\u003e",
+                "DeletedAt": null,
+                "ID": 14,
+                "UpdatedAt": "\u003cTIME\u003e",
+                "comment": "",
+                "enable": true,
+                "ip": "2001:db8:6:1::c179/64",
+                "tunnel_endpoint_router": {
+                  "CreatedAt": "\u003cTIME\u003e",
+                  "DeletedAt": null,
+                  "ID": 0,
+                  "UpdatedAt": "\u003cTIME\u003e",
+                  "capacity": 0,
+                  "comment": "",
+                  "enable": null,
+                  "hostname": "",
+                  "noc_id": null,
+                  "tunnel_endpoint_router_ip": null
+                },
+                "tunnel_endpoint_router_id": 15
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 7,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "bandwidth": "1Gbps",
+        "bgp_router": [],
+        "comment": "",
+        "enable": false,
+        "location": "東京都港区",
+        "name": "NOC03",
+        "tunnel_endpoint_router": [
+          {
+            "CreatedAt": "\u003cTIME\u003e",
+            "DeletedAt": null,
+            "ID": 16,
+            "UpdatedAt": "\u003cTIME\u003e",
+            "capacity": 0,
+            "comment": "",
+            "enable": false,
+            "hostname": "noc03er01",
+            "noc_id": 7,
+            "tunnel_endpoint_router_ip": [
+              {
+                "CreatedAt": "\u003cTIME\u003e",
+                "DeletedAt": null,
+                "ID": 15,
+                "UpdatedAt": "\u003cTIME\u003e",
+                "comment": "",
+                "enable": false,
+                "ip": "2001:db8:7:1::5:9105:179/64",
+                "tunnel_endpoint_router": {
+                  "CreatedAt": "\u003cTIME\u003e",
+                  "DeletedAt": null,
+                  "ID": 0,
+                  "UpdatedAt": "\u003cTIME\u003e",
+                  "capacity": 0,
+                  "comment": "",
+                  "enable": null,
+                  "hostname": "",
+                  "noc_id": null,
+                  "tunnel_endpoint_router_ip": null
+                },
+                "tunnel_endpoint_router_id": 16
+              }
+            ]
+          },
+          {
+            "CreatedAt": "\u003cTIME\u003e",
+            "DeletedAt": null,
+            "ID": 17,
+            "UpdatedAt": "\u003cTIME\u003e",
+            "capacity": 0,
+            "comment": "",
+            "enable": false,
+            "hostname": "noc03ctep01",
+            "noc_id": 7,
+            "tunnel_endpoint_router_ip": [
+              {
+                "CreatedAt": "\u003cTIME\u003e",
+                "DeletedAt": null,
+                "ID": 16,
+                "UpdatedAt": "\u003cTIME\u003e",
+                "comment": "",
+                "enable": false,
+                "ip": "2001:db8:7:1::c179/64",
+                "tunnel_endpoint_router": {
+                  "CreatedAt": "\u003cTIME\u003e",
+                  "DeletedAt": null,
+                  "ID": 0,
+                  "UpdatedAt": "\u003cTIME\u003e",
+                  "capacity": 0,
+                  "comment": "",
+                  "enable": null,
+                  "hostname": "",
+                  "noc_id": null,
+                  "tunnel_endpoint_router_ip": null
+                },
+                "tunnel_endpoint_router_id": 17
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 8,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "bandwidth": "10Gbps",
+        "bgp_router": [],
+        "comment": "",
+        "enable": true,
+        "location": "愛知県名古屋市",
+        "name": "POP53",
+        "tunnel_endpoint_router": [
+          {
+            "CreatedAt": "\u003cTIME\u003e",
+            "DeletedAt": null,
+            "ID": 19,
+            "UpdatedAt": "\u003cTIME\u003e",
+            "capacity": 0,
+            "comment": "",
+            "enable": true,
+            "hostname": "pop53er01",
+            "noc_id": 8,
+            "tunnel_endpoint_router_ip": [
+              {
+                "CreatedAt": "\u003cTIME\u003e",
+                "DeletedAt": null,
+                "ID": 18,
+                "UpdatedAt": "\u003cTIME\u003e",
+                "comment": "",
+                "enable": true,
+                "ip": "2001:db8:8:1::1111/64",
+                "tunnel_endpoint_router": {
+                  "CreatedAt": "\u003cTIME\u003e",
+                  "DeletedAt": null,
+                  "ID": 0,
+                  "UpdatedAt": "\u003cTIME\u003e",
+                  "capacity": 0,
+                  "comment": "",
+                  "enable": null,
+                  "hostname": "",
+                  "noc_id": null,
+                  "tunnel_endpoint_router_ip": null
+                },
+                "tunnel_endpoint_router_id": 19
+              }
+            ]
+          },
+          {
+            "CreatedAt": "\u003cTIME\u003e",
+            "DeletedAt": null,
+            "ID": 20,
+            "UpdatedAt": "\u003cTIME\u003e",
+            "capacity": 0,
+            "comment": "",
+            "enable": true,
+            "hostname": "pop53ctep01",
+            "noc_id": 8,
+            "tunnel_endpoint_router_ip": [
+              {
+                "CreatedAt": "\u003cTIME\u003e",
+                "DeletedAt": null,
+                "ID": 19,
+                "UpdatedAt": "\u003cTIME\u003e",
+                "comment": "",
+                "enable": true,
+                "ip": "2001:db8:8:1::c179/64",
+                "tunnel_endpoint_router": {
+                  "CreatedAt": "\u003cTIME\u003e",
+                  "DeletedAt": null,
+                  "ID": 0,
+                  "UpdatedAt": "\u003cTIME\u003e",
+                  "capacity": 0,
+                  "comment": "",
+                  "enable": null,
+                  "hostname": "",
+                  "noc_id": null,
+                  "tunnel_endpoint_router_ip": null
+                },
+                "tunnel_endpoint_router_id": 20
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 9,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "bandwidth": "10Gbps",
+        "bgp_router": [],
+        "comment": "",
+        "enable": true,
+        "location": "福岡県福岡市",
+        "name": "NOC52",
+        "tunnel_endpoint_router": [
+          {
+            "CreatedAt": "\u003cTIME\u003e",
+            "DeletedAt": null,
+            "ID": 21,
+            "UpdatedAt": "\u003cTIME\u003e",
+            "capacity": 0,
+            "comment": "",
+            "enable": true,
+            "hostname": "noc52er01",
+            "noc_id": 9,
+            "tunnel_endpoint_router_ip": [
+              {
+                "CreatedAt": "\u003cTIME\u003e",
+                "DeletedAt": null,
+                "ID": 20,
+                "UpdatedAt": "\u003cTIME\u003e",
+                "comment": "",
+                "enable": true,
+                "ip": "2001:db8:9:1::1111/64",
+                "tunnel_endpoint_router": {
+                  "CreatedAt": "\u003cTIME\u003e",
+                  "DeletedAt": null,
+                  "ID": 0,
+                  "UpdatedAt": "\u003cTIME\u003e",
+                  "capacity": 0,
+                  "comment": "",
+                  "enable": null,
+                  "hostname": "",
+                  "noc_id": null,
+                  "tunnel_endpoint_router_ip": null
+                },
+                "tunnel_endpoint_router_id": 21
+              }
+            ]
+          },
+          {
+            "CreatedAt": "\u003cTIME\u003e",
+            "DeletedAt": null,
+            "ID": 22,
+            "UpdatedAt": "\u003cTIME\u003e",
+            "capacity": 0,
+            "comment": "",
+            "enable": true,
+            "hostname": "noc52ctep01",
+            "noc_id": 9,
+            "tunnel_endpoint_router_ip": [
+              {
+                "CreatedAt": "\u003cTIME\u003e",
+                "DeletedAt": null,
+                "ID": 21,
+                "UpdatedAt": "\u003cTIME\u003e",
+                "comment": "",
+                "enable": true,
+                "ip": "2001:db8:9:1::6/64",
+                "tunnel_endpoint_router": {
+                  "CreatedAt": "\u003cTIME\u003e",
+                  "DeletedAt": null,
+                  "ID": 0,
+                  "UpdatedAt": "\u003cTIME\u003e",
+                  "capacity": 0,
+                  "comment": "",
+                  "enable": null,
+                  "hostname": "",
+                  "noc_id": null,
+                  "tunnel_endpoint_router_ip": null
+                },
+                "tunnel_endpoint_router_id": 22
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 10,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "bandwidth": "10Gbps",
+        "bgp_router": [],
+        "comment": "",
+        "enable": true,
+        "location": "東京都大田区",
+        "name": "NOC06",
+        "tunnel_endpoint_router": [
+          {
+            "CreatedAt": "\u003cTIME\u003e",
+            "DeletedAt": null,
+            "ID": 23,
+            "UpdatedAt": "\u003cTIME\u003e",
+            "capacity": 0,
+            "comment": "",
+            "enable": true,
+            "hostname": "noc06er01",
+            "noc_id": 10,
+            "tunnel_endpoint_router_ip": [
+              {
+                "CreatedAt": "\u003cTIME\u003e",
+                "DeletedAt": null,
+                "ID": 22,
+                "UpdatedAt": "\u003cTIME\u003e",
+                "comment": "",
+                "enable": true,
+                "ip": "2001:db8:a:1::1111",
+                "tunnel_endpoint_router": {
+                  "CreatedAt": "\u003cTIME\u003e",
+                  "DeletedAt": null,
+                  "ID": 0,
+                  "UpdatedAt": "\u003cTIME\u003e",
+                  "capacity": 0,
+                  "comment": "",
+                  "enable": null,
+                  "hostname": "",
+                  "noc_id": null,
+                  "tunnel_endpoint_router_ip": null
+                },
+                "tunnel_endpoint_router_id": 23
+              }
+            ]
+          },
+          {
+            "CreatedAt": "\u003cTIME\u003e",
+            "DeletedAt": null,
+            "ID": 24,
+            "UpdatedAt": "\u003cTIME\u003e",
+            "capacity": 0,
+            "comment": "",
+            "enable": true,
+            "hostname": "noc06ctep01",
+            "noc_id": 10,
+            "tunnel_endpoint_router_ip": [
+              {
+                "CreatedAt": "\u003cTIME\u003e",
+                "DeletedAt": null,
+                "ID": 23,
+                "UpdatedAt": "\u003cTIME\u003e",
+                "comment": "",
+                "enable": true,
+                "ip": "2001:db8:a:1::c179",
+                "tunnel_endpoint_router": {
+                  "CreatedAt": "\u003cTIME\u003e",
+                  "DeletedAt": null,
+                  "ID": 0,
+                  "UpdatedAt": "\u003cTIME\u003e",
+                  "capacity": 0,
+                  "comment": "",
+                  "enable": null,
+                  "hostname": "",
+                  "noc_id": null,
+                  "tunnel_endpoint_router_ip": null
+                },
+                "tunnel_endpoint_router_id": 24
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "ntts": [
+      "はい（IPoEによりIPv6インターネットへ接続可能）",
+      "はい（IPoEによりIPv6インターネットへ接続不可）",
+      "はい（フレッツv6オプションの契約なし）",
+      "いいえ（フレッツ以外でインターネットに接続可能）",
+      "いいえ（IPv6でのインターネット接続不可）",
+      "etc"
+    ],
+    "payment_membership": [],
+    "preferred_ap": [
+      "東日本",
+      "西日本",
+      "福岡",
+      "フィリピン",
+      "台湾"
+    ],
+    "services": [
+      {
+        "comment": "L2接続",
+        "hidden": false,
+        "name": "L2",
+        "need_bgp": false,
+        "need_comment": false,
+        "need_global_as": false,
+        "need_jpnic": true,
+        "need_route": false,
+        "type": "2000"
+      },
+      {
+        "comment": "Staticにて接続",
+        "hidden": false,
+        "name": "L3 Static",
+        "need_bgp": false,
+        "need_comment": false,
+        "need_global_as": false,
+        "need_jpnic": true,
+        "need_route": true,
+        "type": "3S00"
+      },
+      {
+        "comment": "BGPにて接続",
+        "hidden": false,
+        "name": "L3 BGP",
+        "need_bgp": true,
+        "need_comment": false,
+        "need_global_as": false,
+        "need_jpnic": true,
+        "need_route": true,
+        "type": "3B00"
+      },
+      {
+        "comment": "グローバルASのユーザに対するトランジット提供(L3 BGP)",
+        "hidden": false,
+        "name": "トランジット提供",
+        "need_bgp": true,
+        "need_comment": false,
+        "need_global_as": true,
+        "need_jpnic": false,
+        "need_route": true,
+        "type": "IP3B"
+      }
+    ],
+    "tunnel_endpoint_router": null,
+    "tunnel_endpoint_router_ip": [
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 1,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "comment": "",
+        "enable": true,
+        "ip": "2001:db8:1:1::1111/64",
+        "tunnel_endpoint_router": {
+          "CreatedAt": "\u003cTIME\u003e",
+          "DeletedAt": null,
+          "ID": 1,
+          "UpdatedAt": "\u003cTIME\u003e",
+          "capacity": 0,
+          "comment": "",
+          "enable": true,
+          "hostname": "noc01er01",
+          "noc_id": 1,
+          "tunnel_endpoint_router_ip": null
+        },
+        "tunnel_endpoint_router_id": 1
+      },
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 2,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "comment": "",
+        "enable": true,
+        "ip": "2001:db8:1:1::c179/64",
+        "tunnel_endpoint_router": {
+          "CreatedAt": "\u003cTIME\u003e",
+          "DeletedAt": null,
+          "ID": 2,
+          "UpdatedAt": "\u003cTIME\u003e",
+          "capacity": 0,
+          "comment": "",
+          "enable": true,
+          "hostname": "noc01ctep02",
+          "noc_id": 1,
+          "tunnel_endpoint_router_ip": null
+        },
+        "tunnel_endpoint_router_id": 2
+      },
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 3,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "comment": "",
+        "enable": false,
+        "ip": "2001:db8:2:1::c179/64",
+        "tunnel_endpoint_router": {
+          "CreatedAt": "\u003cTIME\u003e",
+          "DeletedAt": null,
+          "ID": 4,
+          "UpdatedAt": "\u003cTIME\u003e",
+          "capacity": 0,
+          "comment": "",
+          "enable": false,
+          "hostname": "noc02ctep01",
+          "noc_id": 2,
+          "tunnel_endpoint_router_ip": null
+        },
+        "tunnel_endpoint_router_id": 4
+      },
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 4,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "comment": "",
+        "enable": true,
+        "ip": "2001:db8:3:1::1111",
+        "tunnel_endpoint_router": {
+          "CreatedAt": "\u003cTIME\u003e",
+          "DeletedAt": null,
+          "ID": 5,
+          "UpdatedAt": "\u003cTIME\u003e",
+          "capacity": 0,
+          "comment": "",
+          "enable": true,
+          "hostname": "noc05er01",
+          "noc_id": 3,
+          "tunnel_endpoint_router_ip": null
+        },
+        "tunnel_endpoint_router_id": 5
+      },
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 5,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "comment": "",
+        "enable": true,
+        "ip": "2001:db8:3:1::c179",
+        "tunnel_endpoint_router": {
+          "CreatedAt": "\u003cTIME\u003e",
+          "DeletedAt": null,
+          "ID": 6,
+          "UpdatedAt": "\u003cTIME\u003e",
+          "capacity": 0,
+          "comment": "",
+          "enable": true,
+          "hostname": "noc05ctep01",
+          "noc_id": 3,
+          "tunnel_endpoint_router_ip": null
+        },
+        "tunnel_endpoint_router_id": 6
+      },
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 6,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "comment": "",
+        "enable": false,
+        "ip": "2001:db8:4:1::1113/64",
+        "tunnel_endpoint_router": {
+          "CreatedAt": "\u003cTIME\u003e",
+          "DeletedAt": null,
+          "ID": 7,
+          "UpdatedAt": "\u003cTIME\u003e",
+          "capacity": 0,
+          "comment": "",
+          "enable": false,
+          "hostname": "pop03er01",
+          "noc_id": 4,
+          "tunnel_endpoint_router_ip": null
+        },
+        "tunnel_endpoint_router_id": 7
+      },
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 7,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "comment": "",
+        "enable": false,
+        "ip": "2001:db8:4:2::1111",
+        "tunnel_endpoint_router": {
+          "CreatedAt": "\u003cTIME\u003e",
+          "DeletedAt": null,
+          "ID": 8,
+          "UpdatedAt": "\u003cTIME\u003e",
+          "capacity": 0,
+          "comment": "",
+          "enable": false,
+          "hostname": "pop03er02",
+          "noc_id": 4,
+          "tunnel_endpoint_router_ip": null
+        },
+        "tunnel_endpoint_router_id": 8
+      },
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 8,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "comment": "",
+        "enable": true,
+        "ip": "2001:db8:4:3::1113/64",
+        "tunnel_endpoint_router": {
+          "CreatedAt": "\u003cTIME\u003e",
+          "DeletedAt": null,
+          "ID": 9,
+          "UpdatedAt": "\u003cTIME\u003e",
+          "capacity": 0,
+          "comment": "",
+          "enable": true,
+          "hostname": "pop03er03",
+          "noc_id": 4,
+          "tunnel_endpoint_router_ip": null
+        },
+        "tunnel_endpoint_router_id": 9
+      },
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 9,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "comment": "",
+        "enable": true,
+        "ip": "2001:db8:4:4::c179/64",
+        "tunnel_endpoint_router": {
+          "CreatedAt": "\u003cTIME\u003e",
+          "DeletedAt": null,
+          "ID": 10,
+          "UpdatedAt": "\u003cTIME\u003e",
+          "capacity": 0,
+          "comment": "",
+          "enable": true,
+          "hostname": "pop03ctep01",
+          "noc_id": 4,
+          "tunnel_endpoint_router_ip": null
+        },
+        "tunnel_endpoint_router_id": 10
+      },
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 10,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "comment": "",
+        "enable": true,
+        "ip": "2001:db8:4:5::c179/64",
+        "tunnel_endpoint_router": {
+          "CreatedAt": "\u003cTIME\u003e",
+          "DeletedAt": null,
+          "ID": 11,
+          "UpdatedAt": "\u003cTIME\u003e",
+          "capacity": 0,
+          "comment": "",
+          "enable": true,
+          "hostname": "pop03ctep02",
+          "noc_id": 4,
+          "tunnel_endpoint_router_ip": null
+        },
+        "tunnel_endpoint_router_id": 11
+      },
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 11,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "comment": "",
+        "enable": true,
+        "ip": "2001:db8:5:1::1111",
+        "tunnel_endpoint_router": {
+          "CreatedAt": "\u003cTIME\u003e",
+          "DeletedAt": null,
+          "ID": 12,
+          "UpdatedAt": "\u003cTIME\u003e",
+          "capacity": 0,
+          "comment": "",
+          "enable": true,
+          "hostname": "pop52er01",
+          "noc_id": 5,
+          "tunnel_endpoint_router_ip": null
+        },
+        "tunnel_endpoint_router_id": 12
+      },
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 12,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "comment": "",
+        "enable": true,
+        "ip": "2001:db8:5:1::c179",
+        "tunnel_endpoint_router": {
+          "CreatedAt": "\u003cTIME\u003e",
+          "DeletedAt": null,
+          "ID": 13,
+          "UpdatedAt": "\u003cTIME\u003e",
+          "capacity": 0,
+          "comment": "",
+          "enable": true,
+          "hostname": "pop52ctep02",
+          "noc_id": 5,
+          "tunnel_endpoint_router_ip": null
+        },
+        "tunnel_endpoint_router_id": 13
+      },
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 13,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "comment": "",
+        "enable": true,
+        "ip": "2001:db8:6:1::1111/64",
+        "tunnel_endpoint_router": {
+          "CreatedAt": "\u003cTIME\u003e",
+          "DeletedAt": null,
+          "ID": 14,
+          "UpdatedAt": "\u003cTIME\u003e",
+          "capacity": 0,
+          "comment": "",
+          "enable": true,
+          "hostname": "noc51er01",
+          "noc_id": 6,
+          "tunnel_endpoint_router_ip": null
+        },
+        "tunnel_endpoint_router_id": 14
+      },
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 14,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "comment": "",
+        "enable": true,
+        "ip": "2001:db8:6:1::c179/64",
+        "tunnel_endpoint_router": {
+          "CreatedAt": "\u003cTIME\u003e",
+          "DeletedAt": null,
+          "ID": 15,
+          "UpdatedAt": "\u003cTIME\u003e",
+          "capacity": 0,
+          "comment": "",
+          "enable": true,
+          "hostname": "noc51ctep01",
+          "noc_id": 6,
+          "tunnel_endpoint_router_ip": null
+        },
+        "tunnel_endpoint_router_id": 15
+      },
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 15,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "comment": "",
+        "enable": false,
+        "ip": "2001:db8:7:1::5:9105:179/64",
+        "tunnel_endpoint_router": {
+          "CreatedAt": "\u003cTIME\u003e",
+          "DeletedAt": null,
+          "ID": 16,
+          "UpdatedAt": "\u003cTIME\u003e",
+          "capacity": 0,
+          "comment": "",
+          "enable": false,
+          "hostname": "noc03er01",
+          "noc_id": 7,
+          "tunnel_endpoint_router_ip": null
+        },
+        "tunnel_endpoint_router_id": 16
+      },
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 16,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "comment": "",
+        "enable": false,
+        "ip": "2001:db8:7:1::c179/64",
+        "tunnel_endpoint_router": {
+          "CreatedAt": "\u003cTIME\u003e",
+          "DeletedAt": null,
+          "ID": 17,
+          "UpdatedAt": "\u003cTIME\u003e",
+          "capacity": 0,
+          "comment": "",
+          "enable": false,
+          "hostname": "noc03ctep01",
+          "noc_id": 7,
+          "tunnel_endpoint_router_ip": null
+        },
+        "tunnel_endpoint_router_id": 17
+      },
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 17,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "comment": "",
+        "enable": false,
+        "ip": "2001:db8:5:2::1112/64",
+        "tunnel_endpoint_router": {
+          "CreatedAt": "\u003cTIME\u003e",
+          "DeletedAt": null,
+          "ID": 18,
+          "UpdatedAt": "\u003cTIME\u003e",
+          "capacity": 0,
+          "comment": "",
+          "enable": false,
+          "hostname": "pop52er02",
+          "noc_id": 5,
+          "tunnel_endpoint_router_ip": null
+        },
+        "tunnel_endpoint_router_id": 18
+      },
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 18,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "comment": "",
+        "enable": true,
+        "ip": "2001:db8:8:1::1111/64",
+        "tunnel_endpoint_router": {
+          "CreatedAt": "\u003cTIME\u003e",
+          "DeletedAt": null,
+          "ID": 19,
+          "UpdatedAt": "\u003cTIME\u003e",
+          "capacity": 0,
+          "comment": "",
+          "enable": true,
+          "hostname": "pop53er01",
+          "noc_id": 8,
+          "tunnel_endpoint_router_ip": null
+        },
+        "tunnel_endpoint_router_id": 19
+      },
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 19,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "comment": "",
+        "enable": true,
+        "ip": "2001:db8:8:1::c179/64",
+        "tunnel_endpoint_router": {
+          "CreatedAt": "\u003cTIME\u003e",
+          "DeletedAt": null,
+          "ID": 20,
+          "UpdatedAt": "\u003cTIME\u003e",
+          "capacity": 0,
+          "comment": "",
+          "enable": true,
+          "hostname": "pop53ctep01",
+          "noc_id": 8,
+          "tunnel_endpoint_router_ip": null
+        },
+        "tunnel_endpoint_router_id": 20
+      },
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 20,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "comment": "",
+        "enable": true,
+        "ip": "2001:db8:9:1::1111/64",
+        "tunnel_endpoint_router": {
+          "CreatedAt": "\u003cTIME\u003e",
+          "DeletedAt": null,
+          "ID": 21,
+          "UpdatedAt": "\u003cTIME\u003e",
+          "capacity": 0,
+          "comment": "",
+          "enable": true,
+          "hostname": "noc52er01",
+          "noc_id": 9,
+          "tunnel_endpoint_router_ip": null
+        },
+        "tunnel_endpoint_router_id": 21
+      },
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 21,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "comment": "",
+        "enable": true,
+        "ip": "2001:db8:9:1::6/64",
+        "tunnel_endpoint_router": {
+          "CreatedAt": "\u003cTIME\u003e",
+          "DeletedAt": null,
+          "ID": 22,
+          "UpdatedAt": "\u003cTIME\u003e",
+          "capacity": 0,
+          "comment": "",
+          "enable": true,
+          "hostname": "noc52ctep01",
+          "noc_id": 9,
+          "tunnel_endpoint_router_ip": null
+        },
+        "tunnel_endpoint_router_id": 22
+      },
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 22,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "comment": "",
+        "enable": true,
+        "ip": "2001:db8:a:1::1111",
+        "tunnel_endpoint_router": {
+          "CreatedAt": "\u003cTIME\u003e",
+          "DeletedAt": null,
+          "ID": 23,
+          "UpdatedAt": "\u003cTIME\u003e",
+          "capacity": 0,
+          "comment": "",
+          "enable": true,
+          "hostname": "noc06er01",
+          "noc_id": 10,
+          "tunnel_endpoint_router_ip": null
+        },
+        "tunnel_endpoint_router_id": 23
+      },
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 23,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "comment": "",
+        "enable": true,
+        "ip": "2001:db8:a:1::c179",
+        "tunnel_endpoint_router": {
+          "CreatedAt": "\u003cTIME\u003e",
+          "DeletedAt": null,
+          "ID": 24,
+          "UpdatedAt": "\u003cTIME\u003e",
+          "capacity": 0,
+          "comment": "",
+          "enable": true,
+          "hostname": "noc06ctep01",
+          "noc_id": 10,
+          "tunnel_endpoint_router_ip": null
+        },
+        "tunnel_endpoint_router_id": 24
+      },
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 24,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "comment": "",
+        "enable": true,
+        "ip": "2001:db8:4:6::face/64",
+        "tunnel_endpoint_router": {
+          "CreatedAt": "\u003cTIME\u003e",
+          "DeletedAt": null,
+          "ID": 25,
+          "UpdatedAt": "\u003cTIME\u003e",
+          "capacity": 0,
+          "comment": "",
+          "enable": true,
+          "hostname": "pop03er04",
+          "noc_id": 4,
+          "tunnel_endpoint_router_ip": null
+        },
+        "tunnel_endpoint_router_id": 25
+      }
+    ],
+    "user": [
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 1,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "antisocial_check": false,
+        "antisocial_check_at": null,
+        "email": "master@example.com",
+        "expired_status": 0,
+        "group": null,
+        "group_id": 1,
+        "level": 1,
+        "mail_token": "",
+        "mail_verify": true,
+        "name": "マスターユーザー",
+        "name_en": "Master User",
+        "notice": null,
+        "pass": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
+        "tickets": null,
+        "tokens": null
+      },
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 2,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "antisocial_check": false,
+        "antisocial_check_at": null,
+        "email": "member@example.com",
+        "expired_status": 0,
+        "group": null,
+        "group_id": 1,
+        "level": 2,
+        "mail_token": "",
+        "mail_verify": true,
+        "name": "一般ユーザー",
+        "name_en": "Member User",
+        "notice": null,
+        "pass": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
+        "tickets": null,
+        "tokens": null
+      }
+    ]
+  }
+}

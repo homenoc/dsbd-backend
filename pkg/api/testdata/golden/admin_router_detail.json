@@ -1,0 +1,31 @@
+{
+  "status": 200,
+  "body": {
+    "bgp_router": [
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 1,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "address": "",
+        "comment": "",
+        "enable": true,
+        "hostname": "noc01er01",
+        "noc": {
+          "CreatedAt": "\u003cTIME\u003e",
+          "DeletedAt": null,
+          "ID": 0,
+          "UpdatedAt": "\u003cTIME\u003e",
+          "bandwidth": "",
+          "bgp_router": null,
+          "comment": "",
+          "enable": null,
+          "location": "",
+          "name": "",
+          "tunnel_endpoint_router": null
+        },
+        "noc_id": 1
+      }
+    ]
+  }
+}

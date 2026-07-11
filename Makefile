@@ -1,4 +1,4 @@
-.PHONY: tidy build run-user run-admin migrate seed test lint db-up db-down db-clean db-logs docker-up docker-down docker-clean docker-migrate docker-seed docker-logs setup setup-docker clean
+.PHONY: tidy build run-user run-admin migrate seed test test-integration lint db-up db-down db-clean db-logs docker-up docker-down docker-clean docker-migrate docker-seed docker-logs setup setup-docker clean
 
 # 依存関係の整理
 tidy:
@@ -26,6 +26,10 @@ seed:
 # テスト
 test:
 	go test ./...
+
+# 統合テスト（要: make db-up）。ゴールデン更新は UPDATE_GOLDEN=1 make test-integration
+test-integration:
+	DSBD_TEST_DB=1 go test -count=1 -v ./pkg/api/...
 
 # Lint
 lint:

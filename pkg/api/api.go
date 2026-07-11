@@ -26,10 +26,9 @@ import (
 	user "github.com/homenoc/dsbd-backend/pkg/api/core/user/v0"
 )
 
-func AdminRestAPI() {
-	if !config.IsDebug {
-		gin.SetMode(gin.ReleaseMode)
-	}
+// NewAdminRouter builds the admin API router (routes only, no background
+// goroutines and no listener) so tests can drive it via httptest.
+func NewAdminRouter() *gin.Engine {
 	router := gin.Default()
 	router.Use(cors)
 
@@ -37,8 +36,6 @@ func AdminRestAPI() {
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
-
-	go token.TokenRemove()
 
 	api := router.Group("/api")
 	{
@@ -223,14 +220,23 @@ func AdminRestAPI() {
 		}
 	}
 
+	return router
+}
+
+func AdminRestAPI() {
+	if !config.IsDebug {
+		gin.SetMode(gin.ReleaseMode)
+	}
+	router := NewAdminRouter()
+
+	go token.TokenRemove()
 	go ticket.HandleMessagesByAdmin()
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(config.Conf.Controller.Admin.Port), router))
 }
 
-func UserRestAPI() {
-	if !config.IsDebug {
-		gin.SetMode(gin.ReleaseMode)
-	}
+// NewUserRouter builds the user API router (routes only, no background
+// goroutines and no listener) so tests can drive it via httptest.
+func NewUserRouter() *gin.Engine {
 	router := gin.Default()
 	router.Use(cors)
 
@@ -330,6 +336,15 @@ func UserRestAPI() {
 			v1.GET("/support", ticket.GetWebSocket)
 		}
 	}
+
+	return router
+}
+
+func UserRestAPI() {
+	if !config.IsDebug {
+		gin.SetMode(gin.ReleaseMode)
+	}
+	router := NewUserRouter()
 
 	go ticket.HandleMessages()
 

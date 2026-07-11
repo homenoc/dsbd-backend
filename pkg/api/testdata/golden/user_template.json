@@ -1,0 +1,183 @@
+{
+  "status": 200,
+  "body": {
+    "connections": [
+      {
+        "comment": "",
+        "is_l2": true,
+        "is_l3": false,
+        "name": "Ethernet over IPトンネル",
+        "need_comment": false,
+        "need_cross_connect": false,
+        "need_internet": true,
+        "type": "EIP"
+      },
+      {
+        "comment": "",
+        "is_l2": false,
+        "is_l3": true,
+        "name": "GREトンネル",
+        "need_comment": false,
+        "need_cross_connect": false,
+        "need_internet": true,
+        "type": "GRE"
+      },
+      {
+        "comment": "",
+        "is_l2": false,
+        "is_l3": true,
+        "name": "IP-IPトンネル",
+        "need_comment": false,
+        "need_cross_connect": false,
+        "need_internet": true,
+        "type": "IPT"
+      },
+      {
+        "comment": "データセンター構内回線、キャリア専用線上などで直接接続",
+        "is_l2": true,
+        "is_l3": true,
+        "name": "直接接続",
+        "need_comment": true,
+        "need_cross_connect": true,
+        "need_internet": false,
+        "type": "CC0"
+      },
+      {
+        "comment": "インターネットエクスチェンジ経由で接続",
+        "is_l2": true,
+        "is_l3": true,
+        "name": "IX接続",
+        "need_comment": true,
+        "need_cross_connect": true,
+        "need_internet": false,
+        "type": "IXP"
+      },
+      {
+        "comment": "その他の接続方式",
+        "is_l2": false,
+        "is_l3": false,
+        "name": "その他",
+        "need_comment": true,
+        "need_cross_connect": false,
+        "need_internet": false,
+        "type": "ETC"
+      }
+    ],
+    "ipv4": [
+      "/27",
+      "/28",
+      "/29"
+    ],
+    "ipv4_route": [
+      "IPv4 Full Route",
+      "IPv4 Default Route",
+      "etc"
+    ],
+    "ipv6": [
+      "/48",
+      "/52",
+      "/56",
+      "/60",
+      "/64"
+    ],
+    "ipv6_route": [
+      "IPv6 Full Route",
+      "IPv6 Default Route",
+      "etc"
+    ],
+    "ix": [
+      {
+        "ipv4_address": "210.171.225.165",
+        "ipv6_address": "2001:de8:8::5:9105:1",
+        "name": "JPIX TOKYO"
+      },
+      {
+        "ipv4_address": "103.246.232.165",
+        "ipv6_address": "2001:de8:8:6:0:5:9105:1",
+        "name": "JPIX OSAKA"
+      },
+      {
+        "ipv4_address": "203.190.230.227",
+        "ipv6_address": "2001:de8:5::5:9105:1",
+        "name": "Equinix Tokyo"
+      },
+      {
+        "ipv4_address": "61.245.0.45",
+        "ipv6_address": "2001:ded:4000::5:9105:1",
+        "name": "BBIX Manila"
+      },
+      {
+        "ipv4_address": "202.226.3.2",
+        "ipv6_address": "2402:b7c0:e000::5:9105:1",
+        "name": "JCIX"
+      },
+      {
+        "ipv4_address": "103.158.187.190",
+        "ipv6_address": "2a0f:5707:ffe3::190",
+        "name": "STUIX"
+      }
+    ],
+    "ntts": [
+      "はい（IPoEによりIPv6インターネットへ接続可能）",
+      "はい（IPoEによりIPv6インターネットへ接続不可）",
+      "はい（フレッツv6オプションの契約なし）",
+      "いいえ（フレッツ以外でインターネットに接続可能）",
+      "いいえ（IPv6でのインターネット接続不可）",
+      "etc"
+    ],
+    "payment_membership": [],
+    "preferred_ap": [
+      "東日本",
+      "西日本",
+      "福岡",
+      "フィリピン",
+      "台湾"
+    ],
+    "services": [
+      {
+        "comment": "L2接続",
+        "hidden": false,
+        "name": "L2",
+        "need_bgp": false,
+        "need_comment": false,
+        "need_global_as": false,
+        "need_jpnic": true,
+        "need_route": false,
+        "type": "2000"
+      },
+      {
+        "comment": "Staticにて接続",
+        "hidden": false,
+        "name": "L3 Static",
+        "need_bgp": false,
+        "need_comment": false,
+        "need_global_as": false,
+        "need_jpnic": true,
+        "need_route": true,
+        "type": "3S00"
+      },
+      {
+        "comment": "BGPにて接続",
+        "hidden": false,
+        "name": "L3 BGP",
+        "need_bgp": true,
+        "need_comment": false,
+        "need_global_as": false,
+        "need_jpnic": true,
+        "need_route": true,
+        "type": "3B00"
+      },
+      {
+        "comment": "グローバルASのユーザに対するトランジット提供(L3 BGP)",
+        "hidden": false,
+        "name": "トランジット提供",
+        "need_bgp": true,
+        "need_comment": false,
+        "need_global_as": true,
+        "need_jpnic": false,
+        "need_route": true,
+        "type": "IP3B"
+      }
+    ]
+  }
+}
