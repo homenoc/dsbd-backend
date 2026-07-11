@@ -6,10 +6,8 @@ import (
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service/ip"
 	dbIP "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/ip/v0"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
-	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"strconv"
@@ -99,7 +97,7 @@ func UpdateIPByAdmin(c *gin.Context) {
 		return
 	}
 
-	before := dbIP.Get(ip.ID, &core.IP{Model: gorm.Model{ID: uint(id)}})
+	before := dbIP.GetByID(uint(id))
 	if before.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: before.Err.Error()})
 		return

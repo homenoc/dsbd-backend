@@ -5,10 +5,8 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service/jpnicAdmin"
 	dbJPNICAdmin "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/jpnicAdmin/v0"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
-	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"strconv"
@@ -87,7 +85,7 @@ func UpdateJPNICAdminByAdmin(c *gin.Context) {
 		return
 	}
 
-	before := dbJPNICAdmin.Get(jpnicAdmin.ID, &core.JPNICAdmin{Model: gorm.Model{ID: uint(id)}})
+	before := dbJPNICAdmin.GetByID(uint(id))
 	if before.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: before.Err.Error()})
 		return

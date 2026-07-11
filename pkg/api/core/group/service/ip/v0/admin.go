@@ -6,7 +6,6 @@ import (
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service/ip"
 	dbIP "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/ip/v0"
 	"log"
 	"net/http"
@@ -57,7 +56,7 @@ func UpdateByAdmin(c *gin.Context) {
 
 	input.ID = uint(id)
 
-	if err = dbIP.Update(ip.UpdateAll, input); err != nil {
+	if err = dbIP.UpdateAll(input); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
