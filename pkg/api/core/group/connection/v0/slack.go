@@ -78,7 +78,7 @@ func noticeUpdateByAdmin(before, after core.Connection) {
 
 func changeText(before, after core.Connection) string {
 	data := ""
-	if after.Open != nil {
+	if before.Open != nil && after.Open != nil {
 		if *before.Open != *after.Open {
 			if *after.Open {
 				data += "開通: 未開通 => 開通済み\n"

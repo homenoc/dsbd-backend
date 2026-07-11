@@ -214,7 +214,7 @@ func UpdateByAdmin(c *gin.Context) {
 		return
 	}
 
-	err = c.BindJSON(&input)
+	err = common.BindJSONTolerant(c, &input)
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})

@@ -351,7 +351,7 @@ func noticeUpdatePlanByAdmin(before, after core.Plan) {
 
 func changeText(before, after core.Service) string {
 	data := ""
-	if after.Pass != nil {
+	if before.Pass != nil && after.Pass != nil {
 		if *before.Pass != *after.Pass {
 			if *after.Pass {
 				data += "開通: 未開通 => 開通済み\n"
@@ -361,7 +361,7 @@ func changeText(before, after core.Service) string {
 		}
 	}
 
-	if after.AddAllow != nil {
+	if before.AddAllow != nil && after.AddAllow != nil {
 		if *before.AddAllow != *after.AddAllow {
 			if *after.AddAllow {
 				data += "ユーザ側にて接続追加の許可: 禁止 => 許可\n"
@@ -397,7 +397,7 @@ func changeText(before, after core.Service) string {
 			strconv.Itoa(int(after.MaxUpstream)) + "Kbps\n"
 	}
 
-	if after.ASN != nil {
+	if before.ASN != nil && after.ASN != nil {
 		if *before.ASN != *after.ASN {
 			data += "ASN: " + strconv.Itoa(int(*before.ASN)) + " => " + strconv.Itoa(int(*after.ASN)) + "\n"
 		}
@@ -581,7 +581,7 @@ func changeTextIP(before, after core.IP) string {
 		data += "UseCase: " + before.UseCase + "=>" + after.UseCase + "\n"
 	}
 
-	if *before.Open != *after.Open {
+	if before.Open != nil && after.Open != nil && *before.Open != *after.Open {
 		if *after.Open {
 			data += "Open: 未開通 => 開通\n"
 		} else {
