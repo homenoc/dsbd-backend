@@ -136,7 +136,7 @@ func Add(c *gin.Context) {
 		bgpComment = input.BGPComment
 	}
 
-	resultNetwork := dbService.Get(service.SearchNewNumber, &core.Service{GroupID: result.User.Group.ID})
+	resultNetwork := dbService.GetByGroupID(result.User.Group.ID)
 	if resultNetwork.Err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: resultNetwork.Err.Error()})
 		return
@@ -233,7 +233,7 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	resultNetwork := dbService.Get(service.ID, &core.Service{Model: gorm.Model{ID: input.ID}})
+	resultNetwork := dbService.GetByID(input.ID)
 	if resultNetwork.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: resultNetwork.Err.Error()})
 		return
@@ -249,7 +249,7 @@ func Update(c *gin.Context) {
 
 	replace := replaceService(resultNetwork.Service[0], input)
 
-	if err = dbService.Update(service.UpdateData, replace); err != nil {
+	if err = dbService.UpdateData(replace); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
@@ -267,7 +267,7 @@ func GetAddAllow(c *gin.Context) {
 		return
 	}
 
-	if resultService := dbService.Get(service.GIDAndAddAllow, &core.Service{GroupID: result.User.Group.ID}); resultService.Err != nil {
+	if resultService := dbService.GetAddAllowByGroupID(result.User.Group.ID); resultService.Err != nil {
 		log.Println(resultService.Err)
 		c.JSON(http.StatusInternalServerError, common.Error{Error: resultService.Err.Error()})
 	} else {

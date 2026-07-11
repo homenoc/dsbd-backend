@@ -125,7 +125,7 @@ func AddByAdmin(c *gin.Context) {
 		bgpComment = input.BGPComment
 	}
 
-	resultNetwork := dbService.Get(service.SearchNewNumber, &core.Service{GroupID: uint(id)})
+	resultNetwork := dbService.GetByGroupID(uint(id))
 	if resultNetwork.Err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: resultNetwork.Err.Error()})
 		return
@@ -227,7 +227,7 @@ func UpdateByAdmin(c *gin.Context) {
 		return
 	}
 
-	before := dbService.Get(service.ID, &core.Service{Model: gorm.Model{ID: uint(id)}})
+	before := dbService.GetByID(uint(id))
 	if before.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: before.Err.Error()})
 		return
@@ -235,7 +235,7 @@ func UpdateByAdmin(c *gin.Context) {
 
 	input.ID = uint(id)
 
-	if err = dbService.Update(service.UpdateAll, input); err != nil {
+	if err = dbService.UpdateAll(input); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
@@ -255,7 +255,7 @@ func GetByAdmin(c *gin.Context) {
 		return
 	}
 
-	result := dbService.Get(service.ID, &core.Service{Model: gorm.Model{ID: uint(id)}})
+	result := dbService.GetByID(uint(id))
 	if result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return

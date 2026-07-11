@@ -1,155 +1,82 @@
 package v0
 
 import (
-	"fmt"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
 	"gorm.io/gorm"
-	"log"
-	"time"
 )
 
-func Create(service *core.Service) (*core.Service, error) {
-	db, err := store.ConnectDB()
-	if err != nil {
-		log.Println("database connection error")
-		return service, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-
-	err = db.Create(&service).Error
-	return service, err
+func Create(s *core.Service) (*core.Service, error) {
+	err := store.DB().Create(&s).Error
+	return s, err
 }
 
-func Delete(service *core.Service) error {
-	db, err := store.ConnectDB()
-	if err != nil {
-		log.Println("database connection error")
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-
-	return db.Delete(service).Error
+func Delete(s *core.Service) error {
+	return store.DB().Delete(s).Error
 }
 
-func Update(base int, c core.Service) error {
-	db, err := store.ConnectDB()
-	if err != nil {
-		log.Println("database connection error")
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-
-	err = nil
-
-	if service.UpdateData == base {
-		err = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Updates(core.Service{
-			Org:       c.Org,
-			OrgEn:     c.OrgEn,
-			PostCode:  c.PostCode,
-			Address:   c.Address,
-			AddressEn: c.AddressEn,
-			ASN:       c.ASN,
-		}).Error
-	} else if service.UpdateGID == base {
-		err = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Updates(core.Service{GroupID: c.GroupID}).Error
-	} else if service.UpdateStatus == base {
-	} else if service.UpdateAll == base {
-		err = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Updates(c).Error
-	} else if service.ReplaceIP == base {
-		err = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Association("IP").Replace(c.IP[0])
-	} else if service.AppendIP == base {
-		err = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Association("IP").Replace(c.IP[0])
-	} else if service.AppendJPNICAdmin == base {
-		err = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Association("JPNICAdmin").Append(c.JPNICAdmin)
-	} else if service.AppendJPNICTech == base {
-		err = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Association("JPNICTech").Append(c.JPNICTech[0])
-	} else if service.AppendConnection == base {
-		err = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Association("IPv4").Replace(c.Connection[0])
-	} else if service.DeleteIP == base {
-		err = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Association("IP").Replace(c.IP[0])
-	} else if service.DeleteJPNICAdmin == base {
-		err = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Association("JPNICAdmin").Delete(c.JPNICAdmin)
-	} else if service.DeleteJPNICTech == base {
-		err = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Association("JPNICTech").Delete(c.JPNICTech[0])
-	} else if service.DeleteConnection == base {
-		err = db.Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Association("IPv4").Delete(c.Connection[0])
-	} else {
-		log.Println("base select error")
-		return fmt.Errorf("(%s)error: base select\n", time.Now())
-	}
-
-	return err
+// UpdateData updates the editable applicant/org fields (was Update(UpdateData, ...)).
+func UpdateData(c core.Service) error {
+	return store.DB().Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Updates(core.Service{
+		Org:       c.Org,
+		OrgEn:     c.OrgEn,
+		PostCode:  c.PostCode,
+		Address:   c.Address,
+		AddressEn: c.AddressEn,
+		ASN:       c.ASN,
+	}).Error
 }
 
-func Get(base int, data *core.Service) service.ResultDatabase {
-	db, err := store.ConnectDB()
-	if err != nil {
-		log.Println("database connection error")
-		return service.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
-	}
+// UpdateAll updates the service with all non-zero fields of c (was Update(UpdateAll, ...)).
+func UpdateAll(c core.Service) error {
+	return store.DB().Model(&core.Service{Model: gorm.Model{ID: c.ID}}).Updates(c).Error
+}
 
-	var serviceStruct []core.Service
+// GetByID loads one service with its full association graph.
+func GetByID(id uint) service.ResultDatabase {
+	var services []core.Service
+	err := store.DB().Preload("IP").
+		Preload("IP.Plan").
+		Preload("Connection").
+		Preload("Connection.BGPRouter").
+		Preload("Connection.TunnelEndPointRouterIP").
+		Preload("JPNICAdmin").
+		Preload("JPNICTech").
+		Preload("Group").
+		First(&services, id).Error
+	return service.ResultDatabase{Err: err, Service: services}
+}
 
-	switch base {
-	//ID
-	case service.ID:
-		err = db.Preload("IP").
-			Preload("IP.Plan").
-			Preload("Connection").
-			Preload("Connection.BGPRouter").
-			Preload("Connection.TunnelEndPointRouterIP").
-			Preload("JPNICAdmin").
-			Preload("JPNICTech").
-			Preload("Group").
-			First(&serviceStruct, data.ID).Error
-	//	Mail
-	case service.Org:
-		err = db.Preload("IP").
-			Preload("Connection").
-			Preload("JPNICAdmin").
-			Preload("JPNICTech").
-			Where("org = ?", data.Org).Find(&serviceStruct).Error
-	case service.GID:
-		err = db.Preload("IP").
-			Preload("Connection").
-			Preload("JPNICAdmin").
-			Preload("JPNICTech").
-			Where("group_id = ?", data.GroupID).Find(&serviceStruct).Error
-	case service.GIDAndAddAllow:
-		err = db.Where("group_id = ? AND add_allow = ?", data.GroupID, true).Find(&serviceStruct).Error
-	case service.SearchNewNumber:
-		err = db.Where("group_id = ?", data.GroupID).Find(&serviceStruct).Error
-	case service.Open:
-		err = db.Where("group_id = ? AND open = ?", data.GroupID, true).
-			Preload("IP", "open = ?", true).
-			Preload("Connection", "open = ?", true).
-			Preload("Connection.BGPRouter").
-			Preload("Connection.TunnelEndPointRouterIP").
-			Preload("JPNICAdmin").
-			Preload("JPNICTech").
-			Find(&serviceStruct).Error
-	case service.ASN:
-		err = db.Where("asn = ? AND pass = ? AND enable = ?", data.ASN, true, true).
-			Preload("IP").
-			Preload("Connection", "open = ?", true).
-			Preload("Group").
-			Find(&serviceStruct).Error
-	default:
-		log.Println("base select error")
-		return service.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
+// GetByGroupID returns a group's services (used for numbering new services).
+func GetByGroupID(groupID uint) service.ResultDatabase {
+	var services []core.Service
+	err := store.DB().Where("group_id = ?", groupID).Find(&services).Error
+	return service.ResultDatabase{Err: err, Service: services}
+}
 
-	}
-	return service.ResultDatabase{Err: err, Service: serviceStruct}
+// GetAddAllowByGroupID returns a group's services that currently allow additions.
+func GetAddAllowByGroupID(groupID uint) service.ResultDatabase {
+	var services []core.Service
+	err := store.DB().Where("group_id = ? AND add_allow = ?", groupID, true).Find(&services).Error
+	return service.ResultDatabase{Err: err, Service: services}
+}
+
+// GetByASN returns passed+enabled services for an ASN with open connections
+// (used by Slack ASN lookup).
+func GetByASN(asn *uint) service.ResultDatabase {
+	var services []core.Service
+	err := store.DB().Where("asn = ? AND pass = ? AND enable = ?", asn, true, true).
+		Preload("IP").
+		Preload("Connection", "open = ?", true).
+		Preload("Group").
+		Find(&services).Error
+	return service.ResultDatabase{Err: err, Service: services}
 }
 
 func GetAll() service.ResultDatabase {
-	db, err := store.ConnectDB()
-	if err != nil {
-		log.Println("database connection error")
-		return service.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
-	}
-
 	var services []core.Service
-	err = db.Preload("IP").
+	err := store.DB().Preload("IP").
 		Preload("Connection").
 		Preload("Connection.BGPRouter").
 		Preload("Connection.TunnelEndPointRouterIP").

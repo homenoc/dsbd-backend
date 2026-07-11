@@ -2,15 +2,12 @@ package slack
 
 import (
 	"fmt"
-	"github.com/homenoc/dsbd-backend/pkg/api/core"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	dbIP "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/ip/v0"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"github.com/slack-go/slack"
-	"gorm.io/gorm"
 	"net"
 	"strconv"
 )
@@ -185,7 +182,7 @@ func getASNInfo(asn int) slack.MsgOption {
 			},
 		},
 	}
-	resultService := dbService.Get(service.ASN, &core.Service{ASN: tool.ToUintP(uint(asn))})
+	resultService := dbService.GetByASN(tool.ToUintP(uint(asn)))
 	if resultService.Err != nil {
 		return errorProcess(blocks, "データ取得エラー", resultService.Err.Error())
 	}
@@ -343,7 +340,7 @@ func getAddrInfo(addr string) slack.MsgOption {
 	if serviceID == 0 {
 		return errorProcess(blocks, "Not Found...", "一致するアドレスがありませんでした。("+addr+")")
 	}
-	resultService := dbService.Get(service.ID, &core.Service{Model: gorm.Model{ID: serviceID}})
+	resultService := dbService.GetByID(serviceID)
 	if resultService.Err != nil {
 		return errorProcess(blocks, "データ取得エラー", resultService.Err.Error())
 	}

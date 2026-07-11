@@ -11,7 +11,6 @@ import (
 	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	dbConnection "github.com/homenoc/dsbd-backend/pkg/api/store/group/connection/v0"
@@ -101,7 +100,7 @@ func Add(c *gin.Context) {
 		}
 	}
 
-	resultService := dbService.Get(service.ID, &core.Service{Model: gorm.Model{ID: uint(id)}})
+	resultService := dbService.GetByID(uint(id))
 	if resultService.Err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: resultService.Err.Error()})
 		return
@@ -231,7 +230,7 @@ func Add(c *gin.Context) {
 	//	return
 	//}
 
-	if err = dbService.Update(service.UpdateAll, core.Service{
+	if err = dbService.UpdateAll(core.Service{
 		Model:    gorm.Model{ID: resultService.Service[0].ID},
 		AddAllow: &[]bool{false}[0],
 	}); err != nil {
