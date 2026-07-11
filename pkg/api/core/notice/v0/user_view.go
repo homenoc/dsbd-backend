@@ -20,9 +20,9 @@ func GetActive(c *gin.Context) {
 		return
 	}
 
-	var views []notice.UserView
+	var views []notice.Notice
 	for _, n := range noticeResult.Notice {
-		views = append(views, notice.UserView{
+		views = append(views, notice.Notice{
 			StartTime: n.StartTime,
 			EndTime:   n.EndTime,
 			Everyone:  *n.Everyone,

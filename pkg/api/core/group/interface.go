@@ -34,10 +34,10 @@ type ResultDatabase struct {
 	Group []core.Group
 }
 
-// Profile is the user-facing wire shape of the caller's own group
+// Group is the user-facing wire shape of the caller's own group
 // (GET /group), including membership/billing status. Address-level fields are
 // filled only for levels that may manage the group.
-type Profile struct {
+type Group struct {
 	ID            uint       `json:"id"`
 	Agree         *bool      `json:"agree"`
 	Question      string     `json:"question"`

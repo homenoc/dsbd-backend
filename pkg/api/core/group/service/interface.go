@@ -52,36 +52,36 @@ type ResultDatabase struct {
 	Service []core.Service
 }
 
-// UserView is the user-facing wire shape of an enabled service
+// Service is the user-facing wire shape of an enabled service
 // (GET /service), including the capability flags from the type registry.
-type UserView struct {
-	ID             uint            `json:"id"`
-	ServiceID      string          `json:"service_id"`
-	ServiceType    string          `json:"service_type"`
-	NeedRoute      bool            `json:"need_route"`
-	NeedBGP        bool            `json:"need_bgp"`
-	NeedJPNIC      bool            `json:"need_jpnic"`
-	AddAllow       bool            `json:"add_allow"`
-	Pass           bool            `json:"pass"`
-	Org            string          `json:"org"`
-	OrgEn          string          `json:"org_en"`
-	PostCode       string          `json:"postcode"`
-	Address        string          `json:"address"`
-	AddressEn      string          `json:"address_en"`
-	ASN            *uint           `json:"asn"`
-	AveUpstream    uint            `json:"avg_upstream"`
-	MaxUpstream    uint            `json:"max_upstream"`
-	AveDownstream  uint            `json:"avg_downstream"`
-	MaxDownstream  uint            `json:"max_downstream"`
-	MaxBandWidthAS string          `json:"max_bandwidth_as"`
-	JPNICAdmin     UserJPNICView   `json:"jpnic_admin"`
-	JPNICTech      []UserJPNICView `json:"jpnic_tech"`
-	IP             []UserIPView    `json:"ip"`
+type Service struct {
+	ID             uint    `json:"id"`
+	ServiceID      string  `json:"service_id"`
+	ServiceType    string  `json:"service_type"`
+	NeedRoute      bool    `json:"need_route"`
+	NeedBGP        bool    `json:"need_bgp"`
+	NeedJPNIC      bool    `json:"need_jpnic"`
+	AddAllow       bool    `json:"add_allow"`
+	Pass           bool    `json:"pass"`
+	Org            string  `json:"org"`
+	OrgEn          string  `json:"org_en"`
+	PostCode       string  `json:"postcode"`
+	Address        string  `json:"address"`
+	AddressEn      string  `json:"address_en"`
+	ASN            *uint   `json:"asn"`
+	AveUpstream    uint    `json:"avg_upstream"`
+	MaxUpstream    uint    `json:"max_upstream"`
+	AveDownstream  uint    `json:"avg_downstream"`
+	MaxDownstream  uint    `json:"max_downstream"`
+	MaxBandWidthAS string  `json:"max_bandwidth_as"`
+	JPNICAdmin     JPNIC   `json:"jpnic_admin"`
+	JPNICTech      []JPNIC `json:"jpnic_tech"`
+	IP             []IP    `json:"ip"`
 }
 
-// UserJPNICView is a JPNIC contact as shown to users. The admin contact omits
+// JPNIC is a JPNIC contact as shown to users. The admin contact omits
 // its address fields on the wire.
-type UserJPNICView struct {
+type JPNIC struct {
 	ID        uint   `json:"id"`
 	Name      string `json:"name"`
 	NameEn    string `json:"name_en"`
@@ -98,18 +98,18 @@ type UserJPNICView struct {
 	Country   string `json:"country"`
 }
 
-// UserIPView is an opened IP assignment as shown to users.
-type UserIPView struct {
-	ID        uint           `json:"id"`
-	Version   uint           `json:"version"`
-	Name      string         `json:"name"`
-	IP        string         `json:"ip"`
-	Plan      []UserPlanView `json:"plan" `
-	PlanJPNIC string         `json:"" gorm:"size:65535"`
-	UseCase   string         `json:"use_case"`
+// IP is an opened IP assignment as shown to users.
+type IP struct {
+	ID        uint   `json:"id"`
+	Version   uint   `json:"version"`
+	Name      string `json:"name"`
+	IP        string `json:"ip"`
+	Plan      []Plan `json:"plan" `
+	PlanJPNIC string `json:"" gorm:"size:65535"`
+	UseCase   string `json:"use_case"`
 }
 
-type UserPlanView struct {
+type Plan struct {
 	ID       uint   `json:"id"`
 	IPID     uint   `json:"ip_id"`
 	Name     string `json:"name"`

@@ -1,10 +1,10 @@
 package v0
 
 import (
-	"fmt"
-	"time"
 	"crypto/rand"
+	"fmt"
 	"math/big"
+	"time"
 
 	mailStruct "github.com/homenoc/dsbd-backend/pkg/api/core/mail"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
@@ -12,10 +12,10 @@ import (
 )
 
 func generateMessageID() string {
-    host := config.Conf.Mail.Domain
-    timestamp := time.Now().UnixNano()
-    random, _ := rand.Int(rand.Reader, big.NewInt(1<<63-1))
-    return fmt.Sprintf("%d.%d@%s", timestamp, random.Int64(), host)
+	host := config.Conf.Mail.Domain
+	timestamp := time.Now().UnixNano()
+	random, _ := rand.Int(rand.Reader, big.NewInt(1<<63-1))
+	return fmt.Sprintf("%d.%d@%s", timestamp, random.Int64(), host)
 }
 
 func SendMail(d mailStruct.Mail) error {

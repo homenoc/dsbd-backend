@@ -14,9 +14,9 @@ type Input struct {
 	Level  uint   `json:"level"`
 }
 
-// Profile is the user-facing wire shape of an account (GET /user/me and the
+// User is the user-facing wire shape of an account (GET /user/me and the
 // group member list in GET /group).
-type Profile struct {
+type User struct {
 	ID                uint       `json:"id"`
 	GroupID           uint       `json:"group_id"`
 	StripeCustomerID  string     `json:"stripe_customer_id"`
@@ -30,13 +30,13 @@ type Profile struct {
 	AntisocialCheckAt *time.Time `json:"antisocial_check_at"`
 }
 
-// ProfileFrom projects a core.User onto its user-facing wire shape.
-func ProfileFrom(u core.User) Profile {
+// NewUser projects a core.User onto its user-facing wire shape.
+func NewUser(u core.User) User {
 	var groupID uint
 	if u.GroupID != nil {
 		groupID = *u.GroupID
 	}
-	return Profile{
+	return User{
 		ID:                u.ID,
 		GroupID:           groupID,
 		Name:              u.Name,
@@ -50,7 +50,7 @@ func ProfileFrom(u core.User) Profile {
 }
 
 type Result struct {
-	User []Profile `json:"user"`
+	User []User `json:"user"`
 }
 
 type ResultAdmin struct {

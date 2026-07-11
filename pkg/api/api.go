@@ -293,7 +293,7 @@ func NewUserRouter() *gin.Engine {
 			v1.GET("/ticket", middleware.UserAuth, ticket.GetUserTickets)
 			v1.GET("/request", middleware.UserAuth, ticket.GetUserRequests)
 			// Derived network summary of the user's opened connections
-			v1.GET("/info", middleware.UserAuth, connection.GetNetworkInfo)
+			v1.GET("/info", middleware.UserAuth, connection.GetInfo)
 
 			//
 			// Group

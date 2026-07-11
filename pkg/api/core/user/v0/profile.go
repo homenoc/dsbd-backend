@@ -10,5 +10,5 @@ import (
 
 // GetMe returns the authenticated user's profile (GET /user/me).
 func GetMe(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"user": user.ProfileFrom(middleware.CurrentUser(c))})
+	c.JSON(http.StatusOK, gin.H{"user": user.NewUser(middleware.CurrentUser(c))})
 }

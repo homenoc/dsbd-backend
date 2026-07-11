@@ -66,20 +66,20 @@ func Get(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"connection": views})
 }
 
-// GetNetworkInfo returns the derived network summary of the group's opened
+// GetInfo returns the derived network summary of the group's opened
 // connections (GET /info) — the contract-disclosure data the web Info page
 // renders.
-func GetNetworkInfo(c *gin.Context) {
+func GetInfo(c *gin.Context) {
 	g, hasGroup, ok := loadUserGroup(c)
 	if !ok {
 		return
 	}
 	if !hasGroup {
-		c.JSON(http.StatusOK, gin.H{"info": []connection.NetworkInfo{}})
+		c.JSON(http.StatusOK, gin.H{"info": []connection.Info{}})
 		return
 	}
 
-	var infos []connection.NetworkInfo
+	var infos []connection.Info
 	for _, s := range g.Services {
 		serviceType, err := core.GetServiceType(s.ServiceType)
 		if err != nil {
@@ -112,7 +112,7 @@ func GetNetworkInfo(c *gin.Context) {
 			if s.ASN != nil {
 				asn = *s.ASN
 			}
-			infos = append(infos, connection.NetworkInfo{
+			infos = append(infos, connection.Info{
 				ServiceID:  core.ConnectionCode(serviceCode, conn.ConnectionType, conn.ConnectionNumber),
 				Service:    serviceType.Name,
 				Assign:     serviceType.NeedJPNIC,

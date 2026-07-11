@@ -29,8 +29,8 @@ type ResultDatabase struct {
 	Notice []core.Notice
 }
 
-// UserView is the user-facing wire shape of an active notice (GET /notice).
-type UserView struct {
+// Notice is the user-facing wire shape of an active notice (GET /notice).
+type Notice struct {
 	StartTime time.Time `json:"start_time"`
 	EndTime   time.Time `json:"end_time"`
 	Everyone  bool      `json:"everyone"`
@@ -42,5 +42,5 @@ type UserView struct {
 }
 
 type Result struct {
-	Notice []UserView `json:"notice"`
+	Notice []Notice `json:"notice"`
 }

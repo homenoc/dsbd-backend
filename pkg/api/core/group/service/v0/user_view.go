@@ -15,7 +15,7 @@ import (
 func Get(c *gin.Context) {
 	u := middleware.CurrentUser(c)
 	if u.GroupID == nil {
-		c.JSON(http.StatusOK, gin.H{"service": []service.UserView{}})
+		c.JSON(http.StatusOK, gin.H{"service": []service.Service{}})
 		return
 	}
 	if !core.CanViewGroup(u.Level) {
@@ -28,7 +28,7 @@ func Get(c *gin.Context) {
 		return
 	}
 	if len(groupResult.Group) == 0 {
-		c.JSON(http.StatusOK, gin.H{"service": []service.UserView{}})
+		c.JSON(http.StatusOK, gin.H{"service": []service.Service{}})
 		return
 	}
 
@@ -41,8 +41,8 @@ func Get(c *gin.Context) {
 }
 
 // userViews projects a group's enabled services onto their user-facing shape.
-func userViews(g core.Group) ([]service.UserView, error) {
-	var out []service.UserView
+func userViews(g core.Group) ([]service.Service, error) {
+	var out []service.Service
 	for _, s := range g.Services {
 		serviceType, err := core.GetServiceType(s.ServiceType)
 		if err != nil {
@@ -53,7 +53,7 @@ func userViews(g core.Group) ([]service.UserView, error) {
 		}
 
 		// The admin contact intentionally omits its address fields on the wire.
-		admin := service.UserJPNICView{
+		admin := service.JPNIC{
 			ID:       s.JPNICAdmin.ID,
 			Org:      s.JPNICAdmin.Org,
 			OrgEn:    s.JPNICAdmin.OrgEn,
@@ -68,9 +68,9 @@ func userViews(g core.Group) ([]service.UserView, error) {
 			Country:  s.JPNICAdmin.Country,
 		}
 
-		var tech []service.UserJPNICView
+		var tech []service.JPNIC
 		for _, t := range s.JPNICTech {
-			tech = append(tech, service.UserJPNICView{
+			tech = append(tech, service.JPNIC{
 				ID:        t.ID,
 				Name:      t.Name,
 				NameEn:    t.NameEn,
@@ -88,14 +88,14 @@ func userViews(g core.Group) ([]service.UserView, error) {
 			})
 		}
 
-		var ips []service.UserIPView
+		var ips []service.IP
 		for _, ip := range s.IP {
 			if !*ip.Open {
 				continue
 			}
-			var plans []service.UserPlanView
+			var plans []service.Plan
 			for _, plan := range ip.Plan {
-				plans = append(plans, service.UserPlanView{
+				plans = append(plans, service.Plan{
 					ID:       plan.ID,
 					IPID:     plan.IPID,
 					Name:     plan.Name,
@@ -104,7 +104,7 @@ func userViews(g core.Group) ([]service.UserView, error) {
 					OneYear:  plan.OneYear,
 				})
 			}
-			ips = append(ips, service.UserIPView{
+			ips = append(ips, service.IP{
 				ID:      ip.ID,
 				Version: ip.Version,
 				Name:    ip.Name,
@@ -114,7 +114,7 @@ func userViews(g core.Group) ([]service.UserView, error) {
 			})
 		}
 
-		out = append(out, service.UserView{
+		out = append(out, service.Service{
 			ID:             s.ID,
 			ServiceID:      core.ServiceCode(s.GroupID, s.ServiceType, s.ServiceNumber),
 			ServiceType:    s.ServiceType,

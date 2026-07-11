@@ -20,8 +20,8 @@ func Get(c *gin.Context) {
 	// No group yet: the member list is just the user themselves.
 	if u.GroupID == nil {
 		c.JSON(http.StatusOK, gin.H{
-			"group":     group.Profile{},
-			"user_list": []user.Profile{user.ProfileFrom(u)},
+			"group":     group.Group{},
+			"user_list": []user.User{user.NewUser(u)},
 		})
 		return
 	}
@@ -32,7 +32,7 @@ func Get(c *gin.Context) {
 		return
 	}
 	if len(groupResult.Group) == 0 {
-		c.JSON(http.StatusOK, gin.H{"group": group.Profile{}, "user_list": []user.Profile{}})
+		c.JSON(http.StatusOK, gin.H{"group": group.Group{}, "user_list": []user.User{}})
 		return
 	}
 	g := groupResult.Group[0]
@@ -70,7 +70,7 @@ func Get(c *gin.Context) {
 		couponID = *g.CouponID
 	}
 
-	profile := group.Profile{
+	profile := group.Group{
 		ID:            g.ID,
 		Pass:          g.Pass,
 		ExpiredStatus: g.ExpiredStatus,
@@ -95,10 +95,10 @@ func Get(c *gin.Context) {
 		profile.AddAllow = g.AddAllow
 	}
 
-	var userList []user.Profile
+	var userList []user.User
 	if core.CanViewGroup(u.Level) {
 		for _, member := range g.Users {
-			userList = append(userList, user.ProfileFrom(member))
+			userList = append(userList, user.NewUser(member))
 		}
 	}
 
