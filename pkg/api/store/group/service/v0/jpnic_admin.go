@@ -19,3 +19,9 @@ func DeleteJPNICByAdmin(id uint) error {
 func UpdateJPNICByAdmin(input core.JPNICAdmin) error {
 	return store.DB().Model(&core.JPNICAdmin{Model: gorm.Model{ID: input.ID}}).Updates(input).Error
 }
+
+func GetJPNICAdmin(id uint) (core.JPNICAdmin, error) {
+	var admin core.JPNICAdmin
+	err := store.DB().First(&admin, id).Error
+	return admin, err
+}

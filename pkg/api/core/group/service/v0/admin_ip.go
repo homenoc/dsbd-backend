@@ -5,7 +5,6 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
-	dbIP "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/ip/v0"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
 	"log"
 	"net/http"
@@ -37,7 +36,7 @@ func AddIPByAdmin(c *gin.Context) {
 
 	resultIP[0].ServiceID = uint(id)
 
-	if err = dbService.JoinIP(resultIP[0]); err != nil {
+	if err = dbService.CreateIP(resultIP[0]); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
@@ -79,9 +78,9 @@ func UpdateIPByAdmin(c *gin.Context) {
 		return
 	}
 
-	before := dbIP.GetByID(uint(id))
-	if before.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: before.Err.Error()})
+	before, err := dbService.GetIP(uint(id))
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: err.Error()})
 		return
 	}
 
@@ -91,6 +90,6 @@ func UpdateIPByAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	noticeUpdateIPByAdmin(before.IP[0], input)
+	noticeUpdateIPByAdmin(before, input)
 	c.JSON(http.StatusOK, service.Result{})
 }

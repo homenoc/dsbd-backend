@@ -17,3 +17,9 @@ func DeleteJPNICTech(id uint) error {
 func UpdateJPNICTech(input core.JPNICTech) error {
 	return store.DB().Model(&core.JPNICTech{Model: gorm.Model{ID: input.ID}}).Updates(input).Error
 }
+
+func GetJPNICTech(id uint) (core.JPNICTech, error) {
+	var tech core.JPNICTech
+	err := store.DB().First(&tech, id).Error
+	return tech, err
+}

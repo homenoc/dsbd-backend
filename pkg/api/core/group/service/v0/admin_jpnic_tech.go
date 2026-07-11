@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
-	dbJPNICTech "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/jpnicTech/v0"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
 	"log"
 	"net/http"
@@ -70,18 +69,18 @@ func UpdateJPNICTechByAdmin(c *gin.Context) {
 		return
 	}
 
-	before := dbJPNICTech.GetByID(uint(id))
-	if before.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: before.Err.Error()})
+	before, err := dbService.GetJPNICTech(uint(id))
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: err.Error()})
 		return
 	}
 
 	input.ID = uint(id)
 
-	if err = dbJPNICTech.UpdateAll(input); err != nil {
+	if err = dbService.UpdateJPNICTech(input); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	noticeUpdateJPNICTechByAdmin(before.Tech[0], input)
+	noticeUpdateJPNICTechByAdmin(before, input)
 	c.JSON(http.StatusOK, common.Result{})
 }

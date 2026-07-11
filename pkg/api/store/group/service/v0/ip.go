@@ -6,7 +6,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func JoinIP(input core.IP) error {
+func CreateIP(input core.IP) error {
 	return store.DB().Create(&input).Error
 }
 
@@ -16,4 +16,16 @@ func DeleteIP(id uint) error {
 
 func UpdateIP(input core.IP) error {
 	return store.DB().Model(&core.IP{Model: gorm.Model{ID: input.ID}}).Updates(input).Error
+}
+
+func GetIP(id uint) (core.IP, error) {
+	var ip core.IP
+	err := store.DB().First(&ip, id).Error
+	return ip, err
+}
+
+func GetAllIP() ([]core.IP, error) {
+	var ips []core.IP
+	err := store.DB().Find(&ips).Error
+	return ips, err
 }
