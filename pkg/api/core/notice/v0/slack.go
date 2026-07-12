@@ -109,8 +109,14 @@ func changeText(before core.Notice, after notice.Input) string {
 		data += "Start Time: " + before.StartTime.In(jst).Format(layoutInput) + " => " + after.StartTime + "\n"
 	}
 
+	// after.EndTime == nil means "permanent"; only report it as a change when
+	// the stored end was NOT already the permanent sentinel (no-op updates on
+	// permanent notices used to print "End Time: ... => 無制限" every time).
+	const permanentEnd = "9999-12-31 23:59:59"
 	if after.EndTime == nil {
-		data += "End Time: " + before.EndTime.In(jst).Format(layoutInput) + " => 無制限\n"
+		if before.EndTime.In(jst).Format(layoutInput) != permanentEnd {
+			data += "End Time: " + before.EndTime.In(jst).Format(layoutInput) + " => 無制限\n"
+		}
 	} else if *after.EndTime != before.EndTime.In(jst).Format(layoutInput) {
 		data += "End Time: " + before.EndTime.In(jst).Format(layoutInput) + " => " + *after.EndTime + "\n"
 	}
