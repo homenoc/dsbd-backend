@@ -56,9 +56,12 @@ func GetByID(id uint) notice.ResultDatabase {
 }
 
 // GetActiveForUser returns notices currently in their display window that
-// target the given user or everyone (was Get(UIDOrAll, ...)). DB times are UTC.
+// target the given user or everyone (was Get(UIDOrAll, ...)). The driver
+// serializes both the stored values and this parameter in the same loc
+// (DSN loc=Local), so plain time.Now() compares wall-clocks consistently —
+// the old +9h shift made notices go live/expire 9 hours early.
 func GetActiveForUser(userID uint) notice.ResultDatabase {
-	dateTime := time.Now().Add(9 * time.Hour)
+	dateTime := time.Now()
 	var notices []core.Notice
 	err := store.DB().Where("start_time < ? AND ? < end_time", dateTime, dateTime).
 		Joins("left outer join notice_user on notices.id = notice_user.notice_id").

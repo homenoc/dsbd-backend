@@ -117,7 +117,43 @@
         "name": "STUIX"
       }
     ],
-    "mail_template": [],
+    "mail_template": [
+      {
+        "id": "new_chat",
+        "message": "Supportより新着メッセージがあります。",
+        "title": "Supportより新着メッセージ"
+      },
+      {
+        "id": "notice",
+        "message": "ご担当者様\n\nいつもお世話になっております。\nHomeNOC Operators' Group サポート担当です。\n\nお知らせがございます。\n\n-------------------------------------\n[{TITLE}]\n{BODY}\n-------------------------------------\n\n (本情報は、Home NOC Service Onlineでもご確認いただけます。)",
+        "title": "{TITLE}"
+      },
+      {
+        "id": "open_connection",
+        "message": "{GROUP_NAME}様\n\nいつもお世話になっております。\nHomeNOC Operators' Group サポート担当です。\n\n開通処理を行いました。\nhttps://dashboard.homenoc.ad.jp より、必要な情報を閲覧可能となっております。\nまた、一般会員の方(学生会員ではない方)は、上記ダッシュボードより会費のお支払いをお願いいたします。\n\n以上、よろしくお願いいたします。",
+        "title": "開通のお知らせ"
+      },
+      {
+        "id": "pass_service",
+        "message": "{GROUP_NAME}様\n\nいつもお世話になっております。\nHomeNOC Operators' Group サポート担当です。\n\n内容の確認が完了いたしました。\nhttps://dashboard.homenoc.ad.jp より、追加の情報をご記入ください。\n\n以上、よろしくお願いいたします。",
+        "title": "確認完了のお知らせ"
+      },
+      {
+        "id": "pass_the_examination",
+        "message": "{GROUP_NAME}様\n\nいつもお世話になっております。\nHomeNOC Operators' Group サポート担当です。\n\nグループ申請の内容を確認し、審査を通過したことをご連絡致します。\nhttps://dashboard.homenoc.ad.jp より、追加の情報をご記入ください。\n\n以上、よろしくお願いいたします。",
+        "title": "審査通過のご連絡"
+      },
+      {
+        "id": "new_ticket_from_admin",
+        "message": "{GROUP_NAME}様\n\nいつもお世話になっております。\nHomeNOC Operators' Group サポート担当です。\n\n運営から確認事項などがございます。\nhttps://dashboard.homenoc.ad.jp のチケット(チャット)ページより、ご確認の上ご返信のほどお願いします。",
+        "title": "運営からのお問い合わせ"
+      },
+      {
+        "id": "signature",
+        "message": "\n\n\n------------------------------------------------\nAS59105 Home NOC Operators Group\nUser Support \u003csupport@homenoc.ad.jp\u003e\n\nX : https://x.com/AS59105\nFacebook: https://www.facebook.com/AS59105/\n------------------------------------------------",
+        "title": ""
+      }
+    ],
     "member_type": [
       {
         "id": 1,

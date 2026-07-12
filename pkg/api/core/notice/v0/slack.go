@@ -79,6 +79,10 @@ func noticeSlackReplaceByAdmin(before core.Notice, after notice.Input) {
 
 func changeText(before core.Notice, after notice.Input) string {
 	data := ""
+	// Render stored instants in the configured timezone. (The old hard-coded
+	// +9h only happened to look right on a UTC host; on a JST host it showed
+	// times 9 hours ahead and made the comparison flag unchanged times.)
+	jst, _ := time.LoadLocation(config.Conf.Controller.TimeZone)
 	//Title
 	if after.Title != "" && after.Title != before.Title {
 		data += "Title: " + before.Title + " => " + after.Title + "\n"
@@ -101,14 +105,14 @@ func changeText(before core.Notice, after notice.Input) string {
 	//	data += "NOCID: " + strconv.Itoa(int(before.NOCID)) + " => " + strconv.Itoa(int(after.NOCID)) + "\n"
 	//}
 
-	if after.StartTime != before.StartTime.Add(9*time.Hour).Format(layoutInput) {
-		data += "Start Time: " + before.StartTime.Add(9*time.Hour).Format(layoutInput) + " => " + after.StartTime + "\n"
+	if after.StartTime != before.StartTime.In(jst).Format(layoutInput) {
+		data += "Start Time: " + before.StartTime.In(jst).Format(layoutInput) + " => " + after.StartTime + "\n"
 	}
 
 	if after.EndTime == nil {
-		data += "End Time: " + before.EndTime.Add(9*time.Hour).Format(layoutInput) + " => 無制限\n"
-	} else if *after.EndTime != before.EndTime.Add(9*time.Hour).Format(layoutInput) {
-		data += "End Time: " + before.EndTime.Add(9*time.Hour).Format(layoutInput) + " => " + *after.EndTime + "\n"
+		data += "End Time: " + before.EndTime.In(jst).Format(layoutInput) + " => 無制限\n"
+	} else if *after.EndTime != before.EndTime.In(jst).Format(layoutInput) {
+		data += "End Time: " + before.EndTime.In(jst).Format(layoutInput) + " => " + *after.EndTime + "\n"
 	}
 
 	if *after.Everyone != *before.Everyone {
