@@ -29,28 +29,37 @@ func UserAuthorization(data core.Token) auth.UserResult {
 	return auth.UserResult{User: tokens[0].User, Err: nil}
 }
 
-// GroupAuthorization is UserAuthorization plus group-membership checks.
+// CheckGroup runs the group-membership checks that GroupAuthorization layers
+// on top of UserAuthorization: membership, the unexamined gate (errorType 0
+// rejects unexamined groups; 1 permits them), and group expiry. Handlers whose
+// auth flavor depends on the request (personal vs group ticket) run behind
+// middleware.UserAuth and call this for their group branch.
+func CheckGroup(user core.User, errorType uint) error {
+	if user.GroupID == nil {
+		return fmt.Errorf("no group")
+	}
+
+	// 未審査＋errorType = 0の場合
+	if !*user.Group.Pass && errorType == 0 {
+		return fmt.Errorf("error: unexamined")
+	}
+	// アカウント失効時の動作
+	if msg := core.ExpiredMessage(*user.Group.ExpiredStatus); msg != "" {
+		return errors.New(msg)
+	}
+	return nil
+}
+
+// GroupAuthorization is UserAuthorization plus CheckGroup.
 // errorType 0: 未審査の場合はエラーを返す(厳格)　1: 未審査の場合エラーを返さない
 func GroupAuthorization(errorType uint, data core.Token) auth.UserResult {
 	result := UserAuthorization(data)
 	if result.Err != nil {
 		return result
 	}
-	user := result.User
-
-	if user.GroupID == nil {
-		return auth.UserResult{Err: fmt.Errorf("no group")}
+	if err := CheckGroup(result.User, errorType); err != nil {
+		return auth.UserResult{Err: err}
 	}
-
-	// 未審査＋errorType = 0の場合
-	if !*user.Group.Pass && errorType == 0 {
-		return auth.UserResult{Err: fmt.Errorf("error: unexamined")}
-	}
-	// アカウント失効時の動作
-	if msg := core.ExpiredMessage(*user.Group.ExpiredStatus); msg != "" {
-		return auth.UserResult{Err: errors.New(msg)}
-	}
-
 	return result
 }
 

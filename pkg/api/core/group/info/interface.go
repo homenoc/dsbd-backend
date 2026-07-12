@@ -1,6 +1,3 @@
-// Package info holds the user-facing read API: a single GET /info that
-// returns everything the web frontend needs (owner decision: the user side is
-// read-only, so one bootstrap payload beats per-resource endpoints here).
 package info
 
 import (
@@ -21,8 +18,6 @@ type User struct {
 	AntisocialCheckAt *time.Time `json:"antisocial_check_at"`
 }
 
-// Group includes membership/billing status; address-level fields are filled
-// only for levels that may manage the group.
 type Group struct {
 	ID            uint       `json:"id"`
 	Agree         *bool      `json:"agree"`
@@ -68,18 +63,6 @@ type Ticket struct {
 	Solved    *bool     `json:"solved"`
 }
 
-type Request struct {
-	ID        uint      `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	GroupID   uint      `json:"group_id"`
-	UserID    uint      `json:"user_id"`
-	Title     string    `json:"title"`
-	Admin     *bool     `json:"admin"`
-	Chat      []Chat    `json:"chat"`
-	Solved    *bool     `json:"solved"`
-	Reject    *bool     `json:"reject"`
-}
-
 type Chat struct {
 	CreatedAt time.Time `json:"created_at"`
 	TicketID  uint      `json:"ticket_id"`
@@ -88,8 +71,38 @@ type Chat struct {
 	Data      string    `json:"data" gorm:"size:65535"`
 }
 
-// JPNIC is a JPNIC contact as shown to users. The admin contact omits its
-// address fields on the wire.
+type Info struct {
+	ServiceID      string   `json:"service_id"`
+	Service        string   `json:"service"`
+	Assign         bool     `json:"assign"`
+	ASN            uint     `json:"asn"`
+	V4             []string `json:"v4"`
+	V6             []string `json:"v6"`
+	NOC            string   `json:"noc"`
+	NOCIP          string   `json:"noc_ip"`
+	TermIP         string   `json:"term_ip"`
+	RFC8950        bool     `json:"rfc8950"`
+	LinkV4Our      string   `json:"link_v4_our"`
+	LinkV4Your     string   `json:"link_v4_your"`
+	LinkV6Our      string   `json:"link_v6_our"`
+	LinkV6Your     string   `json:"link_v6_your"`
+	Fee            string   `json:"fee"`
+	Org            string   `json:"org"`
+	OrgEn          string   `json:"org_en"`
+	PostCode       string   `json:"postcode"`
+	Address        string   `json:"address"`
+	AddressEn      string   `json:"address_en"`
+	JPNICAdmin     JPNIC    `json:"jpnic_admin"`
+	JPNICTech      []JPNIC  `json:"jpnic_tech"`
+	AveUpstream    uint     `json:"avg_upstream"`
+	MaxUpstream    uint     `json:"max_upstream"`
+	AveDownstream  uint     `json:"avg_downstream"`
+	MaxDownstream  uint     `json:"max_downstream"`
+	MaxBandWidthAS string   `json:"max_bandwidth_as"`
+	BGPRouteV4     string   `json:"bgp_route_v4"`
+	BGPRouteV6     string   `json:"bgp_route_v6"`
+}
+
 type JPNIC struct {
 	ID        uint   `json:"id"`
 	Name      string `json:"name"`
@@ -126,8 +139,6 @@ type Plan struct {
 	OneYear  uint   `json:"one_year"`
 }
 
-// Service carries the capability flags from the type registry alongside the
-// user's own service data.
 type Service struct {
 	ID             uint    `json:"id"`
 	ServiceID      string  `json:"service_id"`
@@ -159,38 +170,16 @@ type Connection struct {
 	Open      bool   `json:"open"`
 }
 
-// Info is the derived network summary of an opened connection — the
-// contract-disclosure data the web Info page renders.
-type Info struct {
-	ServiceID      string   `json:"service_id"`
-	Service        string   `json:"service"`
-	Assign         bool     `json:"assign"`
-	ASN            uint     `json:"asn"`
-	V4             []string `json:"v4"`
-	V6             []string `json:"v6"`
-	NOC            string   `json:"noc"`
-	NOCIP          string   `json:"noc_ip"`
-	TermIP         string   `json:"term_ip"`
-	RFC8950        bool     `json:"rfc8950"`
-	LinkV4Our      string   `json:"link_v4_our"`
-	LinkV4Your     string   `json:"link_v4_your"`
-	LinkV6Our      string   `json:"link_v6_our"`
-	LinkV6Your     string   `json:"link_v6_your"`
-	Fee            string   `json:"fee"`
-	Org            string   `json:"org"`
-	OrgEn          string   `json:"org_en"`
-	PostCode       string   `json:"postcode"`
-	Address        string   `json:"address"`
-	AddressEn      string   `json:"address_en"`
-	JPNICAdmin     JPNIC    `json:"jpnic_admin"`
-	JPNICTech      []JPNIC  `json:"jpnic_tech"`
-	AveUpstream    uint     `json:"avg_upstream"`
-	MaxUpstream    uint     `json:"max_upstream"`
-	AveDownstream  uint     `json:"avg_downstream"`
-	MaxDownstream  uint     `json:"max_downstream"`
-	MaxBandWidthAS string   `json:"max_bandwidth_as"`
-	BGPRouteV4     string   `json:"bgp_route_v4"`
-	BGPRouteV6     string   `json:"bgp_route_v6"`
+type Request struct {
+	ID        uint      `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	GroupID   uint      `json:"group_id"`
+	UserID    uint      `json:"user_id"`
+	Title     string    `json:"title"`
+	Admin     *bool     `json:"admin"`
+	Chat      []Chat    `json:"chat"`
+	Solved    *bool     `json:"solved"`
+	Reject    *bool     `json:"reject"`
 }
 
 type Result struct {

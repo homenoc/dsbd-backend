@@ -314,9 +314,12 @@ func NewUserRouter() *gin.Engine {
 			//
 			// Support/Request
 			//
-			v1.POST("/support", ticket.Create)
-			v1.POST("/request", ticket.Request)
-			v1.PUT("/support/:id", ticket.Update)
+			// Create/Update pick user-vs-group auth per request, so they run
+			// behind UserAuth and do the group checks in-handler (auth.CheckGroup).
+			// The WS route stays self-authenticating: tokens arrive as query params.
+			v1.POST("/support", middleware.UserAuth, ticket.Create)
+			v1.POST("/request", middleware.GroupAuth(1), ticket.Request)
+			v1.PUT("/support/:id", middleware.UserAuth, ticket.Update)
 
 			// Group Delete
 			//v1.DELETE("/group", group.Delete)
