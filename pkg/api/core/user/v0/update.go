@@ -31,7 +31,7 @@ func replaceUser(serverData core.User, input user.Input) (core.User, error) {
 		if !strings.Contains(input.Email, "@") {
 			return core.User{}, fmt.Errorf("wrong email address")
 		}
-		tmp := dbUser.Get(user.Email, &core.User{Email: input.Email})
+		tmp := dbUser.GetByEmail(input.Email)
 		if tmp.Err != nil {
 			return serverData, tmp.Err
 		}
@@ -67,7 +67,7 @@ func replaceUser(serverData core.User, input user.Input) (core.User, error) {
 
 	//Level
 	if input.Level != 0 {
-		if !(1 < input.Level && input.Level < 5) {
+		if !(core.LevelEditor <= input.Level && input.Level <= core.LevelGuest) {
 			return core.User{}, fmt.Errorf("error: user level is invalid")
 		} else {
 			serverData.Level = input.Level
@@ -93,7 +93,7 @@ func updateAdminUser(input, replace core.User) (core.User, error) {
 		if !strings.Contains(input.Email, "@") {
 			return core.User{}, fmt.Errorf("wrong email address")
 		}
-		tmp := dbUser.Get(user.Email, &core.User{Email: input.Email})
+		tmp := dbUser.GetByEmail(input.Email)
 		if tmp.Err != nil {
 			return replace, tmp.Err
 		}

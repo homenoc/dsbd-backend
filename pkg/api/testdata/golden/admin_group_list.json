@@ -1,0 +1,75 @@
+{
+  "status": 200,
+  "body": {
+    "group": [
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 1,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "add_allow": true,
+        "address": "東京都千代田区",
+        "address_en": "Chiyoda-ku, Tokyo",
+        "agree": true,
+        "comment": "",
+        "contract": "",
+        "country": "Japan",
+        "coupon_id": null,
+        "expired_status": 0,
+        "member_expired": null,
+        "member_type": 1,
+        "memos": [],
+        "org": "テスト組織",
+        "org_en": "Test Organization",
+        "pass": true,
+        "postcode": "100-0001",
+        "question": "開発用テストグループです",
+        "services": null,
+        "stripe_customer_id": null,
+        "stripe_subscription_id": null,
+        "tel": "03-1234-5678",
+        "tickets": null,
+        "users": [
+          {
+            "CreatedAt": "\u003cTIME\u003e",
+            "DeletedAt": null,
+            "ID": 1,
+            "UpdatedAt": "\u003cTIME\u003e",
+            "antisocial_check": false,
+            "antisocial_check_at": null,
+            "email": "master@example.com",
+            "expired_status": 0,
+            "group": null,
+            "group_id": 1,
+            "level": 1,
+            "mail_verify": true,
+            "name": "マスターユーザー",
+            "name_en": "Master User",
+            "notice": null,
+            "tickets": null,
+            "tokens": null
+          },
+          {
+            "CreatedAt": "\u003cTIME\u003e",
+            "DeletedAt": null,
+            "ID": 2,
+            "UpdatedAt": "\u003cTIME\u003e",
+            "antisocial_check": false,
+            "antisocial_check_at": null,
+            "email": "member@example.com",
+            "expired_status": 0,
+            "group": null,
+            "group_id": 1,
+            "level": 2,
+            "mail_verify": true,
+            "name": "一般ユーザー",
+            "name_en": "Member User",
+            "notice": null,
+            "tickets": null,
+            "tokens": null
+          }
+        ]
+      }
+    ]
+  }
+}

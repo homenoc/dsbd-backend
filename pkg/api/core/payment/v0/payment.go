@@ -2,18 +2,15 @@ package v0
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/homenoc/dsbd-backend/pkg/api/core"
-	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/payment"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
+	"github.com/homenoc/dsbd-backend/pkg/api/middleware"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	"github.com/stripe/stripe-go/v73"
 	billingSession "github.com/stripe/stripe-go/v73/billingportal/session"
 	"github.com/stripe/stripe-go/v73/checkout/session"
 	"github.com/stripe/stripe-go/v73/customer"
-	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"strconv"
@@ -21,9 +18,6 @@ import (
 )
 
 func PostSubscribeGettingURL(c *gin.Context) {
-	userToken := c.Request.Header.Get("USER_TOKEN")
-	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
-
 	var input payment.Input
 	err := c.BindJSON(&input)
 	if err != nil {
@@ -38,38 +32,34 @@ func PostSubscribeGettingURL(c *gin.Context) {
 		return
 	}
 
-	resultAuth := auth.GroupAuthorization(0, core.Token{UserToken: userToken, AccessToken: accessToken})
-	if resultAuth.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAuth.Err.Error()})
-		return
-	}
+	user := middleware.CurrentUser(c)
 
 	// exist check: stripeCustomerID
-	if resultAuth.User.Group.StripeCustomerID == nil || *resultAuth.User.Group.StripeCustomerID == "" {
+	if user.Group.StripeCustomerID == nil || *user.Group.StripeCustomerID == "" {
 		params := &stripe.CustomerParams{
-			Description: stripe.String("[" + strconv.Itoa(int(resultAuth.User.Group.ID)) + "] Org: " + resultAuth.User.Group.Org + "(" + resultAuth.User.Group.OrgEn + ")"),
+			Description: stripe.String("[" + strconv.Itoa(int(user.Group.ID)) + "] Org: " + user.Group.Org + "(" + user.Group.OrgEn + ")"),
 		}
 		cus, err := customer.New(params)
 		if err != nil {
 			noticePaymentError(false, []string{
-				"User: [" + strconv.Itoa(int(resultAuth.User.ID)) + "] " + resultAuth.User.Name,
-				"Group: [" + strconv.Itoa(int(resultAuth.User.Group.ID)) + "] " + resultAuth.User.Group.Org,
+				"User: [" + strconv.Itoa(int(user.ID)) + "] " + user.Name,
+				"Group: [" + strconv.Itoa(int(user.Group.ID)) + "] " + user.Group.Org,
 				"Type: Create Customer", "Error: " + err.Error()},
 			)
 			log.Println("Error: " + err.Error())
 		}
-		err = dbGroup.Update(group.UpdateAll, core.Group{Model: gorm.Model{ID: resultAuth.User.Group.ID}, StripeCustomerID: &cus.ID})
+		err = dbGroup.UpdateStripeCustomerID(user.Group.ID, cus.ID)
 		noticePaymentLog(stripe.Event{
 			ID:   cus.ID,
 			Type: "stripe customer追加",
 		})
-		resultAuth.User.Group.StripeCustomerID = &cus.ID
+		user.Group.StripeCustomerID = &cus.ID
 	}
 
 	date := time.Now()
 	params := &stripe.CheckoutSessionParams{
 		Mode:     stripe.String(string(stripe.CheckoutSessionModeSubscription)),
-		Customer: resultAuth.User.Group.StripeCustomerID,
+		Customer: user.Group.StripeCustomerID,
 		LineItems: []*stripe.CheckoutSessionLineItemParams{
 			{
 				Price:    stripe.String(membershipWithTemplate.PriceID),
@@ -82,10 +72,10 @@ func PostSubscribeGettingURL(c *gin.Context) {
 		SubscriptionData: &stripe.CheckoutSessionSubscriptionDataParams{
 			Metadata: map[string]string{
 				"type":     "membership",
-				"group_id": strconv.Itoa(int(resultAuth.User.Group.ID)),
-				"name":     strconv.Itoa(int(resultAuth.User.ID)),
-				"log": "[" + strconv.Itoa(int(resultAuth.User.ID)) + "] " + resultAuth.User.Name +
-					"_[" + strconv.Itoa(int(resultAuth.User.Group.ID)) + "] " + resultAuth.User.Group.Org,
+				"group_id": strconv.Itoa(int(user.Group.ID)),
+				"name":     strconv.Itoa(int(user.ID)),
+				"log": "[" + strconv.Itoa(int(user.ID)) + "] " + user.Name +
+					"_[" + strconv.Itoa(int(user.Group.ID)) + "] " + user.Group.Org,
 			},
 		},
 	}
@@ -101,23 +91,16 @@ func PostSubscribeGettingURL(c *gin.Context) {
 }
 
 func GetBillingPortalURL(c *gin.Context) {
-	userToken := c.Request.Header.Get("USER_TOKEN")
-	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
-
-	resultAuth := auth.GroupAuthorization(0, core.Token{UserToken: userToken, AccessToken: accessToken})
-	if resultAuth.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAuth.Err.Error()})
-		return
-	}
+	user := middleware.CurrentUser(c)
 
 	// exist check: stripeCustomerID
-	if resultAuth.User.Group.StripeCustomerID == nil || *resultAuth.User.Group.StripeCustomerID == "" {
+	if user.Group.StripeCustomerID == nil || *user.Group.StripeCustomerID == "" {
 		c.JSON(http.StatusNotFound, common.Error{Error: "CustomerID is not found..."})
 		return
 	}
 
 	params := &stripe.BillingPortalSessionParams{
-		Customer:  stripe.String(*resultAuth.User.Group.StripeCustomerID),
+		Customer:  stripe.String(*user.Group.StripeCustomerID),
 		ReturnURL: stripe.String(config.Conf.Controller.User.ReturnURL),
 	}
 

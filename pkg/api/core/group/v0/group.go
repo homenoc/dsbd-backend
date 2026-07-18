@@ -3,10 +3,9 @@ package v0
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
-	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
+	"github.com/homenoc/dsbd-backend/pkg/api/middleware"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"gorm.io/gorm"
@@ -18,8 +17,6 @@ import (
 // 参照関連のエラーが出る可能性あるかもしれない
 func Add(c *gin.Context) {
 	var input group.Input
-	userToken := c.Request.Header.Get("USER_TOKEN")
-	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
 	err := c.BindJSON(&input)
 	if err != nil {
@@ -28,25 +25,21 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	userResult := auth.UserAuthorization(core.Token{UserToken: userToken, AccessToken: accessToken})
-	if userResult.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: userResult.Err.Error()})
-		return
-	}
+	user := middleware.CurrentUser(c)
 
 	// check authority
-	if userResult.User.Level > 2 {
+	if !core.CanManageServices(user.Level) {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: "You don't have authority this operation"})
 		return
 	}
 
-	if userResult.User.GroupID != nil {
+	if user.GroupID != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: "error: You can't create new group"})
 		return
 	}
 
 	// double check
-	resultDB := dbGroup.Get(group.Org, &core.Group{Org: input.Org})
+	resultDB := dbGroup.GetByOrg(input.Org)
 	if resultDB.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: "error: can't get data from db."})
 		return
@@ -79,7 +72,7 @@ func Add(c *gin.Context) {
 		AddressEn:     input.AddressEn,
 		Tel:           input.Tel,
 		Country:       input.Country,
-		ExpiredStatus: &[]uint{0}[0],
+		ExpiredStatus: &[]uint{core.ExpiredNone}[0],
 		Contract:      input.Contract,
 		MemberType:    memberType,
 		MemberExpired: memberExpired,
@@ -93,9 +86,9 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	noticeAddGroup(userResult.User, input)
+	noticeAddGroup(user, input)
 
-	if err = dbUser.Update(user.UpdateGID, &core.User{Model: gorm.Model{ID: userResult.User.ID}, GroupID: &groupData.ID}); err != nil {
+	if err = dbUser.UpdateGID(&core.User{Model: gorm.Model{ID: user.ID}, GroupID: &groupData.ID}); err != nil {
 		log.Println(dbGroup.Delete(&core.Group{Model: gorm.Model{ID: groupData.ID}}))
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 	} else {

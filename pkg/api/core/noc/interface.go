@@ -4,13 +4,6 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 )
 
-const (
-	ID        = 0
-	Name      = 1
-	Enable    = 2
-	UpdateAll = 150
-)
-
 type ResultOneUser struct {
 	ID       uint   `json:"ID"`
 	Name     string `json:"name"`

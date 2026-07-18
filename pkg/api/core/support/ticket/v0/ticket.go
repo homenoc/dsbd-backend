@@ -11,9 +11,9 @@ import (
 	controller "github.com/homenoc/dsbd-backend/pkg/api/core/controller/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support/ticket"
+	"github.com/homenoc/dsbd-backend/pkg/api/middleware"
 	dbChat "github.com/homenoc/dsbd-backend/pkg/api/store/support/chat/v0"
 	dbTicket "github.com/homenoc/dsbd-backend/pkg/api/store/support/ticket/v0"
-	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"strconv"
@@ -24,8 +24,6 @@ const timeLayout = "2006-01-02 15:04:05 JST"
 
 func Create(c *gin.Context) {
 	var input support.FirstInput
-	userToken := c.Request.Header.Get("USER_TOKEN")
-	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
 	err := c.BindJSON(&input)
 	if err != nil {
@@ -49,29 +47,24 @@ func Create(c *gin.Context) {
 	}
 	var userValue, groupValue string
 
+	u := middleware.CurrentUser(c)
+
 	// isn't group
 	if !input.IsGroup {
-		result := auth.UserAuthorization(core.Token{UserToken: userToken, AccessToken: accessToken})
-		if result.Err != nil {
-			c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
-			return
-		}
 		resultTicket.GroupID = nil
-		resultTicket.UserID = &result.User.ID
-		userValue = "[" + strconv.Itoa(int(result.User.ID)) + "] " + result.User.Name + " (" + result.User.NameEn + ")"
+		resultTicket.UserID = &u.ID
+		userValue = "[" + strconv.Itoa(int(u.ID)) + "] " + u.Name + " (" + u.NameEn + ")"
 		groupValue = "個人ユーザ"
 	} else {
 		//is group
-		// Group authentication
-		result := auth.GroupAuthorization(1, core.Token{UserToken: userToken, AccessToken: accessToken})
-		if result.Err != nil {
-			c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
+		if err := auth.CheckGroup(u, 1); err != nil {
+			c.JSON(http.StatusUnauthorized, common.Error{Error: err.Error()})
 			return
 		}
-		resultTicket.GroupID = result.User.GroupID
-		resultTicket.UserID = &result.User.ID
-		userValue = "[" + strconv.Itoa(int(result.User.ID)) + "] " + result.User.Name + "(" + result.User.NameEn + ")"
-		groupValue = "[" + strconv.Itoa(int(result.User.Group.ID)) + "] " + result.User.Group.Org + "(" + result.User.Group.OrgEn + ")"
+		resultTicket.GroupID = u.GroupID
+		resultTicket.UserID = &u.ID
+		userValue = "[" + strconv.Itoa(int(u.ID)) + "] " + u.Name + "(" + u.NameEn + ")"
+		groupValue = "[" + strconv.Itoa(int(u.Group.ID)) + "] " + u.Group.Org + "(" + u.Group.OrgEn + ")"
 	}
 
 	// Tickets DBに登録
@@ -101,8 +94,6 @@ func Create(c *gin.Context) {
 
 func Request(c *gin.Context) {
 	var input support.FirstInput
-	userToken := c.Request.Header.Get("USER_TOKEN")
-	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
 	err := c.BindJSON(&input)
 	if err != nil {
@@ -111,12 +102,7 @@ func Request(c *gin.Context) {
 		return
 	}
 
-	// Group authentication
-	result := auth.GroupAuthorization(1, core.Token{UserToken: userToken, AccessToken: accessToken})
-	if result.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
-		return
-	}
+	u := middleware.CurrentUser(c)
 
 	// input check
 	if err = check(input); err != nil {
@@ -125,8 +111,8 @@ func Request(c *gin.Context) {
 	}
 
 	resultTicket := &core.Ticket{
-		GroupID:       result.User.GroupID,
-		UserID:        &result.User.ID,
+		GroupID:       u.GroupID,
+		UserID:        &u.ID,
 		Solved:        &[]bool{false}[0],
 		Title:         input.Title,
 		Admin:         &[]bool{false}[0],
@@ -153,8 +139,8 @@ func Request(c *gin.Context) {
 		return
 	}
 
-	userValue := "[" + strconv.Itoa(int(result.User.ID)) + "] " + result.User.Name + "(" + result.User.NameEn + ")"
-	groupValue := "[" + strconv.Itoa(int(result.User.Group.ID)) + "] " + result.User.Group.Org + "(" + result.User.Group.OrgEn + ")"
+	userValue := "[" + strconv.Itoa(int(u.ID)) + "] " + u.Name + "(" + u.NameEn + ")"
+	groupValue := "[" + strconv.Itoa(int(u.Group.ID)) + "] " + u.Group.Org + "(" + u.Group.OrgEn + ")"
 
 	//HomeNOC Slackに送信
 	noticeAdd("[新規] 追加・変更手続き", userValue, groupValue, input)
@@ -164,9 +150,6 @@ func Request(c *gin.Context) {
 
 func Update(c *gin.Context) {
 	var input core.Ticket
-
-	userToken := c.Request.Header.Get("USER_TOKEN")
-	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
 	err := c.BindJSON(&input)
 	if err != nil {
@@ -182,7 +165,7 @@ func Update(c *gin.Context) {
 	}
 
 	// Tickets DBからデータを取得
-	ticketResult := dbTicket.Get(ticket.ID, &core.Ticket{Model: gorm.Model{ID: uint(id)}})
+	ticketResult := dbTicket.GetByID(uint(id))
 	if ticketResult.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: ticketResult.Err.Error()})
 		return
@@ -191,30 +174,35 @@ func Update(c *gin.Context) {
 	updateTicketData := ticketResult.Tickets[0]
 	var userValue, groupValue string
 
+	u := middleware.CurrentUser(c)
+
 	// isn't group
 	if ticketResult.Tickets[0].GroupID == nil {
-		result := auth.UserAuthorization(core.Token{UserToken: userToken, AccessToken: accessToken})
-		if result.Err != nil {
-			c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
+		// 自分のチケット以外は不可 (WSハンドラと同じ基準)
+		if ticketResult.Tickets[0].UserID != nil && *ticketResult.Tickets[0].UserID != u.ID {
+			c.JSON(http.StatusForbidden, common.Error{Error: "error: not your ticket"})
 			return
 		}
-		userValue = "[" + strconv.Itoa(int(result.User.ID)) + "] " + result.User.Name + "(" + result.User.NameEn + ")"
+		userValue = "[" + strconv.Itoa(int(u.ID)) + "] " + u.Name + "(" + u.NameEn + ")"
 	} else {
 		//is group
-		// Group authentication
-		result := auth.GroupAuthorization(1, core.Token{UserToken: userToken, AccessToken: accessToken})
-		if result.Err != nil {
-			c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
+		if err := auth.CheckGroup(u, 1); err != nil {
+			c.JSON(http.StatusUnauthorized, common.Error{Error: err.Error()})
 			return
 		}
-		userValue = "[" + strconv.Itoa(int(result.User.ID)) + "] " + result.User.Name + "(" + result.User.NameEn + ")"
-		groupValue = "[" + strconv.Itoa(int(result.User.Group.ID)) + "] " + result.User.Group.Org + "(" + result.User.Group.OrgEn + ")"
+		// 自グループのチケット以外は不可 (WSハンドラと同じ基準)
+		if *ticketResult.Tickets[0].GroupID != *u.GroupID {
+			c.JSON(http.StatusForbidden, common.Error{Error: "error: not your group's ticket"})
+			return
+		}
+		userValue = "[" + strconv.Itoa(int(u.ID)) + "] " + u.Name + "(" + u.NameEn + ")"
+		groupValue = "[" + strconv.Itoa(int(u.Group.ID)) + "] " + u.Group.Org + "(" + u.Group.OrgEn + ")"
 	}
 
 	updateTicketData.Solved = input.Solved
 
 	// Ticketのアップデート
-	err = dbTicket.Update(ticket.UpdateAll, updateTicketData)
+	err = dbTicket.Update(updateTicketData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
@@ -254,7 +242,7 @@ func GetWebSocket(c *gin.Context) {
 		return
 	}
 
-	ticketResult := dbTicket.Get(ticket.ID, &core.Ticket{Model: gorm.Model{ID: uint(id)}})
+	ticketResult := dbTicket.GetByID(uint(id))
 	if ticketResult.Err != nil {
 		log.Println("ws:// support error: db error")
 		conn.WriteMessage(websocket.TextMessage, []byte("error: db error"))
@@ -282,15 +270,16 @@ func GetWebSocket(c *gin.Context) {
 		groupID = *ticketResult.Tickets[0].GroupID
 	}
 
-	// WebSocket送信
-	support.Clients[&support.WebSocket{
+	// WebSocket送信 (登録と同一ポインタで削除しないと永遠に消えない)
+	client := &support.WebSocket{
 		TicketID: uint(id),
 		Admin:    false,
 		UserID:   result.User.ID,
 		UserName: result.User.Name,
 		GroupID:  groupID,
 		Socket:   conn,
-	}] = true
+	}
+	support.Clients[client] = true
 
 	//WebSocket受信
 	for {
@@ -298,14 +287,7 @@ func GetWebSocket(c *gin.Context) {
 		err = conn.ReadJSON(&msg)
 		if err != nil {
 			log.Printf("error: %v", err)
-			delete(support.Clients, &support.WebSocket{
-				TicketID: uint(id),
-				Admin:    false,
-				UserID:   result.User.ID,
-				UserName: result.User.Name,
-				GroupID:  groupID,
-				Socket:   conn,
-			})
+			delete(support.Clients, client)
 			break
 		}
 		// 入力されたデータをTokenにて認証

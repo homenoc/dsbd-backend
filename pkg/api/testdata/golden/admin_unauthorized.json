@@ -1,0 +1,45 @@
+{
+  "status": 200,
+  "body": {
+    "users": [
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 1,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "antisocial_check": false,
+        "antisocial_check_at": null,
+        "email": "master@example.com",
+        "expired_status": 0,
+        "group": null,
+        "group_id": 1,
+        "level": 1,
+        "mail_verify": true,
+        "name": "マスターユーザー",
+        "name_en": "Master User",
+        "notice": null,
+        "tickets": null,
+        "tokens": null
+      },
+      {
+        "CreatedAt": "\u003cTIME\u003e",
+        "DeletedAt": null,
+        "ID": 2,
+        "UpdatedAt": "\u003cTIME\u003e",
+        "antisocial_check": false,
+        "antisocial_check_at": null,
+        "email": "member@example.com",
+        "expired_status": 0,
+        "group": null,
+        "group_id": 1,
+        "level": 2,
+        "mail_verify": true,
+        "name": "一般ユーザー",
+        "name_en": "Member User",
+        "notice": null,
+        "tickets": null,
+        "tokens": null
+      }
+    ]
+  }
+}

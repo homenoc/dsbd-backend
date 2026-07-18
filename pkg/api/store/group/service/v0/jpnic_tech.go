@@ -1,58 +1,32 @@
 package v0
 
 import (
-	"fmt"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
 	"gorm.io/gorm"
-	"log"
-	"time"
 )
 
 func JoinJPNICTech(input core.JPNICTech) error {
-	db, err := store.ConnectDB()
-	if err != nil {
-		log.Println("database connection error")
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	defer dbSQL.Close()
-
-	return db.Create(&input).Error
+	return store.DB().Create(&input).Error
 }
 
 func DeleteJPNICTech(id uint) error {
-	db, err := store.ConnectDB()
-	if err != nil {
-		log.Println("database connection error")
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	defer dbSQL.Close()
-
-	return db.Delete(core.JPNICTech{Model: gorm.Model{ID: id}}).Error
+	return store.DB().Delete(core.JPNICTech{Model: gorm.Model{ID: id}}).Error
 }
 
+// UpdateJPNICTech writes the editable JPNIC tech-contact columns from a full
+// object. Value-typed columns are always written (clearing persists);
+// service_id structural flags stay untouchable.
 func UpdateJPNICTech(input core.JPNICTech) error {
-	db, err := store.ConnectDB()
-	if err != nil {
-		log.Println("database connection error")
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	defer dbSQL.Close()
+	cols := []string{"hidden", "is_group", "v4_jpnic_handle", "v6_jpnic_handle", "name", "name_en", "mail",
+		"org", "org_en", "post_code", "address", "address_en",
+		"dept", "dept_en", "title", "title_en", "tel", "fax", "country"}
+	return store.DB().Model(&core.JPNICTech{Model: gorm.Model{ID: input.ID}}).
+		Select(cols).Updates(input).Error
+}
 
-	return db.Model(&core.JPNICTech{Model: gorm.Model{ID: input.ID}}).Updates(input).Error
+func GetJPNICTech(id uint) (core.JPNICTech, error) {
+	var tech core.JPNICTech
+	err := store.DB().First(&tech, id).Error
+	return tech, err
 }

@@ -6,7 +6,6 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -57,7 +56,7 @@ func TestUpdateAntisocialCheck(t *testing.T) {
 		AntisocialCheckAt: &now,
 	}
 
-	if err := Update(user.UpdateAntisocialCheck, testUser); err != nil {
+	if err := UpdateAntisocialCheck(testUser); err != nil {
 		t.Fatal(err)
 	}
 

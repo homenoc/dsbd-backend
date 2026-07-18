@@ -4,18 +4,6 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 )
 
-const (
-	ID                      = 0
-	UserToken               = 10
-	UserTokenAndAccessToken = 11
-	AccessToken             = 12
-	ExpiredTime             = 13
-	AdminToken              = 20
-	AddToken                = 100
-	UpdateToken             = 101
-	UpdateAll               = 150
-)
-
 type Result struct {
 	Token []core.Token `json:"token"`
 }
@@ -24,6 +12,8 @@ type ResultTmpToken struct {
 	Token string `json:"token"`
 }
 
+// ResultDatabase is retained only for GetAll; new store functions return
+// ([]core.Token, error) directly.
 type ResultDatabase struct {
 	Err   error
 	Token []core.Token

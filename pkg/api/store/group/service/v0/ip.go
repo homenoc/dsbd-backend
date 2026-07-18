@@ -1,58 +1,44 @@
 package v0
 
 import (
-	"fmt"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
 	"gorm.io/gorm"
-	"log"
-	"time"
 )
 
-func JoinIP(input core.IP) error {
-	db, err := store.ConnectDB()
-	if err != nil {
-		log.Println("database connection error")
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	defer dbSQL.Close()
-
-	return db.Create(&input).Error
+func CreateIP(input core.IP) error {
+	return store.DB().Create(&input).Error
 }
 
 func DeleteIP(id uint) error {
-	db, err := store.ConnectDB()
-	if err != nil {
-		log.Println("database connection error")
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	defer dbSQL.Close()
-
-	return db.Select("Plan").Delete(&core.IP{Model: gorm.Model{ID: id}}).Error
+	return store.DB().Select("Plan").Delete(&core.IP{Model: gorm.Model{ID: id}}).Error
 }
 
+// UpdateIP writes the admin-editable IP columns from a full object. Value-typed
+// columns are always written (clearing persists); pointer/time columns only
+// when provided. service_id/version stay untouchable.
 func UpdateIP(input core.IP) error {
-	db, err := store.ConnectDB()
-	if err != nil {
-		log.Println("database connection error")
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	cols := []string{"name", "ip", "use_case"}
+	if !input.StartDate.IsZero() {
+		cols = append(cols, "start_date")
 	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	if input.EndDate != nil {
+		cols = append(cols, "end_date")
 	}
-	defer dbSQL.Close()
+	if input.Open != nil {
+		cols = append(cols, "open")
+	}
+	return store.DB().Model(&core.IP{Model: gorm.Model{ID: input.ID}}).Select(cols).Updates(input).Error
+}
 
-	return db.Model(&core.IP{Model: gorm.Model{ID: input.ID}}).Updates(input).Error
+func GetIP(id uint) (core.IP, error) {
+	var ip core.IP
+	err := store.DB().First(&ip, id).Error
+	return ip, err
+}
+
+func GetAllIP() ([]core.IP, error) {
+	var ips []core.IP
+	err := store.DB().Find(&ips).Error
+	return ips, err
 }

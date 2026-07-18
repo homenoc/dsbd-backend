@@ -1,12 +1,12 @@
 package v0
 
 import (
-	"github.com/homenoc/dsbd-backend/pkg/api/core"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
-	dbToken "github.com/homenoc/dsbd-backend/pkg/api/store/token/v0"
-	"gorm.io/gorm"
 	"log"
 	"time"
+
+	"github.com/homenoc/dsbd-backend/pkg/api/core"
+	dbToken "github.com/homenoc/dsbd-backend/pkg/api/store/token/v0"
+	"gorm.io/gorm"
 )
 
 func TokenRemove() {
@@ -16,11 +16,11 @@ func TokenRemove() {
 		for {
 			select {
 			case <-t.C:
-				result := dbToken.Get(token.ExpiredTime, &core.Token{})
-				if result.Err != nil {
-					log.Println(result.Err)
+				expired, err := dbToken.GetExpired()
+				if err != nil {
+					log.Println(err)
 				}
-				for _, tmp := range result.Token {
+				for _, tmp := range expired {
 					err := dbToken.Delete(&core.Token{Model: gorm.Model{ID: tmp.ID}})
 					if err != nil {
 						log.Println(err)

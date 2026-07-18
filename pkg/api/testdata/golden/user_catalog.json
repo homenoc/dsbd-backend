@@ -1,0 +1,242 @@
+{
+  "status": 200,
+  "body": {
+    "connections": [
+      {
+        "comment": "",
+        "is_l2": true,
+        "is_l3": false,
+        "name": "Ethernet over IPトンネル",
+        "need_comment": false,
+        "need_cross_connect": false,
+        "need_internet": true,
+        "type": "EIP"
+      },
+      {
+        "comment": "",
+        "is_l2": false,
+        "is_l3": true,
+        "name": "GREトンネル",
+        "need_comment": false,
+        "need_cross_connect": false,
+        "need_internet": true,
+        "type": "GRE"
+      },
+      {
+        "comment": "",
+        "is_l2": false,
+        "is_l3": true,
+        "name": "IP-IPトンネル",
+        "need_comment": false,
+        "need_cross_connect": false,
+        "need_internet": true,
+        "type": "IPT"
+      },
+      {
+        "comment": "データセンター構内回線、キャリア専用線上などで直接接続",
+        "is_l2": true,
+        "is_l3": true,
+        "name": "直接接続",
+        "need_comment": true,
+        "need_cross_connect": true,
+        "need_internet": false,
+        "type": "CC0"
+      },
+      {
+        "comment": "インターネットエクスチェンジ経由で接続",
+        "is_l2": true,
+        "is_l3": true,
+        "name": "IX接続",
+        "need_comment": true,
+        "need_cross_connect": true,
+        "need_internet": false,
+        "type": "IXP"
+      },
+      {
+        "comment": "その他の接続方式",
+        "is_l2": false,
+        "is_l3": false,
+        "name": "その他",
+        "need_comment": true,
+        "need_cross_connect": false,
+        "need_internet": false,
+        "type": "ETC"
+      }
+    ],
+    "ipv4": [
+      "/27",
+      "/28",
+      "/29"
+    ],
+    "ipv4_route": [
+      "IPv4 Full Route",
+      "IPv4 Default Route",
+      "etc"
+    ],
+    "ipv6": [
+      "/48",
+      "/52",
+      "/56",
+      "/60",
+      "/64"
+    ],
+    "ipv6_route": [
+      "IPv6 Full Route",
+      "IPv6 Default Route",
+      "etc"
+    ],
+    "ix": [
+      {
+        "ipv4_address": "210.171.225.165",
+        "ipv6_address": "2001:de8:8::5:9105:1",
+        "name": "JPIX TOKYO"
+      },
+      {
+        "ipv4_address": "103.246.232.165",
+        "ipv6_address": "2001:de8:8:6:0:5:9105:1",
+        "name": "JPIX OSAKA"
+      },
+      {
+        "ipv4_address": "203.190.230.227",
+        "ipv6_address": "2001:de8:5::5:9105:1",
+        "name": "Equinix Tokyo"
+      },
+      {
+        "ipv4_address": "61.245.0.45",
+        "ipv6_address": "2001:ded:4000::5:9105:1",
+        "name": "BBIX Manila"
+      },
+      {
+        "ipv4_address": "202.226.3.2",
+        "ipv6_address": "2402:b7c0:e000::5:9105:1",
+        "name": "JCIX"
+      },
+      {
+        "ipv4_address": "103.158.187.190",
+        "ipv6_address": "2a0f:5707:ffe3::190",
+        "name": "STUIX"
+      }
+    ],
+    "mail_template": [
+      {
+        "id": "new_chat",
+        "message": "Supportより新着メッセージがあります。",
+        "title": "Supportより新着メッセージ"
+      },
+      {
+        "id": "notice",
+        "message": "ご担当者様\n\nいつもお世話になっております。\nHomeNOC Operators' Group サポート担当です。\n\nお知らせがございます。\n\n-------------------------------------\n[{TITLE}]\n{BODY}\n-------------------------------------\n\n (本情報は、Home NOC Service Onlineでもご確認いただけます。)",
+        "title": "{TITLE}"
+      },
+      {
+        "id": "open_connection",
+        "message": "{GROUP_NAME}様\n\nいつもお世話になっております。\nHomeNOC Operators' Group サポート担当です。\n\n開通処理を行いました。\nhttps://dashboard.homenoc.ad.jp より、必要な情報を閲覧可能となっております。\nまた、一般会員の方(学生会員ではない方)は、上記ダッシュボードより会費のお支払いをお願いいたします。\n\n以上、よろしくお願いいたします。",
+        "title": "開通のお知らせ"
+      },
+      {
+        "id": "pass_service",
+        "message": "{GROUP_NAME}様\n\nいつもお世話になっております。\nHomeNOC Operators' Group サポート担当です。\n\n内容の確認が完了いたしました。\nhttps://dashboard.homenoc.ad.jp より、追加の情報をご記入ください。\n\n以上、よろしくお願いいたします。",
+        "title": "確認完了のお知らせ"
+      },
+      {
+        "id": "pass_the_examination",
+        "message": "{GROUP_NAME}様\n\nいつもお世話になっております。\nHomeNOC Operators' Group サポート担当です。\n\nグループ申請の内容を確認し、審査を通過したことをご連絡致します。\nhttps://dashboard.homenoc.ad.jp より、追加の情報をご記入ください。\n\n以上、よろしくお願いいたします。",
+        "title": "審査通過のご連絡"
+      },
+      {
+        "id": "new_ticket_from_admin",
+        "message": "{GROUP_NAME}様\n\nいつもお世話になっております。\nHomeNOC Operators' Group サポート担当です。\n\n運営から確認事項などがございます。\nhttps://dashboard.homenoc.ad.jp のチケット(チャット)ページより、ご確認の上ご返信のほどお願いします。",
+        "title": "運営からのお問い合わせ"
+      },
+      {
+        "id": "signature",
+        "message": "\n\n\n------------------------------------------------\nAS59105 Home NOC Operators Group\nUser Support \u003csupport@homenoc.ad.jp\u003e\n\nX : https://x.com/AS59105\nFacebook: https://www.facebook.com/AS59105/\n------------------------------------------------",
+        "title": ""
+      }
+    ],
+    "member_type": [
+      {
+        "id": 1,
+        "name": "一般会員"
+      },
+      {
+        "id": 70,
+        "name": "学生会員"
+      },
+      {
+        "id": 40,
+        "name": "運営委員(有償)"
+      },
+      {
+        "id": 90,
+        "name": "運営委員(無償)"
+      },
+      {
+        "id": 99,
+        "name": ""
+      }
+    ],
+    "ntts": [
+      "はい（IPoEによりIPv6インターネットへ接続可能）",
+      "はい（IPoEによりIPv6インターネットへ接続不可）",
+      "はい（フレッツv6オプションの契約なし）",
+      "いいえ（フレッツ以外でインターネットに接続可能）",
+      "いいえ（IPv6でのインターネット接続不可）",
+      "etc"
+    ],
+    "payment_membership": [],
+    "preferred_ap": [
+      "東日本",
+      "西日本",
+      "福岡",
+      "フィリピン",
+      "台湾"
+    ],
+    "services": [
+      {
+        "comment": "L2接続",
+        "hidden": false,
+        "name": "L2",
+        "need_bgp": false,
+        "need_comment": false,
+        "need_global_as": false,
+        "need_jpnic": true,
+        "need_route": false,
+        "type": "2000"
+      },
+      {
+        "comment": "Staticにて接続",
+        "hidden": false,
+        "name": "L3 Static",
+        "need_bgp": false,
+        "need_comment": false,
+        "need_global_as": false,
+        "need_jpnic": true,
+        "need_route": true,
+        "type": "3S00"
+      },
+      {
+        "comment": "BGPにて接続",
+        "hidden": false,
+        "name": "L3 BGP",
+        "need_bgp": true,
+        "need_comment": false,
+        "need_global_as": false,
+        "need_jpnic": true,
+        "need_route": true,
+        "type": "3B00"
+      },
+      {
+        "comment": "グローバルASのユーザに対するトランジット提供(L3 BGP)",
+        "hidden": false,
+        "name": "トランジット提供",
+        "need_bgp": true,
+        "need_comment": false,
+        "need_global_as": true,
+        "need_jpnic": false,
+        "need_route": true,
+        "type": "IP3B"
+      }
+    ]
+  }
+}

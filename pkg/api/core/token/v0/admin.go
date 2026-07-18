@@ -41,12 +41,6 @@ func GenerateByAdmin(c *gin.Context) {
 func AddByAdmin(c *gin.Context) {
 	var input core.Token
 
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
-
 	err := c.BindJSON(&input)
 	if err != nil {
 		log.Println(err)
@@ -68,11 +62,6 @@ func AddByAdmin(c *gin.Context) {
 }
 
 func DeleteByAdmin(c *gin.Context) {
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -88,11 +77,6 @@ func DeleteByAdmin(c *gin.Context) {
 }
 
 func DeleteAllByAdmin(c *gin.Context) {
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
 
 	if err := dbToken.DeleteAll(); err != nil {
 		//エラー時はTokenがすでに消えている状態なので、問題なし
@@ -105,12 +89,6 @@ func DeleteAllByAdmin(c *gin.Context) {
 func UpdateByAdmin(c *gin.Context) {
 	var input core.Token
 
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
-
 	err := c.BindJSON(&input)
 	if err != nil {
 		log.Println(err)
@@ -118,7 +96,7 @@ func UpdateByAdmin(c *gin.Context) {
 		return
 	}
 
-	if err = dbToken.Update(token.UpdateAll, &input); err != nil {
+	if err = dbToken.Update(&input); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
@@ -126,31 +104,21 @@ func UpdateByAdmin(c *gin.Context) {
 }
 
 func GetByAdmin(c *gin.Context) {
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 		return
 	}
 
-	result := dbToken.Get(token.ID, &core.Token{Model: gorm.Model{ID: uint(id)}})
-	if result.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
+	tokens, err := dbToken.GetByID(uint(id))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, token.Result{Token: result.Token})
+	c.JSON(http.StatusOK, token.Result{Token: tokens})
 }
 
 func GetAllByAdmin(c *gin.Context) {
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
 
 	if result := dbToken.GetAll(); result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})

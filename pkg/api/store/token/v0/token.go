@@ -1,152 +1,97 @@
 package v0
 
 import (
-	"fmt"
+	"time"
+
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/token"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
 	"gorm.io/gorm"
-	"log"
-	"time"
 )
 
+// Create inserts a token. tx may be nil to use the shared pool.
 func Create(t *core.Token) error {
-	db, err := store.ConnectDB()
-	if err != nil {
-		log.Println("database connection error")
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	defer dbSQL.Close()
-
-	return db.Create(t).Error
+	return store.DB().Create(t).Error
 }
 
 func Delete(t *core.Token) error {
-	db, err := store.ConnectDB()
-	if err != nil {
-		log.Println("database connection error")
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	defer dbSQL.Close()
-
-	return db.Delete(t).Error
+	return store.DB().Delete(t).Error
 }
 
 func DeleteAll() error {
-	db, err := store.ConnectDB()
-	if err != nil {
-		log.Println("database connection error")
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	defer dbSQL.Close()
-
-	return db.Exec("DELETE FROM tokens").Error
+	return store.DB().Exec("DELETE FROM tokens").Error
 }
 
-func Update(base int, t *core.Token) error {
-	db, err := store.ConnectDB()
-	if err != nil {
-		log.Println("database connection error")
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	defer dbSQL.Close()
-
-	if token.AddToken == base {
-		err = db.Model(&core.Token{Model: gorm.Model{ID: t.ID}}).Updates(core.Token{
-			ExpiredAt: t.ExpiredAt, UserID: t.UserID, Status: t.Status, AccessToken: t.AccessToken}).Error
-	} else if token.UpdateToken == base {
-		err = db.Model(&core.Token{Model: gorm.Model{ID: t.ID}}).Updates(core.Token{ExpiredAt: t.ExpiredAt}).Error
-	} else if token.UpdateAll == base {
-		err = db.Model(&core.Token{Model: gorm.Model{ID: t.ID}}).Updates(core.Token{
-			ExpiredAt:   t.ExpiredAt,
-			UserID:      t.UserID,
-			Status:      t.Status,
-			UserToken:   t.UserToken,
-			TmpToken:    t.TmpToken,
-			AccessToken: t.AccessToken,
-			Debug:       t.Debug,
-		}).Error
-	} else {
-		log.Println("base select error")
-		return fmt.Errorf("(%s)error: base select\n %s", time.Now(), err)
-	}
-	return err
+// UpdateSession sets the fields written on login (was Update(AddToken, ...)).
+func UpdateSession(t *core.Token) error {
+	return store.DB().Model(&core.Token{Model: gorm.Model{ID: t.ID}}).Updates(core.Token{
+		ExpiredAt: t.ExpiredAt, UserID: t.UserID, Status: t.Status, AccessToken: t.AccessToken}).Error
 }
 
-// value of base can reference from api/core/user/interface.go
-func Get(base int, input *core.Token) token.ResultDatabase {
-	db, err := store.ConnectDB()
-	if err != nil {
-		log.Println("database connection error")
-		return token.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
-	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return token.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
-	}
-	defer dbSQL.Close()
+// Renew extends only the expiry (was Update(UpdateToken, ...)).
+func Renew(t *core.Token) error {
+	return store.DB().Model(&core.Token{Model: gorm.Model{ID: t.ID}}).
+		Updates(core.Token{ExpiredAt: t.ExpiredAt}).Error
+}
 
-	var tokenStruct []core.Token
+// Update writes the mutable token fields. Legacy non-zero semantics kept as-is:
+// the admin token PUT has no known frontend caller, so its payload shape is
+// unverified and the safer non-destructive behaviour is preserved.
+func Update(t *core.Token) error {
+	return store.DB().Model(&core.Token{Model: gorm.Model{ID: t.ID}}).Updates(core.Token{
+		ExpiredAt:   t.ExpiredAt,
+		UserID:      t.UserID,
+		Status:      t.Status,
+		UserToken:   t.UserToken,
+		TmpToken:    t.TmpToken,
+		AccessToken: t.AccessToken,
+		Debug:       t.Debug,
+	}).Error
+}
 
-	if base == token.UserToken {
-		err = db.Where("user_token = ? AND admin = ? AND expired_at > ?",
-			input.UserToken, false, time.Now()).Find(&tokenStruct).Error
-	} else if base == token.UserTokenAndAccessToken {
-		err = db.Where("user_token = ? AND access_token = ? AND admin = ? AND expired_at > ?",
-			input.UserToken, input.AccessToken, false, time.Now()).
-			Preload("User").
-			Preload("User.Group").
-			Find(&tokenStruct).Error
-	} else if base == token.AccessToken {
-		err = db.Where("access_token = ? AND admin = ?", input.AccessToken, true).
-			Find(&tokenStruct).Error
-	} else if base == token.AdminToken {
-		err = db.Where("access_token = ? AND admin = ? AND expired_at > ?",
-			input.AccessToken, true, time.Now()).Find(&tokenStruct).Error
-	} else if base == token.ExpiredTime {
-		err = db.Where("expired_at < ? ", time.Now()).Find(&tokenStruct).Error
-	} else {
-		log.Println("base select error")
-		return token.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
-	}
-	return token.ResultDatabase{Token: tokenStruct, Err: err}
+// GetByID looks up a single token by primary key.
+func GetByID(id uint) ([]core.Token, error) {
+	var tokens []core.Token
+	err := store.DB().Where(&core.Token{Model: gorm.Model{ID: id}}).Find(&tokens).Error
+	return tokens, err
+}
+
+// GetByUserToken returns valid, non-admin tokens matching a user token.
+func GetByUserToken(userToken string) ([]core.Token, error) {
+	var tokens []core.Token
+	err := store.DB().Where("user_token = ? AND admin = ? AND expired_at > ?",
+		userToken, false, time.Now()).Find(&tokens).Error
+	return tokens, err
+}
+
+// GetSession resolves a user session (user token + access token) and preloads
+// the owning user and group.
+func GetSession(userToken, accessToken string) ([]core.Token, error) {
+	var tokens []core.Token
+	err := store.DB().Where("user_token = ? AND access_token = ? AND admin = ? AND expired_at > ?",
+		userToken, accessToken, false, time.Now()).
+		Preload("User").
+		Preload("User.Group").
+		Find(&tokens).Error
+	return tokens, err
+}
+
+// GetAdminBotToken returns admin tokens matching an access token (no expiry filter).
+func GetAdminBotToken(accessToken string) ([]core.Token, error) {
+	var tokens []core.Token
+	err := store.DB().Where("access_token = ? AND admin = ?", accessToken, true).Find(&tokens).Error
+	return tokens, err
+}
+
+// GetExpired returns tokens past their expiry (for the cleanup goroutine).
+func GetExpired() ([]core.Token, error) {
+	var tokens []core.Token
+	err := store.DB().Where("expired_at < ?", time.Now()).Find(&tokens).Error
+	return tokens, err
 }
 
 func GetAll() token.ResultDatabase {
-	db, err := store.ConnectDB()
-	if err != nil {
-		log.Println("database connection error")
-		return token.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
-	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return token.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
-	}
-	defer dbSQL.Close()
-
 	var tokens []core.Token
-	err = db.Find(&tokens).Error
+	err := store.DB().Find(&tokens).Error
 	return token.ResultDatabase{Token: tokens, Err: err}
 }

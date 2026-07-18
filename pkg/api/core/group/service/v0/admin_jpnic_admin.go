@@ -3,12 +3,8 @@ package v0
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
-	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service/jpnicAdmin"
-	dbJPNICAdmin "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/jpnicAdmin/v0"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
-	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"strconv"
@@ -16,12 +12,6 @@ import (
 
 func AddJPNICAdminByAdmin(c *gin.Context) {
 	var input core.JPNICAdmin
-
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -45,11 +35,6 @@ func AddJPNICAdminByAdmin(c *gin.Context) {
 }
 
 func DeleteJPNICAdminByAdmin(c *gin.Context) {
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -68,12 +53,6 @@ func DeleteJPNICAdminByAdmin(c *gin.Context) {
 func UpdateJPNICAdminByAdmin(c *gin.Context) {
 	var input core.JPNICAdmin
 
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
-
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
@@ -87,9 +66,9 @@ func UpdateJPNICAdminByAdmin(c *gin.Context) {
 		return
 	}
 
-	before := dbJPNICAdmin.Get(jpnicAdmin.ID, &core.JPNICAdmin{Model: gorm.Model{ID: uint(id)}})
-	if before.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: before.Err.Error()})
+	before, err := dbService.GetJPNICAdmin(uint(id))
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: err.Error()})
 		return
 	}
 
@@ -99,6 +78,6 @@ func UpdateJPNICAdminByAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	noticeUpdateJPNICByAdmin(before.Admins[0], input)
+	noticeUpdateJPNICByAdmin(before, input)
 	c.JSON(http.StatusOK, common.Result{})
 }

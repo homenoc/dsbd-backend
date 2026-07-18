@@ -1,16 +1,10 @@
 package ticket
 
 import (
+	"net/http"
+
 	"github.com/gorilla/websocket"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
-	"net/http"
-)
-
-const (
-	ID        = 0
-	GID       = 1
-	UID       = 2
-	UpdateAll = 150
 )
 
 //#4 Issue(解決済み）

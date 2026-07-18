@@ -2,16 +2,11 @@ package slack
 
 import (
 	"fmt"
-	"github.com/homenoc/dsbd-backend/pkg/api/core"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
-	dbIP "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/ip/v0"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"github.com/slack-go/slack"
-	"gorm.io/gorm"
 	"net"
 	"strconv"
 )
@@ -97,7 +92,7 @@ func getUserInfo(userId uint) slack.MsgOption {
 			},
 		},
 	}
-	userDetail := dbUser.Get(user.ID, &core.User{Model: gorm.Model{ID: userId}})
+	userDetail := dbUser.GetByID(userId)
 	if userDetail.Err != nil {
 		return errorProcess(blocks, "データ取得エラー", userDetail.Err.Error())
 	}
@@ -186,7 +181,7 @@ func getASNInfo(asn int) slack.MsgOption {
 			},
 		},
 	}
-	resultService := dbService.Get(service.ASN, &core.Service{ASN: tool.ToUintP(uint(asn))})
+	resultService := dbService.GetByASN(tool.ToUintP(uint(asn)))
 	if resultService.Err != nil {
 		return errorProcess(blocks, "データ取得エラー", resultService.Err.Error())
 	}
@@ -319,9 +314,9 @@ func getAddrInfo(addr string) slack.MsgOption {
 			},
 		},
 	}
-	resultIP := dbIP.GetAll()
-	if resultIP.Err != nil {
-		return errorProcess(blocks, "データ取得エラー", resultIP.Err.Error())
+	resultIP, err := dbService.GetAllIP()
+	if err != nil {
+		return errorProcess(blocks, "データ取得エラー", err.Error())
 	}
 
 	// check input value
@@ -331,7 +326,7 @@ func getAddrInfo(addr string) slack.MsgOption {
 	}
 	// search IP
 	var serviceID uint = 0
-	for _, detailIP := range resultIP.IP {
+	for _, detailIP := range resultIP {
 		_, ipNet, err := net.ParseCIDR(detailIP.IP)
 		if err != nil {
 			continue
@@ -344,7 +339,7 @@ func getAddrInfo(addr string) slack.MsgOption {
 	if serviceID == 0 {
 		return errorProcess(blocks, "Not Found...", "一致するアドレスがありませんでした。("+addr+")")
 	}
-	resultService := dbService.Get(service.ID, &core.Service{Model: gorm.Model{ID: serviceID}})
+	resultService := dbService.GetByID(serviceID)
 	if resultService.Err != nil {
 		return errorProcess(blocks, "データ取得エラー", resultService.Err.Error())
 	}

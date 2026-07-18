@@ -23,6 +23,14 @@ type Config struct {
 	Slack      Slack      `json:"slack"`
 	Log        Log        `json:"log"`
 	Template   Template   `json:"template"`
+	CORS       CORS       `json:"cors"`
+}
+
+// CORS controls cross-origin access. Origins is an allowlist of exact origins
+// (scheme+host+port). Fail-safe: when empty, no cross-origin requests are
+// allowed — every deployment must list its frontend origins explicitly.
+type CORS struct {
+	Origins []string `json:"origins"`
 }
 
 type Controller struct {
@@ -116,9 +124,9 @@ type SlackChannels struct {
 	PaymentLog string `json:"payment_log"`
 }
 
+// Template holds deployment option lists served by /catalog. Service/connection
+// TYPE definitions live in the code registry (package core), not here.
 type Template struct {
-	Service     []ServiceTemplate    `json:"service"`
-	Connection  []ConnectionTemplate `json:"connection"`
 	Membership  []MembershipTemplate `json:"membership"`
 	IX          []IXTemplate         `json:"ix"`
 	NTT         []string             `json:"NTT"`
@@ -141,29 +149,6 @@ type MailTemplate struct {
 	ID      string `json:"id"`
 	Title   string `json:"title"`
 	Message string `json:"message"`
-}
-
-type ServiceTemplate struct {
-	Hidden       bool   `json:"hidden"`
-	Name         string `json:"name"`
-	Type         string `json:"type"`
-	Comment      string `json:"comment"`
-	NeedJPNIC    bool   `json:"need_jpnic"`
-	NeedGlobalAS bool   `json:"need_global_as"`
-	NeedComment  bool   `json:"need_comment"`
-	NeedRoute    bool   `json:"need_route"`
-	NeedBGP      bool   `json:"need_bgp"`
-}
-
-type ConnectionTemplate struct {
-	Name             string `json:"name"`
-	Type             string `json:"type"`
-	Comment          string `json:"comment"`
-	NeedInternet     bool   `json:"need_internet"`
-	NeedComment      bool   `json:"need_comment"`
-	NeedCrossConnect bool   `json:"need_cross_connect"`
-	IsL2             bool   `json:"is_l2"`
-	IsL3             bool   `json:"is_l3"`
 }
 
 type IXTemplate struct {

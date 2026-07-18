@@ -1,131 +1,52 @@
 package v0
 
 import (
-	"fmt"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support/ticket"
 	"github.com/homenoc/dsbd-backend/pkg/api/store"
 	"gorm.io/gorm"
-	"log"
-	"time"
 )
 
-func Create(support *core.Ticket) (*core.Ticket, error) {
-	db, err := store.ConnectDB()
-	if err != nil {
-		log.Println("database connection error")
-		return support, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return nil, fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	defer dbSQL.Close()
-
-	err = db.Create(&support).Error
-	return support, err
+func Create(t *core.Ticket) (*core.Ticket, error) {
+	err := store.DB().Create(&t).Error
+	return t, err
 }
 
-func Delete(support *core.Ticket) error {
-	db, err := store.ConnectDB()
-	if err != nil {
-		log.Println("database connection error")
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
-	}
-	defer dbSQL.Close()
-
-	return db.Delete(support).Error
+func Delete(t *core.Ticket) error {
+	return store.DB().Delete(t).Error
 }
 
-func Update(base int, t core.Ticket) error {
-	db, err := store.ConnectDB()
-	if err != nil {
-		log.Println("database connection error")
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+// Update writes the mutable ticket columns from a merged full object (both
+// callers merge the request onto the current record first). Pointer columns
+// are written only when provided; chats and creation metadata stay untouched.
+func Update(t core.Ticket) error {
+	cols := []string{"title"}
+	if t.Solved != nil {
+		cols = append(cols, "solved")
 	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())
+	if t.Request != nil {
+		cols = append(cols, "request")
 	}
-	defer dbSQL.Close()
-
-	err = nil
-
-	//#4 Issue(解決済み）
-	if ticket.UpdateAll == base {
-		err = db.Model(&core.Ticket{Model: gorm.Model{ID: t.ID}}).Updates(&core.Ticket{Title: t.Title,
-			GroupID:       t.GroupID,
-			UserID:        t.UserID,
-			Solved:        t.Solved,
-			Request:       t.Request,
-			RequestReject: t.RequestReject,
-		}).Error
-	} else {
-		log.Println("base select error")
-		return fmt.Errorf("(%s)error: base select\n", time.Now())
+	if t.RequestReject != nil {
+		cols = append(cols, "request_reject")
 	}
-	return err
+	return store.DB().Model(&core.Ticket{Model: gorm.Model{ID: t.ID}}).Select(cols).Updates(t).Error
 }
 
-func Get(base int, data *core.Ticket) ticket.ResultDatabase {
-	db, err := store.ConnectDB()
-	if err != nil {
-		log.Println("database connection error")
-		return ticket.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
-	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return ticket.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
-	}
-	defer dbSQL.Close()
-
-	var ticketStruct []core.Ticket
-
-	if base == ticket.ID { //ID
-		err = db.Preload("User").
-			Preload("Group").
-			Preload("Chat").
-			Preload("Chat.User").
-			First(&ticketStruct, data.ID).Error
-	} else if base == ticket.GID { //GroupID
-		err = db.Where("group_id = ?", data.GroupID).
-			Preload("User").
-			Preload("Group").
-			Preload("Chat").
-			Preload("Chat.User").
-			Find(&ticketStruct).Error
-	} else if base == ticket.UID { //UserID
-		err = db.Where("user_id = ?", data.UserID).Find(&ticketStruct).Error
-	} else {
-		log.Println("base select error")
-		return ticket.ResultDatabase{Err: fmt.Errorf("(%s)error: base select\n", time.Now())}
-	}
-	return ticket.ResultDatabase{Tickets: ticketStruct, Err: err}
+// GetByID loads one ticket with its user, group, and chat messages.
+func GetByID(id uint) ticket.ResultDatabase {
+	var tickets []core.Ticket
+	err := store.DB().Preload("User").
+		Preload("Group").
+		Preload("Chat").
+		Preload("Chat.User").
+		First(&tickets, id).Error
+	return ticket.ResultDatabase{Tickets: tickets, Err: err}
 }
 
 func GetAll() ticket.ResultDatabase {
-	db, err := store.ConnectDB()
-	if err != nil {
-		log.Println("database connection error")
-		return ticket.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
-	}
-	dbSQL, err := db.DB()
-	if err != nil {
-		log.Printf("database error: %v", err)
-		return ticket.ResultDatabase{Err: fmt.Errorf("(%s)error: %s\n", time.Now(), err.Error())}
-	}
-	defer dbSQL.Close()
-
 	var tickets []core.Ticket
-	err = db.Preload("User").
+	err := store.DB().Preload("User").
 		Preload("Group").
 		Preload("Chat").
 		Preload("Chat.User").

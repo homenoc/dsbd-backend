@@ -1,10 +1,7 @@
 package v0
 
 import (
-	"github.com/homenoc/dsbd-backend/pkg/api/core"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
-	"gorm.io/gorm"
 )
 
 func userExtraction(inputUser, inputGroup, inputNOC []uint) []uint {
@@ -20,7 +17,7 @@ func userExtraction(inputUser, inputGroup, inputNOC []uint) []uint {
 	if len(inputGroup) != 0 {
 		//I should implement check function
 		for _, tmpGroup := range inputGroup {
-			result := dbGroup.Get(group.ID, &core.Group{Model: gorm.Model{ID: tmpGroup}})
+			result := dbGroup.GetByID(tmpGroup)
 			if result.Err != nil {
 				for _, tmpResultGroup := range result.Group {
 					for _, tmpUser := range tmpResultGroup.Users {

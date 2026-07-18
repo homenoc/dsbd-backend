@@ -21,10 +21,7 @@ import (
 func Run() error {
 	log.Println("[Seed] Starting seed data creation...")
 
-	db, err := store.ConnectDB()
-	if err != nil {
-		return err
-	}
+	db := store.DB()
 
 	// NOC
 	log.Println("[Seed] Creating NOC data...")
@@ -248,7 +245,7 @@ func createTestGroup() (*core.Group, error) {
 	agree := true
 	pass := true
 	addAllow := true
-	expiredStatus := uint(0)
+	expiredStatus := uint(core.ExpiredNone)
 
 	group := &core.Group{
 		Agree:         &agree,
@@ -272,7 +269,7 @@ func createTestGroup() (*core.Group, error) {
 func createTestUsers(db interface{}, group *core.Group) error {
 	mailVerify := true
 	antisocialCheck := false // 実際のフローに合わせて未同意状態
-	expiredStatus := uint(0)
+	expiredStatus := uint(core.ExpiredNone)
 
 	var groupID *uint
 	if group != nil {
@@ -287,7 +284,7 @@ func createTestUsers(db interface{}, group *core.Group) error {
 		Email:           "master@example.com",
 		Pass:            strings.ToLower(hash.Generate("password")),
 		ExpiredStatus:   &expiredStatus,
-		Level:           1, // Master: グループ内の申請・変更・閲覧可能
+		Level:           core.LevelMaster,
 		MailVerify:      &mailVerify,
 		AntisocialCheck: &antisocialCheck,
 	}
@@ -304,7 +301,7 @@ func createTestUsers(db interface{}, group *core.Group) error {
 		Email:           "member@example.com",
 		Pass:            strings.ToLower(hash.Generate("password")),
 		ExpiredStatus:   &expiredStatus,
-		Level:           2, // Member: 一般メンバー
+		Level:           core.LevelEditor,
 		MailVerify:      &mailVerify,
 		AntisocialCheck: &antisocialCheck,
 	}

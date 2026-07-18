@@ -26,6 +26,12 @@ var MemberTypeStudent = ConstantMembership{ID: 70, Name: "学生会員"}
 var MemberTypeCommitteeFree = ConstantMembership{ID: 90, Name: "運営委員(無償)"}
 var MemberTypeDisable = ConstantMembership{ID: 99, Name: ""}
 
+// IsPaidMemberType reports whether a membership type pays fees
+// (IDs 1-49 per the taxonomy above; 70+ are free/steering tiers).
+func IsPaidMemberType(id uint) bool {
+	return id < 50
+}
+
 // Payment Type
 const PaymentMembership = 1
 const PaymentDonate = 2

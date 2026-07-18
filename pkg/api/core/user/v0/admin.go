@@ -3,7 +3,6 @@ package v0
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
-	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
@@ -16,12 +15,6 @@ import (
 func AddByAdmin(c *gin.Context) {
 	var input core.User
 
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
-
 	err := c.BindJSON(&input)
 	if err != nil {
 		log.Println(err)
@@ -30,7 +23,7 @@ func AddByAdmin(c *gin.Context) {
 	}
 
 	//check exist for database
-	result := dbUser.Get(user.Email, &core.User{Email: input.Email})
+	result := dbUser.GetByEmail(input.Email)
 	if result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
@@ -48,11 +41,6 @@ func AddByAdmin(c *gin.Context) {
 }
 
 func DeleteByAdmin(c *gin.Context) {
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -70,20 +58,14 @@ func DeleteByAdmin(c *gin.Context) {
 func UpdateByAdmin(c *gin.Context) {
 	var input core.User
 
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
-
-	err := c.BindJSON(&input)
+	err := common.BindJSONTolerant(c, &input)
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 		return
 	}
 
-	tmp := dbUser.Get(user.ID, &core.User{Model: gorm.Model{ID: input.ID}})
+	tmp := dbUser.GetByID(input.ID)
 	if tmp.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: tmp.Err.Error()})
 		return
@@ -95,7 +77,7 @@ func UpdateByAdmin(c *gin.Context) {
 		return
 	}
 
-	if err = dbUser.Update(user.UpdateAll, &replace); err != nil {
+	if err = dbUser.Update(&replace); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
@@ -103,18 +85,13 @@ func UpdateByAdmin(c *gin.Context) {
 }
 
 func GetByAdmin(c *gin.Context) {
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 		return
 	}
 
-	result := dbUser.Get(user.ID, &core.User{Model: gorm.Model{ID: uint(id)}})
+	result := dbUser.GetByID(uint(id))
 	if result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
@@ -123,11 +100,6 @@ func GetByAdmin(c *gin.Context) {
 }
 
 func GetAllByAdmin(c *gin.Context) {
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
 
 	if result := dbUser.GetAll(); result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
