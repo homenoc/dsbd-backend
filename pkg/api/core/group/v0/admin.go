@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
-	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
@@ -16,12 +15,6 @@ import (
 
 func AddByAdmin(c *gin.Context) {
 	var input core.Group
-
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
 
 	err := c.BindJSON(&input)
 	if err != nil {
@@ -38,11 +31,6 @@ func AddByAdmin(c *gin.Context) {
 }
 
 func DeleteByAdmin(c *gin.Context) {
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -73,20 +61,14 @@ func UpdateByAdmin(c *gin.Context) {
 
 	var input core.Group
 
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
-
-	err = c.BindJSON(&input)
+	err = common.BindJSONTolerant(c, &input)
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 		return
 	}
 
-	tmp := dbGroup.Get(group.ID, &core.Group{Model: gorm.Model{ID: uint(id)}})
+	tmp := dbGroup.GetByID(uint(id))
 	if tmp.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: tmp.Err.Error()})
 		return
@@ -96,7 +78,7 @@ func UpdateByAdmin(c *gin.Context) {
 
 	input.ID = uint(id)
 
-	if err = dbGroup.Update(group.UpdateAll, input); err != nil {
+	if err = dbGroup.Update(input); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
@@ -104,18 +86,13 @@ func UpdateByAdmin(c *gin.Context) {
 }
 
 func GetByAdmin(c *gin.Context) {
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 		return
 	}
 
-	result := dbGroup.Get(group.ID, &core.Group{Model: gorm.Model{ID: uint(id)}})
+	result := dbGroup.GetByID(uint(id))
 	if result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
@@ -127,11 +104,6 @@ func GetByAdmin(c *gin.Context) {
 }
 
 func GetAllByAdmin(c *gin.Context) {
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
 
 	if result := dbGroup.GetAll(); result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})

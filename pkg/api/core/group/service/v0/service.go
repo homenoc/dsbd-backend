@@ -4,15 +4,12 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
-	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
+	"github.com/homenoc/dsbd-backend/pkg/api/middleware"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
 	dbGroup "github.com/homenoc/dsbd-backend/pkg/api/store/group/v0"
-	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"strconv"
@@ -21,8 +18,6 @@ import (
 
 func Add(c *gin.Context) {
 	var input service.Input
-	userToken := c.Request.Header.Get("USER_TOKEN")
-	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
 	err := c.BindJSON(&input)
 	if err != nil {
@@ -32,14 +27,10 @@ func Add(c *gin.Context) {
 	}
 
 	// group authentication
-	result := auth.GroupAuthorization(0, core.Token{UserToken: userToken, AccessToken: accessToken})
-	if result.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
-		return
-	}
+	user := middleware.CurrentUser(c)
 
 	// check user level
-	if result.User.Level > 2 {
+	if !core.CanManageServices(user.Level) {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: "You don't have authority this operation"})
 		return
 	}
@@ -51,13 +42,13 @@ func Add(c *gin.Context) {
 	}
 
 	// status check for group
-	if !(*result.User.Group.ExpiredStatus == 0 && *result.User.Group.Pass) {
+	if !(*user.Group.ExpiredStatus == core.ExpiredNone && *user.Group.Pass) {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: "error: failed group status"})
 		return
 	}
 
 	// add_allow check for group
-	if !(*result.User.Group.AddAllow) {
+	if !(*user.Group.AddAllow) {
 		c.JSON(http.StatusForbidden, common.Error{Error: "error: failed group add_allow status"})
 		return
 	}
@@ -65,7 +56,7 @@ func Add(c *gin.Context) {
 	var grpIP []core.IP = nil
 
 	// check input.ConnectionType and getting connection template
-	resultServiceTemplate, err := config.GetServiceTemplate(input.ServiceType)
+	resultServiceTemplate, err := core.GetServiceType(input.ServiceType)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 		return
@@ -137,7 +128,7 @@ func Add(c *gin.Context) {
 		bgpComment = input.BGPComment
 	}
 
-	resultNetwork := dbService.Get(service.SearchNewNumber, &core.Service{GroupID: result.User.Group.ID})
+	resultNetwork := dbService.GetByGroupID(user.Group.ID)
 	if resultNetwork.Err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: resultNetwork.Err.Error()})
 		return
@@ -156,7 +147,7 @@ func Add(c *gin.Context) {
 
 	// db create for network
 	net, err := dbService.Create(&core.Service{
-		GroupID:        result.User.Group.ID,
+		GroupID:        user.Group.ID,
 		ServiceType:    input.ServiceType,
 		ServiceComment: input.ServiceComment,
 		ServiceNumber:  number,
@@ -170,6 +161,7 @@ func Add(c *gin.Context) {
 		MaxUpstream:    input.MaxUpstream,
 		AveDownstream:  input.AveDownstream,
 		MaxDownstream:  input.MaxDownstream,
+		MaxBandWidthAS: input.MaxBandWidthAS,
 		StartDate:      startDate,
 		EndDate:        endDate,
 		ASN:            &[]uint{input.ASN}[0],
@@ -187,87 +179,29 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	applicant := "[" + strconv.Itoa(int(result.User.ID)) + "] " + result.User.Name + "(" + result.User.NameEn + ")"
-	groupName := "[" + strconv.Itoa(int(result.User.Group.ID)) + "] " + result.User.Group.Org + "(" + result.User.Group.OrgEn + ")"
+	applicant := "[" + strconv.Itoa(int(user.ID)) + "] " + user.Name + "(" + user.NameEn + ")"
+	groupName := "[" + strconv.Itoa(int(user.Group.ID)) + "] " + user.Group.Org + "(" + user.Group.OrgEn + ")"
 	serviceCodeNew := resultServiceTemplate.Type + fmt.Sprintf("%03d", number)
 	serviceCodeComment := input.ServiceComment
 	noticeAdd(applicant, groupName, serviceCodeNew, serviceCodeComment)
 
 	// ---------ここまで処理が通っている場合、DBへの書き込みにすべて成功している
 	// GroupのStatusをAfterStatusにする
-	if err = dbGroup.Update(group.UpdateAll, core.Group{
-		Model:    gorm.Model{ID: result.User.Group.ID},
-		AddAllow: &[]bool{false}[0],
-	}); err != nil {
+	if err = dbGroup.UpdateAddAllow(user.Group.ID, false); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
 
-	notification.NoticeUpdateStatus(groupName, "審査中", "1[ネットワーク情報記入段階(User)] =>2[審査中]")
+	notification.NoticeUpdateStatus(groupName, core.StatusExamination.Label(),
+		core.TransitionText(core.StatusServiceInput, core.StatusExamination))
 
 	c.JSON(http.StatusOK, service.ResultOne{Service: *net})
 }
 
-// Todo: 以下の処理は実装中
-func Update(c *gin.Context) {
-	var input core.Service
-	userToken := c.Request.Header.Get("USER_TOKEN")
-	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
-
-	err := c.BindJSON(&input)
-	if err != nil {
-		log.Println(err)
-		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
-		return
-	}
-
-	result := auth.GroupAuthorization(0, core.Token{UserToken: userToken, AccessToken: accessToken})
-	if result.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
-		return
-	}
-
-	// check authority
-	if result.User.Level > 2 {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: "You don't have authority this operation"})
-		return
-	}
-
-	resultNetwork := dbService.Get(service.ID, &core.Service{Model: gorm.Model{ID: input.ID}})
-	if resultNetwork.Err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: resultNetwork.Err.Error()})
-		return
-	}
-	if len(resultNetwork.Service) == 0 {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: "failed Service ID"})
-		return
-	}
-	if resultNetwork.Service[0].GroupID != result.User.Group.ID {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: "Authorization failure"})
-		return
-	}
-
-	replace := replaceService(resultNetwork.Service[0], input)
-
-	if err = dbService.Update(service.UpdateData, replace); err != nil {
-		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, common.Result{})
-}
-
 func GetAddAllow(c *gin.Context) {
-	userToken := c.Request.Header.Get("USER_TOKEN")
-	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
+	user := middleware.CurrentUser(c)
 
-	result := auth.GroupAuthorization(0, core.Token{UserToken: userToken, AccessToken: accessToken})
-	if result.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
-		return
-	}
-
-	if resultService := dbService.Get(service.GIDAndAddAllow, &core.Service{GroupID: result.User.Group.ID}); resultService.Err != nil {
+	if resultService := dbService.GetAddAllowByGroupID(user.Group.ID); resultService.Err != nil {
 		log.Println(resultService.Err)
 		c.JSON(http.StatusInternalServerError, common.Error{Error: resultService.Err.Error()})
 	} else {

@@ -3,12 +3,8 @@ package v0
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
-	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service/jpnicTech"
-	dbJPNICTech "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/jpnicTech/v0"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
-	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"strconv"
@@ -16,12 +12,6 @@ import (
 
 func AddJPNICTechByAdmin(c *gin.Context) {
 	var input core.JPNICTech
-
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -48,11 +38,6 @@ func AddJPNICTechByAdmin(c *gin.Context) {
 }
 
 func DeleteJPNICTechByAdmin(c *gin.Context) {
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -71,12 +56,6 @@ func DeleteJPNICTechByAdmin(c *gin.Context) {
 func UpdateJPNICTechByAdmin(c *gin.Context) {
 	var input core.JPNICTech
 
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
-
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
@@ -90,18 +69,18 @@ func UpdateJPNICTechByAdmin(c *gin.Context) {
 		return
 	}
 
-	before := dbJPNICTech.Get(jpnicTech.ID, &core.JPNICTech{Model: gorm.Model{ID: uint(id)}})
-	if before.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: before.Err.Error()})
+	before, err := dbService.GetJPNICTech(uint(id))
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: err.Error()})
 		return
 	}
 
 	input.ID = uint(id)
 
-	if err = dbJPNICTech.Update(jpnicTech.UpdateAll, input); err != nil {
+	if err = dbService.UpdateJPNICTech(input); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
-	noticeUpdateJPNICTechByAdmin(before.Tech[0], input)
+	noticeUpdateJPNICTechByAdmin(before, input)
 	c.JSON(http.StatusOK, common.Result{})
 }

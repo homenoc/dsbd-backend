@@ -5,6 +5,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/slack"
+	"github.com/homenoc/dsbd-backend/pkg/api/store"
 	"github.com/spf13/cobra"
 	"github.com/stripe/stripe-go/v73"
 	"log"
@@ -36,6 +37,10 @@ var startUserCmd = &cobra.Command{
 		}
 		log.Println("[Config] Config loaded successfully")
 
+		if err = store.Init(); err != nil {
+			log.Fatalf("[DB] Failed to connect: %v", err)
+		}
+
 		notification.NewNotification()
 		notification.NoticeLog("good", []string{
 			"Status: User側 API起動",
@@ -65,6 +70,10 @@ var startAdminCmd = &cobra.Command{
 			log.Fatalf("[Config] Failed to load config: %v", err)
 		}
 		log.Println("[Config] Config loaded successfully")
+
+		if err = store.Init(); err != nil {
+			log.Fatalf("[DB] Failed to connect: %v", err)
+		}
 
 		notification.NewNotification()
 		go slack.StartAppSlack()

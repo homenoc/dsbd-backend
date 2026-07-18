@@ -8,21 +8,17 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
-	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/group/connection"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/group/service"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
+	"github.com/homenoc/dsbd-backend/pkg/api/middleware"
 	dbConnection "github.com/homenoc/dsbd-backend/pkg/api/store/group/connection/v0"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
-	"gorm.io/gorm"
 )
 
 func Add(c *gin.Context) {
 	var input connection.Input
-	userToken := c.Request.Header.Get("USER_TOKEN")
-	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
 	err := c.BindJSON(&input)
 	if err != nil {
@@ -43,25 +39,21 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	result := auth.GroupAuthorization(0, core.Token{UserToken: userToken, AccessToken: accessToken})
-	if result.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
-		return
-	}
+	user := middleware.CurrentUser(c)
 
 	// check authority
-	if result.User.Level > 2 {
+	if !core.CanManageServices(user.Level) {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: "You don't have authority this operation"})
 		return
 	}
 
 	// status check for group
-	if !*result.User.Group.Pass {
+	if !*user.Group.Pass {
 		c.JSON(http.StatusForbidden, common.Error{Error: "error: Your group has not yet been reviewed."})
 		return
 	}
 
-	if *result.User.Group.ExpiredStatus != 0 {
+	if *user.Group.ExpiredStatus != core.ExpiredNone {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: "error: failed group status"})
 		return
 	}
@@ -72,7 +64,7 @@ func Add(c *gin.Context) {
 	}
 
 	// check input.ConnectionType and getting connection template
-	connectionTemplate, err := config.GetConnectionTemplate(input.ConnectionType)
+	connectionTemplate, err := core.GetConnectionType(input.ConnectionType)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 		return
@@ -101,7 +93,7 @@ func Add(c *gin.Context) {
 		}
 	}
 
-	resultService := dbService.Get(service.ID, &core.Service{Model: gorm.Model{ID: uint(id)}})
+	resultService := dbService.GetByID(uint(id))
 	if resultService.Err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: resultService.Err.Error()})
 		return
@@ -126,13 +118,13 @@ func Add(c *gin.Context) {
 	}
 
 	// GroupIDが一致しない場合はエラーを返す
-	if resultService.Service[0].GroupID != result.User.Group.ID {
+	if resultService.Service[0].GroupID != user.Group.ID {
 		c.JSON(http.StatusBadRequest, common.Error{Error: "error: GroupID does not match."})
 		return
 	}
 
 	// getting service with template
-	resultServiceWithTemplate, err := config.GetServiceTemplate(resultService.Service[0].ServiceType)
+	resultServiceWithTemplate, err := core.GetServiceType(resultService.Service[0].ServiceType)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
@@ -169,7 +161,7 @@ func Add(c *gin.Context) {
 		}
 	}
 
-	resultConnection := dbConnection.Get(connection.ServiceID, &core.Connection{ServiceID: uint(id)})
+	resultConnection := dbConnection.GetByServiceID(uint(id))
 	if resultConnection.Err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: resultConnection.Err.Error()})
 		return
@@ -215,8 +207,8 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	applicant := "[" + strconv.Itoa(int(result.User.ID)) + "] " + result.User.Name + "(" + result.User.NameEn + ")"
-	groupName := "[" + strconv.Itoa(int(result.User.Group.ID)) + "] " + result.User.Group.Org + "(" + result.User.Group.OrgEn + ")"
+	applicant := "[" + strconv.Itoa(int(user.ID)) + "] " + user.Name + "(" + user.NameEn + ")"
+	groupName := "[" + strconv.Itoa(int(user.Group.ID)) + "] " + user.Group.Org + "(" + user.Group.OrgEn + ")"
 	serviceCode := resultServiceWithTemplate.Type + strconv.Itoa(int(resultService.Service[0].ServiceNumber))
 	connectionCodeNew := connectionTemplate.Type + fmt.Sprintf("%03d", number)
 	connectionCodeComment := input.ConnectionComment
@@ -224,22 +216,20 @@ func Add(c *gin.Context) {
 	noticeAdd(applicant, groupName, serviceCode, connectionCodeNew, connectionCodeComment)
 
 	//if err = dbGroup.Update(group.UpdateStatus, core.Group{
-	//	Model:  gorm.Model{ID: result.User.Group.ID},
+	//	Model:  gorm.Model{ID: user.Group.ID},
 	//	Status: &[]uint{4}[0],
 	//}); err != nil {
 	//	c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 	//	return
 	//}
 
-	if err = dbService.Update(service.UpdateAll, core.Service{
-		Model:    gorm.Model{ID: resultService.Service[0].ID},
-		AddAllow: &[]bool{false}[0],
-	}); err != nil {
+	if err = dbService.UpdateAddAllow(resultService.Service[0].ID, false); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
 
-	notification.NoticeUpdateStatus(groupName, "開通作業中", "3[接続情報記入段階(User)] =>4[開通作業中]")
+	notification.NoticeUpdateStatus(groupName, core.StatusOpening.Label(),
+		core.TransitionText(core.StatusConnectionInput, core.StatusOpening))
 
 	c.JSON(http.StatusOK, common.Result{})
 }

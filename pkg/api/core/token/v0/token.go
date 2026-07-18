@@ -9,7 +9,6 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/hash"
 	logging "github.com/homenoc/dsbd-backend/pkg/api/core/tool/log"
 	toolToken "github.com/homenoc/dsbd-backend/pkg/api/core/tool/token"
-	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
 	dbToken "github.com/homenoc/dsbd-backend/pkg/api/store/token/v0"
 	dbUser "github.com/homenoc/dsbd-backend/pkg/api/store/user/v0"
 	"gorm.io/gorm"
@@ -45,13 +44,17 @@ func Generate(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	hashPass := c.Request.Header.Get("HASH_PASS")
 	mail := c.Request.Header.Get("Email")
-	tokenResult := dbToken.Get(token.UserToken, &core.Token{UserToken: userToken})
-	if tokenResult.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: tokenResult.Err.Error()})
+	tokens, err := dbToken.GetByUserToken(userToken)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: err.Error()})
+		return
+	}
+	if len(tokens) == 0 {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: "unauthorized: token not found"})
 		return
 	}
 
-	userResult := dbUser.Get(user.Email, &core.User{Email: mail})
+	userResult := dbUser.GetByEmail(mail)
 	if userResult.Err != nil {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: userResult.Err.Error()})
 		return
@@ -72,20 +75,20 @@ func Generate(c *gin.Context) {
 		return
 	}
 
-	if hash.Generate(userResult.User[0].Pass+tokenResult.Token[0].TmpToken) != strings.ToUpper(hashPass) {
+	if hash.Generate(userResult.User[0].Pass+tokens[0].TmpToken) != strings.ToUpper(hashPass) {
 		log.Println(userResult.User[0].Pass)
-		log.Println(tokenResult.Token[0].TmpToken)
-		log.Println("hash(server): " + hash.Generate(userResult.User[0].Pass+tokenResult.Token[0].TmpToken))
+		log.Println(tokens[0].TmpToken)
+		log.Println("hash(server): " + hash.Generate(userResult.User[0].Pass+tokens[0].TmpToken))
 		log.Println("hash(client): " + hashPass)
 		c.JSON(http.StatusUnauthorized, common.Error{Error: "not match"})
 		return
 	}
 
 	accessToken, _ := toolToken.Generate(2)
-	err := dbToken.Update(token.AddToken, &core.Token{Model: gorm.Model{ID: tokenResult.Token[0].Model.ID},
+	err = dbToken.UpdateSession(&core.Token{Model: gorm.Model{ID: tokens[0].Model.ID},
 		ExpiredAt:   time.Now().Add(30 * time.Minute),
 		UserID:      &userResult.User[0].ID,
-		Status:      1,
+		Status:      core.Token30m,
 		AccessToken: accessToken,
 	})
 	if err != nil {
@@ -104,20 +107,20 @@ func Delete(c *gin.Context) {
 	userToken := c.Request.Header.Get("USER_TOKEN")
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	result := dbToken.Get(token.UserTokenAndAccessToken, &core.Token{UserToken: userToken, AccessToken: accessToken})
-	if result.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
+	tokens, err := dbToken.GetSession(userToken, accessToken)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: err.Error()})
 		return
 	}
 
-	if len(result.Token) == 0 {
+	if len(tokens) == 0 {
 		c.JSON(http.StatusUnauthorized, common.Error{Error: "Error: Unauthorized..."})
 		return
 	}
 
-	logging.WriteLog(strconv.Itoa(int(result.Token[0].User.ID))+"-"+result.Token[0].User.Name, "Logout")
+	logging.WriteLog(strconv.Itoa(int(tokens[0].User.ID))+"-"+tokens[0].User.Name, "Logout")
 
-	if err := dbToken.Delete(&core.Token{Model: gorm.Model{ID: result.Token[0].ID}}); err != nil {
+	if err := dbToken.Delete(&core.Token{Model: gorm.Model{ID: tokens[0].ID}}); err != nil {
 		//エラー時はTokenがすでに消えている状態なので、問題なし
 		c.JSON(http.StatusOK, common.Result{})
 		return
@@ -129,13 +132,17 @@ func Delete(c *gin.Context) {
 func DeleteAdminUser(c *gin.Context) {
 	accessToken := c.Request.Header.Get("ACCESS_TOKEN")
 
-	result := dbToken.Get(token.AccessToken, &core.Token{AccessToken: accessToken})
-	if result.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: result.Err.Error()})
+	tokens, err := dbToken.GetAdminBotToken(accessToken)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: err.Error()})
+		return
+	}
+	if len(tokens) == 0 {
+		c.JSON(http.StatusUnauthorized, common.Error{Error: "Error: Unauthorized..."})
 		return
 	}
 
-	if err := dbToken.Delete(&core.Token{Model: gorm.Model{ID: result.Token[0].ID}}); err != nil {
+	if err := dbToken.Delete(&core.Token{Model: gorm.Model{ID: tokens[0].ID}}); err != nil {
 		//エラー時はTokenがすでに消えている状態なので、問題なし
 		c.JSON(http.StatusOK, common.Result{})
 		return

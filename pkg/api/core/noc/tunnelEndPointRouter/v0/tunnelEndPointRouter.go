@@ -3,7 +3,6 @@ package v0
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
-	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/noc/tunnelEndPointRouter"
 	dbGateway "github.com/homenoc/dsbd-backend/pkg/api/store/noc/tunnelEndPointRouter/v0"
@@ -16,11 +15,6 @@ import (
 func AddByAdmin(c *gin.Context) {
 	var input core.TunnelEndPointRouter
 
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
 	err := c.BindJSON(&input)
 	if err != nil {
 		log.Println(err)
@@ -36,11 +30,6 @@ func AddByAdmin(c *gin.Context) {
 }
 
 func DeleteByAdmin(c *gin.Context) {
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -58,12 +47,6 @@ func DeleteByAdmin(c *gin.Context) {
 func UpdateByAdmin(c *gin.Context) {
 	var input core.TunnelEndPointRouter
 
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
-
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
@@ -77,13 +60,13 @@ func UpdateByAdmin(c *gin.Context) {
 		return
 	}
 
-	tmp := dbGateway.Get(tunnelEndPointRouter.ID, &core.TunnelEndPointRouter{Model: gorm.Model{ID: uint(id)}})
+	tmp := dbGateway.GetByID(uint(id))
 	if tmp.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: tmp.Err.Error()})
 		return
 	}
 
-	if err = dbGateway.Update(tunnelEndPointRouter.UpdateAll, replace(input, tmp.TunnelEndPointRouter[0])); err != nil {
+	if err = dbGateway.Update(replace(input, tmp.TunnelEndPointRouter[0])); err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: err.Error()})
 		return
 	}
@@ -91,18 +74,13 @@ func UpdateByAdmin(c *gin.Context) {
 }
 
 func GetByAdmin(c *gin.Context) {
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, common.Error{Error: err.Error()})
 		return
 	}
 
-	result := dbGateway.Get(tunnelEndPointRouter.ID, &core.TunnelEndPointRouter{Model: gorm.Model{ID: uint(id)}})
+	result := dbGateway.GetByID(uint(id))
 	if result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})
 		return
@@ -112,11 +90,6 @@ func GetByAdmin(c *gin.Context) {
 }
 
 func GetAllByAdmin(c *gin.Context) {
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
 
 	if result := dbGateway.GetAll(); result.Err != nil {
 		c.JSON(http.StatusInternalServerError, common.Error{Error: result.Err.Error()})

@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-//#2 Issue
+// #2 Issue
 func WriteLog(user, data string) {
 	file, err := os.OpenFile(config.Conf.Log.Path, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {

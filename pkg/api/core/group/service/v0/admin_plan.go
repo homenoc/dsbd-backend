@@ -3,7 +3,6 @@ package v0
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/homenoc/dsbd-backend/pkg/api/core"
-	auth "github.com/homenoc/dsbd-backend/pkg/api/core/auth/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/common"
 	dbService "github.com/homenoc/dsbd-backend/pkg/api/store/group/service/v0"
 	"gorm.io/gorm"
@@ -28,12 +27,6 @@ func AddPlanByAdmin(c *gin.Context) {
 		return
 	}
 
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
-
 	input.IPID = uint(id)
 
 	if err = dbService.JoinPlan(uint(id), input); err != nil {
@@ -45,11 +38,6 @@ func AddPlanByAdmin(c *gin.Context) {
 }
 
 func DeletePlanByAdmin(c *gin.Context) {
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -67,12 +55,6 @@ func DeletePlanByAdmin(c *gin.Context) {
 
 func UpdatePlanByAdmin(c *gin.Context) {
 	var input core.Plan
-
-	resultAdmin := auth.AdminAuthorization(c.Request.Header.Get("ACCESS_TOKEN"))
-	if resultAdmin.Err != nil {
-		c.JSON(http.StatusUnauthorized, common.Error{Error: resultAdmin.Err.Error()})
-		return
-	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {

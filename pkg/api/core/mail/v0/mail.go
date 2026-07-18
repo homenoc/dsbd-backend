@@ -1,10 +1,10 @@
 package v0
 
 import (
-	"fmt"
-	"time"
 	"crypto/rand"
+	"fmt"
 	"math/big"
+	"time"
 
 	mailStruct "github.com/homenoc/dsbd-backend/pkg/api/core/mail"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
@@ -12,10 +12,10 @@ import (
 )
 
 func generateMessageID() string {
-    host := config.Conf.Mail.Domain
-    timestamp := time.Now().UnixNano()
-    random, _ := rand.Int(rand.Reader, big.NewInt(1<<63-1))
-    return fmt.Sprintf("%d.%d@%s", timestamp, random.Int64(), host)
+	host := config.Conf.Mail.Domain
+	timestamp := time.Now().UnixNano()
+	random, _ := rand.Int(rand.Reader, big.NewInt(1<<63-1))
+	return fmt.Sprintf("%d.%d@%s", timestamp, random.Int64(), host)
 }
 
 func SendMail(d mailStruct.Mail) error {
@@ -36,10 +36,21 @@ func SendMail(d mailStruct.Mail) error {
 	message.Subject(d.Subject)
 	message.SetBodyString(mail.TypeTextPlain, d.Content)
 
-	client, err := mail.NewClient(config.Conf.Mail.Host, mail.WithPort(config.Conf.Mail.Port),
-		mail.WithSMTPAuth(mail.SMTPAuthPlain), mail.WithTLSPortPolicy(mail.TLSMandatory),
-		mail.WithUsername(config.Conf.Mail.User), mail.WithPassword(config.Conf.Mail.Pass),
-	)
+	// Opportunistic TLS (STARTTLS if the server offers it) so this works both
+	// against production SMTP and a plaintext dev server like MailDev. Auth is
+	// only configured when a username is set (MailDev / local relays need none).
+	opts := []mail.Option{
+		mail.WithPort(config.Conf.Mail.Port),
+		mail.WithTLSPortPolicy(mail.TLSOpportunistic),
+	}
+	if config.Conf.Mail.User != "" {
+		opts = append(opts,
+			mail.WithSMTPAuth(mail.SMTPAuthPlain),
+			mail.WithUsername(config.Conf.Mail.User),
+			mail.WithPassword(config.Conf.Mail.Pass),
+		)
+	}
+	client, err := mail.NewClient(config.Conf.Mail.Host, opts...)
 	if err != nil {
 		return fmt.Errorf("failed to create new mail delivery client: %s", err)
 	}

@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	catalog "github.com/homenoc/dsbd-backend/pkg/api/core/catalog/v0"
 	controller "github.com/homenoc/dsbd-backend/pkg/api/core/controller/v0"
 	connection "github.com/homenoc/dsbd-backend/pkg/api/core/group/connection/v0"
 	info "github.com/homenoc/dsbd-backend/pkg/api/core/group/info/v0"
@@ -20,16 +21,15 @@ import (
 	notice "github.com/homenoc/dsbd-backend/pkg/api/core/notice/v0"
 	payment "github.com/homenoc/dsbd-backend/pkg/api/core/payment/v0"
 	ticket "github.com/homenoc/dsbd-backend/pkg/api/core/support/ticket/v0"
-	template "github.com/homenoc/dsbd-backend/pkg/api/core/template/v0"
 	token "github.com/homenoc/dsbd-backend/pkg/api/core/token/v0"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	user "github.com/homenoc/dsbd-backend/pkg/api/core/user/v0"
+	"github.com/homenoc/dsbd-backend/pkg/api/middleware"
 )
 
-func AdminRestAPI() {
-	if !config.IsDebug {
-		gin.SetMode(gin.ReleaseMode)
-	}
+// NewAdminRouter builds the admin API router (routes only, no background
+// goroutines and no listener) so tests can drive it via httptest.
+func NewAdminRouter() *gin.Engine {
 	router := gin.Default()
 	router.Use(cors)
 
@@ -37,8 +37,6 @@ func AdminRestAPI() {
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
-
-	go token.TokenRemove()
 
 	api := router.Group("/api")
 	{
@@ -104,7 +102,7 @@ func AdminRestAPI() {
 			v1.DELETE("/memo/:id", memo.DeleteByAdmin)
 
 			// Template
-			v1.GET("/template", template.GetByAdmin)
+			v1.GET("/catalog", catalog.GetByAdmin)
 
 			//
 			// NOC
@@ -223,14 +221,23 @@ func AdminRestAPI() {
 		}
 	}
 
+	return router
+}
+
+func AdminRestAPI() {
+	if !config.IsDebug {
+		gin.SetMode(gin.ReleaseMode)
+	}
+	router := NewAdminRouter()
+
+	go token.TokenRemove()
 	go ticket.HandleMessagesByAdmin()
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(config.Conf.Controller.Admin.Port), router))
 }
 
-func UserRestAPI() {
-	if !config.IsDebug {
-		gin.SetMode(gin.ReleaseMode)
-	}
+// NewUserRouter builds the user API router (routes only, no background
+// goroutines and no listener) so tests can drive it via httptest.
+func NewUserRouter() *gin.Engine {
 	router := gin.Default()
 	router.Use(cors)
 
@@ -265,51 +272,54 @@ func UserRestAPI() {
 			//
 			// User
 			//
-			// User Create
+			// User Create (public: registration)
 			v1.POST("/user", user.Add)
 			// User Create(Group)
-			v1.POST("/group/:id/user", user.AddGroup)
+			v1.POST("/group/:id/user", middleware.GroupAuth(0), user.AddGroup)
 			// Antisocial Check
-			v1.PUT("/user/antisocial/agree", user.AgreeAntisocialCheck)
+			v1.PUT("/user/antisocial/agree", middleware.UserAuth, user.AgreeAntisocialCheck)
 			// User Update
-			v1.PUT("/user/:id", user.Update)
+			v1.PUT("/user/:id", middleware.UserAuth, user.Update)
 			// User Delete
-			v1.DELETE("/user/:id", user.Delete)
+			v1.DELETE("/user/:id", middleware.GroupAuth(0), user.Delete)
 
 			//
-			// Info
+			// Info (user-facing read API: one GET-only bootstrap payload)
 			//
-			v1.GET("/info", info.Get)
+			v1.GET("/info", middleware.UserAuth, info.Get)
 
 			//
 			// Group
 			//
 			// Group Create
-			v1.POST("/group", group.Add)
+			v1.POST("/group", middleware.UserAuth, group.Add)
 
 			// Template
-			v1.GET("/template", template.Get)
+			v1.GET("/catalog", middleware.UserAuth, catalog.Get)
 
 			// Service add
-			v1.POST("/service", service.Add)
-			v1.GET("/service/add_allow", service.GetAddAllow)
+			v1.POST("/service", middleware.GroupAuth(0), service.Add)
+			v1.GET("/service/add_allow", middleware.GroupAuth(0), service.GetAddAllow)
 			//v1.PUT("/group/network", network.Update)
 
 			// Connection Create
-			v1.POST("/service/:id/connection", connection.Add)
+			v1.POST("/service/:id/connection", middleware.GroupAuth(0), connection.Add)
 
 			//
 			// Payment
 			//
-			v1.POST("/payment/subscribe", payment.PostSubscribeGettingURL)
-			v1.GET("/payment", payment.GetBillingPortalURL)
+			v1.POST("/payment/subscribe", middleware.GroupAuth(0), payment.PostSubscribeGettingURL)
+			v1.GET("/payment", middleware.GroupAuth(0), payment.GetBillingPortalURL)
 
 			//
 			// Support/Request
 			//
-			v1.POST("/support", ticket.Create)
-			v1.POST("/request", ticket.Request)
-			v1.PUT("/support/:id", ticket.Update)
+			// Create/Update pick user-vs-group auth per request, so they run
+			// behind UserAuth and do the group checks in-handler (auth.CheckGroup).
+			// The WS route stays self-authenticating: tokens arrive as query params.
+			v1.POST("/support", middleware.UserAuth, ticket.Create)
+			v1.POST("/request", middleware.GroupAuth(1), ticket.Request)
+			v1.PUT("/support/:id", middleware.UserAuth, ticket.Update)
 
 			// Group Delete
 			//v1.DELETE("/group", group.Delete)
@@ -331,24 +341,51 @@ func UserRestAPI() {
 		}
 	}
 
+	return router
+}
+
+func UserRestAPI() {
+	if !config.IsDebug {
+		gin.SetMode(gin.ReleaseMode)
+	}
+	router := NewUserRouter()
+
 	go ticket.HandleMessages()
 
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(config.Conf.Controller.User.Port), router))
 }
 
 func cors(c *gin.Context) {
-
-	//c.Header("Access-Control-Allow-Headers", "Accept, Content-ID, Content-Length, Accept-Encoding, X-CSRF-BotToken, Authorization, Access-Control-Request-Headers, Access-Control-Request-Method, Connection, Host, Origin, User-Agent, Referer, Cache-Control, X-header")
-	c.Header("Access-Control-Allow-Origin", "*")
-	c.Header("Access-Control-Allow-Methods", "*")
-	c.Header("Access-Control-Allow-Headers", "*")
-	c.Header("Content-ID", "application/json")
-	c.Header("Access-Control-Allow-Credentials", "true")
-	//c.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	// A wildcard origin ("*") together with Allow-Credentials:true is rejected by
+	// browsers for credentialed requests, so we reflect a specific allowed origin
+	// instead. config.cors.origins is an exact-match allowlist; when empty the
+	// request Origin is echoed back (valid with credentials).
+	if origin := c.Request.Header.Get("Origin"); origin != "" && originAllowed(origin) {
+		c.Header("Access-Control-Allow-Origin", origin)
+		c.Header("Vary", "Origin")
+		c.Header("Access-Control-Allow-Credentials", "true")
+	}
+	c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+	c.Header("Access-Control-Allow-Headers",
+		"Content-Type, USER_TOKEN, ACCESS_TOKEN, HASH_PASS, Email, USER, PASS")
 
 	if c.Request.Method != "OPTIONS" {
 		c.Next()
 	} else {
 		c.AbortWithStatus(http.StatusOK)
 	}
+}
+
+// originAllowed reports whether origin is in the config.cors.origins
+// allowlist. Fail-safe: an empty/missing allowlist allows NOTHING cross-origin
+// — a deployment that forgets to configure it must not silently accept
+// credentialed requests from anywhere. Dev origins are listed in
+// configs/config.json.
+func originAllowed(origin string) bool {
+	for _, o := range config.Conf.CORS.Origins {
+		if o == origin {
+			return true
+		}
+	}
+	return false
 }
