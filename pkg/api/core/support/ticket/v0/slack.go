@@ -5,6 +5,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/support"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
+	"github.com/homenoc/dsbd-backend/pkg/api/notify"
 	"github.com/slack-go/slack"
 	"strconv"
 )
@@ -71,7 +72,7 @@ func noticeUpdateByAdmin(before, after core.Ticket) {
 			Type: slack.MBTSection,
 			Text: &slack.TextBlockObject{
 				Type: "mrkdwn",
-				Text: changeText(before, after),
+				Text: notify.BlockText(changeText(before, after)),
 			},
 		},
 		slack.NewDividerBlock(),
@@ -110,7 +111,7 @@ func noticeUpdate(before, after core.Ticket, user, group string) {
 			Type: slack.MBTSection,
 			Text: &slack.TextBlockObject{
 				Type: "mrkdwn",
-				Text: changeText(before, after),
+				Text: notify.BlockText(changeText(before, after)),
 			},
 		},
 		slack.NewDividerBlock(),

@@ -95,7 +95,7 @@ func noticeUpdate(before, after core.Service) {
 			Type: slack.MBTSection,
 			Text: &slack.TextBlockObject{
 				Type: "mrkdwn",
-				Text: changeText(before, after),
+				Text: notify.BlockText(changeText(before, after)),
 			},
 		},
 		slack.NewDividerBlock(),
@@ -128,7 +128,7 @@ func noticeAddJPNICByAdmin(serviceID int, input core.JPNICAdmin) {
 			Type: slack.MBTSection,
 			Text: &slack.TextBlockObject{
 				Type: "mrkdwn",
-				Text: changeTextJPNICByAdmin(core.JPNICAdmin{}, input),
+				Text: notify.BlockText(changeTextJPNICByAdmin(core.JPNICAdmin{}, input)),
 			},
 		},
 		slack.NewDividerBlock(),
@@ -161,7 +161,7 @@ func noticeAddJPNICTechByAdmin(serviceID int, input core.JPNICTech) {
 			Type: slack.MBTSection,
 			Text: &slack.TextBlockObject{
 				Type: "mrkdwn",
-				Text: changeTextJPNICTech(core.JPNICTech{}, input),
+				Text: notify.BlockText(changeTextJPNICTech(core.JPNICTech{}, input)),
 			},
 		},
 		slack.NewDividerBlock(),
@@ -247,7 +247,7 @@ func noticeUpdateJPNICByAdmin(before, after core.JPNICAdmin) {
 			Type: slack.MBTSection,
 			Text: &slack.TextBlockObject{
 				Type: "mrkdwn",
-				Text: changeTextJPNICByAdmin(before, after),
+				Text: notify.BlockText(changeTextJPNICByAdmin(before, after)),
 			},
 		},
 		slack.NewDividerBlock(),
@@ -279,7 +279,7 @@ func noticeUpdateJPNICTechByAdmin(before, after core.JPNICTech) {
 			Type: slack.MBTSection,
 			Text: &slack.TextBlockObject{
 				Type: "mrkdwn",
-				Text: changeTextJPNICTech(before, after),
+				Text: notify.BlockText(changeTextJPNICTech(before, after)),
 			},
 		},
 		slack.NewDividerBlock(),
@@ -311,7 +311,7 @@ func noticeUpdateIPByAdmin(before, after core.IP) {
 			Type: slack.MBTSection,
 			Text: &slack.TextBlockObject{
 				Type: "mrkdwn",
-				Text: changeTextIP(before, after),
+				Text: notify.BlockText(changeTextIP(before, after)),
 			},
 		},
 		slack.NewDividerBlock(),
@@ -343,7 +343,7 @@ func noticeUpdatePlanByAdmin(before, after core.Plan) {
 			Type: slack.MBTSection,
 			Text: &slack.TextBlockObject{
 				Type: "mrkdwn",
-				Text: changeTextPlan(before, after),
+				Text: notify.BlockText(changeTextPlan(before, after)),
 			},
 		},
 		slack.NewDividerBlock(),

@@ -102,3 +102,22 @@ func indexOf(s, sub string) int {
 	}
 	return -1
 }
+
+func TestBlockText(t *testing.T) {
+	cases := []struct {
+		name string
+		in   string
+		want string
+	}{
+		{name: "empty diff", in: "", want: "(変更なし)"},
+		{name: "whitespace only", in: " \n\t", want: "(変更なし)"},
+		{name: "real diff passes through", in: "接続IX: (なし) => ENTERNET\n", want: "接続IX: (なし) => ENTERNET\n"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := BlockText(tc.in); got != tc.want {
+				t.Errorf("BlockText(%q) = %q, want %q", tc.in, got, tc.want)
+			}
+		})
+	}
+}

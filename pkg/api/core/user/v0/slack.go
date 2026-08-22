@@ -5,6 +5,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/user"
+	"github.com/homenoc/dsbd-backend/pkg/api/notify"
 	"github.com/slack-go/slack"
 	"strconv"
 )
@@ -94,7 +95,7 @@ func noticeRenew(loginUser, before core.User, after user.Input) {
 			Type: slack.MBTSection,
 			Text: &slack.TextBlockObject{
 				Type: "mrkdwn",
-				Text: changeText(before, after),
+				Text: notify.BlockText(changeText(before, after)),
 			},
 		},
 		slack.NewDividerBlock(),

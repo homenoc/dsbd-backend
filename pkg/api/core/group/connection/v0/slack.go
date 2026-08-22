@@ -70,7 +70,7 @@ func noticeUpdateByAdmin(before, after core.Connection) {
 			Type: slack.MBTSection,
 			Text: &slack.TextBlockObject{
 				Type: "mrkdwn",
-				Text: changeText(before, after),
+				Text: notify.BlockText(changeText(before, after)),
 			},
 		},
 		slack.NewDividerBlock(),

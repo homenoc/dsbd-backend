@@ -99,26 +99,26 @@ type Connection struct {
 	BGPRouterID              *uint                  `json:"bgp_router_id"`                //使用RouterのID
 	TunnelEndPointRouterIPID *uint                  `json:"tunnel_endpoint_router_ip_id"` //使用エンドポイントルータのID
 	ConnectionType           string                 `json:"connection_type" notify:"接続ID"`
-	ConnectionComment        string                 `json:"connection_comment"` // ServiceがETCの時や補足説明で必要
+	ConnectionComment        string                 `json:"connection_comment" notify:"接続コード（補足情報）"` // ServiceがETCの時や補足説明で必要
 	ConnectionNumber         uint                   `json:"connection_number"`
-	IX                       string                 `json:"ix"`           // 接続IX（configで定義されたIX名）
-	IXPeerType               string                 `json:"ix_peer_type"` // パブリック or PI/CUG
-	IXVlanID                 string                 `json:"ix_vlan_id"`   // VLAN-ID（PI/CUGの場合）
-	IPv4Route                string                 `json:"ipv4_route"`
-	IPv6Route                string                 `json:"ipv6_route"`
+	IX                       string                 `json:"ix" notify:"接続IX"`               // 接続IX（configで定義されたIX名）
+	IXPeerType               string                 `json:"ix_peer_type" notify:"IXピア種別"`   // パブリック or PI/CUG
+	IXVlanID                 string                 `json:"ix_vlan_id" notify:"IX VLAN-ID"` // VLAN-ID（PI/CUGの場合）
+	IPv4Route                string                 `json:"ipv4_route" notify:"IPv4経路"`
+	IPv6Route                string                 `json:"ipv6_route" notify:"IPv6経路"`
 	NTT                      string                 `json:"ntt" notify:"インターネット接続"`
-	PreferredAP              string                 `json:"preferred_ap"`
+	PreferredAP              string                 `json:"preferred_ap" notify:"接続希望拠点"`
 	TermIP                   string                 `json:"term_ip" notify:"終端アドレス"`
 	RFC8950                  bool                   `json:"rfc8950" notify:"RFC8950,true=有効,false=無効"`
-	Monitor                  *bool                  `json:"monitor"`
-	Address                  string                 `json:"address"` //都道府県　市町村
+	Monitor                  *bool                  `json:"monitor" notify:"監視,true=有効,false=無効"`
+	Address                  string                 `json:"address" notify:"接続場所"` //都道府県　市町村
 	LinkV4Our                string                 `json:"link_v4_our" notify:"v4(HomeNOC側)"`
 	LinkV4Your               string                 `json:"link_v4_your" notify:"v4(相手団体側)"`
 	LinkV6Our                string                 `json:"link_v6_our" notify:"v6(HomeNOC側)"`
 	LinkV6Your               string                 `json:"link_v6_your" notify:"v6(相手団体側)"`
 	Open                     *bool                  `json:"open" notify:"開通,true=開通済み,false=未開通"`
 	Enable                   *bool                  `json:"enable"`
-	Comment                  string                 `json:"comment"`
+	Comment                  string                 `json:"comment" notify:"Comment"`
 	BGPRouter                BGPRouter              `json:"bgp_router"`
 	TunnelEndPointRouterIP   TunnelEndPointRouterIP `json:"tunnel_endpoint_router_ip"`
 	Service                  Service                `json:"service"`
