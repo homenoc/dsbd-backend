@@ -5,6 +5,7 @@ import (
 	"github.com/homenoc/dsbd-backend/pkg/api/core/notice"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/config"
 	"github.com/homenoc/dsbd-backend/pkg/api/core/tool/notification"
+	"github.com/homenoc/dsbd-backend/pkg/api/notify"
 	"github.com/slack-go/slack"
 	"strconv"
 	"time"
@@ -70,7 +71,7 @@ func noticeSlackReplaceByAdmin(before core.Notice, after notice.Input) {
 			Type: slack.MBTSection,
 			Text: &slack.TextBlockObject{
 				Type: "mrkdwn",
-				Text: changeText(before, after),
+				Text: notify.BlockText(changeText(before, after)),
 			},
 		},
 		slack.NewDividerBlock(),

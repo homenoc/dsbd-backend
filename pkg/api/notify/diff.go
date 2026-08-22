@@ -157,3 +157,15 @@ func render(v reflect.Value, o tagOpts) string {
 		return fmt.Sprintf("%v", v.Interface())
 	}
 }
+
+// BlockText makes a Diff result safe to drop straight into a Slack section
+// block. Slack rejects a block whose text is empty ("invalid_blocks") and the
+// PostMessage error is discarded at every call site, so an update that touched
+// only untagged fields used to silently post nothing at all instead of the
+// notification the caller intended.
+func BlockText(s string) string {
+	if strings.TrimSpace(s) == "" {
+		return "(変更なし)"
+	}
+	return s
+}
